@@ -1,15 +1,15 @@
 # Sandeep 2.0
 
-Mon hub de vie personnel — web app mobile-first pour iPhone (HTML/CSS/JS, sans build).
+My personal life hub — a mobile-first web app for iPhone (plain HTML/CSS/JS, no build step).
 
-- En ligne : https://sdeepmvp.github.io/Sandeep-2.0/ (une fois GitHub Pages activé)
-- Règles du projet : [CLAUDE.md](CLAUDE.md) · Historique : [CHANGELOG.md](CHANGELOG.md)
+- Live: https://sdeepmvp.github.io/Sandeep-2.0/
+- Project rules: [CLAUDE.md](CLAUDE.md) · Changes: [CHANGELOG.md](CHANGELOG.md)
 
-## Lancer en local
+## Run locally
 ```
 python3 -m http.server 8000
 ```
-puis ouvrir http://localhost:8000
+then open http://localhost:8000
 
-## Publier avec GitHub Pages
-Settings → Pages → *Build and deployment* → Source : **GitHub Actions**. Chaque push sur `main` publie automatiquement (workflow `.github/workflows/pages.yml`).
+## Publishing
+Settings → Pages → Source: **GitHub Actions**. Every push to `main` is published automatically (`.github/workflows/pages.yml`), and the installed app updates itself on next launch.

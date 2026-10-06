@@ -1,5 +1,9 @@
 # Changelog — Sandeep 2.0
 
+## 0.3.0 — 2026-10-06
+- The whole interface is now in English (tabs: Gym, Wardrobe, Kitchen, Habits, Settings). Numbers use a decimal point; commas are still accepted when typing. Existing data is untouched.
+- Fix: a set saved without reps or weight showed “null” in the history; it now shows “?”.
+
 ## 0.2.0 — 2026-10-06
 - Mise à jour automatique : l'app installée détecte chaque nouvelle version publiée et se recharge toute seule (en attendant la fin d'une saisie), avec le message « Application mise à jour ».
 - Réglages : bouton « Vérifier maintenant » et affichage de la version.

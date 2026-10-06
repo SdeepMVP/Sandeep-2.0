@@ -6,7 +6,7 @@
 
   if (sessionStorage.getItem('s2-updated')) {
     sessionStorage.removeItem('s2-updated');
-    S2.ui.toast('Application mise à jour');
+    S2.ui.toast('App updated');
   }
 
   if (!('serviceWorker' in navigator) || !(location.protocol === 'https:' || location.hostname === 'localhost')) return;
