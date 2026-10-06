@@ -1,5 +1,12 @@
 # Changelog — Sandeep 2.0
 
+## 0.12.0 — 2026-10-06
+- Wardrobe **Complete your wardrobe** (from the Closet): ranks the purchases that would unlock the most new good outfits across 6 typical days (weekend, office, date night, summer weekend, cold city day, wedding), with the reason (new outfits with your pieces, first outfit possible for an occasion, upgraded best look) and alternative colours.
+- **Days you can’t dress for yet**: when an occasion needs several missing pieces, a simple starter set is proposed.
+- **Style essentials** checklist (18 items for structured street smart / oversized tailoring) showing what you own and what's missing.
+- **Wishlist** with share, and “I bought it”, which opens the new piece pre-filled (kind, colour, fit, defaults) and removes it from the wishlist.
+- Engine: pure shopping analysis (virtual pieces in credible palette colours per kind), covered by 5 new tests; ~0.5 s for 105 pieces, run in small chunks with a progress bar.
+
 ## 0.11.0 — 2026-10-06
 - Wardrobe **performance**: 3-stage search with per-piece shortlists instead of trying every combination. A 105-piece closet went from ~4 s to well under 0.3 s; “Show another one” is instant (cached). Quality checked against the exhaustive search in tests.
 - **Learns your taste**: 👍 / 👎 on each suggestion (the outfit and its pairs of pieces), wearing an outfit counts as a small 👍; disliked outfits never come back. ★ **Favourite** pieces rotate back more often.

@@ -695,6 +695,197 @@
     return { top: 1, layer: 4, bottom: 4, outer: 20, shoes: 0, acc: 0 }[x.cat] || 1;
   }
 
+  /* ---------- Achats conseillés : les pièces manquantes qui débloquent le plus de tenues ----------
+     Principe : on imagine des pièces « virtuelles » (chaque sorte × les couleurs de la palette les plus utiles à la
+     penderie actuelle), puis on compte, dans 6 situations types, combien de NOUVELLES tenues de bon niveau chacune
+     permet, si elle améliore la meilleure tenue, ou si elle débloque une occasion jusque-là impossible.
+     Aucune donnée externe : tout est calculé à partir de la penderie et des lignes directrices. */
+  var SHOP_CONTEXTS = [
+    { occasion: 'weekend', temp: 16, cond: 'clear', label: 'Mild weekend' },
+    { occasion: 'office', temp: 12, cond: 'cloudy', label: 'Cool office day' },
+    { occasion: 'datenight', temp: 18, cond: 'clear', label: 'Date night' },
+    { occasion: 'weekend', temp: 27, cond: 'clear', label: 'Summer weekend' },
+    { occasion: 'citytrip', temp: 4, cond: 'clear', label: 'Cold city day' },
+    { occasion: 'wedding', temp: 19, cond: 'clear', label: 'Wedding' }
+  ];
+  var SHOP_KINDS = Object.keys(DEFAULTS).filter(function (k) {
+    var d = DEFAULTS[k];
+    return d.cat !== 'acc' && d.formality !== 'sport' && CASUAL_SHOES.indexOf(k) < 0 && k !== 'Tank top' && k !== 'Puffer';
+  });
+  function uniq(a) { return a.filter(function (x, i) { return a.indexOf(x) === i; }); }
+  function virtualPiece(kind, col, pattern) {
+    var v = { id: 'shop:' + kind + ':' + col, name: color(col).label + ' ' + kind.toLowerCase(), color: col, pattern: pattern || 'solid',
+      laundry: false, lastWorn: null, worn: 0, fav: false, virtual: true };
+    applyDefaults(v, kind);
+    return complete(v);
+  }
+  /* Couleurs crédibles par catégorie et par sorte (pas de veste en cuir blanche…). */
+  var CAT_COLOURS = {
+    top: ['white', 'black', 'cream', 'grey', 'navy', 'beige', 'sand', 'brown', 'taupe'],
+    layer: ['grey', 'cream', 'navy', 'black', 'brown', 'beige', 'taupe', 'khaki', 'sand'],
+    bottom: ['black', 'navy', 'beige', 'sand', 'khaki', 'grey', 'cream', 'brown', 'taupe'],
+    outer: ['black', 'navy', 'brown', 'beige', 'taupe', 'khaki', 'grey']
+  };
+  var KIND_COLOURS = {
+    'Leather jacket': ['black', 'brown'], 'Jeans': ['denim', 'black', 'grey'], 'Denim jacket': ['denim', 'black'],
+    'Coat': ['beige', 'black', 'navy', 'grey', 'brown'], 'Trench coat': ['beige', 'navy', 'black'], 'Blazer': ['navy', 'black', 'grey', 'brown', 'beige'],
+    'Oxford shirt': ['white', 'cream', 'grey'], 'Cargo pants': ['khaki', 'black', 'sand', 'grey'], 'Shorts': ['cream', 'beige', 'sand', 'navy', 'black'],
+    'Sneakers': ['black', 'white', 'brown'], 'Leather shoes': ['black', 'brown'], 'Loafers': ['black', 'brown'], 'Derbies': ['brown', 'black'],
+    'Boots': ['black', 'brown'], 'Chelsea boots': ['black', 'brown']
+  };
+  /* Les 3 couleurs les plus utiles pour une sorte donnée, vu ce qu'on possède déjà. */
+  function colourChoices(kind, items) {
+    var d = DEFAULTS[kind];
+    var owned = function (c) { return items.some(function (x) { return x.cat === d.cat && x.subtype === kind && family(x.color) === family(c); }); };
+    var allowed = KIND_COLOURS[kind] || CAT_COLOURS[d.cat] || DNA.palette;
+    if (d.cat === 'shoes') return allowed.filter(function (c) { return !owned(c); });
+    var others = items.filter(function (x) { return x.cat !== d.cat && x.cat !== 'acc'; });
+    return allowed.filter(function (c) { return !owned(c); }).map(function (c) {
+      var sc = 0;
+      others.forEach(function (x) { if (hasPair(c, x.color)) sc += 2; if (family(c) === family(x.color)) sc += 1; });
+      if (['black', 'white', 'navy', 'cream', 'grey', 'brown'].indexOf(c) > -1) sc += 2;
+      return { c: c, s: sc };
+    }).sort(function (a, b) { return b.s - a.s; }).slice(0, 3).map(function (r) { return r.c; });
+  }
+  /* Prépare l'analyse : situations, meilleures tenues actuelles, pièces candidates. Le linge compte comme possédé. */
+  function planShopping(items, opts) {
+    opts = opts || {};
+    var owned = items.filter(function (x) { return !x.virtual; }).map(function (x) { var y = {}; for (var k in x) y[k] = x[k]; y.laundry = false; return y; });
+    var contexts = (opts.contexts || SHOP_CONTEXTS).map(function (c) {
+      var ctx = { temp: c.temp, cond: c.cond, occasion: occ(c.occasion), worn: {}, prefs: opts.prefs };
+      var base = candidates(owned, ctx);
+      var best = base.length ? base[0].score : null;
+      var T = Math.max(112, best === null ? 0 : best - 8);
+      var sl = {};
+      CORE.forEach(function (k) { sl[k.id] = shortlist(pool(owned, k.id, ctx.occasion), ctx, k.id === 'shoes' ? 5 : 8); });
+      /* Meilleurs trios haut + bas + chaussures existants, réutilisés pour tester couches et manteaux. */
+      var trios = [];
+      sl.top.forEach(function (t) { sl.bottom.forEach(function (b) { sl.shoes.forEach(function (sh) {
+        var r = score({ outer: null, layer: null, top: t, bottom: b, shoes: sh }, ctx);
+        if (r) trios.push({ o: { top: t, bottom: b, shoes: sh }, score: r.score });
+      }); }); });
+      trios.sort(function (a, b) { return b.score - a.score; });
+      return { def: c, ctx: ctx, best: best, T: T, sl: sl, trios: trios.slice(0, 8) };
+    });
+    var cands = [];
+    SHOP_KINDS.forEach(function (kind) {
+      colourChoices(kind, owned).forEach(function (c) { cands.push(virtualPiece(kind, c)); });
+    });
+    /* Une pièce « statement » à motif subtil, si la penderie n'en a aucune. */
+    if (!owned.some(function (x) { return SUBTLE_PATTERNS.indexOf(x.pattern) > -1; })) {
+      cands.push(virtualPiece('Overshirt', 'taupe', 'houndstooth'));
+      cands.push(virtualPiece('Shirt', 'cream', 'stripes'));
+    }
+    return { owned: owned, contexts: contexts, candidates: cands };
+  }
+  /* Impact d'une pièce candidate : nouvelles tenues de bon niveau, occasions débloquées ou améliorées. */
+  function evaluateCandidate(plan, v) {
+    var gain = 0, unlocked = 0, firsts = [], improved = [], partners = {};
+    plan.contexts.forEach(function (pc) {
+      var ctx = pc.ctx, sl = pc.sl;
+      if (poolReason(v, ctx.occasion)) return;
+      var results = [];
+      function run(o) { var r = score(o, ctx); if (r) results.push({ o: o, score: r.score }); }
+      if (v.cat === 'layer' || v.cat === 'outer') {
+        pc.trios.forEach(function (tr) {
+          var others = v.cat === 'layer' ? [null].concat(sl.outer.slice(0, 4)) : [null].concat(sl.layer.slice(0, 5));
+          others.forEach(function (x) {
+            run({ top: tr.o.top, bottom: tr.o.bottom, shoes: tr.o.shoes, layer: v.cat === 'layer' ? v : x, outer: v.cat === 'outer' ? v : x });
+          });
+        });
+      } else {
+        var tops = v.cat === 'top' ? [v] : sl.top, bottoms = v.cat === 'bottom' ? [v] : sl.bottom, shoes = v.cat === 'shoes' ? [v] : sl.shoes;
+        var stage = [];
+        tops.forEach(function (t) { bottoms.forEach(function (b) { shoes.forEach(function (sh) {
+          var o = { top: t, bottom: b, shoes: sh, layer: null, outer: null }, r = score(o, ctx);
+          if (r) stage.push({ o: o, score: r.score });
+        }); }); });
+        stage.sort(function (a, b) { return b.score - a.score; });
+        stage.slice(0, 5).forEach(function (st) {
+          [null].concat(sl.layer.slice(0, 4)).forEach(function (l) { [null].concat(sl.outer.slice(0, 3)).forEach(function (ou) {
+            run({ top: st.o.top, bottom: st.o.bottom, shoes: st.o.shoes, layer: l, outer: ou });
+          }); });
+        });
+      }
+      if (!results.length) return;
+      results.sort(function (a, b) { return b.score - a.score; });
+      var seen = {}, n = 0;
+      results.forEach(function (r) {
+        if (r.score < pc.T) return;
+        var k = comboKey(r.o); if (seen[k]) return; seen[k] = true; n++;
+        CORE.forEach(function (c) { var x = r.o[c.id]; if (x && x !== v) partners[x.id] = true; });
+      });
+      var bestV = results[0].score;
+      unlocked += n; gain += Math.min(n, 12);
+      if (pc.best === null && bestV >= 100) { gain += 15; firsts.push(pc.def.label); }
+      else if (pc.best !== null && bestV > pc.best + 2) { gain += (bestV - pc.best) * 0.4; improved.push(pc.def.label); }
+    });
+    return { piece: v, gain: Math.round(gain * 10) / 10, unlocked: unlocked, firsts: uniq(firsts), improved: uniq(improved), partners: Object.keys(partners).length };
+  }
+  /* Classe les résultats : une seule couleur par sorte (les autres en alternatives), 3 pièces max par catégorie. */
+  function rankShopping(results, limit) {
+    var good = results.filter(function (r) { return r.gain > 0; }).sort(function (a, b) { return b.gain - a.gain; });
+    var byKind = {}, perCat = {}, out = [];
+    good.forEach(function (r) {
+      var k = r.piece.subtype + (r.piece.pattern !== 'solid' ? ':' + r.piece.pattern : '');
+      if (byKind[k]) { byKind[k].alternatives.push(r); return; }
+      var c = r.piece.cat;
+      if ((perCat[c] || 0) >= 3) return;
+      perCat[c] = (perCat[c] || 0) + 1;
+      r.alternatives = []; byKind[k] = r; out.push(r);
+    });
+    return out.slice(0, limit || 8);
+  }
+  /* Occasions impossibles aujourd'hui : quelles pièces manquent (une par place vide). */
+  var GAP_PICKS = {
+    work: { top: ['Oxford shirt', 'white'], bottom: ['Trousers', 'navy'], shoes: ['Derbies', 'brown'] },
+    formal: { top: ['Oxford shirt', 'white'], bottom: ['Trousers', 'black'], shoes: ['Derbies', 'black'] },
+    casual: { top: ['T-shirt', 'white'], bottom: ['Jeans', 'denim'], shoes: ['Sneakers', 'black'] },
+    sport: { top: ['Sport top', 'grey'], bottom: ['Sport shorts', 'black'], shoes: ['Running shoes', 'grey'] }
+  };
+  function contextGaps(plan) {
+    var seen = {};
+    return plan.contexts.filter(function (pc) { return pc.best === null; }).map(function (pc) {
+      var oc = pc.ctx.occasion, picks = GAP_PICKS[oc.type] || GAP_PICKS.casual;
+      var slots = ['top', 'bottom', 'shoes'].filter(function (c) { return !pool(plan.owned, c, oc).length; });
+      return { label: pc.def.label, occasion: oc, slots: slots,
+        pieces: slots.map(function (c) { var pk = picks[c]; return virtualPiece(pk[0], pk[1]); }) };
+    }).filter(function (g) {
+      var k = g.occasion.id + g.slots.join(); if (seen[k] || !g.slots.length) return false; seen[k] = true; return true;
+    });
+  }
+  function shoppingSuggestions(items, opts) {
+    var plan = planShopping(items, opts);
+    return rankShopping(plan.candidates.map(function (v) { return evaluateCandidate(plan, v); }), (opts && opts.limit) || 8);
+  }
+
+  /* Les indispensables du style (street smart structuré, tailoring oversize) et la pièce qui les couvre. */
+  function isDarkCol(c) { return ['black', 'navy', 'brown', 'charcoal'].indexOf(c) > -1; }
+  function isLightEarth(c) { return ['cream', 'beige', 'sand', 'khaki', 'taupe', 'camel', 'white'].indexOf(c) > -1; }
+  var ESSENTIALS = [
+    { id: 'tee-white', label: 'White T-shirt', kind: 'T-shirt', color: 'white', match: function (x) { return x.cat === 'top' && x.subtype === 'T-shirt' && x.color === 'white'; } },
+    { id: 'tee-black', label: 'Black T-shirt', kind: 'T-shirt', color: 'black', match: function (x) { return x.cat === 'top' && x.subtype === 'T-shirt' && x.color === 'black'; } },
+    { id: 'knit-top', label: 'Knit polo or fitted knit', kind: 'Polo', color: 'cream', match: function (x) { return x.cat === 'top' && (x.subtype === 'Polo' || x.material === 'Knit'); } },
+    { id: 'shirt', label: 'Crisp light shirt', kind: 'Oxford shirt', color: 'white', match: function (x) { return x.cat === 'top' && (x.subtype === 'Shirt' || x.subtype === 'Oxford shirt') && color(x.color).light; } },
+    { id: 'knit-layer', label: 'Knit sweater or cardigan', kind: 'Sweater', color: 'grey', match: function (x) { return x.cat === 'layer' && ['Sweater', 'Cardigan', 'Turtleneck'].indexOf(x.subtype) > -1; } },
+    { id: 'pattern', label: 'One piece with a subtle pattern', kind: 'Overshirt', color: 'taupe', pattern: 'houndstooth', match: function (x) { return x.cat !== 'acc' && SUBTLE_PATTERNS.indexOf(x.pattern) > -1; } },
+    { id: 'wide-dark', label: 'Wide tailored trousers, dark', kind: 'Trousers', color: 'navy', match: function (x) { return x.cat === 'bottom' && x.fit === 'wide' && x.subtype === 'Trousers' && isDarkCol(x.color); } },
+    { id: 'wide-light', label: 'Wide trousers in a light earth tone', kind: 'Trousers', color: 'sand', match: function (x) { return x.cat === 'bottom' && x.fit === 'wide' && x.warmth > 1 && isLightEarth(x.color); } },
+    { id: 'wide-jeans', label: 'Wide jeans', kind: 'Jeans', color: 'black', match: function (x) { return x.cat === 'bottom' && x.subtype === 'Jeans' && x.fit === 'wide'; } },
+    { id: 'cropped', label: 'Cropped or waist-length jacket', kind: 'Leather jacket', color: 'black', match: function (x) { return x.cat === 'outer' && (x.length === 'cropped' || x.length === 'waist'); } },
+    { id: 'long-coat', label: 'Long coat (worn open)', kind: 'Coat', color: 'beige', match: function (x) { return x.cat === 'outer' && x.length === 'long' && x.warmth >= 2; } },
+    { id: 'rain', label: 'Rain-proof outer layer', kind: 'Trench coat', color: 'beige', match: function (x) { return x.cat === 'outer' && x.rainOk; } },
+    { id: 'boots', label: 'Dark boots', kind: 'Chelsea boots', color: 'black', match: function (x) { return x.cat === 'shoes' && (x.subtype === 'Boots' || x.subtype === 'Chelsea boots') && isDarkShoe(x); } },
+    { id: 'brown-shoes', label: 'Brown leather shoes', kind: 'Derbies', color: 'brown', match: function (x) { return x.cat === 'shoes' && ['Leather shoes', 'Derbies', 'Loafers'].indexOf(x.subtype) > -1 && x.color === 'brown'; } },
+    { id: 'dark-sneakers', label: 'Dark leather sneakers', kind: 'Sneakers', color: 'black', match: function (x) { return x.cat === 'shoes' && x.subtype === 'Sneakers' && isDarkShoe(x); } },
+    { id: 'watch', label: 'Watch', kind: 'Watch', color: 'brown', match: function (x) { return x.cat === 'acc' && x.subtype === 'Watch'; } },
+    { id: 'headwear', label: 'Cap or beanie', kind: 'Cap', color: 'black', match: function (x) { return x.cat === 'acc' && (x.subtype === 'Cap' || x.subtype === 'Beanie'); } },
+    { id: 'scarf', label: 'Scarf', kind: 'Scarf', color: 'grey', match: function (x) { return x.cat === 'acc' && x.subtype === 'Scarf'; } }
+  ];
+  function essentials(items) {
+    return ESSENTIALS.map(function (e) { return { e: e, have: items.filter(function (x) { return !x.virtual && e.match(x); }) }; });
+  }
+
   S2.wardrobeEngine = {
     CATS: CATS, CORE: CORE, TAGS: TAGS, GROUPS: GROUPS, OCCASIONS: OCCASIONS, LEGACY_OCC: LEGACY_OCC, LEGACY_TEMP: LEGACY_TEMP,
     CONDITIONS: CONDITIONS, WARMTH: WARMTH, FITS: FITS, FORMALITY: FORMALITY, PATTERNS: PATTERNS, SUBTLE_PATTERNS: SUBTLE_PATTERNS,
@@ -705,6 +896,9 @@
     keyOf: keyOf, today: today, daysAgo: daysAgo,
     complete: complete, poolReason: poolReason, pool: pool, score: score, pieceScore: pieceScore,
     candidates: candidates, missing: missing, accessorySuggestions: accessorySuggestions,
-    comboKey: comboKey, learn: learn, applyDefaults: applyDefaults, washDefault: washDefault
+    comboKey: comboKey, learn: learn, applyDefaults: applyDefaults, washDefault: washDefault,
+    SHOP_CONTEXTS: SHOP_CONTEXTS, ESSENTIALS: ESSENTIALS, virtualPiece: virtualPiece, planShopping: planShopping,
+    evaluateCandidate: evaluateCandidate, rankShopping: rankShopping, shoppingSuggestions: shoppingSuggestions, essentials: essentials,
+    contextGaps: contextGaps
   };
 })();

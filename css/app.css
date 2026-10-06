@@ -616,3 +616,26 @@ input[type="date"].input { display: block; line-height: 48px; }
 .wr-inslist li { display: flex; align-items: center; gap: 10px; font-size: 14px; }
 .wr-inslist li > span:nth-child(2) { flex: 1; }
 .wr-bulkpad { height: 130px; }
+/* Wardrobe v0.12 : compléter la garde-robe */
+.wr-shopentry { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; margin-top: 4px; }
+.wr-shopicon { font-size: 26px; }
+.wr-shopentry .wr-piecemain { display: grid; }
+.wr-analysing { padding: 14px; }
+.wr-prog { height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; margin-top: 10px; }
+.wr-prog span { display: block; height: 100%; width: 0; background: var(--good); transition: width .15s; }
+.wr-buy { padding: 12px 14px; }
+.wr-buyhead { display: flex; align-items: center; gap: 10px; }
+.wr-buyrank { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0;
+  background: var(--surface-2); font-size: 12px; font-weight: 800; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.wr-buy .wr-why { margin: 8px 0 4px; }
+.wr-alts { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.wr-alt { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 10px; border-radius: 999px;
+  background: var(--surface); border: 1.5px solid var(--border); font-size: 13px; font-weight: 600; }
+.wr-alt.is-active { border-color: var(--accent); }
+.wr-buybtns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; flex-wrap: wrap; }
+.wr-gap { padding: 12px 14px; }
+.wr-gaprow { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--border); flex-wrap: wrap; }
+.wr-gaprow .wr-buybtns { margin: 0; width: 100%; }
+.wr-ess { gap: 12px; justify-content: flex-start; }
+.wr-ess.is-have .wr-box { background: var(--good); border-color: var(--good); }
+.wr-ess.is-have .list-title { color: var(--text-2); }

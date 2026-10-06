@@ -136,5 +136,43 @@ test('accessories: at most 2, scarf first when cold', function () {
   ok(acc[0].x.subtype === 'Scarf', 'first is ' + acc[0].x.subtype);
 });
 
+console.log('\nShopping');
+function kit() {
+  function it(id, color, kind) { return E.complete(E.applyDefaults({ id: id, name: color + ' ' + kind, color: color, laundry: false, lastWorn: null, worn: 0, pattern: 'solid' }, kind)); }
+  return [it('k1', 'white', 'T-shirt'), it('k2', 'black', 'Jeans'), it('k3', 'black', 'Sneakers'), it('k4', 'grey', 'Sweater')];
+}
+test('suggests purchases with a positive impact, one colour per kind', function () {
+  var res = E.shoppingSuggestions(kit());
+  ok(res.length >= 4, 'count ' + res.length);
+  ok(res[0].gain > 0 && res[0].unlocked > 0, 'impact');
+  var kinds = res.map(function (r) { return r.piece.subtype + r.piece.pattern; });
+  ok(kinds.length === new Set(kinds).size, 'duplicate kinds');
+  res.forEach(function (r) { ok(r.piece.color !== 'white' || r.piece.cat !== 'outer', 'white jacket'); });
+});
+test('buying the top suggestion really improves the outfits', function () {
+  var items = kit(), res = E.shoppingSuggestions(items), c = ctx(16, 'weekend');
+  var before = E.candidates(items, c)[0].score;
+  var bought = Object.assign({}, res[0].piece, { id: 'bought', virtual: false });
+  var after = E.candidates(items.concat([bought]), c);
+  ok(after[0].score > before, 'best ' + after[0].score + ' vs ' + before);
+  ok(E.CORE.some(function (k) { return after[0].o[k.id] && after[0].o[k.id].id === 'bought'; }), 'bought piece not used');
+});
+test('detects occasions that need several pieces (office, formal)', function () {
+  var gaps = E.contextGaps(E.planShopping(kit()));
+  var office = gaps.filter(function (g) { return g.occasion.id === 'office'; })[0];
+  ok(office && office.pieces.length === office.slots.length && office.slots.length > 0, JSON.stringify(gaps.map(function (g) { return g.label; })));
+});
+test('style essentials checklist recognises owned pieces', function () {
+  var ess = E.essentials(kit()), have = ess.filter(function (x) { return x.have.length; }).map(function (x) { return x.e.id; });
+  ok(have.indexOf('tee-white') > -1 && have.indexOf('wide-jeans') > -1 && have.indexOf('dark-sneakers') > -1, have.join());
+  ok(have.indexOf('long-coat') < 0, 'long coat');
+});
+test('105-piece closet: full shopping analysis in under 2 s', function () {
+  var t0 = Date.now(), res = E.shoppingSuggestions(bigCloset());
+  var ms = Date.now() - t0;
+  ok(ms < 2000, ms + ' ms');
+  console.log('      (' + ms + ' ms, ' + res.length + ' suggestions)');
+});
+
 console.log('\n' + passed + ' passed, ' + failed + ' failed\n');
 process.exit(failed ? 1 : 0);
