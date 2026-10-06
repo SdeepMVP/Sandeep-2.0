@@ -1,5 +1,10 @@
 # Changelog — Sandeep 2.0
 
+## 0.6.0 — 2026-10-06
+- Habits: new **Daily** view with a checklist for today: Creatine, Medication (morning + evening), Sleep schedule (in bed before midnight, up before 9:00).
+- Streak and best streak per habit, last 7 days strip (tap a day to fix it).
+- Add, edit (single box or several times a day) and delete your own daily habits. Quit smoking moves to its own view, with a shortcut from Daily.
+
 ## 0.5.0 — 2026-10-06
 - New **Kitchen** tab (no longer “soon”) with 10 easy, fast, high-protein recipes: 4 breakfast & snacks, 6 lunch & dinner.
 - Search by recipe name or ingredient (e.g. “chicken”), filters by category.

@@ -1,4 +1,4 @@
-/* Onglet Habits : suivi d'habitudes. Première habitude : arrêter de fumer (objectif 0 cigarette).
+/* Onglet Habits : habitudes quotidiennes à cocher (créatine, médicaments, sommeil…) et arrêt du tabac.
    Données : localStorage "sandeep2:habitudes". */
 (function () {
   'use strict';
@@ -28,6 +28,14 @@
   function daysBetween(a, b) { return Math.round((parseKey(b) - parseKey(a)) / 86400000); }
 
   /* ---------- Données ---------- */
+  /* Habitudes à cocher proposées par défaut (ajoutées aux données existantes si absentes). */
+  var DEFAULT_CHECKS = [
+    { id: 'creatine', type: 'check', name: 'Creatine', slots: [{ id: 'dose', label: 'Daily dose' }] },
+    { id: 'medication', type: 'check', name: 'Medication', slots: [{ id: 'am', label: 'Morning' }, { id: 'pm', label: 'Evening' }] },
+    { id: 'sleep', type: 'check', name: 'Sleep schedule', note: 'Bedtime counts for the night of that day.',
+      slots: [{ id: 'bed', label: 'In bed before midnight' }, { id: 'wake', label: 'Up before 9:00' }] }
+  ];
+
   function defaults() {
     return {
       schema: SCHEMA,
@@ -36,8 +44,10 @@
         goal: 'Stop smoking completely: 0 cigarettes a day.',
         startDate: today(), baselinePerDay: null, packPrice: null, perPack: 20
       }],
-      /* logs[habitId][YYYY-MM-DD] = { count, cravings } — un jour absent = non renseigné */
-      logs: {}
+      /* logs[habitId][YYYY-MM-DD] = { count, cravings } (tabac) ou { done: { slotId: true } } (à cocher).
+         Un jour absent = non renseigné. */
+      logs: {},
+      removedDefaults: []
     };
   }
 
@@ -46,7 +56,14 @@
     var d = S2.storage.load(NS, null);
     if (!d || !Array.isArray(d.habits)) { d = defaults(); S2.storage.save(NS, d); }
     d.logs = d.logs || {};
+    d.removedDefaults = d.removedDefaults || [];
+    var added = false;
+    DEFAULT_CHECKS.forEach(function (def) {
+      if (d.habits.some(function (x) { return x.id === def.id; }) || d.removedDefaults.indexOf(def.id) > -1) return;
+      var c = JSON.parse(JSON.stringify(def)); c.startDate = today(); d.habits.push(c); added = true;
+    });
     d.schema = SCHEMA;
+    if (added) S2.storage.save(NS, d);
     return d;
   }
   function persist() { S2.storage.save(NS, data); }
@@ -96,18 +113,206 @@
       avoided: hb.baselinePerDay ? avoided : null, saved: saved };
   }
 
+  /* Habitudes à cocher : un jour est « complet » quand toutes ses cases sont cochées. */
+  function doneCount(hb, k) {
+    var l = dayLog(hb, k);
+    if (!l || !l.done) return 0;
+    return hb.slots.filter(function (sl) { return l.done[sl.id]; }).length;
+  }
+  function complete(hb, k) { return doneCount(hb, k) === hb.slots.length; }
+  function toggleSlot(hb, k, slotId) {
+    var l = logsOf(hb);
+    var cur = l[k] || { done: {} };
+    cur.done = cur.done || {};
+    if (cur.done[slotId]) delete cur.done[slotId]; else cur.done[slotId] = true;
+    if (Object.keys(cur.done).length) l[k] = cur; else delete l[k];
+    persist();
+  }
+  function checkStreak(hb) {
+    var k = today(), n = 0;
+    if (!complete(hb, k)) k = addDays(k, -1); /* aujourd'hui pas fini ne casse pas la série */
+    while (k >= hb.startDate && complete(hb, k)) { n++; k = addDays(k, -1); }
+    return n;
+  }
+  function checkBest(hb) {
+    var best = 0, run = 0, k = hb.startDate, end = today();
+    while (k <= end) {
+      if (complete(hb, k)) { run++; if (run > best) best = run; } else run = 0;
+      k = addDays(k, 1);
+    }
+    return best;
+  }
+
   /* ---------- Rendu ---------- */
+  var view = 'daily'; // daily | quit
+
   function mount(container) {
     data = loadData();
     root = container;
     render();
   }
 
+  function quitHabit() { return data.habits.filter(function (x) { return x.type === 'quit'; })[0]; }
+  function checkHabits() { return data.habits.filter(function (x) { return x.type === 'check'; }); }
+
   function render() {
     root.innerHTML = '';
-    data.habits.forEach(function (hb) {
-      if (hb.type === 'quit') renderQuit(hb);
+    var q = quitHabit();
+    root.appendChild(h('div', { class: 'segmented hb-nav' },
+      h('button', { class: 'seg' + (view === 'daily' ? ' is-active' : ''), onclick: function () { view = 'daily'; render(); } }, 'Daily'),
+      q ? h('button', { class: 'seg' + (view === 'quit' ? ' is-active' : ''), onclick: function () { view = 'quit'; render(); } }, q.name) : null));
+    if (view === 'quit' && q) renderQuit(q);
+    else renderDaily();
+  }
+
+  function renderDaily() {
+    var tk = today();
+    var list = checkHabits();
+    var total = 0, done = 0;
+    list.forEach(function (hb) { total += hb.slots.length; done += doneCount(hb, tk); });
+
+    var card = h('section', { class: 'card hb-daily' },
+      h('div', { class: 'hb-todayhead' },
+        h('span', { class: 'card-title' }, 'Today · ' + parseKey(tk).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })),
+        h('span', { class: 'hb-status ' + (total && done === total ? 'is-up' : 'is-info') }, done + ' / ' + total)),
+      h('div', { class: 'hb-progress' }, h('span', { style: { width: (total ? done / total * 100 : 0) + '%' } })));
+    list.forEach(function (hb) {
+      if (hb.slots.length > 1) card.appendChild(h('div', { class: 'hb-group' }, hb.name));
+      hb.slots.forEach(function (sl) {
+        var on = !!(dayLog(hb, tk) && dayLog(hb, tk).done && dayLog(hb, tk).done[sl.id]);
+        card.appendChild(h('button', { class: 'hb-check' + (on ? ' is-on' : ''), role: 'checkbox', 'aria-checked': on ? 'true' : 'false',
+          onclick: function () { toggleSlot(hb, tk, sl.id); render(); if (!on && complete(hb, tk)) ui.toast(hb.name + ': done for today ✓'); } },
+          h('span', { class: 'hb-box', 'aria-hidden': 'true' }, on ? '✓' : ''),
+          h('span', { class: 'hb-checktext' }, hb.slots.length > 1 ? sl.label : hb.name)));
+      });
     });
+    if (!list.length) card.appendChild(h('p', { class: 'muted' }, 'No daily habits yet.'));
+    var q = quitHabit();
+    if (q) {
+      var s = currentStreak(q);
+      card.appendChild(h('button', { class: 'hb-quitlink', onclick: function () { view = 'quit'; render(); window.scrollTo(0, 0); } },
+        h('span', null, '🚭 ' + q.name),
+        h('span', { class: 'hb-quitstreak' }, s + ' day' + (s === 1 ? '' : 's') + ' smoke-free ›')));
+    }
+    root.appendChild(card);
+
+    root.appendChild(h('h2', { class: 'section-title' }, 'Streaks · last 7 days'));
+    list.forEach(function (hb) {
+      var streak = checkStreak(hb), best = checkBest(hb);
+      var strip = h('div', { class: 'hb-week' });
+      for (var i = 6; i >= 0; i--) {
+        (function (k) {
+          var n = doneCount(hb, k), before = k < hb.startDate;
+          var cls = 'hb-day' + (before ? ' is-before' : n === hb.slots.length ? ' is-free' : n ? ' is-part' : ' is-empty') + (k === tk ? ' is-today' : '');
+          var d = parseKey(k);
+          strip.appendChild(h('button', { class: cls,
+            'aria-label': d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) + ': ' + n + ' of ' + hb.slots.length,
+            onclick: function () { editCheckDay(hb, k); } },
+            h('span', { class: 'hb-dayname' }, d.toLocaleDateString('en-GB', { weekday: 'narrow' })),
+            h('span', { class: 'hb-dayval' }, before ? '' : n === hb.slots.length ? '✓' : n ? n + '/' + hb.slots.length : '')));
+        })(addDays(tk, -i));
+      }
+      root.appendChild(h('div', { class: 'card hb-habit' },
+        h('div', { class: 'hb-habithead' },
+          h('div', null,
+            h('div', { class: 'list-title' }, hb.name),
+            h('div', { class: 'list-sub' }, hb.slots.length > 1 ? hb.slots.map(function (sl) { return sl.label; }).join(' · ') : 'Once a day')),
+          h('div', { class: 'hb-habitstreak' },
+            h('span', { class: 'hb-streaksmall' }, streak),
+            h('span', { class: 'list-sub' }, 'day' + (streak === 1 ? '' : 's') + ' · best ' + best)),
+          h('button', { class: 'btn btn-icon', 'aria-label': 'Edit ' + hb.name, onclick: function () { editCheckHabit(hb); } }, '✎')),
+        strip,
+        hb.note ? h('p', { class: 'hint' }, hb.note) : null));
+    });
+    root.appendChild(h('p', { class: 'hint' }, 'Tap a day to fix it after the fact. A streak counts the days where every box was ticked; today only counts once it is complete.'));
+    root.appendChild(h('div', { class: 'bottom-actions' },
+      h('button', { class: 'btn btn-secondary btn-block btn-lg', onclick: function () { editCheckHabit(null); } }, '+ Add a habit')));
+  }
+
+  /* Modifier les cases d'un jour passé (ou d'aujourd'hui). */
+  function editCheckDay(hb, k) {
+    var draft = {};
+    hb.slots.forEach(function (sl) { var l = dayLog(hb, k); draft[sl.id] = !!(l && l.done && l.done[sl.id]); });
+    ui.sheet(function (close) {
+      var box = h('div', { class: 'hb-sheetchecks' });
+      function paint() {
+        box.innerHTML = '';
+        hb.slots.forEach(function (sl) {
+          box.appendChild(h('button', { class: 'hb-check' + (draft[sl.id] ? ' is-on' : ''), type: 'button', role: 'checkbox',
+            'aria-checked': draft[sl.id] ? 'true' : 'false', onclick: function () { draft[sl.id] = !draft[sl.id]; paint(); } },
+            h('span', { class: 'hb-box', 'aria-hidden': 'true' }, draft[sl.id] ? '✓' : ''),
+            h('span', { class: 'hb-checktext' }, hb.slots.length > 1 ? sl.label : hb.name)));
+        });
+      }
+      paint();
+      return [
+        h('h2', { class: 'sheet-title' }, hb.name),
+        h('p', { class: 'sheet-text' }, parseKey(k).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })),
+        box,
+        h('div', { class: 'sheet-actions' },
+          h('button', { class: 'btn btn-primary btn-block', onclick: function () {
+            var done = {};
+            Object.keys(draft).forEach(function (id) { if (draft[id]) done[id] = true; });
+            if (Object.keys(done).length) {
+              logsOf(hb)[k] = { done: done };
+              if (k < hb.startDate) hb.startDate = k; /* jour rattrapé avant le début : le suivi commence plus tôt */
+            } else delete logsOf(hb)[k];
+            persist(); close(); render();
+          } }, 'Save'),
+          h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, 'Cancel'))
+      ];
+    }, { modal: true });
+  }
+
+  /* Ajouter / modifier / supprimer une habitude à cocher. */
+  function editCheckHabit(hb) {
+    var isNew = !hb;
+    var draft = { name: hb ? hb.name : '', slots: hb && hb.slots.length > 1 ? hb.slots.map(function (sl) { return sl.label; }).join('\n') : '' };
+    ui.sheet(function (close) {
+      var err = h('p', { class: 'form-error', hidden: true });
+      var name = h('input', { class: 'input', type: 'text', value: draft.name, placeholder: 'e.g. Drink 2 L of water', 'aria-label': 'Habit name', autocapitalize: 'sentences' });
+      name.addEventListener('input', function () { draft.name = name.value; });
+      var slots = h('textarea', { class: 'input hb-textarea', rows: 3, placeholder: 'Morning\nEvening', 'aria-label': 'Times of day' });
+      slots.value = draft.slots;
+      slots.addEventListener('input', function () { draft.slots = slots.value; });
+      function save() {
+        var n = draft.name.trim();
+        if (!n) { err.textContent = 'Give the habit a name.'; err.hidden = false; return; }
+        var labels = draft.slots.split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
+        var old = hb ? hb.slots : [];
+        var newSlots = labels.length > 1
+          ? labels.map(function (lab) {
+              var same = old.filter(function (sl) { return sl.label === lab; })[0];
+              return same || { id: ui.uid(), label: lab };
+            })
+          : [old.length === 1 ? old[0] : { id: ui.uid(), label: labels[0] || 'Done' }];
+        if (labels.length === 1) newSlots[0].label = labels[0];
+        if (isNew) data.habits.push({ id: 'h-' + ui.uid(), type: 'check', name: n, slots: newSlots, startDate: today() });
+        else { hb.name = n; hb.slots = newSlots; }
+        persist(); close(); render(); ui.toast(isNew ? 'Habit added' : 'Habit updated');
+      }
+      function remove() {
+        ui.confirm({ title: 'Delete “' + hb.name + '”?', message: 'The habit and its history will be removed.', okLabel: 'Delete', danger: true })
+          .then(function (ok) {
+            if (!ok) return;
+            data.habits = data.habits.filter(function (x) { return x.id !== hb.id; });
+            delete data.logs[hb.id];
+            if (DEFAULT_CHECKS.some(function (d) { return d.id === hb.id; })) data.removedDefaults.push(hb.id);
+            persist(); close(); render(); ui.toast('Habit deleted');
+          });
+      }
+      return [
+        h('h2', { class: 'sheet-title' }, isNew ? 'New habit' : 'Edit habit'),
+        h('label', { class: 'field' }, h('span', { class: 'field-label' }, 'Name'), name),
+        h('label', { class: 'field' }, h('span', { class: 'field-label' }, 'Several times a day? One per line (optional)'), slots,
+          h('span', { class: 'hint' }, 'Leave empty for a single box per day.')),
+        err,
+        h('div', { class: 'sheet-actions' },
+          h('button', { class: 'btn btn-primary btn-block', onclick: save }, isNew ? 'Add the habit' : 'Save changes'),
+          h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, 'Cancel'),
+          isNew ? null : h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: remove }, 'Delete this habit'))
+      ];
+    }, { modal: true });
   }
 
   function renderQuit(hb) {

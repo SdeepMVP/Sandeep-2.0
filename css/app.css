@@ -434,3 +434,33 @@ input[type="date"].input { display: block; line-height: 48px; }
 .ck-cooknav { display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px; margin-top: 18px; }
 .ck-textarea { min-height: 140px; padding: 10px 12px; line-height: 1.45; resize: vertical; }
 .ck-grid1 { grid-template-columns: 1fr; }
+.hb-nav { margin-top: 0; }
+.hb-progress { height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; margin: 10px 0 6px; }
+.hb-progress span { display: block; height: 100%; background: var(--good); transition: width .2s; }
+.hb-group { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 14px 2px 2px; }
+.hb-check { width: 100%; display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 8px 4px;
+  background: transparent; border: 0; border-bottom: 1px solid var(--border); text-align: left; font-size: 17px; }
+.hb-check:last-child { border-bottom: 0; }
+.hb-check:active { background: var(--surface-2); }
+.hb-box { flex-shrink: 0; width: 30px; height: 30px; border-radius: 9px; border: 2px solid var(--border); display: grid; place-items: center; font-weight: 800; color: var(--surface); }
+.hb-check.is-on .hb-box { background: var(--good); border-color: var(--good); }
+.hb-check.is-on .hb-checktext { color: var(--muted); }
+.hb-quitlink { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 48px; margin-top: 10px;
+  padding: 10px 12px; border: 0; border-radius: 12px; background: var(--good-bg); color: var(--good); font-weight: 600; text-align: left; }
+.hb-quitstreak { font-size: 14px; white-space: nowrap; }
+.hb-habit { padding: 12px 14px; }
+.hb-habithead { display: flex; align-items: center; gap: 10px; }
+.hb-habithead > div:first-child { flex: 1; min-width: 0; }
+.hb-habitstreak { display: grid; justify-items: end; text-align: right; }
+.hb-streaksmall { font-size: 24px; font-weight: 750; line-height: 1; color: var(--good); font-variant-numeric: tabular-nums; }
+.hb-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 10px; }
+.hb-day { min-height: 48px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface);
+  display: grid; place-items: center; align-content: center; padding: 2px 0; font-variant-numeric: tabular-nums; }
+.hb-dayname { font-size: 10px; color: var(--muted); line-height: 1; }
+.hb-dayval { font-size: 14px; font-weight: 700; min-height: 18px; line-height: 1.3; }
+.hb-day.is-free { background: var(--good-bg); border-color: transparent; color: var(--good); }
+.hb-day.is-part { background: var(--keep-bg); border-color: transparent; color: var(--keep); }
+.hb-day.is-before { opacity: .35; }
+.hb-day.is-today { outline: 2px solid var(--accent); outline-offset: 1px; }
+.hb-sheetchecks { margin: 10px 0; }
+.hb-textarea { min-height: 90px; padding: 10px 12px; line-height: 1.45; }
