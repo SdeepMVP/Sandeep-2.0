@@ -1,5 +1,8 @@
 # Changelog — Sandeep 2.0
 
+## 0.1.1 — 2026-10-06
+- Publication automatique sur GitHub Pages via GitHub Actions (`.github/workflows/pages.yml`).
+
 ## 0.1.0 — 2026-10-06
 - Première version de l'app : coquille avec barre d'onglets (Muscu actif ; Garde-robe, Cuisine, Habitudes « bientôt » ; Réglages).
 - Onglet **Muscu** : programme 4 jours (Legs / Push / Pull / Shoulders) entièrement modifiable (ajout, suppression, ordre, séries, fourchette de reps, catégorie, variantes au choix par séance).

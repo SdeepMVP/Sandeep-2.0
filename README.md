@@ -12,4 +12,4 @@ python3 -m http.server 8000
 puis ouvrir http://localhost:8000
 
 ## Publier avec GitHub Pages
-Settings → Pages → *Build and deployment* → Source : **Deploy from a branch** → Branch : **main** / **(root)** → Save.
+Settings → Pages → *Build and deployment* → Source : **GitHub Actions**. Chaque push sur `main` publie automatiquement (workflow `.github/workflows/pages.yml`).
