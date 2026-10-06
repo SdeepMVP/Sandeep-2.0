@@ -4,7 +4,7 @@
   var S2 = window.S2;
   var ui = S2.ui, h = ui.h;
   var NS = 'settings';
-  var VERSION = '0.3.0';
+  var VERSION = '0.4.0';
 
   function get() { return S2.storage.load(NS, { theme: 'auto', lastExport: null }); }
   function set(patch) {

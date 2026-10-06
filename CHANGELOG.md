@@ -1,5 +1,11 @@
 # Changelog — Sandeep 2.0
 
+## 0.4.0 — 2026-10-06
+- New **Habits** tab (no longer “soon”) with a first habit: **Quit smoking**, goal 0 cigarettes a day.
+- Smoke-free streak (current and best), today counter (+/− per cigarette), “Smoke-free today” and “I resisted a craving” buttons.
+- Last 28 days calendar (tap a day to edit it), totals, and optional starting point (cigarettes per day, pack price) to estimate cigarettes avoided and money saved.
+- Health milestones (WHO / American Cancer Society) and the Tabac Info Service number (39 89).
+
 ## 0.3.0 — 2026-10-06
 - The whole interface is now in English (tabs: Gym, Wardrobe, Kitchen, Habits, Settings). Numbers use a decimal point; commas are still accepted when typing. Existing data is untouched.
 - Fix: a set saved without reps or weight showed “null” in the history; it now shows “?”.
