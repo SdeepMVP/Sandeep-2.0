@@ -1,5 +1,13 @@
 # Changelog — Sandeep 2.0
 
+## 0.9.0 — 2026-10-06
+- Wardrobe **Style DNA** (smart casual + street smart) applied to every suggestion: slim top → wide bottom (never both slim or both loose), palette white/black/beige/brown/cream/navy/khaki/grey with 3 colours max, dark structured shoes (sport shoes only for sport), mid layer below 14 °C, outerwear below 6 °C, base layer only above 22 °C. Read-only **My Style** screen (Wardrobe › Today, and Settings).
+- **21 occasions** in 6 groups (Work, Daily life, Social, Formal, Sport & wellness, Travel) in a scrollable chip row; per-type rules (sport only from activewear, no sneakers for formal, no hoodies/joggers for work).
+- Weather is now a **temperature slider (°C)** plus a condition (clear, cloudy, rain, wind, snow). Pieces get a **Fit** (slim / regular / wide) and a new **Accessories** type (cap, beanie, scarf, bags, watch); “Good for” gains Dressed up and Travel.
+- **Complete your look**: up to 2 optional accessories under the outfit (scarf when cold or windy, beanie below 10 °C or cap, watch, bag), each to add or dismiss.
+- **History** journal: “I wore this” logs date, time, pieces, accessories, occasion and weather; entries can be deleted. Pieces worn in the last 3 days are suggested last, pieces not worn for 7+ days first.
+- Existing data migrated (old weather and occasions mapped, fits inferred from names, past history kept).
+
 ## 0.8.0 — 2026-10-06
 - Wardrobe: **saved outfits**. Create them from scratch, from a suggestion or from what you wore; see which are ready (nothing in the laundry), filter by occasion, wear them in one tap. Ready outfits for the chosen occasion appear first in Today.
 - Each piece can have a **storage place** (shown in outfits so you can find the clothes), plus kind (shirt, chinos, boots…), pattern, style (sport → formal), material, brand and notes. Existing pieces are completed automatically.
