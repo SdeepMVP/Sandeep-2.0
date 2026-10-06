@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#4E3524"/>
+  <circle cx="256" cy="256" r="178" fill="none" stroke="#C19A6B" stroke-width="10"/>
+  <text x="256" y="268" text-anchor="middle" dominant-baseline="middle" font-family="Georgia, 'Times New Roman', serif" font-size="210" fill="#F5EFE6">S</text>
+  <text x="256" y="388" text-anchor="middle" font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif" font-weight="600" font-size="54" letter-spacing="6" fill="#C19A6B">2.0</text>
+</svg>

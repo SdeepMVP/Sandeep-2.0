@@ -1,0 +1,10 @@
+# Changelog — Sandeep 2.0
+
+## 0.1.0 — 2026-10-06
+- Première version de l'app : coquille avec barre d'onglets (Muscu actif ; Garde-robe, Cuisine, Habitudes « bientôt » ; Réglages).
+- Onglet **Muscu** : programme 4 jours (Legs / Push / Pull / Shoulders) entièrement modifiable (ajout, suppression, ordre, séries, fourchette de reps, catégorie, variantes au choix par séance).
+- Saisie de séance : jour + semaine (1–12), poids / reps / RPE (6 à 10 par 0,5) par série, valeurs de la dernière fois en gris, bouton ✓ pour les reprendre, sauvegarde automatique à chaque frappe.
+- RPE cible par catégorie et double progression (suggestion d'augmenter si toutes les séries au haut de la fourchette avec RPE < 9,5). Semaine 1 = référence sans objectif.
+- Historique par exercice avec 1RM estimé (Epley, meilleure série) et graphique ; liste des séances avec suppression.
+- Réglages : thème Auto / Clair / Sombre, export / import JSON, copie du JSON, tout effacer.
+- Installable sur l'écran d'accueil (manifest, icônes, service worker hors-ligne).
