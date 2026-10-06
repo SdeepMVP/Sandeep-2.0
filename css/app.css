@@ -574,3 +574,4 @@ input[type="date"].input { display: block; line-height: 48px; }
 .wr-dnaswatches { display: flex; flex-wrap: wrap; gap: 8px 10px; margin: 6px 0; }
 .wr-dnaswatch { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; font-size: 11px; color: var(--text-2); width: 44px; }
 .wr-dnalist { margin: 4px 0 0; padding-left: 18px; font-size: 13px; color: var(--muted); display: grid; gap: 2px; }
+.wr-bend { margin: 4px 14px 6px; padding: 8px 10px; border-radius: 10px; font-size: 13px; font-weight: 600; background: var(--camel-soft); color: var(--chocolate); }

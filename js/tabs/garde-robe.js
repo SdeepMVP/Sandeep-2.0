@@ -24,8 +24,8 @@
       subtypes: ['Jeans', 'Chinos', 'Trousers', 'Cargo pants', 'Joggers', 'Track pants', 'Shorts', 'Sport shorts'] },
     { id: 'shoes', label: 'Shoes', hint: 'Boots, leather shoes, sneakers',
       subtypes: ['Sneakers', 'Leather shoes', 'Loafers', 'Derbies', 'Boots', 'Chelsea boots', 'Running shoes', 'Sandals', 'Slides'] },
-    { id: 'acc', label: 'Accessories', hint: 'Cap, beanie, scarf, bag, watch',
-      subtypes: ['Cap', 'Beanie', 'Scarf', 'Tote bag', 'Crossbody bag', 'Backpack', 'Watch'] }
+    { id: 'acc', label: 'Accessories', hint: 'Cap, beanie, scarf, watch, necklace, chain wallet, bag',
+      subtypes: ['Cap', 'Beanie', 'Scarf', 'Watch', 'Necklace', 'Chain wallet', 'Tote bag', 'Crossbody bag', 'Backpack'] }
   ];
   var CORE = CATS.filter(function (c) { return c.id !== 'acc'; });
 
@@ -97,8 +97,15 @@
     { id: 'smart', label: 'Smart casual', lvl: 2 },
     { id: 'formal', label: 'Formal', lvl: 3 }
   ];
-  var PATTERNS = [['solid', 'Solid'], ['stripes', 'Stripes'], ['check', 'Check'], ['print', 'Print'], ['texture', 'Texture']];
-  var MATERIALS = ['Cotton', 'Linen', 'Wool', 'Knit', 'Denim', 'Leather', 'Suede', 'Technical', 'Synthetic'];
+  /* Motifs : subtils (une pièce « statement » idéale) ou voyants (à éviter dans cet esprit). */
+  var PATTERNS = [['solid', 'Solid'], ['stripes', 'Thin stripe'], ['pinstripe', 'Tonal pinstripe'], ['check', 'Plaid / check'],
+    ['houndstooth', 'Houndstooth'], ['texture', 'Texture'], ['print', 'Print'], ['graphic', 'Logo / graphic']];
+  var SUBTLE_PATTERNS = ['stripes', 'pinstripe', 'check', 'houndstooth'];
+  var LOUD_PATTERNS = ['print', 'graphic'];
+  var MATERIALS = ['Cotton', 'Linen', 'Wool', 'Knit', 'Fleece', 'Corduroy', 'Denim', 'Leather', 'Suede', 'Shearling', 'Technical', 'Synthetic'];
+  /* Matières « statement » : une par tenue sur des pièces lisses donne de la profondeur. */
+  var STATEMENT_TEXTURES = ['Leather', 'Suede', 'Fleece', 'Knit', 'Wool', 'Corduroy', 'Shearling'];
+  var LENGTHS = [['cropped', 'Cropped'], ['waist', 'Waist'], ['hip', 'Hip'], ['long', 'Long']];
 
   /* Couleurs : les neutres vont avec tout ; les couleurs « accent » se limitent à une par tenue. */
   var COLORS = [
@@ -108,10 +115,12 @@
     { id: 'white', label: 'White', hex: '#F7F5F0', neutral: true, light: true },
     { id: 'cream', label: 'Cream', hex: '#EDE3CF', neutral: true, light: true },
     { id: 'beige', label: 'Beige', hex: '#D6C3A1', neutral: true, light: true },
+    { id: 'sand', label: 'Sand', hex: '#CDB892', neutral: true, light: true },
     { id: 'khaki', label: 'Khaki', hex: '#B9A57A', neutral: true },
+    { id: 'taupe', label: 'Taupe', hex: '#8B7D6B', neutral: true },
     { id: 'camel', label: 'Camel', hex: '#B8895A', neutral: true },
-    { id: 'brown', label: 'Brown', hex: '#5C3D2E', neutral: true, dark: true },
-    { id: 'navy', label: 'Navy', hex: '#1F2A44', neutral: true, dark: true },
+    { id: 'brown', label: 'Chocolate', hex: '#4E3524', neutral: true, dark: true },
+    { id: 'navy', label: 'Dark navy', hex: '#1F2A44', neutral: true, dark: true },
     { id: 'denim', label: 'Denim', hex: '#4A6A8A', neutral: true },
     { id: 'lightblue', label: 'Light blue', hex: '#A9C6E3', neutral: true, light: true },
     { id: 'olive', label: 'Olive', hex: '#6B6B3A', neutral: true },
@@ -127,18 +136,25 @@
   ];
   var ACCENT_PAIRS = [['burgundy', 'green'], ['orange', 'teal'], ['yellow', 'purple'], ['pink', 'green'], ['red', 'teal']];
 
-  /* ---------- Style DNA : smart casual + street smart ---------- */
+  /* ---------- Style DNA : street smart structuré, influences tailoring oversize ----------
+     Ce sont des LIGNES DIRECTRICES, pas des contraintes : elles classent les tenues (bonus / malus)
+     sans en éliminer. Une belle tenue qui plie une règle passe devant une tenue sage qui les suit toutes. */
   var DNA = {
-    palette: ['white', 'black', 'beige', 'brown', 'cream', 'navy', 'khaki', 'grey'],
+    palette: ['white', 'cream', 'beige', 'sand', 'khaki', 'grey', 'black', 'brown', 'navy', 'taupe'],
     /* Couleurs ramenées à une famille de la palette (charcoal = gris, camel = beige, denim = marine). */
-    family: { white: 'white', black: 'black', beige: 'beige', camel: 'beige', brown: 'brown', cream: 'cream', navy: 'navy', denim: 'navy', khaki: 'khaki', grey: 'grey', charcoal: 'grey' },
-    maxColours: 3,
-    midLayerBelow: 14,
-    outerBelow: 6,
-    baseOnlyAbove: 22,
+    family: { white: 'white', cream: 'cream', beige: 'beige', camel: 'beige', sand: 'sand', khaki: 'khaki', taupe: 'taupe',
+      brown: 'brown', grey: 'grey', charcoal: 'grey', black: 'black', navy: 'navy', denim: 'navy' },
+    /* Grandes familles de teintes, pour les tenues « ton sur ton ». */
+    shade: { white: 'light', cream: 'light', beige: 'earth', camel: 'earth', sand: 'earth', khaki: 'earth', taupe: 'earth',
+      brown: 'earth', grey: 'grey', charcoal: 'grey', black: 'dark', navy: 'dark', denim: 'dark' },
+    baseOnlyAbove: 22,  /* au-dessus : la couche de base suffit */
+    midLayerFrom: 14,   /* 14–22 °C : une couche intermédiaire donne de la profondeur */
+    outerBelow: 14,     /* en dessous : le manteau est naturel */
+    outerStrongBelow: 6, /* en dessous : le manteau s'impose */
     beanieBelow: 10,
     scarfBelow: 8
   };
+  var FAMILY_LABEL = { white: 'white', cream: 'cream', beige: 'beige', sand: 'sand', khaki: 'khaki', taupe: 'taupe', brown: 'brown', grey: 'grey', black: 'black', navy: 'navy' };
   var STRUCTURED_SHOES = ['Leather shoes', 'Loafers', 'Derbies', 'Boots', 'Chelsea boots', 'Sneakers'];
   var SPORT_SHOES = ['Running shoes'];
   var CASUAL_SHOES = ['Sandals', 'Slides'];
@@ -191,6 +207,10 @@
     if (x.subtype === undefined) {
       var subs = cat(x.cat).subtypes.slice().sort(function (a, b) { return b.length - a.length; });
       x.subtype = subs.filter(function (s) { return n.indexOf(s.toLowerCase().replace(/s$/, '')) > -1; })[0] || null;
+    }
+    if (x.cat === 'outer' && !x.length) {
+      x.length = /crop/.test(n) ? 'cropped' : /bomber|leather jacket|denim jacket|harrington|blouson|trucker/.test(n) || ['Bomber', 'Leather jacket', 'Denim jacket'].indexOf(x.subtype) > -1 ? 'waist'
+        : /coat|trench|overcoat/.test(n) || ['Coat', 'Trench coat'].indexOf(x.subtype) > -1 ? 'long' : 'hip';
     }
     if (!x.fit) x.fit = /slim|skinny|fitted/.test(n) ? 'slim' : /wide|relaxed|baggy|loose|oversized|cargo|pleated/.test(n) ? 'wide' : 'regular';
     if (x.location === undefined) x.location = '';
@@ -254,9 +274,12 @@
       it('Navy rain jacket', 'outer', 'navy', 1, ['work', 'gym', 'chill', 'travel'], true),
       it('Camel wool coat', 'outer', 'camel', 3, ['work', 'date', 'club', 'formal']),
       it('Black bomber jacket', 'outer', 'black', 2, ['club', 'date', 'chill']),
+      it('Black cropped leather jacket', 'outer', 'black', 2, ['club', 'date', 'chill'], false, { subtype: 'Leather jacket', material: 'Leather', length: 'cropped' }),
       it('Grey crewneck sweater', 'layer', 'grey', 2, ['work', 'date', 'chill', 'travel']),
       it('Navy knit sweater', 'layer', 'navy', 2, ['work', 'date', 'chill']),
       it('Black hoodie', 'layer', 'black', 2, ['gym', 'chill'], false, { fit: 'wide' }),
+      it('Taupe houndstooth overshirt', 'layer', 'taupe', 2, ['work', 'date', 'chill'], false, { subtype: 'Overshirt', pattern: 'houndstooth' }),
+      it('Cream fleece zip-up', 'layer', 'cream', 2, ['chill', 'travel'], false, { subtype: 'Zip-up', material: 'Fleece' }),
       it('White T-shirt', 'top', 'white', 1, ['chill', 'date', 'travel'], false, { fit: 'slim' }),
       it('Black T-shirt', 'top', 'black', 1, ['club', 'chill', 'date'], false, { fit: 'slim' }),
       it('White Oxford shirt', 'top', 'white', 1, ['work', 'date', 'formal']),
@@ -277,7 +300,9 @@
       it('Grey beanie', 'acc', 'grey', 2, ['chill', 'travel', 'club'], false, { subtype: 'Beanie' }),
       it('Navy wool scarf', 'acc', 'navy', 2, ['work', 'chill', 'date', 'formal'], false, { subtype: 'Scarf' }),
       it('Brown leather watch', 'acc', 'brown', 1, ['work', 'date', 'formal', 'chill'], false, { subtype: 'Watch' }),
-      it('Black crossbody bag', 'acc', 'black', 1, ['chill', 'travel', 'club'], false, { subtype: 'Crossbody bag' })
+      it('Black crossbody bag', 'acc', 'black', 1, ['chill', 'travel', 'club'], false, { subtype: 'Crossbody bag' }),
+      it('Silver chain necklace', 'acc', 'grey', 1, ['chill', 'date', 'club', 'travel'], false, { subtype: 'Necklace' }),
+      it('Black chain wallet', 'acc', 'black', 1, ['chill', 'club', 'travel'], false, { subtype: 'Chain wallet' })
     ];
   }
 
@@ -291,13 +316,7 @@
       if (x.formality !== 'sport' && x.occasions.indexOf('gym') < 0) return 'sport';
       return null;
     }
-    if (x.cat === 'shoes') {
-      var beachShoe = o.beach && CASUAL_SHOES.indexOf(x.subtype) > -1;
-      if (!beachShoe) {
-        if (!isDarkShoe(x) || !isStructured(x)) return 'shoes';
-        if (o.type === 'formal' && x.subtype === 'Sneakers') return 'shoes';
-      }
-    }
+    if (x.cat === 'shoes' && o.type === 'formal' && (x.subtype === 'Sneakers' || CASUAL_SHOES.indexOf(x.subtype) > -1)) return 'shoes';
     if (x.formality === 'sport') return 'sport';
     if (o.strict && TOO_CASUAL_FOR_WORK.indexOf(x.subtype) > -1) return 'casual';
     if (o.type === 'formal' && TOO_CASUAL_FOR_WORK.indexOf(x.subtype) > -1) return 'casual';
@@ -313,44 +332,46 @@
     return COMBOS.pairs.filter(function (p) { return (p[0] === a && p[1] === b) || (p[0] === b && p[1] === a); })[0];
   }
 
-  /* Note une tenue { outer, layer, top, bottom, shoes } et explique pourquoi. null = tenue impossible.
+  /* Note une tenue { outer, layer, top, bottom, shoes } selon les lignes directrices et explique pourquoi.
+     why = ce qui la rend réussie ; bends = la ligne directrice qu'elle plie, et pourquoi ça marche quand même.
+     null = tenue vraiment impossible (seul cas : short pour une occasion formelle).
      ctx = { temp, cond, occasion (objet), worn (carte id → date), free (tenue composée à la main) } */
   function score(o, ctx) {
-    var s = 100, why = [];
+    var s = 100, why = [], bends = [];
     var parts = CORE.map(function (c) { return o[c.id]; }).filter(Boolean);
     var wear = parts.filter(function (x) { return x.cat !== 'shoes'; });
     var t = ctx.temp, oc = ctx.occasion, sport = oc.type === 'sport';
     var wet = ctx.cond === 'rain' || ctx.cond === 'snow';
+    var shorts = o.bottom.warmth === 1;
+    if (shorts && oc.type === 'formal') return null;
 
-    /* Style DNA : couches selon la température */
-    if (t < DNA.outerBelow && !o.outer) return null;
-    if (t < DNA.midLayerBelow && !o.layer && !sport) return null;
+    /* --- Couches selon la température (indicatif) --- */
     if (t > DNA.baseOnlyAbove) {
-      if (o.layer && !ctx.free) return null;
-      if (o.outer && !(wet && o.outer.rainOk && o.outer.warmth === 1)) return null;
-      if (o.top.warmth > 1) s -= 15;
-    }
-    if (t < DNA.outerBelow) {
-      if (o.outer.warmth === 3) { s += 8; why.push('Warm coat below ' + DNA.outerBelow + ' °C'); }
-      else if (o.outer.warmth === 1) s -= 12;
-      if (o.bottom.warmth === 1) return null;
-    } else if (t < DNA.midLayerBelow) {
-      if (!sport) why.push('Mid layer below ' + DNA.midLayerBelow + ' °C');
-      if (o.outer && o.outer.warmth === 3 && t >= 10) s -= 8;
-      if (!o.outer && t < 10) s -= 8;
-      if (o.bottom.warmth === 1 && !sport) s -= 30;
-    } else if (t <= DNA.baseOnlyAbove) {
-      if (o.outer && o.outer.warmth === 3) s -= 25;
-      else if (o.outer && o.outer.warmth === 2 && !wet) s -= t >= 16 ? 12 : 6;
-      if (o.outer && o.outer.warmth === 1 && !wet && t >= 18) s -= 6;
-      if (o.bottom.warmth === 1 && t < 18 && !sport) s -= 20;
+      if (o.layer && !ctx.free) s -= o.layer.warmth > 1 ? 35 : 20;
+      if (o.outer && !(wet && o.outer.rainOk && o.outer.warmth === 1)) s -= o.outer.warmth > 1 ? 30 : 15;
+      if (o.top.warmth > 1) s -= 10;
+      if (!o.layer && !o.outer) why.push('Base layer is enough above ' + DNA.baseOnlyAbove + ' °C');
+      if (shorts && t >= 25 && oc.type === 'casual') { s += oc.beach ? 18 : 12; why.push('Shorts for the heat'); }
+      else if (!shorts && t >= 27 && oc.type === 'casual') s -= 6;
+    } else if (t >= DNA.midLayerFrom) {
+      if (o.layer) { s += 6; why.push('A mid layer adds depth without overheating'); if (o.layer.warmth === 3 && t >= 18) s -= 8; }
+      if (o.outer && o.outer.warmth === 3) s -= 20;
+      else if (o.outer && o.outer.warmth === 2 && !wet && t >= 18) s -= 12;
+      if (shorts && t < 18 && !sport) s -= 15;
+    } else if (t >= DNA.outerStrongBelow) {
+      if (o.outer) { s += 8; why.push('Outerwear feels natural below ' + DNA.outerBelow + ' °C'); if (o.outer.warmth === 3 && t >= 10) s -= 6; }
+      else s -= 10;
+      if (!o.layer && !sport) s -= 4;
+      if (shorts && !sport) s -= 30;
     } else {
-      why.push('Base layer only above ' + DNA.baseOnlyAbove + ' °C');
-      if (o.bottom.warmth === 1 && t >= 25 && oc.type === 'casual') { s += oc.beach ? 18 : 12; why.push('Shorts for the heat'); }
-      else if (o.bottom.warmth > 1 && t >= 27 && oc.type === 'casual') s -= 6;
+      if (o.outer) {
+        s += 12; why.push('Outerwear is the right call below ' + DNA.outerStrongBelow + ' °C');
+        if (o.outer.warmth === 3) s += 6; else if (o.outer.warmth === 1) s -= 10;
+      } else s -= 35;
+      if (!o.layer) s -= 8;
+      if (shorts) s -= 40;
     }
-    if (o.bottom.warmth === 1 && oc.type === 'work') s -= 30;
-    if (o.bottom.warmth === 1 && oc.type === 'formal') return null;
+    if (shorts && oc.type === 'work') s -= 30;
     if (wet) {
       if (t <= DNA.baseOnlyAbove && !o.outer) s -= 10;
       if (o.outer && o.outer.rainOk) { s += 10; why.push('Rain-proof jacket'); }
@@ -360,30 +381,80 @@
       if (o.outer && o.outer.material === 'Suede') s -= 8;
     }
     if (ctx.cond === 'wind' && t < 18) { if (o.outer) s += 4; else s -= 6; }
-
-    /* Matières selon la météo */
     var linen = wear.filter(function (x) { return x.material === 'Linen'; }).length;
-    var wool = wear.filter(function (x) { return x.material === 'Wool' || x.material === 'Knit'; }).length;
+    var wool = wear.filter(function (x) { return x.material === 'Wool' || x.material === 'Knit' || x.material === 'Shearling'; }).length;
     if (t > DNA.baseOnlyAbove) { s += linen * 5 - wool * 8; if (linen) why.push('Linen breathes in the heat'); }
-    if (t < 10 && wool) { s += Math.min(wool, 2) * 3; why.push('Wool keeps you warm'); }
+    if (t < 10 && wool) s += Math.min(wool, 2) * 3;
 
-    /* Style DNA : silhouette (haut ajusté → bas ample, jamais les deux pareils) */
+    /* --- Couleurs : familles, ton sur ton --- */
+    var wearFams = [], fams = [], groups = [];
+    wear.forEach(function (x) {
+      var f = family(x.color), g = DNA.shade[x.color] || x.color;
+      if (wearFams.indexOf(f) < 0) wearFams.push(f);
+      if (groups.indexOf(g) < 0) groups.push(g);
+    });
+    /* Des chaussures sombres ancrent la tenue sans compter comme une couleur. */
+    parts.forEach(function (x) {
+      if (x.cat === 'shoes' && isDarkShoe(x)) return;
+      var f = family(x.color); if (fams.indexOf(f) < 0) fams.push(f);
+    });
+    var tonal = wearFams.length === 1, sameFamily = !tonal && groups.length === 1;
+    if (tonal) { s += 14; why.unshift('All ' + (FAMILY_LABEL[wearFams[0]] || color(wear[0].color).label.toLowerCase()) + ': tonal look'); }
+    else if (sameFamily) { s += 8; why.push('Shades of the same family'); }
+
+    /* --- Silhouette : contraste haut / bas (direction, pas obligation) --- */
+    var volume = false;
     if (!sport) {
       var tf = o.top.fit, bf = o.bottom.fit;
-      if (tf === 'slim' && bf !== 'wide') return null;
-      if (tf === 'wide' && bf === 'wide') return null;
-      if (tf === 'slim' && bf === 'wide') { s += 8; why.push('Slim top, relaxed bottom: balanced silhouette'); }
-      else if (tf === 'wide' && bf === 'slim') { s += 5; why.push('Loose top, slim bottom: balanced silhouette'); }
+      if (tf === 'slim' && bf === 'wide') { s += 10; why.unshift('Fitted top, wide bottom: the signature contrast'); }
+      else if (tf === 'wide' && bf === 'slim') { s += 4; why.push('Loose top, slim bottom: balanced proportions'); }
+      else if (tf === 'slim' && bf === 'slim') s -= 8;
+      else if (tf === 'wide' && bf === 'wide') { volume = true; s -= 6; }
+      else if (bf === 'wide') s += 4;
+      if (volume && (tonal || sameFamily)) { s += 8; bends.push('Volume on volume, kept intentional by the tonal palette'); }
+    }
+    if (o.outer) {
+      if (o.outer.length === 'cropped' || o.outer.length === 'waist') { s += 5; why.push((o.outer.length === 'cropped' ? 'Cropped' : 'Waist-length') + ' jacket keeps the proportion'); }
+      else if (o.outer.length === 'long') why.push('Long coat: wear it open');
+    }
+    /* Chaque couche visible : le haut qui dépasse au col ou à l'ourlet. */
+    if (o.layer) {
+      if (value(color(o.layer.color)) !== value(color(o.top.color))) { s += 3; why.push('Each layer stays visible'); }
+      else if (o.layer.color === o.top.color && !tonal) s -= 3;
     }
 
-    /* Style DNA : palette et 3 couleurs maximum */
-    var fams = [];
-    parts.forEach(function (x) { var f = family(x.color); if (fams.indexOf(f) < 0) fams.push(f); });
-    if (!sport && fams.length > DNA.maxColours) return null;
+    /* --- Nombre de couleurs (2–3 conseillé) ; une 3e/4e couleur discrète via un motif est permise --- */
+    var subtleFams = [];
+    fams.forEach(function (f) {
+      var carriers = parts.filter(function (x) { return family(x.color) === f; });
+      if (carriers.length && carriers.every(function (x) { return SUBTLE_PATTERNS.indexOf(x.pattern) > -1; })) subtleFams.push(f);
+    });
+    var effective = fams.length - Math.min(subtleFams.length, 1);
+    if (!sport) {
+      if (fams.length <= 2) s += 4;
+      else if (effective === 3) s += 0;
+      else if (effective === 4) s -= 10;
+      else if (effective > 4) s -= 25;
+      if (fams.length > 3 && effective <= 3) bends.push('A ' + (fams.length === 4 ? '4th' : 'extra') + ' colour, kept subtle in the pattern');
+    }
     var off = parts.filter(function (x) { return !inPalette(x.color); });
-    if (!sport) { s -= off.length * 15; if (!off.length) why.push('Within your palette (' + fams.length + ' colour' + (fams.length === 1 ? '' : 's') + ')'); }
+    var bright = parts.filter(function (x) { return !color(x.color).neutral; });
+    if (!sport) s -= off.length * 8 + bright.length * 12;
 
-    /* Occasion : contexte prioritaire et formalité */
+    /* --- Motif : une pièce statement subtile --- */
+    var subtle = parts.filter(function (x) { return SUBTLE_PATTERNS.indexOf(x.pattern) > -1; });
+    var loud = parts.filter(function (x) { return LOUD_PATTERNS.indexOf(x.pattern) > -1; });
+    if (subtle.length === 1) { s += 6; why.push('One subtle pattern carries the interest (' + PATTERNS.filter(function (p) { return p[0] === subtle[0].pattern; })[0][1].toLowerCase() + ')'); }
+    else if (subtle.length > 1) s -= 12;
+    loud.forEach(function (x) { s -= x.pattern === 'graphic' ? 10 : 8; });
+
+    /* --- Texture : une matière statement sur des pièces lisses --- */
+    var tex = wear.filter(function (x) { return STATEMENT_TEXTURES.indexOf(x.material) > -1; });
+    if (tex.length === 1 && wear.length > 1) { s += 6; why.push('Texture mix: ' + tex[0].material.toLowerCase() + ' against smooth pieces'); }
+    else if (tex.length === 2) s += 2;
+    else if (tex.length > 2) s -= 3;
+
+    /* --- Occasion : contexte prioritaire et formalité --- */
     parts.forEach(function (x) {
       if (x.occasions.indexOf(oc.tags[0]) > -1) s += 3;
       if (oc.dressy && x.occasions.indexOf('formal') > -1) s += 4;
@@ -393,58 +464,44 @@
     parts.forEach(function (x) { if (oc.ideal.indexOf(formality(x.formality).lvl) > -1) fit++; });
     s += Math.min(fit, 4) * 2;
     if (oc.type === 'work' && !oc.strict && TOO_CASUAL_FOR_WORK.some(function (st) { return parts.some(function (x) { return x.subtype === st; }); })) s -= 10;
-    if (fit === parts.length && !sport) why.push('Right dress code for ' + oc.label.toLowerCase());
     var spread = Math.max.apply(null, lvls) - Math.min.apply(null, lvls);
     if (!sport) { if (spread >= 3) s -= 10; else if (spread === 2) s -= 3; }
 
-    /* Motifs : un seul motif marqué par tenue */
-    var patterned = parts.filter(function (x) { return ['stripes', 'check', 'print'].indexOf(x.pattern) > -1; }).length;
-    if (patterned > 1) s -= 12;
-    else if (patterned === 1) { s += 2; why.push('One patterned piece, the rest plain'); }
-
-    /* Couleurs : accents */
-    var accents = [];
-    parts.forEach(function (x) { if (!color(x.color).neutral && accents.indexOf(x.color) < 0) accents.push(x.color); });
-    if (accents.length === 1) s += 2;
-    else if (accents.length === 2 && isPair(accents[0], accents[1])) s += 0;
-    else if (accents.length === 2) s -= 22;
-    else if (accents.length > 2) s -= 50;
-
-    /* Couleurs : paires et trios éprouvés */
+    /* --- Paires et trios éprouvés --- */
     var cols = [];
     wear.forEach(function (x) { if (cols.indexOf(x.color) < 0) cols.push(x.color); });
     var found = [];
     for (var i = 0; i < cols.length; i++) for (var j = i + 1; j < cols.length; j++) {
       var p = hasPair(cols[i], cols[j]); if (p) found.push(p[2]);
     }
-    s += Math.min(found.length, 2) * 4;
+    s += Math.min(found.length, 2) * 3;
     var allCols = cols.concat([o.shoes.color]);
     var trio = COMBOS.trios.filter(function (tr) { return allCols.indexOf(tr[0]) > -1 && allCols.indexOf(tr[1]) > -1 && allCols.indexOf(tr[2]) > -1; })[0];
-    if (trio) { s += 6; why.push(trio[3]); }
-    else if (found.length) why.push(found[0]);
+    if (trio) { s += 5; why.push(trio[3]); }
+    else if (found.length && !tonal) why.push(found[0]);
 
-    /* Haut / bas : contraste */
+    /* --- Contraste haut / bas --- */
     var tc = color(o.top.color), bc = color(o.bottom.color), sc = color(o.shoes.color);
     if (o.top.color === o.bottom.color) {
-      if (o.top.color === 'black' && oc.night) { s += 4; why.push('All black: sharp for a night out'); }
-      else if (o.top.color === 'denim') s -= 25;
-      else s -= 10;
-    } else if ((tc.light && bc.dark) || (tc.dark && bc.light)) {
-      s += 6;
-      if (tc.dark && bc.light && sc.dark) { s += 3; why.push('Dark–light–dark balance from top to shoes'); }
-    } else if (tc.light && bc.light) s -= 4;
-    if (o.layer && o.outer && o.layer.color === o.outer.color) s -= 4;
+      if (o.top.color === 'denim') s -= 15;
+      else if (!tonal) s -= 6;
+    } else if ((tc.light && bc.dark) || (tc.dark && bc.light)) s += 4;
+    if (o.layer && o.outer && o.layer.color === o.outer.color && !tonal) s -= 4;
     if (oc.night && tc.dark) s += 5;
 
-    /* Chaussures selon la couleur du bas */
+    /* --- Chaussures : sombres et structurées (tendance) --- */
+    if (!sport) {
+      if (isDarkShoe(o.shoes) && isStructured(o.shoes)) s += 6;
+      else if (!isDarkShoe(o.shoes)) { s -= 4; if (s > 0) bends.push('Lighter shoes: lifts the look'); }
+      if (CASUAL_SHOES.indexOf(o.shoes.subtype) > -1 && !oc.beach) s -= 20;
+    }
     var rule = COMBOS.shoes[o.bottom.color];
     if (rule) {
-      if (rule.good && rule.good.indexOf(o.shoes.color) > -1) { s += 5; why.push(sc.label + ' ' + (o.shoes.subtype || 'shoes').toLowerCase() + ' suit ' + bc.label.toLowerCase() + ' ' + (o.bottom.subtype || 'trousers').toLowerCase()); }
-      else if (rule.avoid && rule.avoid.indexOf(o.shoes.color) > -1) s -= 10;
+      if (rule.good && rule.good.indexOf(o.shoes.color) > -1) s += 4;
+      else if (rule.avoid && rule.avoid.indexOf(o.shoes.color) > -1) s -= 8;
     }
 
-    /* Historique : pièces portées ces 3 derniers jours en bas de la pile, pièces jamais / pas portées depuis 7 j en priorité.
-       Si tout a été porté récemment, les tenues restent proposées (simplement moins bien classées). */
+    /* --- Historique : pièces portées ces 3 derniers jours en bas de la pile, non portées depuis 7 j en priorité --- */
     var worn = ctx.worn || {};
     parts.forEach(function (x) {
       var d = daysAgo(worn[x.id] || x.lastWorn);
@@ -452,7 +509,9 @@
       else if (d >= 7) s += 5;
     });
 
-    return { score: s, why: why };
+    /* Une tenue qui plie une ligne directrice ne garde la mention que si elle reste bien classée. */
+    if (s < 100) bends = bends.filter(function (b) { return b.indexOf('Lighter shoes') < 0; });
+    return { score: s, why: why, bends: bends };
   }
 
   function candidates(ctx) {
@@ -464,7 +523,7 @@
       layers.forEach(function (layer) { outers.forEach(function (outer) {
         var o = { outer: outer, layer: layer, top: top, bottom: bottom, shoes: sh };
         var r = score(o, ctx);
-        if (r) out.push({ o: o, score: r.score, why: r.why });
+        if (r) out.push({ o: o, score: r.score, why: r.why, bends: r.bends });
       }); });
     }); }); });
     out.sort(function (a, b) { return b.score - a.score; });
@@ -481,20 +540,18 @@
   function missing(ctx) {
     var oc = ctx.occasion;
     var need = ['top', 'bottom', 'shoes'];
-    if (ctx.temp < DNA.midLayerBelow && oc.type !== 'sport') need.push('layer');
-    if (ctx.temp < DNA.outerBelow) need.push('outer');
     var out = [];
     need.forEach(function (c) {
       if (pool(c, oc).length) return;
       var tagged = data.items.filter(function (x) { return x.cat === c && x.occasions.some(function (t) { return oc.tags.indexOf(t) > -1; }); });
       var dirty = tagged.filter(function (x) { return x.laundry; }).length;
-      var label = c === 'shoes' && oc.type !== 'sport' && !oc.beach ? 'Dark, structured shoes' : catLabel(c);
+      var label = c === 'shoes' && oc.type === 'formal' ? 'Dressed-up shoes (no sneakers)' : catLabel(c);
       out.push(label + (dirty ? ' (' + dirty + ' in the laundry)' : ''));
     });
     return out;
   }
 
-  /* ---------- Accessoires : « Complete your look » (2 maximum) ---------- */
+  /* ---------- Accessoires : « Complete your look » (2 maximum : discrets mais présents) ---------- */
   function accessorySuggestions(o, ctx, st) {
     var oc = ctx.occasion, t = ctx.temp;
     var clean = data.items.filter(function (x) { return x.cat === 'acc' && !x.laundry && !st.accDismissed[x.id]; });
@@ -504,22 +561,26 @@
     function bestOf(list) {
       return list.map(function (x) {
         var sc = 0, f = family(x.color);
-        if (fams.indexOf(f) > -1) sc += 6; else if (fams.length >= DNA.maxColours) sc -= 10;
+        if (fams.indexOf(f) > -1) sc += 6; else if (fams.length >= 3) sc -= 4; else sc += 1; /* une 3e couleur discrète est bienvenue */
         if (inPalette(x.color)) sc += 4; else sc -= 8;
+        if (LOUD_PATTERNS.indexOf(x.pattern) > -1) sc -= 6;
         if (x.occasions.some(function (tg) { return oc.tags.indexOf(tg) > -1; })) sc += 3;
         if (daysAgo(ctx.worn[x.id] || x.lastWorn) <= 3) sc -= 2;
         return { x: x, sc: sc };
       }).sort(function (a, b) { return b.sc - a.sc; })[0];
     }
     function of(subs) { return clean.filter(function (x) { return subs.indexOf(x.subtype) > -1; }); }
+    var casual = oc.type !== 'work' && oc.type !== 'formal';
     var kinds = [];
     if (t < DNA.scarfBelow || ctx.cond === 'wind') kinds.push({ list: of(['Scarf']), why: ctx.cond === 'wind' ? 'Scarf: it’s windy' : 'Scarf below ' + DNA.scarfBelow + ' °C' });
     /* Couvre-chef : jamais pour les occasions habillées ; au travail, seulement le bonnet quand il fait froid. */
     if (oc.type !== 'formal') {
       if (t < DNA.beanieBelow || ctx.cond === 'snow') kinds.push({ list: of(['Beanie']), why: 'Beanie for the cold' });
-      else if (oc.type !== 'work' && (oc.ideal[0] <= 1 || oc.type === 'sport')) kinds.push({ list: of(['Cap']), why: 'Cap to finish the street look' });
+      else if (casual && (oc.ideal[0] <= 1 || oc.type === 'sport')) kinds.push({ list: of(['Cap']), why: 'Cap: the street finish' });
     }
-    kinds.push({ list: of(['Watch']), why: 'Watch: the smart detail' });
+    kinds.push({ list: of(['Watch']), why: 'Watch: a considered detail' });
+    if (oc.type !== 'sport') kinds.push({ list: of(['Necklace']), why: 'Necklace: subtle, under the collar' });
+    if (casual && oc.type !== 'sport') kinds.push({ list: of(['Chain wallet']), why: 'Chain wallet: a quiet street detail' });
     if (oc.type !== 'sport') kinds.push({ list: of(['Tote bag', 'Crossbody bag', 'Backpack']), why: 'Bag for your essentials' });
     var out = [];
     kinds.forEach(function (k) {
@@ -636,7 +697,7 @@
       root.appendChild(h('h2', { class: 'section-title' }, 'Your outfits ready for ' + oc.label.toLowerCase()));
       mine.slice(0, 3).forEach(function (x) {
         root.appendChild(savedCard(x.of, x.st, {
-          weatherNote: x.fit ? null : 'Doesn’t match today’s weather or your style rules',
+          weatherNote: x.fit ? (x.fit.score < 80 ? 'Not the best fit for today’s weather' : null) : 'Not for this occasion',
           onWear: function () { wear(st, x.st.o, []); }
         }));
       });
@@ -649,15 +710,15 @@
         h('div', { class: 'card-title' }, 'No complete outfit available'),
         h('p', { class: 'sheet-text' }, miss.length
           ? 'Missing clean pieces for ' + oc.label.toLowerCase() + ': ' + miss.join(', ') + '.'
-          : 'No combination of your clean clothes follows the weather and your style rules (silhouette, palette, 3 colours max).'),
-        h('p', { class: 'hint' }, 'Tag more clothes for this context in the Closet, check their fit, or mark some laundry as clean. You can also build it yourself.'),
+          : 'No combination of your clean clothes works for this occasion.'),
+        h('p', { class: 'hint' }, 'Tag more clothes for this context in the Closet, or mark some laundry as clean. You can also build it yourself.'),
         h('button', { class: 'btn btn-secondary btn-block', onclick: function () { compose(st, {}); } }, 'Build it myself')));
       return;
     }
     if (pick >= list.length) pick = 0;
     var c = list[pick];
     root.appendChild(h('h2', { class: 'section-title' }, 'Suggested outfit · ' + (pick + 1) + ' of ' + list.length));
-    root.appendChild(outfitCard(c.o, c.why));
+    root.appendChild(outfitCard(c.o, c.why, null, c.bends));
 
     /* Compléter la tenue */
     var accs = accessorySuggestions(c.o, ctx, st);
@@ -705,13 +766,14 @@
       x.laundry ? h('span', { class: 'badge wr-dirtybadge' }, '🧺 Laundry') : null);
   }
 
-  function outfitCard(o, why, acc) {
+  function outfitCard(o, why, acc, bends) {
     var card = h('div', { class: 'card wr-outfit' });
     card.appendChild(h('div', { class: 'wr-palette', 'aria-hidden': 'true' },
       CORE.map(function (c) { return o[c.id] ? h('span', { style: { background: color(o[c.id].color).hex } }) : null; })));
     CORE.forEach(function (c) { if (o[c.id]) card.appendChild(pieceLine(o[c.id])); });
     (acc || []).forEach(function (x) { card.appendChild(pieceLine(x)); });
     if (why && why.length) card.appendChild(h('ul', { class: 'wr-why' }, why.slice(0, 4).map(function (w) { return h('li', null, w); })));
+    if (bends && bends.length) card.appendChild(h('p', { class: 'wr-bend' }, '✦ Creative pick: ' + bends[0]));
     return card;
   }
 
@@ -1028,22 +1090,33 @@
         return h('div', { class: 'wr-dnarow' }, h('span', { class: 'wr-dnaicon', 'aria-hidden': 'true' }, icon),
           h('div', null, h('div', { class: 'wr-dnatitle' }, title), body));
       }
+      function p(text) { return h('p', { class: 'list-sub' }, text); }
       return [
         h('h2', { class: 'sheet-title' }, 'My Style'),
-        h('p', { class: 'sheet-text' }, 'Smart casual + street smart. Every suggestion follows these rules.'),
+        h('p', { class: 'sheet-text' }, 'Structured street smart with oversized tailoring influences. Effortless but intentional: no loud branding, no bright colours. Creativity comes from proportion, texture and tonal play.'),
+        h('p', { class: 'note' }, 'These are guidelines, not rules. A great outfit that bends one beats a safe outfit that follows them all: look for ✦ Creative pick.'),
         h('div', { class: 'wr-dna' },
-          rule('📐', 'Silhouette', h('p', { class: 'list-sub' }, 'Slim / fitted top → wide / relaxed bottom. Never both slim, never both loose.')),
-          rule('🎨', 'Colour palette', h('div', null,
+          rule('📐', 'Silhouette', h('div', null,
+            p('Strong contrast: a fitted or structured top with wide, draped trousers or jeans. Both pieces can have volume when the look still feels intentional (e.g. tonal).'),
+            p('Outerwear cropped or waist-length to keep the proportion; long coats worn open.'))),
+          rule('🎨', 'Colour', h('div', null,
             h('div', { class: 'wr-dnaswatches' }, DNA.palette.map(function (c) {
               return h('span', { class: 'wr-dnaswatch' }, swatch(c, true), h('span', null, color(c).label));
             })),
-            h('p', { class: 'list-sub' }, 'Maximum ' + DNA.maxColours + ' colours per outfit. Charcoal counts as grey, camel as beige, denim as navy.'))),
-          rule('👞', 'Shoes', h('p', { class: 'list-sub' }, 'Always dark and structured (black, brown, navy…; leather shoes, boots, dark sneakers). Running / sport shoes only for sport. No sneakers for formal occasions.')),
-          rule('🌡️', 'Layering by temperature', h('ul', { class: 'wr-dnalist' },
-            h('li', null, 'Below ' + DNA.outerBelow + ' °C: outerwear is mandatory'),
-            h('li', null, 'Below ' + DNA.midLayerBelow + ' °C: mid layer is mandatory'),
-            h('li', null, 'Above ' + DNA.baseOnlyAbove + ' °C: base layer only (unless you add a layer yourself)'))),
-          rule('🧢', 'Finishers', h('p', { class: 'list-sub' }, 'Cap, beanie or scarf are optional finishers, suggested under each outfit with a watch or a bag (2 at most): beanie below ' + DNA.beanieBelow + ' °C, cap otherwise, scarf below ' + DNA.scarfBelow + ' °C or in the wind.'))),
+            p('Tonal outfits work extremely well (all black, all cream, all brown, all grey); otherwise lean on shades of the same family. 2–3 colours look cleaner; a subtle extra colour in an accessory or a pattern adds personality.'))),
+          rule('🧵', 'Pattern & texture', h('div', null,
+            p('One statement piece with a subtle pattern: thin stripe, plaid, houndstooth, tonal pinstripe.'),
+            p('Mix textures: leather over a plain tee, fleece over smooth trousers, a knit over a fitted shirt. One statement texture is usually enough.'))),
+          rule('👞', 'Shoes', p('Tend to be dark and structured. A tendency, not a rule.')),
+          rule('🌡️', 'Layering', h('div', null,
+            p('Each layer visible and intentional: a base peeking at the collar or hem, a mid layer adding structure or texture, an outer layer completing the silhouette.'),
+            h('ul', { class: 'wr-dnalist' },
+              h('li', null, 'Above ' + DNA.baseOnlyAbove + ' °C: base layer is enough'),
+              h('li', null, DNA.midLayerFrom + '–' + DNA.baseOnlyAbove + ' °C: a mid layer adds depth'),
+              h('li', null, 'Below ' + DNA.outerBelow + ' °C: outerwear feels natural'),
+              h('li', null, 'Below ' + DNA.outerStrongBelow + ' °C: outerwear is the right call')),
+            p('Soft guidance: skipping layers on a warm day or adding more on a cool one is equally valid.'))),
+          rule('⌚', 'Accessories', p('Subtle but present: a cap, a chain wallet, a necklace, a watch. One or two details (shown under each outfit) that finish the look without overpowering it.'))),
         h('p', { class: 'hint' }, 'Read-only for now.'),
         h('div', { class: 'sheet-actions' }, h('button', { class: 'btn btn-primary btn-block', onclick: function () { close(); } }, 'Close'))
       ];
@@ -1061,7 +1134,7 @@
         h('div', { class: 'stack' },
           h('button', { class: 'btn btn-primary btn-block', onclick: function () { editItem(null); } }, '+ Add a piece of clothing'),
           h('button', { class: 'btn btn-secondary btn-block', onclick: function () {
-            ui.confirm({ title: 'Load the starter set?', message: '27 basic pieces (jackets, sweaters, shirts, trousers, shoes, accessories…) will be added. Edit or delete them to match your real closet.', okLabel: 'Load the starter set' })
+            ui.confirm({ title: 'Load the starter set?', message: '32 basic pieces (jackets, sweaters, shirts, trousers, shoes, accessories…) will be added. Edit or delete them to match your real closet.', okLabel: 'Load the starter set' })
               .then(function (ok) { if (!ok) return; data.items = data.items.concat(starter()); persist(); render(); ui.toast('Starter set added'); });
           } }, 'Load a starter set'))));
       return;
@@ -1159,6 +1232,10 @@
               'aria-pressed': draft.color === c.id ? 'true' : 'false', style: { background: c.hex }, onclick: function () { draft.color = c.id; paint(); } });
           }))));
         if (!isAcc && draft.cat !== 'shoes') body.appendChild(h('div', { class: 'field' }, h('span', { class: 'field-label' }, 'Fit'), seg(FITS, 'fit')));
+        if (draft.cat === 'outer') {
+          if (!draft.length) draft.length = 'hip';
+          body.appendChild(h('div', { class: 'field' }, h('span', { class: 'field-label' }, 'Length'), seg(LENGTHS, 'length')));
+        }
         body.appendChild(h('div', { class: 'field' }, h('span', { class: 'field-label' }, 'Pattern'), seg(PATTERNS, 'pattern')));
         if (!isAcc) body.appendChild(h('div', { class: 'field' }, h('span', { class: 'field-label' }, 'Style'), seg(FORMALITY.map(function (f) { return [f.id, f.label]; }), 'formality')));
         if (!isAcc) body.appendChild(h('div', { class: 'field' }, h('span', { class: 'field-label' }, 'Warmth'),

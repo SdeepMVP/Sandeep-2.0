@@ -64,7 +64,15 @@
       ['brown', 'white', 'Brown & white: fresh and grounded'],
       ['brown', 'beige', 'Brown & beige: tonal earth'],
       ['black', 'beige', 'Black & beige: clean street'],
-      ['grey', 'white', 'Grey & white: easy']
+      ['grey', 'white', 'Grey & white: easy'],
+      ['sand', 'white', 'Sand & white: light and soft'],
+      ['sand', 'brown', 'Sand & chocolate: warm earth'],
+      ['sand', 'navy', 'Sand & navy: relaxed tailoring'],
+      ['sand', 'black', 'Sand & black: clean street'],
+      ['taupe', 'cream', 'Taupe & cream: soft tonal'],
+      ['taupe', 'black', 'Taupe & black: understated'],
+      ['taupe', 'navy', 'Taupe & navy: quiet contrast'],
+      ['taupe', 'white', 'Taupe & white: fresh neutral']
     ],
     /* Trios complets reconnus (les trois couleurs présentes dans la tenue). */
     trios: [
@@ -95,7 +103,9 @@
       brown: { good: ['brown', 'camel', 'white'], ok: ['burgundy'], avoid: ['black'] },
       white: { good: ['brown', 'camel', 'navy', 'white'], ok: ['grey'] },
       lightblue: { good: ['brown', 'white', 'camel'], ok: ['navy'] },
-      khaki: { good: ['brown', 'burgundy', 'navy'], ok: ['white', 'black'] }
+      khaki: { good: ['brown', 'burgundy', 'navy'], ok: ['white', 'black'] },
+      sand: { good: ['brown', 'burgundy', 'navy'], ok: ['white', 'black'] },
+      taupe: { good: ['black', 'brown'], ok: ['white', 'navy'] }
     }
   };
 })();
