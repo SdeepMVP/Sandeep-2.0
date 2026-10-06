@@ -1,5 +1,11 @@
 # Changelog — Sandeep 2.0
 
+## 0.7.0 — 2026-10-06
+- New **Wardrobe** tab (no longer “soon”). Closet with type, colour, warmth, occasions (work, gym, clubbing, date, chilling out) and rain-proof flag; optional starter set of 23 basics.
+- **Today**: pick the weather (cold / cool / mild / hot, rain) and the occasion, get a suggested outfit with matching colours and the reasons why; show another one, swap a piece yourself, then “Wear this”.
+- Rotation: pieces worn in the last two days are suggested less.
+- **Laundry**: in the evening, choose which worn pieces go in the laundry; they are not suggested until marked clean.
+
 ## 0.6.0 — 2026-10-06
 - Habits: new **Daily** view with a checklist for today: Creatine, Medication (morning + evening), Sleep schedule (in bed before midnight, up before 9:00).
 - Streak and best streak per habit, last 7 days strip (tap a day to fix it).
