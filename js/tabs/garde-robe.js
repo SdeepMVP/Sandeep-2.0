@@ -27,6 +27,7 @@
     d.history = d.history || [];
     d.outfits = d.outfits || [];
     d.prefs = d.prefs || {};
+    d.wishlist = d.wishlist || [];
     d.items.forEach(complete);
     /* Historique : chaque entrée garde une copie des pièces portées (pour rester lisible si une pièce est supprimée). */
     d.history.forEach(function (e) {
@@ -55,6 +56,8 @@
     if (!S2.storage.save(NS, data)) ui.toast('Storage full: export a backup and remove some photos');
   }
   function savePhotos() { return S2.storage.save(PHOTOS_NS, photos); }
+  /* Sauvegarde sans invalider les caches (liste d'envies, rang de suggestion…). */
+  function saveQuiet() { S2.storage.save(NS, data); }
   function item(id) { return data.items.filter(function (x) { return x.id === id; })[0]; }
   function snap(x) { return { id: x.id, name: x.name, cat: x.cat, color: x.color, subtype: x.subtype || null }; }
   function todayState() {
@@ -156,9 +159,11 @@
     var dirty = data.items.filter(function (x) { return x.laundry; }).length;
     root.appendChild(h('div', { class: 'segmented wr-nav' },
       [['today', 'Today'], ['outfits', 'Outfits'], ['closet', 'Closet'], ['laundry', 'Laundry' + (dirty ? ' ' + dirty : '')], ['history', 'History']].map(function (v) {
-        return h('button', { class: 'seg' + (view === v[0] ? ' is-active' : ''), onclick: function () { view = v[0]; render(); window.scrollTo(0, 0); } }, v[1]);
+        var on = view === v[0] || (view === 'shop' && v[0] === 'closet');
+        return h('button', { class: 'seg' + (on ? ' is-active' : ''), onclick: function () { view = v[0]; render(); window.scrollTo(0, 0); } }, v[1]);
       })));
     if (view === 'closet') renderCloset();
+    else if (view === 'shop') renderShop();
     else if (view === 'outfits') renderOutfits();
     else if (view === 'laundry') renderLaundry();
     else if (view === 'history') renderHistory();
@@ -209,7 +214,8 @@
           ? 'Missing clean pieces for ' + oc.label.toLowerCase() + ': ' + miss.join(', ') + '.'
           : 'No combination of your clean clothes works for this occasion.'),
         h('p', { class: 'hint' }, 'Tag more clothes for this context in the Closet, or mark some laundry as clean. You can also build it yourself.'),
-        h('button', { class: 'btn btn-secondary btn-block', onclick: function () { compose(st, {}); } }, 'Build it myself')));
+        h('button', { class: 'btn btn-secondary btn-block', onclick: function () { compose(st, {}); } }, 'Build it myself'),
+        h('button', { class: 'btn btn-ghost btn-block', onclick: function () { view = 'shop'; render(); window.scrollTo(0, 0); } }, '🛍 What should I buy?')));
       renderReadyOutfits(st, oc, ctx);
       return;
     }
@@ -752,6 +758,13 @@
           } }, 'Load a starter set'))));
       return;
     }
+    var ess = E.essentials(data.items), owned = ess.filter(function (x) { return x.have.length; }).length;
+    root.appendChild(h('button', { class: 'card wr-shopentry', onclick: function () { view = 'shop'; render(); window.scrollTo(0, 0); } },
+      h('span', { class: 'wr-shopicon', 'aria-hidden': 'true' }, '🛍'),
+      h('span', { class: 'wr-piecemain' },
+        h('span', { class: 'wr-piecename' }, 'Complete your wardrobe'),
+        h('span', { class: 'list-sub' }, 'Style essentials ' + owned + ' / ' + ess.length + ' · see which purchases unlock the most outfits')),
+      h('span', { class: 'chev', 'aria-hidden': 'true' }, '›')));
     var search = h('input', { class: 'input wr-search', type: 'search', value: closetQuery, autocomplete: 'off', enterkeyhint: 'search',
       placeholder: 'Search name, colour, type, place…', 'aria-label': 'Search the closet' });
     var results = h('div');
@@ -879,7 +892,7 @@
       x.laundry ? h('span', { class: 'badge wr-dirtybadge' }, 'Laundry') : h('span', { class: 'chev', 'aria-hidden': 'true' }, '›'));
   }
 
-  function editItem(x, prefill) {
+  function editItem(x, prefill, onSaved) {
     var isNew = !x;
     var draft = x ? JSON.parse(JSON.stringify(x)) : prefill ? prefill
       : complete({ id: ui.uid(), name: '', cat: 'top', color: 'navy', warmth: 1, occasions: ['chill'], rainOk: false, laundry: false, lastWorn: null, worn: 0, subtype: null, material: null, fit: 'regular' });
@@ -1004,6 +1017,7 @@
           data.items[data.items.indexOf(x)] = draft;
           if (draft.cat !== x.cat) data.outfits.forEach(function (of) { if (of.items[x.cat] === x.id) of.items[x.cat] = null; });
         }
+        if (onSaved) onSaved(draft);
         persist(); close(); render(); ui.toast(isNew ? 'Added to your closet' : 'Saved');
       }
       return [
@@ -1038,6 +1052,134 @@
           } }, 'Delete'))
       ];
     }, { modal: true });
+  }
+
+  /* ----- Compléter la garde-robe : achats conseillés, indispensables, liste d'envies ----- */
+  var shopCache = { rev: -1, result: null };
+  function wishKey(kind, col, pattern) { return kind + '|' + col + '|' + (pattern || 'solid'); }
+  function inWish(v) { var k = wishKey(v.subtype, v.color, v.pattern); return data.wishlist.some(function (w) { return wishKey(w.kind, w.color, w.pattern) === k; }); }
+  function toggleWish(v) {
+    var k = wishKey(v.subtype, v.color, v.pattern);
+    if (inWish(v)) data.wishlist = data.wishlist.filter(function (w) { return wishKey(w.kind, w.color, w.pattern) !== k; });
+    else data.wishlist.push({ id: ui.uid(), kind: v.subtype, color: v.color, pattern: v.pattern || 'solid', name: v.name, added: today() });
+    saveQuiet(); render();
+  }
+  /* « I bought it » : ouvre la fiche pré-remplie ; une fois enregistrée, la pièce quitte la liste d'envies. */
+  function bought(v) {
+    var prefill = JSON.parse(JSON.stringify(v));
+    delete prefill.virtual; prefill.id = ui.uid();
+    editItem(null, prefill, function () {
+      var k = wishKey(v.subtype, v.color, v.pattern);
+      data.wishlist = data.wishlist.filter(function (w) { return wishKey(w.kind, w.color, w.pattern) !== k; });
+    });
+  }
+  function shopButtons(v) {
+    var wished = inWish(v);
+    return h('div', { class: 'wr-buybtns' },
+      h('button', { class: 'btn btn-sm ' + (wished ? 'btn-primary' : 'btn-secondary'), 'aria-pressed': wished ? 'true' : 'false', onclick: function () { toggleWish(v); } }, wished ? '♥ In wishlist' : '♡ Wishlist'),
+      h('button', { class: 'btn btn-ghost btn-sm', onclick: function () { bought(v); } }, 'I bought it'));
+  }
+  function pieceDesc(v) {
+    return [catLabel(v.cat), v.fit && v.fit !== 'regular' && v.cat !== 'shoes' ? (v.fit === 'slim' ? 'Slim' : 'Wide') : null,
+      v.length && v.cat === 'outer' ? v.length.charAt(0).toUpperCase() + v.length.slice(1) : null,
+      v.pattern && v.pattern !== 'solid' ? E.PATTERNS.filter(function (p) { return p[0] === v.pattern; })[0][1] : null].filter(Boolean).join(' · ');
+  }
+  function runShop(done) {
+    if (shopCache.rev === rev && shopCache.result) { done(); return; }
+    var plan = E.planShopping(data.items, { prefs: data.prefs });
+    var res = [], i = 0, n = plan.candidates.length;
+    (function step() {
+      var end = Math.min(n, i + 10);
+      for (; i < end; i++) res.push(E.evaluateCandidate(plan, plan.candidates[i]));
+      var bar = document.getElementById('wr-shopprog');
+      if (bar) bar.style.width = Math.round(i / n * 100) + '%';
+      if (i < n) setTimeout(step, 0);
+      else { shopCache = { rev: rev, result: { buys: E.rankShopping(res, 8), gaps: E.contextGaps(plan) } }; done(); }
+    })();
+  }
+
+  function renderShop() {
+    root.appendChild(h('button', { class: 'btn btn-ghost btn-sm back', onclick: function () { view = 'closet'; render(); } }, '‹ Closet'));
+    root.appendChild(h('h2', { class: 'page-title' }, 'Complete your wardrobe'));
+    root.appendChild(h('p', { class: 'hint' }, 'Calculated from your closet and your style guidelines, across 6 typical days (weekend, office, date night, summer, cold city day, wedding). Pieces in the laundry count as owned. Nothing is fetched or bought for you.'));
+    var box = h('div');
+    root.appendChild(box);
+    if (shopCache.rev === rev && shopCache.result) paintShop(box);
+    else {
+      box.appendChild(h('div', { class: 'card wr-analysing' }, h('p', { class: 'sheet-text' }, 'Analysing which pieces would unlock the most outfits…'),
+        h('div', { class: 'wr-prog' }, h('span', { id: 'wr-shopprog' }))));
+      setTimeout(function () { runShop(function () { if (view === 'shop') { box.innerHTML = ''; paintShop(box); } }); }, 30);
+    }
+  }
+
+  function paintShop(box) {
+    var r = shopCache.result;
+    /* Meilleurs achats */
+    box.appendChild(h('h2', { class: 'section-title' }, 'Best next buys'));
+    if (!r.buys.length) box.appendChild(h('p', { class: 'muted' }, 'Your closet already covers these days well. Check the essentials below.'));
+    r.buys.forEach(function (b, idx) {
+      var v = b.piece, reasons = [];
+      if (b.unlocked) reasons.push('Unlocks ' + b.unlocked + ' new outfit' + (b.unlocked === 1 ? '' : 's') + (b.partners ? ' with ' + b.partners + ' of your pieces' : ''));
+      if (b.firsts.length) reasons.push('First outfit possible for: ' + b.firsts.join(', ').toLowerCase());
+      if (b.improved.length) reasons.push('Upgrades your best look for: ' + b.improved.join(', ').toLowerCase());
+      box.appendChild(h('div', { class: 'card wr-buy' },
+        h('div', { class: 'wr-buyhead' },
+          h('span', { class: 'wr-buyrank' }, idx + 1), swatch(v.color, true),
+          h('div', { class: 'wr-piecemain' }, h('div', { class: 'wr-piecename' }, v.name), h('div', { class: 'list-sub' }, pieceDesc(v))),
+          b.unlocked ? h('span', { class: 'badge wr-readybadge' }, '+' + b.unlocked) : null),
+        h('ul', { class: 'wr-why' }, reasons.map(function (t) { return h('li', null, t); })),
+        b.alternatives.length ? h('div', { class: 'wr-alts' }, h('span', { class: 'list-sub' }, 'Also works in'),
+          b.alternatives.slice(0, 3).map(function (a) {
+            return h('button', { class: 'wr-alt' + (inWish(a.piece) ? ' is-active' : ''), 'aria-label': 'Add ' + a.piece.name + ' to the wishlist', onclick: function () { toggleWish(a.piece); } },
+              swatch(a.piece.color), color(a.piece.color).label);
+          })) : null,
+        shopButtons(v)));
+    });
+
+    /* Occasions impossibles */
+    if (r.gaps.length) {
+      box.appendChild(h('h2', { class: 'section-title' }, 'Days you can’t dress for yet'));
+      r.gaps.forEach(function (g) {
+        box.appendChild(h('div', { class: 'card wr-gap' },
+          h('div', { class: 'wr-piecename' }, g.occasion.icon + ' ' + g.label),
+          h('p', { class: 'list-sub' }, 'Missing: ' + g.slots.map(function (c) { return catLabel(c).toLowerCase(); }).join(', ') + '. A simple set to start:'),
+          g.pieces.map(function (v) {
+            return h('div', { class: 'wr-gaprow' }, swatch(v.color, true),
+              h('div', { class: 'wr-piecemain' }, h('div', { class: 'wr-piecename' }, v.name), h('div', { class: 'list-sub' }, pieceDesc(v))), shopButtons(v));
+          })));
+      });
+    }
+
+    /* Indispensables du style */
+    var ess = E.essentials(data.items), have = ess.filter(function (x) { return x.have.length; }).length;
+    box.appendChild(h('h2', { class: 'section-title' }, 'Style essentials · ' + have + ' / ' + ess.length));
+    box.appendChild(h('div', { class: 'list wr-esslist' }, ess.map(function (x) {
+      var v = E.virtualPiece(x.e.kind, x.e.color, x.e.pattern);
+      if (x.have.length) return h('div', { class: 'list-row wr-ess is-have' }, h('span', { class: 'wr-box', 'aria-hidden': 'true' }, '✓'),
+        h('div', { class: 'wr-rowmain' }, h('div', { class: 'list-title' }, x.e.label), h('div', { class: 'list-sub' }, x.have.slice(0, 2).map(function (p) { return p.name; }).join(', ') + (x.have.length > 2 ? ' +' + (x.have.length - 2) : ''))));
+      return h('div', { class: 'list-row wr-ess' }, h('span', { class: 'wr-box', 'aria-hidden': 'true' }),
+        h('div', { class: 'wr-rowmain' }, h('div', { class: 'list-title' }, x.e.label), h('div', { class: 'list-sub' }, 'e.g. ' + v.name.toLowerCase())),
+        h('button', { class: 'btn btn-icon', 'aria-label': (inWish(v) ? 'Remove ' : 'Add ') + v.name + (inWish(v) ? ' from' : ' to') + ' the wishlist', onclick: function () { toggleWish(v); } }, inWish(v) ? '♥' : '♡'));
+    })));
+
+    /* Liste d'envies */
+    box.appendChild(h('h2', { class: 'section-title' }, 'Wishlist · ' + data.wishlist.length));
+    if (!data.wishlist.length) box.appendChild(h('p', { class: 'hint' }, 'Tap ♡ on a suggestion to build your shopping list.'));
+    else {
+      box.appendChild(h('div', { class: 'list' }, data.wishlist.map(function (w) {
+        var v = E.virtualPiece(w.kind, w.color, w.pattern);
+        return h('div', { class: 'list-row wr-row' }, swatch(w.color, true),
+          h('div', { class: 'wr-rowmain' }, h('div', { class: 'list-title' }, w.name), h('div', { class: 'list-sub' }, pieceDesc(v) + ' · added ' + ui.date(w.added))),
+          h('button', { class: 'btn btn-secondary btn-sm', onclick: function () { bought(v); } }, 'Bought'),
+          h('button', { class: 'btn btn-icon', 'aria-label': 'Remove ' + w.name, onclick: function () { toggleWish(v); } }, '✕'));
+      })));
+      box.appendChild(h('div', { class: 'bottom-actions' },
+        h('button', { class: 'btn btn-secondary btn-block', onclick: function () {
+          var text = 'Wardrobe wishlist\n' + data.wishlist.map(function (w) { return '• ' + w.name; }).join('\n');
+          if (navigator.share) navigator.share({ title: 'Wardrobe wishlist', text: text }).catch(function () {});
+          else if (navigator.clipboard) navigator.clipboard.writeText(text).then(function () { ui.toast('List copied'); });
+        } }, 'Share the list')));
+    }
   }
 
   /* Réduit une photo (côté le plus long = max px) et la convertit en JPEG data-URL. */
