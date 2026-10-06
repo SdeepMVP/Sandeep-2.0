@@ -1,5 +1,11 @@
 # Changelog — Sandeep 2.0
 
+## 0.8.0 — 2026-10-06
+- Wardrobe: **saved outfits**. Create them from scratch, from a suggestion or from what you wore; see which are ready (nothing in the laundry), filter by occasion, wear them in one tap. Ready outfits for the chosen occasion appear first in Today.
+- Each piece can have a **storage place** (shown in outfits so you can find the clothes), plus kind (shirt, chinos, boots…), pattern, style (sport → formal), material, brand and notes. Existing pieces are completed automatically.
+- Colour rules extended with proven combinations from menswear guides: 44 colour pairs, 9 trios, shoe colour by trouser colour, light–dark balance, one pattern at a time, dress code per occasion, linen/wool by weather, no suede in the rain. Browse them in the new Colour guide.
+- Closet search (name, colour, kind, place…) and filters (clean, laundry, occasion).
+
 ## 0.7.0 — 2026-10-06
 - New **Wardrobe** tab (no longer “soon”). Closet with type, colour, warmth, occasions (work, gym, clubbing, date, chilling out) and rain-proof flag; optional starter set of 23 basics.
 - **Today**: pick the weather (cold / cool / mild / hot, rain) and the occasion, get a suggested outfit with matching colours and the reasons why; show another one, swap a piece yourself, then “Wear this”.

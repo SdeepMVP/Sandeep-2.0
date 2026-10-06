@@ -36,6 +36,7 @@ js/core/ui.js         helpers DOM, feuilles (bottom sheets), confirmations, toas
 js/core/app.js        registre des onglets, navigation
 js/tabs/*.js          un fichier par onglet (muscu.js, garde-robe.js, …)
 js/tabs/cuisine-recipes.js  recettes intégrées de Kitchen (nouvel id = ajoutée aux données existantes)
+js/tabs/garde-robe-combos.js  combinaisons de couleurs (paires, trios, chaussures) utilisées par Wardrobe
 js/settings.js        écran Réglages
 js/main.js            démarrage
 ```

@@ -1,0 +1,86 @@
+/* Combinaisons de couleurs éprouvées pour l'onglet Wardrobe (recherche web, octobre 2026).
+   Sources : guides couleurs homme de Siyaram, StudioSuits, Aza Fashions, Care of Carl,
+   Real Men Real Style, Westwood Hart, Effortless Gent, FashionBeans, Permanent Style, Sartoro.
+   Idées communes : base de neutres + une couleur d'accent, contraste clair/foncé,
+   chaussures assorties au pantalon (le marron va avec presque tout, pas de noir avec le beige). */
+(function () {
+  'use strict';
+  var S2 = (window.S2 = window.S2 || {});
+
+  S2.wardrobeCombos = {
+    /* Paires de couleurs qui marchent (entre vêtements visibles : manteau, couche, haut, bas). */
+    pairs: [
+      ['navy', 'white', 'Navy & white: timeless'],
+      ['black', 'white', 'Black & white: sharp contrast'],
+      ['black', 'grey', 'Black & grey: sleek monochrome'],
+      ['black', 'charcoal', 'Black & charcoal: sleek monochrome'],
+      ['grey', 'navy', 'Grey & navy: smart and easy'],
+      ['charcoal', 'white', 'Charcoal & white: crisp'],
+      ['brown', 'navy', 'Brown & navy: warm and smart'],
+      ['camel', 'navy', 'Camel & navy: contrast with harmony'],
+      ['camel', 'white', 'Camel & white: clean and warm'],
+      ['camel', 'black', 'Camel & black: elegant'],
+      ['camel', 'grey', 'Camel & grey: soft and refined'],
+      ['beige', 'olive', 'Beige & olive: earthy'],
+      ['beige', 'navy', 'Beige & navy: menswear classic'],
+      ['beige', 'white', 'Beige & white: light and fresh'],
+      ['olive', 'white', 'Olive & white: fresh'],
+      ['olive', 'cream', 'Olive & cream: warm-weather favourite'],
+      ['olive', 'navy', 'Olive & navy: rugged and smart'],
+      ['olive', 'brown', 'Olive & brown: earthy'],
+      ['olive', 'black', 'Olive & black: utilitarian'],
+      ['burgundy', 'navy', 'Burgundy & navy: rich and classic'],
+      ['burgundy', 'grey', 'Burgundy & grey: rich without trying too hard'],
+      ['burgundy', 'charcoal', 'Burgundy & charcoal: deep and confident'],
+      ['burgundy', 'cream', 'Burgundy & cream: rich'],
+      ['burgundy', 'beige', 'Burgundy & beige: warm'],
+      ['lightblue', 'navy', 'Light blue & navy: tonal blues'],
+      ['lightblue', 'beige', 'Light blue & tan: fresh'],
+      ['lightblue', 'camel', 'Light blue & camel: fresh'],
+      ['lightblue', 'grey', 'Light blue & grey: soft'],
+      ['lightblue', 'white', 'Light blue & white: summer clean'],
+      ['denim', 'white', 'Denim & white: easy casual'],
+      ['denim', 'grey', 'Denim & grey: relaxed'],
+      ['denim', 'black', 'Denim & black: night-out casual'],
+      ['green', 'white', 'Green & white: clean'],
+      ['green', 'beige', 'Green & beige: natural'],
+      ['pink', 'navy', 'Pink & navy: confident'],
+      ['pink', 'grey', 'Grey & pastel pink: soft'],
+      ['yellow', 'navy', 'Yellow & navy: bold but safe'],
+      ['yellow', 'grey', 'Grey & pastel yellow: soft'],
+      ['teal', 'beige', 'Teal & beige: relaxed'],
+      ['purple', 'grey', 'Purple & grey: subtle'],
+      ['red', 'navy', 'Red & navy: punchy'],
+      ['orange', 'navy', 'Orange & navy: complementary'],
+      ['blue', 'white', 'Blue & white: crisp'],
+      ['blue', 'beige', 'Blue & beige: relaxed']
+    ],
+    /* Trios complets reconnus (les trois couleurs présentes dans la tenue). */
+    trios: [
+      ['navy', 'white', 'burgundy', 'Navy, white & burgundy: the timeless trio'],
+      ['lightblue', 'white', 'brown', 'Light blue, white & brown: fresh and grounded'],
+      ['olive', 'white', 'brown', 'Olive, white & brown: casual done right'],
+      ['olive', 'cream', 'brown', 'Olive, cream & brown: earthy summer'],
+      ['camel', 'navy', 'white', 'Camel, navy & white: polished'],
+      ['grey', 'black', 'white', 'Grey, black & white: modern monochrome'],
+      ['charcoal', 'burgundy', 'grey', 'Charcoal, burgundy & grey: deep and refined'],
+      ['beige', 'olive', 'white', 'Beige, olive & white: relaxed earth tones'],
+      ['denim', 'white', 'camel', 'Denim, white & camel: weekend classic']
+    ],
+    /* Chaussures selon la couleur du bas. good = recommandé, ok = passe en casual, avoid = à éviter. */
+    shoes: {
+      navy: { good: ['brown', 'camel', 'burgundy', 'black'], ok: ['white', 'grey'] },
+      grey: { good: ['black', 'brown', 'burgundy'], ok: ['white', 'grey', 'navy'] },
+      charcoal: { good: ['black', 'burgundy', 'brown'], ok: ['white', 'grey'] },
+      beige: { good: ['brown', 'camel', 'burgundy', 'navy'], ok: ['white', 'grey'], avoid: ['black'] },
+      cream: { good: ['brown', 'camel', 'burgundy', 'navy'], ok: ['white', 'grey'], avoid: ['black'] },
+      camel: { good: ['brown', 'burgundy', 'navy'], ok: ['white'], avoid: ['black'] },
+      black: { good: ['black'], ok: ['white', 'grey', 'charcoal'], avoid: ['brown', 'camel'] },
+      denim: { good: ['brown', 'white', 'black', 'camel'], ok: ['grey', 'navy', 'burgundy'] },
+      olive: { good: ['brown', 'camel', 'white'], ok: ['black', 'burgundy'] },
+      brown: { good: ['brown', 'camel', 'white'], ok: ['burgundy'], avoid: ['black'] },
+      white: { good: ['brown', 'camel', 'navy', 'white'], ok: ['grey'] },
+      lightblue: { good: ['brown', 'white', 'camel'], ok: ['navy'] }
+    }
+  };
+})();
