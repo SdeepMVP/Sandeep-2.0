@@ -1,5 +1,11 @@
 # Changelog — Sandeep 2.0
 
+## 0.5.0 — 2026-10-06
+- New **Kitchen** tab (no longer “soon”) with 10 easy, fast, high-protein recipes: 4 breakfast & snacks, 6 lunch & dinner.
+- Search by recipe name or ingredient (e.g. “chicken”), filters by category.
+- Each recipe: grocery checklist (saved ticks, share the missing items), servings that adjust quantities, steps to tick off, and a full-screen step-by-step cooking guide that keeps the screen on.
+- Add, edit and delete your own recipes.
+
 ## 0.4.0 — 2026-10-06
 - New **Habits** tab (no longer “soon”) with a first habit: **Quit smoking**, goal 0 cigarettes a day.
 - Smoke-free streak (current and best), today counter (+/− per cigarette), “Smoke-free today” and “I resisted a craving” buttons.

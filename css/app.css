@@ -393,3 +393,44 @@ select.input option { color: var(--text); }
 .hb-togo { font-size: 12px; white-space: nowrap; }
 .hb-grid2 { grid-template-columns: 1fr 1fr; }
 input[type="date"].input { display: block; line-height: 48px; }
+
+/* ---------- Onglet Kitchen (préfixe ck-) ---------- */
+.ck-searchwrap { position: sticky; top: calc(env(safe-area-inset-top) + 56px); z-index: 5; background: var(--bg); padding: 4px 0 2px; }
+.ck-search { font-size: 17px; padding-left: 40px; -webkit-appearance: none;
+  background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239A8574' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-4-4'/%3E%3C/svg%3E") no-repeat 12px center / 20px; }
+.ck-card { display: grid; gap: 4px; width: 100%; text-align: left; margin: 10px 0; }
+.ck-card:active { background: var(--surface-2); }
+.ck-cardname { font-size: 17px; font-weight: 650; }
+.ck-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: 13px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.ck-meta-lg { font-size: 14px; margin-bottom: 4px; }
+.ck-protein { color: var(--good); font-weight: 700; }
+.ck-tags { font-size: 12px; color: var(--muted); }
+.ck-servings { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; }
+.ck-servings .stepper { margin: 0; gap: 18px; }
+.ck-servings .btn-step { min-width: 52px; min-height: 48px; font-size: 22px; }
+.ck-servings .stepper-num { font-size: 26px; min-width: 28px; text-align: center; }
+.ck-mode { margin: 14px 0 8px; }
+.ck-listhead { display: flex; justify-content: space-between; align-items: baseline; margin: 14px 4px 8px; font-size: 13px; }
+.ck-listhead .card-title { margin: 0; font-size: 16px; }
+.ck-check { width: 100%; text-align: left; background: transparent; border-left: 0; border-right: 0; border-top: 0; justify-content: flex-start; gap: 12px; }
+.ck-check:active { background: var(--surface-2); }
+.ck-box { flex-shrink: 0; width: 28px; height: 28px; border-radius: 8px; border: 2px solid var(--border); display: grid; place-items: center; font-weight: 800; color: var(--surface); }
+.ck-check.is-on .ck-box { background: var(--good); border-color: var(--good); }
+.ck-check.is-on .ck-checktext { text-decoration: line-through; color: var(--muted); }
+.ck-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.ck-step { width: 100%; display: flex; gap: 12px; align-items: flex-start; text-align: left; padding: 12px 14px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); font-size: 16px; line-height: 1.45; }
+.ck-stepnum { flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--surface-2); font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; }
+.ck-step.is-done { opacity: .6; }
+.ck-step.is-done .ck-stepnum { background: var(--good); color: var(--surface); }
+.ck-inglist summary { font-weight: 600; min-height: 32px; cursor: pointer; }
+.ck-inglist ul { margin: 8px 0 0; padding-left: 20px; display: grid; gap: 4px; }
+.ck-cook { display: flex; flex-direction: column; min-height: 70vh; }
+.ck-cookhead { display: flex; justify-content: space-between; align-items: center; }
+.ck-progress { height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; margin: 6px 0 18px; }
+.ck-progress span { display: block; height: 100%; background: var(--good); transition: width .2s; }
+.ck-cooktext { font-size: 24px; line-height: 1.4; font-weight: 550; flex: 1; }
+.ck-cooknav { display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px; margin-top: 18px; }
+.ck-textarea { min-height: 140px; padding: 10px 12px; line-height: 1.45; resize: vertical; }
+.ck-grid1 { grid-template-columns: 1fr; }
