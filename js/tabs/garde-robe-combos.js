@@ -53,7 +53,18 @@
       ['red', 'navy', 'Red & navy: punchy'],
       ['orange', 'navy', 'Orange & navy: complementary'],
       ['blue', 'white', 'Blue & white: crisp'],
-      ['blue', 'beige', 'Blue & beige: relaxed']
+      ['blue', 'beige', 'Blue & beige: relaxed'],
+      ['khaki', 'navy', 'Khaki & navy: smart classic'],
+      ['khaki', 'white', 'Khaki & white: crisp'],
+      ['khaki', 'black', 'Khaki & black: utility street'],
+      ['khaki', 'brown', 'Khaki & brown: earthy'],
+      ['cream', 'navy', 'Cream & navy: soft contrast'],
+      ['cream', 'brown', 'Cream & brown: warm and refined'],
+      ['cream', 'black', 'Cream & black: sharp'],
+      ['brown', 'white', 'Brown & white: fresh and grounded'],
+      ['brown', 'beige', 'Brown & beige: tonal earth'],
+      ['black', 'beige', 'Black & beige: clean street'],
+      ['grey', 'white', 'Grey & white: easy']
     ],
     /* Trios complets reconnus (les trois couleurs présentes dans la tenue). */
     trios: [
@@ -65,7 +76,10 @@
       ['grey', 'black', 'white', 'Grey, black & white: modern monochrome'],
       ['charcoal', 'burgundy', 'grey', 'Charcoal, burgundy & grey: deep and refined'],
       ['beige', 'olive', 'white', 'Beige, olive & white: relaxed earth tones'],
-      ['denim', 'white', 'camel', 'Denim, white & camel: weekend classic']
+      ['denim', 'white', 'camel', 'Denim, white & camel: weekend classic'],
+      ['black', 'cream', 'brown', 'Black, cream & brown: smart street'],
+      ['navy', 'khaki', 'brown', 'Navy, khaki & brown: classic smart casual'],
+      ['white', 'black', 'beige', 'White, black & beige: clean street']
     ],
     /* Chaussures selon la couleur du bas. good = recommandé, ok = passe en casual, avoid = à éviter. */
     shoes: {
@@ -80,7 +94,8 @@
       olive: { good: ['brown', 'camel', 'white'], ok: ['black', 'burgundy'] },
       brown: { good: ['brown', 'camel', 'white'], ok: ['burgundy'], avoid: ['black'] },
       white: { good: ['brown', 'camel', 'navy', 'white'], ok: ['grey'] },
-      lightblue: { good: ['brown', 'white', 'camel'], ok: ['navy'] }
+      lightblue: { good: ['brown', 'white', 'camel'], ok: ['navy'] },
+      khaki: { good: ['brown', 'burgundy', 'navy'], ok: ['white', 'black'] }
     }
   };
 })();

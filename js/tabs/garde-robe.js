@@ -1,57 +1,102 @@
-/* Onglet Wardrobe : vêtements, tenues enregistrées, linge sale, et proposition de tenue
-   selon la météo et l'occasion. La météo est choisie à la main (pas de récupération automatique, cf. CLAUDE.md).
+/* Onglet Wardrobe : vêtements, tenues enregistrées, linge sale, historique, et proposition de tenue
+   selon la météo, l'occasion et le « Style DNA » de l'utilisateur.
+   La météo est saisie à la main (pas de récupération automatique, cf. CLAUDE.md).
    Règles de couleurs : js/tabs/garde-robe-combos.js. Données : localStorage "sandeep2:garde-robe". */
 (function () {
   'use strict';
   var S2 = window.S2;
   var ui = S2.ui, h = ui.h;
   var NS = 'garde-robe';
-  var SCHEMA = 2;
+  var SCHEMA = 3;
   var COMBOS = S2.wardrobeCombos || { pairs: [], trios: [], shoes: {} };
 
   var ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6a2 2 0 1 1 2-2M12 6v2l8.5 6.5a1.5 1.5 0 0 1-.9 2.7H4.4a1.5 1.5 0 0 1-.9-2.7L12 8"/></svg>';
 
-  /* Ordre = du haut du corps vers les pieds, tel qu'affiché dans une tenue. */
+  /* Ordre = du haut du corps vers les pieds, tel qu'affiché dans une tenue. Les accessoires sont à part. */
   var CATS = [
     { id: 'outer', label: 'Outerwear', hint: 'Jacket, coat',
       subtypes: ['Jacket', 'Coat', 'Blazer', 'Bomber', 'Rain jacket', 'Puffer', 'Leather jacket', 'Denim jacket', 'Trench coat'] },
     { id: 'layer', label: 'Mid layer', hint: 'Sweater, hoodie, overshirt',
       subtypes: ['Sweater', 'Cardigan', 'Hoodie', 'Sweatshirt', 'Overshirt', 'Zip-up', 'Vest', 'Turtleneck'] },
-    { id: 'top', label: 'Top', hint: 'T-shirt, shirt, polo',
+    { id: 'top', label: 'Top (base layer)', hint: 'T-shirt, shirt, polo',
       subtypes: ['T-shirt', 'Shirt', 'Oxford shirt', 'Polo', 'Long-sleeve', 'Henley', 'Tank top', 'Sport top'] },
     { id: 'bottom', label: 'Bottom', hint: 'Jeans, chinos, shorts',
-      subtypes: ['Jeans', 'Chinos', 'Trousers', 'Cargo pants', 'Joggers', 'Shorts', 'Sport shorts'] },
-    { id: 'shoes', label: 'Shoes', hint: 'Sneakers, boots',
-      subtypes: ['Sneakers', 'Leather shoes', 'Loafers', 'Boots', 'Chelsea boots', 'Running shoes', 'Sandals', 'Slides'] }
+      subtypes: ['Jeans', 'Chinos', 'Trousers', 'Cargo pants', 'Joggers', 'Track pants', 'Shorts', 'Sport shorts'] },
+    { id: 'shoes', label: 'Shoes', hint: 'Boots, leather shoes, sneakers',
+      subtypes: ['Sneakers', 'Leather shoes', 'Loafers', 'Derbies', 'Boots', 'Chelsea boots', 'Running shoes', 'Sandals', 'Slides'] },
+    { id: 'acc', label: 'Accessories', hint: 'Cap, beanie, scarf, bag, watch',
+      subtypes: ['Cap', 'Beanie', 'Scarf', 'Tote bag', 'Crossbody bag', 'Backpack', 'Watch'] }
   ];
-  var OCCASIONS = [
+  var CORE = CATS.filter(function (c) { return c.id !== 'acc'; });
+
+  /* Contextes pour lesquels une pièce convient (« Good for »). Les ids historiques sont conservés. */
+  var TAGS = [
     { id: 'work', label: 'Work', icon: '💼' },
-    { id: 'gym', label: 'Gym', icon: '🏋️' },
-    { id: 'club', label: 'Clubbing', icon: '🪩' },
-    { id: 'date', label: 'Date', icon: '🌹' },
-    { id: 'chill', label: 'Chilling out', icon: '☕' }
+    { id: 'chill', label: 'Casual', icon: '☕' },
+    { id: 'date', label: 'Date / dinner', icon: '🌹' },
+    { id: 'club', label: 'Night out', icon: '🪩' },
+    { id: 'formal', label: 'Dressed up', icon: '🎩' },
+    { id: 'gym', label: 'Sport', icon: '🏋️' },
+    { id: 'travel', label: 'Travel', icon: '✈️' }
   ];
-  var TEMPS = [
-    { id: 'cold', label: 'Cold', sub: '< 10 °C' },
-    { id: 'cool', label: 'Cool', sub: '10–17 °C' },
-    { id: 'mild', label: 'Mild', sub: '18–24 °C' },
-    { id: 'hot', label: 'Hot', sub: '25 °C +' }
+
+  /* Occasions, groupées. type : work | casual | formal | sport. tags = contextes de pièces acceptés (le 1er est prioritaire).
+     ideal = niveaux de formalité visés (0 sport, 1 casual, 2 smart casual, 3 formel). strict = pas de sweat / jogging. */
+  var GROUPS = [
+    { id: 'work', label: 'Work', items: [
+      { id: 'wfh', label: 'Remote / WFH', icon: '🏠', type: 'work', tags: ['chill', 'work'], ideal: [1, 2] },
+      { id: 'office', label: 'Office casual', icon: '💼', type: 'work', tags: ['work'], ideal: [2], strict: true },
+      { id: 'meeting', label: 'Important meeting', icon: '📊', type: 'work', tags: ['work', 'formal'], ideal: [3, 2], strict: true, dressy: true },
+      { id: 'clientdinner', label: 'Client dinner', icon: '🍽️', type: 'work', tags: ['work', 'formal', 'date'], ideal: [2, 3], strict: true, dressy: true }
+    ] },
+    { id: 'daily', label: 'Daily life', items: [
+      { id: 'errands', label: 'Errands', icon: '🛒', type: 'casual', tags: ['chill'], ideal: [1] },
+      { id: 'weekend', label: 'Weekend casual', icon: '☕', type: 'casual', tags: ['chill'], ideal: [1, 2] },
+      { id: 'outdoors', label: 'Walk / outdoors', icon: '🌳', type: 'casual', tags: ['chill', 'travel'], ideal: [1] }
+    ] },
+    { id: 'social', label: 'Social', items: [
+      { id: 'friends', label: 'Dinner with friends', icon: '🍝', type: 'casual', tags: ['chill', 'date'], ideal: [1, 2] },
+      { id: 'datenight', label: 'Date night', icon: '🌹', type: 'casual', tags: ['date'], ideal: [2] },
+      { id: 'bar', label: 'Bar / lounge', icon: '🍸', type: 'casual', tags: ['date', 'club'], ideal: [2] },
+      { id: 'club', label: 'Club / night out', icon: '🪩', type: 'casual', tags: ['club'], ideal: [2, 1], night: true },
+      { id: 'party', label: 'House party', icon: '🎉', type: 'casual', tags: ['chill', 'club'], ideal: [1, 2] }
+    ] },
+    { id: 'formal', label: 'Formal', items: [
+      { id: 'wedding', label: 'Wedding (guest)', icon: '💍', type: 'formal', tags: ['formal'], ideal: [3] },
+      { id: 'gala', label: 'Ceremony / gala', icon: '🎩', type: 'formal', tags: ['formal'], ideal: [3] },
+      { id: 'interview', label: 'Job interview', icon: '🤝', type: 'formal', tags: ['formal', 'work'], ideal: [3, 2] }
+    ] },
+    { id: 'sport', label: 'Sport & wellness', items: [
+      { id: 'gym', label: 'Gym / weights', icon: '🏋️', type: 'sport', tags: ['gym'], ideal: [0] },
+      { id: 'running', label: 'Running / outdoor sport', icon: '🏃', type: 'sport', tags: ['gym'], ideal: [0] },
+      { id: 'yoga', label: 'Yoga / recovery', icon: '🧘', type: 'sport', tags: ['gym'], ideal: [0] }
+    ] },
+    { id: 'travel', label: 'Travel', items: [
+      { id: 'airport', label: 'Airport / long travel', icon: '✈️', type: 'casual', tags: ['travel', 'chill'], ideal: [1] },
+      { id: 'citytrip', label: 'City trip', icon: '🏙️', type: 'casual', tags: ['travel', 'chill'], ideal: [1, 2] },
+      { id: 'beach', label: 'Beach / holiday', icon: '🏖️', type: 'casual', tags: ['travel', 'chill'], ideal: [1], beach: true }
+    ] }
+  ];
+  var OCCASIONS = [];
+  GROUPS.forEach(function (g) { g.items.forEach(function (o) { o.group = g.label; OCCASIONS.push(o); }); });
+  /* Anciennes occasions (v0.7–0.8) → nouvelles. */
+  var LEGACY_OCC = { work: 'office', gym: 'gym', club: 'club', date: 'datenight', chill: 'weekend' };
+
+  var CONDITIONS = [
+    { id: 'clear', label: 'Clear', icon: '☀️' },
+    { id: 'cloudy', label: 'Cloudy', icon: '☁️' },
+    { id: 'rain', label: 'Rain', icon: '🌧️' },
+    { id: 'wind', label: 'Wind', icon: '💨' },
+    { id: 'snow', label: 'Snow', icon: '❄️' }
   ];
   var WARMTH = { 1: 'Light', 2: 'Medium', 3: 'Warm' };
+  var FITS = [['slim', 'Slim / fitted'], ['regular', 'Regular'], ['wide', 'Wide / relaxed']];
   var FORMALITY = [
     { id: 'sport', label: 'Sport', lvl: 0 },
     { id: 'casual', label: 'Casual', lvl: 1 },
     { id: 'smart', label: 'Smart casual', lvl: 2 },
     { id: 'formal', label: 'Formal', lvl: 3 }
   ];
-  /* Niveau de formalité idéal / à éviter par occasion. */
-  var OCC_FORMALITY = {
-    work: { ideal: [2, 3], bad: [0] },
-    gym: { ideal: [0], bad: [2, 3] },
-    club: { ideal: [2, 1], bad: [0] },
-    date: { ideal: [2], bad: [0] },
-    chill: { ideal: [1, 0], bad: [3] }
-  };
   var PATTERNS = [['solid', 'Solid'], ['stripes', 'Stripes'], ['check', 'Check'], ['print', 'Print'], ['texture', 'Texture']];
   var MATERIALS = ['Cotton', 'Linen', 'Wool', 'Knit', 'Denim', 'Leather', 'Suede', 'Technical', 'Synthetic'];
 
@@ -63,6 +108,7 @@
     { id: 'white', label: 'White', hex: '#F7F5F0', neutral: true, light: true },
     { id: 'cream', label: 'Cream', hex: '#EDE3CF', neutral: true, light: true },
     { id: 'beige', label: 'Beige', hex: '#D6C3A1', neutral: true, light: true },
+    { id: 'khaki', label: 'Khaki', hex: '#B9A57A', neutral: true },
     { id: 'camel', label: 'Camel', hex: '#B8895A', neutral: true },
     { id: 'brown', label: 'Brown', hex: '#5C3D2E', neutral: true, dark: true },
     { id: 'navy', label: 'Navy', hex: '#1F2A44', neutral: true, dark: true },
@@ -79,15 +125,42 @@
     { id: 'orange', label: 'Orange', hex: '#D9772B' },
     { id: 'purple', label: 'Purple', hex: '#6A4C93', dark: true }
   ];
-  /* Paires d'accents qui fonctionnent ensemble (complémentaires classiques). */
   var ACCENT_PAIRS = [['burgundy', 'green'], ['orange', 'teal'], ['yellow', 'purple'], ['pink', 'green'], ['red', 'teal']];
 
+  /* ---------- Style DNA : smart casual + street smart ---------- */
+  var DNA = {
+    palette: ['white', 'black', 'beige', 'brown', 'cream', 'navy', 'khaki', 'grey'],
+    /* Couleurs ramenées à une famille de la palette (charcoal = gris, camel = beige, denim = marine). */
+    family: { white: 'white', black: 'black', beige: 'beige', camel: 'beige', brown: 'brown', cream: 'cream', navy: 'navy', denim: 'navy', khaki: 'khaki', grey: 'grey', charcoal: 'grey' },
+    maxColours: 3,
+    midLayerBelow: 14,
+    outerBelow: 6,
+    baseOnlyAbove: 22,
+    beanieBelow: 10,
+    scarfBelow: 8
+  };
+  var STRUCTURED_SHOES = ['Leather shoes', 'Loafers', 'Derbies', 'Boots', 'Chelsea boots', 'Sneakers'];
+  var SPORT_SHOES = ['Running shoes'];
+  var CASUAL_SHOES = ['Sandals', 'Slides'];
+  var TOO_CASUAL_FOR_WORK = ['Hoodie', 'Sweatshirt', 'Joggers', 'Track pants', 'Sport shorts', 'Sport top', 'Tank top'];
+
   function color(id) { return COLORS.filter(function (c) { return c.id === id; })[0] || COLORS[2]; }
-  function cat(id) { return CATS.filter(function (c) { return c.id === id; })[0]; }
+  function cat(id) { return CATS.filter(function (c) { return c.id === id; })[0] || CATS[2]; }
   function catLabel(id) { return cat(id).label; }
-  function occ(id) { return OCCASIONS.filter(function (o) { return o.id === id; })[0]; }
+  function tag(id) { return TAGS.filter(function (t) { return t.id === id; })[0] || { id: id, label: id, icon: '•' }; }
+  function occ(id) { return OCCASIONS.filter(function (o) { return o.id === id; })[0] || OCCASIONS.filter(function (o) { return o.id === LEGACY_OCC[id]; })[0]; }
+  function cond(id) { return CONDITIONS.filter(function (c) { return c.id === id; })[0] || CONDITIONS[0]; }
   function formality(id) { return FORMALITY.filter(function (f) { return f.id === id; })[0] || FORMALITY[1]; }
   function value(c) { return c.light ? 'light' : c.dark ? 'dark' : 'mid'; }
+  function family(colId) { return DNA.family[colId] || colId; }
+  function inPalette(colId) { return DNA.palette.indexOf(family(colId)) > -1; }
+  function isDarkShoe(x) { return ['black', 'brown', 'navy', 'charcoal', 'burgundy'].indexOf(x.color) > -1; }
+  function isStructured(x) {
+    if (SPORT_SHOES.indexOf(x.subtype) > -1 || CASUAL_SHOES.indexOf(x.subtype) > -1) return false;
+    if (x.formality === 'sport') return false;
+    return !x.subtype || STRUCTURED_SHOES.indexOf(x.subtype) > -1;
+  }
+  function weatherText(t, c) { return (t === null || t === undefined ? '?' : t) + ' °C · ' + cond(c).icon + ' ' + cond(c).label; }
 
   /* ---------- Dates ---------- */
   function pad(n) { return String(n).padStart(2, '0'); }
@@ -95,17 +168,19 @@
   function today() { return keyOf(new Date()); }
   function daysAgo(k) {
     if (!k) return Infinity;
-    var p = k.split('-');
+    var p = k.slice(0, 10).split('-');
     return Math.round((new Date(new Date().toDateString()) - new Date(+p[0], +p[1] - 1, +p[2])) / 86400000);
   }
+  var LEGACY_TEMP = { cold: 5, cool: 13, mild: 20, hot: 27 };
 
   /* ---------- Données ---------- */
   /* Complète une pièce avec les nouveaux champs (migration douce des anciennes données). */
   function complete(x) {
     var n = (x.name || '').toLowerCase();
+    x.occasions = x.occasions || ['chill'];
     if (!x.formality) {
-      x.formality = x.occasions && x.occasions.length === 1 && x.occasions[0] === 'gym' ? 'sport'
-        : x.occasions && x.occasions.indexOf('work') > -1 ? 'smart' : 'casual';
+      x.formality = x.occasions.length === 1 && x.occasions[0] === 'gym' ? 'sport'
+        : x.occasions.indexOf('work') > -1 ? 'smart' : 'casual';
     }
     if (!x.pattern) x.pattern = 'solid';
     if (x.material === undefined) {
@@ -114,9 +189,10 @@
         : /training|running|sport/.test(n) ? 'Technical' : null;
     }
     if (x.subtype === undefined) {
-      var subs = (cat(x.cat) || CATS[2]).subtypes.slice().sort(function (a, b) { return b.length - a.length; });
+      var subs = cat(x.cat).subtypes.slice().sort(function (a, b) { return b.length - a.length; });
       x.subtype = subs.filter(function (s) { return n.indexOf(s.toLowerCase().replace(/s$/, '')) > -1; })[0] || null;
     }
+    if (!x.fit) x.fit = /slim|skinny|fitted/.test(n) ? 'slim' : /wide|relaxed|baggy|loose|oversized|cargo|pleated/.test(n) ? 'wide' : 'regular';
     if (x.location === undefined) x.location = '';
     if (x.brand === undefined) x.brand = '';
     if (x.notes === undefined) x.notes = '';
@@ -130,50 +206,104 @@
     d.history = d.history || [];
     d.outfits = d.outfits || [];
     d.items.forEach(complete);
+    /* Historique : chaque entrée garde une copie des pièces portées (pour rester lisible si une pièce est supprimée). */
+    d.history.forEach(function (e) {
+      if (!e.id) e.id = ui.uid();
+      if (!e.at) e.at = e.date + 'T12:00:00';
+      if (typeof e.temp === 'string') e.temp = LEGACY_TEMP[e.temp] !== undefined ? LEGACY_TEMP[e.temp] : null;
+      if (!e.cond) e.cond = e.rain ? 'rain' : 'clear';
+      if (e.occasion && LEGACY_OCC[e.occasion]) e.occasion = LEGACY_OCC[e.occasion];
+      if (!e.pieces) e.pieces = (e.items || []).map(function (id) { var x = d.items.filter(function (i) { return i.id === id; })[0]; return x ? snap(x) : null; }).filter(Boolean);
+      e.acc = e.acc || [];
+    });
     if (d.today && d.today.date !== today()) d.today = null; /* nouvelle journée : on repart de zéro */
+    if (d.today) {
+      if (typeof d.today.temp === 'string') d.today.temp = LEGACY_TEMP[d.today.temp];
+      if (!d.today.cond) d.today.cond = d.today.rain ? 'rain' : 'clear';
+      if (d.today.occasion && LEGACY_OCC[d.today.occasion]) d.today.occasion = LEGACY_OCC[d.today.occasion];
+      d.today.accAdded = d.today.accAdded || {};
+      d.today.accDismissed = d.today.accDismissed || {};
+    }
     d.schema = SCHEMA;
     return d;
   }
   function persist() { S2.storage.save(NS, data); }
   function item(id) { return data.items.filter(function (x) { return x.id === id; })[0]; }
-  function clean(c, occasion) {
-    return data.items.filter(function (x) { return x.cat === c && !x.laundry && x.occasions.indexOf(occasion) > -1; });
-  }
+  function snap(x) { return { id: x.id, name: x.name, cat: x.cat, color: x.color, subtype: x.subtype || null }; }
   function todayState() {
-    if (!data.today) data.today = { date: today(), temp: null, rain: false, occasion: null, outfit: null, worn: false };
+    if (!data.today) data.today = { date: today(), temp: null, cond: 'clear', occasion: null, outfit: null, worn: false, accAdded: {}, accDismissed: {} };
     return data.today;
   }
 
+  /* Dernier jour de port d'une pièce d'après les 30 dernières entrées de l'historique (sinon champ lastWorn). */
+  function lastWornMap() {
+    var m = {};
+    data.history.slice().sort(function (a, b) { return a.at < b.at ? 1 : -1; }).slice(0, 30).forEach(function (e) {
+      (e.items || []).concat(e.acc || []).forEach(function (id) { if (!m[id]) m[id] = e.date || e.at.slice(0, 10); });
+    });
+    return m;
+  }
+
   function starter() {
-    function it(name, c, col, warmth, occasions, rainOk) {
-      return complete({ id: ui.uid(), name: name, cat: c, color: col, warmth: warmth, occasions: occasions, rainOk: !!rainOk, laundry: false, lastWorn: null, worn: 0 });
+    function it(name, c, col, warmth, occasions, rainOk, extra) {
+      var x = { id: ui.uid(), name: name, cat: c, color: col, warmth: warmth, occasions: occasions, rainOk: !!rainOk, laundry: false, lastWorn: null, worn: 0 };
+      Object.keys(extra || {}).forEach(function (k) { x[k] = extra[k]; });
+      return complete(x);
     }
     return [
-      it('Navy rain jacket', 'outer', 'navy', 1, ['work', 'gym', 'chill'], true),
-      it('Camel wool coat', 'outer', 'camel', 3, ['work', 'date', 'club']),
+      it('Navy rain jacket', 'outer', 'navy', 1, ['work', 'gym', 'chill', 'travel'], true),
+      it('Camel wool coat', 'outer', 'camel', 3, ['work', 'date', 'club', 'formal']),
       it('Black bomber jacket', 'outer', 'black', 2, ['club', 'date', 'chill']),
-      it('Grey crewneck sweater', 'layer', 'grey', 2, ['work', 'date', 'chill']),
+      it('Grey crewneck sweater', 'layer', 'grey', 2, ['work', 'date', 'chill', 'travel']),
       it('Navy knit sweater', 'layer', 'navy', 2, ['work', 'date', 'chill']),
-      it('Black hoodie', 'layer', 'black', 2, ['gym', 'chill']),
-      it('White T-shirt', 'top', 'white', 1, ['chill', 'date']),
-      it('Black T-shirt', 'top', 'black', 1, ['club', 'chill', 'date']),
-      it('White Oxford shirt', 'top', 'white', 1, ['work', 'date']),
-      it('Light blue shirt', 'top', 'lightblue', 1, ['work', 'date']),
-      it('Black shirt', 'top', 'black', 1, ['club', 'date']),
-      it('Burgundy polo', 'top', 'burgundy', 1, ['chill', 'date', 'work']),
+      it('Black hoodie', 'layer', 'black', 2, ['gym', 'chill'], false, { fit: 'wide' }),
+      it('White T-shirt', 'top', 'white', 1, ['chill', 'date', 'travel'], false, { fit: 'slim' }),
+      it('Black T-shirt', 'top', 'black', 1, ['club', 'chill', 'date'], false, { fit: 'slim' }),
+      it('White Oxford shirt', 'top', 'white', 1, ['work', 'date', 'formal']),
+      it('Cream knit polo', 'top', 'cream', 1, ['work', 'date', 'chill'], false, { fit: 'slim', subtype: 'Polo' }),
+      it('Black shirt', 'top', 'black', 1, ['club', 'date', 'formal']),
       it('Grey training T-shirt', 'top', 'grey', 1, ['gym']),
-      it('Dark denim jeans', 'bottom', 'denim', 2, ['chill', 'date', 'club']),
-      it('Black jeans', 'bottom', 'black', 2, ['club', 'date', 'chill']),
-      it('Beige chinos', 'bottom', 'beige', 2, ['work', 'date', 'chill']),
-      it('Navy chinos', 'bottom', 'navy', 2, ['work', 'date']),
-      it('Navy shorts', 'bottom', 'navy', 1, ['chill']),
-      it('Black training shorts', 'bottom', 'black', 1, ['gym']),
-      it('White leather sneakers', 'shoes', 'white', 1, ['chill', 'date', 'work']),
-      it('Brown leather shoes', 'shoes', 'brown', 2, ['work', 'date']),
-      it('Black Chelsea boots', 'shoes', 'black', 2, ['club', 'date', 'work'], true),
-      it('Running shoes', 'shoes', 'grey', 1, ['gym'], true)
+      it('Wide-leg navy trousers', 'bottom', 'navy', 2, ['work', 'date', 'club', 'formal'], false, { subtype: 'Trousers', formality: 'smart' }),
+      it('Relaxed beige chinos', 'bottom', 'beige', 2, ['work', 'date', 'chill', 'travel'], false, { subtype: 'Chinos' }),
+      it('Wide black jeans', 'bottom', 'black', 2, ['club', 'date', 'chill'], false, { subtype: 'Jeans' }),
+      it('Khaki cargo pants', 'bottom', 'khaki', 2, ['chill', 'travel']),
+      it('Relaxed cream shorts', 'bottom', 'cream', 1, ['chill', 'travel'], false, { subtype: 'Shorts' }),
+      it('Black training shorts', 'bottom', 'black', 1, ['gym'], false, { subtype: 'Sport shorts' }),
+      it('Black leather sneakers', 'shoes', 'black', 1, ['chill', 'date', 'club', 'travel'], false, { subtype: 'Sneakers', material: 'Leather' }),
+      it('Brown leather derbies', 'shoes', 'brown', 2, ['work', 'date', 'formal'], false, { subtype: 'Derbies' }),
+      it('Black Chelsea boots', 'shoes', 'black', 2, ['club', 'date', 'work', 'formal'], true),
+      it('Running shoes', 'shoes', 'grey', 1, ['gym'], true),
+      it('Black cap', 'acc', 'black', 1, ['chill', 'travel', 'gym'], false, { subtype: 'Cap' }),
+      it('Grey beanie', 'acc', 'grey', 2, ['chill', 'travel', 'club'], false, { subtype: 'Beanie' }),
+      it('Navy wool scarf', 'acc', 'navy', 2, ['work', 'chill', 'date', 'formal'], false, { subtype: 'Scarf' }),
+      it('Brown leather watch', 'acc', 'brown', 1, ['work', 'date', 'formal', 'chill'], false, { subtype: 'Watch' }),
+      it('Black crossbody bag', 'acc', 'black', 1, ['chill', 'travel', 'club'], false, { subtype: 'Crossbody bag' })
     ];
   }
+
+  /* ---------- Sélection des pièces selon l'occasion ---------- */
+  /* Une pièce est candidate si elle est propre, taguée pour un contexte de l'occasion,
+     et respecte les règles de l'occasion et du Style DNA. Retourne une raison de refus ou null. */
+  function poolReason(x, o) {
+    if (x.laundry) return 'laundry';
+    if (!x.occasions.some(function (t) { return o.tags.indexOf(t) > -1; })) return 'tag';
+    if (o.type === 'sport') {
+      if (x.formality !== 'sport' && x.occasions.indexOf('gym') < 0) return 'sport';
+      return null;
+    }
+    if (x.cat === 'shoes') {
+      var beachShoe = o.beach && CASUAL_SHOES.indexOf(x.subtype) > -1;
+      if (!beachShoe) {
+        if (!isDarkShoe(x) || !isStructured(x)) return 'shoes';
+        if (o.type === 'formal' && x.subtype === 'Sneakers') return 'shoes';
+      }
+    }
+    if (x.formality === 'sport') return 'sport';
+    if (o.strict && TOO_CASUAL_FOR_WORK.indexOf(x.subtype) > -1) return 'casual';
+    if (o.type === 'formal' && TOO_CASUAL_FOR_WORK.indexOf(x.subtype) > -1) return 'casual';
+    return null;
+  }
+  function pool(c, o) { return data.items.filter(function (x) { return x.cat === c && !poolReason(x, o); }); }
 
   /* ---------- Moteur de tenue ---------- */
   function isPair(a, b) {
@@ -183,66 +313,89 @@
     return COMBOS.pairs.filter(function (p) { return (p[0] === a && p[1] === b) || (p[0] === b && p[1] === a); })[0];
   }
 
-  /* Note une tenue { outer, layer, top, bottom, shoes } et explique pourquoi. null = tenue impossible. */
+  /* Note une tenue { outer, layer, top, bottom, shoes } et explique pourquoi. null = tenue impossible.
+     ctx = { temp, cond, occasion (objet), worn (carte id → date), free (tenue composée à la main) } */
   function score(o, ctx) {
     var s = 100, why = [];
-    var parts = CATS.map(function (c) { return o[c.id]; }).filter(Boolean);
-    var t = ctx.temp, wear = parts.filter(function (x) { return x.cat !== 'shoes'; });
+    var parts = CORE.map(function (c) { return o[c.id]; }).filter(Boolean);
+    var wear = parts.filter(function (x) { return x.cat !== 'shoes'; });
+    var t = ctx.temp, oc = ctx.occasion, sport = oc.type === 'sport';
+    var wet = ctx.cond === 'rain' || ctx.cond === 'snow';
 
-    /* Météo : couches nécessaires */
-    if (t === 'hot') {
-      if (o.outer && !(ctx.rain && o.outer.rainOk && o.outer.warmth === 1)) return null;
-      if (o.layer) return null;
+    /* Style DNA : couches selon la température */
+    if (t < DNA.outerBelow && !o.outer) return null;
+    if (t < DNA.midLayerBelow && !o.layer && !sport) return null;
+    if (t > DNA.baseOnlyAbove) {
+      if (o.layer && !ctx.free) return null;
+      if (o.outer && !(wet && o.outer.rainOk && o.outer.warmth === 1)) return null;
       if (o.top.warmth > 1) s -= 15;
-      if (o.bottom.warmth === 1) { s += 6; why.push('Light pieces for the heat'); }
-    } else if (t === 'mild') {
-      if (o.outer && o.outer.warmth > 1) return null;
-      if (o.outer && !ctx.rain) s -= 12;
-      if (o.layer && o.layer.warmth > 2) s -= 8;
-      if (o.bottom.warmth === 1 && ctx.occasion !== 'gym') s -= 4;
-    } else if (t === 'cool') {
-      if (!o.layer && !o.outer) return null;
-      if (o.outer && o.outer.warmth === 3) s -= 10;
-      if (o.bottom.warmth === 1 && ctx.occasion !== 'gym') s -= 25;
-      why.push(o.layer && o.outer ? 'Two layers for the cool air' : 'A layer for the cool air');
-    } else if (t === 'cold') {
-      if (!o.outer || o.outer.warmth < 2) return null;
-      if (o.bottom.warmth === 1) return null;
-      if (o.outer.warmth === 3) { s += 8; why.push('Warm coat for the cold'); }
-      if (o.layer) s += 6; else s -= 10;
     }
-    if (ctx.rain) {
-      if (t !== 'hot' && !o.outer) s -= 10;
+    if (t < DNA.outerBelow) {
+      if (o.outer.warmth === 3) { s += 8; why.push('Warm coat below ' + DNA.outerBelow + ' °C'); }
+      else if (o.outer.warmth === 1) s -= 12;
+      if (o.bottom.warmth === 1) return null;
+    } else if (t < DNA.midLayerBelow) {
+      if (!sport) why.push('Mid layer below ' + DNA.midLayerBelow + ' °C');
+      if (o.outer && o.outer.warmth === 3 && t >= 10) s -= 8;
+      if (!o.outer && t < 10) s -= 8;
+      if (o.bottom.warmth === 1 && !sport) s -= 30;
+    } else if (t <= DNA.baseOnlyAbove) {
+      if (o.outer && o.outer.warmth === 3) s -= 25;
+      else if (o.outer && o.outer.warmth === 2 && !wet) s -= t >= 16 ? 12 : 6;
+      if (o.outer && o.outer.warmth === 1 && !wet && t >= 18) s -= 6;
+      if (o.bottom.warmth === 1 && t < 18 && !sport) s -= 20;
+    } else {
+      why.push('Base layer only above ' + DNA.baseOnlyAbove + ' °C');
+      if (o.bottom.warmth === 1 && t >= 25 && oc.type === 'casual') { s += oc.beach ? 18 : 12; why.push('Shorts for the heat'); }
+      else if (o.bottom.warmth > 1 && t >= 27 && oc.type === 'casual') s -= 6;
+    }
+    if (o.bottom.warmth === 1 && oc.type === 'work') s -= 30;
+    if (o.bottom.warmth === 1 && oc.type === 'formal') return null;
+    if (wet) {
+      if (t <= DNA.baseOnlyAbove && !o.outer) s -= 10;
       if (o.outer && o.outer.rainOk) { s += 10; why.push('Rain-proof jacket'); }
       else if (o.outer) s -= 8;
       if (o.shoes.rainOk) s += 4; else s -= 6;
       if (o.shoes.material === 'Suede') s -= 12;
       if (o.outer && o.outer.material === 'Suede') s -= 8;
     }
+    if (ctx.cond === 'wind' && t < 18) { if (o.outer) s += 4; else s -= 6; }
 
     /* Matières selon la météo */
     var linen = wear.filter(function (x) { return x.material === 'Linen'; }).length;
     var wool = wear.filter(function (x) { return x.material === 'Wool' || x.material === 'Knit'; }).length;
-    if (t === 'hot') { s += linen * 5 - wool * 8; if (linen) why.push('Linen breathes in the heat'); }
-    if (t === 'cold' && wool) { s += Math.min(wool, 2) * 3; why.push('Wool keeps you warm'); }
+    if (t > DNA.baseOnlyAbove) { s += linen * 5 - wool * 8; if (linen) why.push('Linen breathes in the heat'); }
+    if (t < 10 && wool) { s += Math.min(wool, 2) * 3; why.push('Wool keeps you warm'); }
 
-    /* Occasion : coupe et formalité */
-    if (ctx.occasion === 'work' && o.bottom.warmth === 1) s -= 30;
-    if (ctx.occasion === 'date' && o.bottom.warmth === 1) s -= 10;
-    var pref = OCC_FORMALITY[ctx.occasion];
-    var lvls = parts.map(function (x) { return formality(x.formality).lvl; });
-    if (pref) {
-      var fit = 0;
-      parts.forEach(function (x) {
-        var l = formality(x.formality).lvl;
-        if (pref.bad.indexOf(l) > -1) s -= (ctx.occasion === 'gym' && x.cat !== 'outer' && x.cat !== 'layer') ? 30 : 15;
-        else if (pref.ideal.indexOf(l) > -1) fit++;
-      });
-      s += Math.min(fit, 4) * 2;
-      if (fit === parts.length && ctx.occasion !== 'gym') why.push('Right dress code for ' + occ(ctx.occasion).label.toLowerCase());
+    /* Style DNA : silhouette (haut ajusté → bas ample, jamais les deux pareils) */
+    if (!sport) {
+      var tf = o.top.fit, bf = o.bottom.fit;
+      if (tf === 'slim' && bf !== 'wide') return null;
+      if (tf === 'wide' && bf === 'wide') return null;
+      if (tf === 'slim' && bf === 'wide') { s += 8; why.push('Slim top, relaxed bottom: balanced silhouette'); }
+      else if (tf === 'wide' && bf === 'slim') { s += 5; why.push('Loose top, slim bottom: balanced silhouette'); }
     }
+
+    /* Style DNA : palette et 3 couleurs maximum */
+    var fams = [];
+    parts.forEach(function (x) { var f = family(x.color); if (fams.indexOf(f) < 0) fams.push(f); });
+    if (!sport && fams.length > DNA.maxColours) return null;
+    var off = parts.filter(function (x) { return !inPalette(x.color); });
+    if (!sport) { s -= off.length * 15; if (!off.length) why.push('Within your palette (' + fams.length + ' colour' + (fams.length === 1 ? '' : 's') + ')'); }
+
+    /* Occasion : contexte prioritaire et formalité */
+    parts.forEach(function (x) {
+      if (x.occasions.indexOf(oc.tags[0]) > -1) s += 3;
+      if (oc.dressy && x.occasions.indexOf('formal') > -1) s += 4;
+      if (oc.type === 'formal' && x.occasions.indexOf('formal') > -1) s += 4;
+    });
+    var fit = 0, lvls = parts.map(function (x) { return formality(x.formality).lvl; });
+    parts.forEach(function (x) { if (oc.ideal.indexOf(formality(x.formality).lvl) > -1) fit++; });
+    s += Math.min(fit, 4) * 2;
+    if (oc.type === 'work' && !oc.strict && TOO_CASUAL_FOR_WORK.some(function (st) { return parts.some(function (x) { return x.subtype === st; }); })) s -= 10;
+    if (fit === parts.length && !sport) why.push('Right dress code for ' + oc.label.toLowerCase());
     var spread = Math.max.apply(null, lvls) - Math.min.apply(null, lvls);
-    if (spread >= 3) s -= 10; else if (spread === 2) s -= 3;
+    if (!sport) { if (spread >= 3) s -= 10; else if (spread === 2) s -= 3; }
 
     /* Motifs : un seul motif marqué par tenue */
     var patterned = parts.filter(function (x) { return ['stripes', 'check', 'print'].indexOf(x.pattern) > -1; }).length;
@@ -252,11 +405,10 @@
     /* Couleurs : accents */
     var accents = [];
     parts.forEach(function (x) { if (!color(x.color).neutral && accents.indexOf(x.color) < 0) accents.push(x.color); });
-    if (accents.length === 1) { s += 8; why.push('One accent colour (' + color(accents[0]).label.toLowerCase() + ') over neutrals'); }
-    else if (accents.length === 2 && isPair(accents[0], accents[1])) { s += 2; why.push(color(accents[0]).label + ' & ' + color(accents[1]).label.toLowerCase() + ' complement each other'); }
+    if (accents.length === 1) s += 2;
+    else if (accents.length === 2 && isPair(accents[0], accents[1])) s += 0;
     else if (accents.length === 2) s -= 22;
     else if (accents.length > 2) s -= 50;
-    if (ctx.occasion === 'work') s -= accents.length * 4;
 
     /* Couleurs : paires et trios éprouvés */
     var cols = [];
@@ -270,41 +422,43 @@
     var trio = COMBOS.trios.filter(function (tr) { return allCols.indexOf(tr[0]) > -1 && allCols.indexOf(tr[1]) > -1 && allCols.indexOf(tr[2]) > -1; })[0];
     if (trio) { s += 6; why.push(trio[3]); }
     else if (found.length) why.push(found[0]);
-    if (!accents.length && !found.length && !trio) why.push('Neutral palette: always works');
 
     /* Haut / bas : contraste */
     var tc = color(o.top.color), bc = color(o.bottom.color), sc = color(o.shoes.color);
     if (o.top.color === o.bottom.color) {
-      if (o.top.color === 'black' && ctx.occasion === 'club') { s += 4; why.push('All black: sharp for a night out'); }
+      if (o.top.color === 'black' && oc.night) { s += 4; why.push('All black: sharp for a night out'); }
       else if (o.top.color === 'denim') s -= 25;
       else s -= 10;
     } else if ((tc.light && bc.dark) || (tc.dark && bc.light)) {
       s += 6;
-      if ((tc.light && bc.dark && sc.light) || (tc.dark && bc.light && sc.dark)) { s += 3; why.push('Light–dark balance from top to shoes'); }
+      if (tc.dark && bc.light && sc.dark) { s += 3; why.push('Dark–light–dark balance from top to shoes'); }
     } else if (tc.light && bc.light) s -= 4;
-    if (value(tc) === value(bc) && value(bc) === value(sc) && !(o.top.color === 'black' && ctx.occasion === 'club')) s -= 4;
     if (o.layer && o.outer && o.layer.color === o.outer.color) s -= 4;
-    if (ctx.occasion === 'club' && tc.dark) s += 5;
-    if (ctx.occasion === 'date' && accents.length === 1) s += 3;
+    if (oc.night && tc.dark) s += 5;
 
     /* Chaussures selon la couleur du bas */
     var rule = COMBOS.shoes[o.bottom.color];
     if (rule) {
-      if (rule.good && rule.good.indexOf(o.shoes.color) > -1) { s += 5; why.push(sc.label + ' shoes suit ' + bc.label.toLowerCase() + ' ' + (o.bottom.subtype || 'trousers').toLowerCase()); }
+      if (rule.good && rule.good.indexOf(o.shoes.color) > -1) { s += 5; why.push(sc.label + ' ' + (o.shoes.subtype || 'shoes').toLowerCase() + ' suit ' + bc.label.toLowerCase() + ' ' + (o.bottom.subtype || 'trousers').toLowerCase()); }
       else if (rule.avoid && rule.avoid.indexOf(o.shoes.color) > -1) s -= 10;
     }
 
-    /* Rotation : éviter ce qui a été porté hier ou avant-hier */
-    var recent = 0;
-    parts.forEach(function (x) { var d = daysAgo(x.lastWorn); if (d <= 1) recent += x.cat === 'shoes' || x.cat === 'outer' ? 2 : 10; else if (d <= 2) recent += 4; });
-    s -= recent;
+    /* Historique : pièces portées ces 3 derniers jours en bas de la pile, pièces jamais / pas portées depuis 7 j en priorité.
+       Si tout a été porté récemment, les tenues restent proposées (simplement moins bien classées). */
+    var worn = ctx.worn || {};
+    parts.forEach(function (x) {
+      var d = daysAgo(worn[x.id] || x.lastWorn);
+      if (d <= 3) s -= (x.cat === 'shoes' || x.cat === 'outer') ? 20 : 40;
+      else if (d >= 7) s += 5;
+    });
 
     return { score: s, why: why };
   }
 
   function candidates(ctx) {
-    var tops = clean('top', ctx.occasion), bottoms = clean('bottom', ctx.occasion), shoes = clean('shoes', ctx.occasion);
-    var layers = [null].concat(clean('layer', ctx.occasion)), outers = [null].concat(clean('outer', ctx.occasion));
+    var oc = ctx.occasion;
+    var tops = pool('top', oc), bottoms = pool('bottom', oc), shoes = pool('shoes', oc);
+    var layers = [null].concat(pool('layer', oc)), outers = [null].concat(pool('outer', oc));
     var out = [];
     tops.forEach(function (top) { bottoms.forEach(function (bottom) { shoes.forEach(function (sh) {
       layers.forEach(function (layer) { outers.forEach(function (outer) {
@@ -325,13 +479,52 @@
 
   /* Ce qui manque pour proposer une tenue (pour l'expliquer clairement). */
   function missing(ctx) {
+    var oc = ctx.occasion;
     var need = ['top', 'bottom', 'shoes'];
-    if (ctx.temp === 'cold') need.push('outer');
+    if (ctx.temp < DNA.midLayerBelow && oc.type !== 'sport') need.push('layer');
+    if (ctx.temp < DNA.outerBelow) need.push('outer');
     var out = [];
     need.forEach(function (c) {
-      if (clean(c, ctx.occasion).length) return;
-      var dirty = data.items.filter(function (x) { return x.cat === c && x.laundry && x.occasions.indexOf(ctx.occasion) > -1; }).length;
-      out.push(catLabel(c) + (dirty ? ' (' + dirty + ' in the laundry)' : ''));
+      if (pool(c, oc).length) return;
+      var tagged = data.items.filter(function (x) { return x.cat === c && x.occasions.some(function (t) { return oc.tags.indexOf(t) > -1; }); });
+      var dirty = tagged.filter(function (x) { return x.laundry; }).length;
+      var label = c === 'shoes' && oc.type !== 'sport' && !oc.beach ? 'Dark, structured shoes' : catLabel(c);
+      out.push(label + (dirty ? ' (' + dirty + ' in the laundry)' : ''));
+    });
+    return out;
+  }
+
+  /* ---------- Accessoires : « Complete your look » (2 maximum) ---------- */
+  function accessorySuggestions(o, ctx, st) {
+    var oc = ctx.occasion, t = ctx.temp;
+    var clean = data.items.filter(function (x) { return x.cat === 'acc' && !x.laundry && !st.accDismissed[x.id]; });
+    if (!clean.length) return [];
+    var fams = [];
+    CORE.forEach(function (c) { var x = o[c.id]; if (x) { var f = family(x.color); if (fams.indexOf(f) < 0) fams.push(f); } });
+    function bestOf(list) {
+      return list.map(function (x) {
+        var sc = 0, f = family(x.color);
+        if (fams.indexOf(f) > -1) sc += 6; else if (fams.length >= DNA.maxColours) sc -= 10;
+        if (inPalette(x.color)) sc += 4; else sc -= 8;
+        if (x.occasions.some(function (tg) { return oc.tags.indexOf(tg) > -1; })) sc += 3;
+        if (daysAgo(ctx.worn[x.id] || x.lastWorn) <= 3) sc -= 2;
+        return { x: x, sc: sc };
+      }).sort(function (a, b) { return b.sc - a.sc; })[0];
+    }
+    function of(subs) { return clean.filter(function (x) { return subs.indexOf(x.subtype) > -1; }); }
+    var kinds = [];
+    if (t < DNA.scarfBelow || ctx.cond === 'wind') kinds.push({ list: of(['Scarf']), why: ctx.cond === 'wind' ? 'Scarf: it’s windy' : 'Scarf below ' + DNA.scarfBelow + ' °C' });
+    /* Couvre-chef : jamais pour les occasions habillées ; au travail, seulement le bonnet quand il fait froid. */
+    if (oc.type !== 'formal') {
+      if (t < DNA.beanieBelow || ctx.cond === 'snow') kinds.push({ list: of(['Beanie']), why: 'Beanie for the cold' });
+      else if (oc.type !== 'work' && (oc.ideal[0] <= 1 || oc.type === 'sport')) kinds.push({ list: of(['Cap']), why: 'Cap to finish the street look' });
+    }
+    kinds.push({ list: of(['Watch']), why: 'Watch: the smart detail' });
+    if (oc.type !== 'sport') kinds.push({ list: of(['Tote bag', 'Crossbody bag', 'Backpack']), why: 'Bag for your essentials' });
+    var out = [];
+    kinds.forEach(function (k) {
+      if (out.length >= 2 || !k.list.length) return;
+      var b = bestOf(k.list); out.push({ x: b.x, why: k.why });
     });
     return out;
   }
@@ -339,18 +532,18 @@
   /* ---------- Tenues enregistrées ---------- */
   function outfitPieces(of) {
     var o = {};
-    CATS.forEach(function (c) { var id = of.items[c.id]; var x = id ? item(id) : null; if (x) o[c.id] = x; });
+    CORE.forEach(function (c) { var id = of.items[c.id]; var x = id ? item(id) : null; if (x) o[c.id] = x; });
     return o;
   }
   function outfitStatus(of) {
     var o = outfitPieces(of);
-    var dirty = CATS.map(function (c) { return o[c.id]; }).filter(function (x) { return x && x.laundry; });
+    var dirty = CORE.map(function (c) { return o[c.id]; }).filter(function (x) { return x && x.laundry; });
     var full = !!(o.top && o.bottom && o.shoes);
     return { o: o, dirty: dirty, ready: full && !dirty.length, complete: full };
   }
 
   /* ---------- Interface ---------- */
-  var view = 'today'; // today | outfits | closet | laundry
+  var view = 'today'; // today | outfits | closet | laundry | history
   var pick = 0;       // rang de la proposition affichée
   var outfitFilter = 'all', closetQuery = '', closetFilter = 'all';
 
@@ -364,20 +557,21 @@
     root.innerHTML = '';
     var dirty = data.items.filter(function (x) { return x.laundry; }).length;
     root.appendChild(h('div', { class: 'segmented wr-nav' },
-      [['today', 'Today'], ['outfits', 'Outfits'], ['closet', 'Closet'], ['laundry', 'Laundry' + (dirty ? ' ' + dirty : '')]].map(function (v) {
+      [['today', 'Today'], ['outfits', 'Outfits'], ['closet', 'Closet'], ['laundry', 'Laundry' + (dirty ? ' ' + dirty : '')], ['history', 'History']].map(function (v) {
         return h('button', { class: 'seg' + (view === v[0] ? ' is-active' : ''), onclick: function () { view = v[0]; render(); window.scrollTo(0, 0); } }, v[1]);
       })));
     if (view === 'closet') renderCloset();
     else if (view === 'outfits') renderOutfits();
     else if (view === 'laundry') renderLaundry();
+    else if (view === 'history') renderHistory();
     else renderToday();
   }
 
   function swatch(col, big) {
     return h('span', { class: 'wr-swatch' + (big ? ' is-big' : ''), style: { background: color(col).hex }, 'aria-hidden': 'true' });
   }
-  function pieceSub(x, c) {
-    return [x.subtype || c.label, color(x.color).label].join(' · ');
+  function pieceSub(x) {
+    return [x.subtype || catLabel(x.cat), color(x.color).label, x.fit && x.fit !== 'regular' && x.cat !== 'acc' && x.cat !== 'shoes' ? (x.fit === 'slim' ? 'Slim' : 'Wide') : null].filter(Boolean).join(' · ');
   }
 
   /* ----- Aujourd'hui ----- */
@@ -392,41 +586,58 @@
 
     if (st.worn && st.outfit) return renderWorn(st);
 
-    root.appendChild(h('h2', { class: 'section-title' }, 'Weather today'));
-    root.appendChild(h('div', { class: 'wr-temps' }, TEMPS.map(function (t) {
-      return h('button', { class: 'wr-chip' + (st.temp === t.id ? ' is-active' : ''), 'aria-pressed': st.temp === t.id ? 'true' : 'false',
-        onclick: function () { st.temp = t.id; pick = 0; persist(); render(); } },
-        h('span', { class: 'wr-chiplabel' }, t.label), h('span', { class: 'wr-chipsub' }, t.sub));
-    })));
-    root.appendChild(h('button', { class: 'wr-rain' + (st.rain ? ' is-active' : ''), role: 'switch', 'aria-checked': st.rain ? 'true' : 'false',
-      onclick: function () { st.rain = !st.rain; pick = 0; persist(); render(); } },
-      h('span', null, '☔ Rain expected'), h('span', { class: 'wr-toggle', 'aria-hidden': 'true' })));
-    root.appendChild(h('p', { class: 'hint' }, 'Check your weather app, then pick here.'));
+    /* Occasion : rangée de puces défilante, groupée par catégorie */
+    var oc = occ(st.occasion);
+    root.appendChild(h('div', { class: 'wr-todayhead' },
+      h('h2', { class: 'section-title' }, 'Occasion'),
+      h('button', { class: 'btn btn-ghost btn-sm', onclick: openStyle }, '✦ My Style')));
+    var row = h('div', { class: 'wr-occrow', role: 'listbox', 'aria-label': 'Occasion' });
+    GROUPS.forEach(function (g) {
+      row.appendChild(h('span', { class: 'wr-occgroup' }, g.label));
+      g.items.forEach(function (o) {
+        var on = oc && oc.id === o.id;
+        row.appendChild(h('button', { class: 'wr-pill' + (on ? ' is-active' : ''), role: 'option', 'aria-selected': on ? 'true' : 'false',
+          onclick: function () { st.occasion = o.id; pick = 0; st.accAdded = {}; st.accDismissed = {}; persist(); render(); } }, o.icon + ' ' + o.label));
+      });
+    });
+    root.appendChild(row);
+    if (oc) setTimeout(function () { var a = row.querySelector('.is-active'); if (a) row.scrollLeft = Math.max(0, a.offsetLeft - row.offsetLeft - 90); }, 0);
 
-    root.appendChild(h('h2', { class: 'section-title' }, 'Where are you going?'));
-    root.appendChild(h('div', { class: 'wr-occs' }, OCCASIONS.map(function (o) {
-      return h('button', { class: 'wr-chip wr-occ' + (st.occasion === o.id ? ' is-active' : ''), 'aria-pressed': st.occasion === o.id ? 'true' : 'false',
-        onclick: function () { st.occasion = o.id; pick = 0; persist(); render(); } },
-        h('span', { class: 'wr-occicon', 'aria-hidden': 'true' }, o.icon), h('span', { class: 'wr-chiplabel' }, o.label));
-    })));
+    /* Météo : température + condition */
+    root.appendChild(h('h2', { class: 'section-title' }, 'Weather'));
+    var tVal = st.temp === null || st.temp === undefined ? 15 : st.temp;
+    var tLabel = h('span', { class: 'wr-tempval' }, st.temp === null || st.temp === undefined ? '— °C' : tVal + ' °C');
+    var slider = h('input', { class: 'wr-slider', type: 'range', min: -10, max: 40, step: 1, value: String(tVal), 'aria-label': 'Temperature in °C' });
+    slider.addEventListener('input', function () { tLabel.textContent = slider.value + ' °C'; });
+    slider.addEventListener('change', function () { st.temp = Number(slider.value); pick = 0; persist(); render(); });
+    root.appendChild(h('div', { class: 'card wr-weather' },
+      h('div', { class: 'wr-temprow' }, h('span', { class: 'field-label' }, 'Temperature'), tLabel),
+      slider,
+      h('div', { class: 'wr-conds' }, CONDITIONS.map(function (c) {
+        var on = st.cond === c.id;
+        return h('button', { class: 'wr-cond' + (on ? ' is-active' : ''), 'aria-pressed': on ? 'true' : 'false',
+          onclick: function () { st.cond = c.id; if (st.temp === null || st.temp === undefined) st.temp = Number(slider.value); pick = 0; persist(); render(); } },
+          h('span', { 'aria-hidden': 'true' }, c.icon), h('span', null, c.label));
+      }))));
+    root.appendChild(h('p', { class: 'hint' }, 'Check your weather app, then set it here.'));
 
-    if (!st.temp || !st.occasion) {
-      root.appendChild(h('p', { class: 'note' }, 'Pick the weather and the occasion to get an outfit.'));
+    if (!oc || st.temp === null || st.temp === undefined) {
+      root.appendChild(h('p', { class: 'note' }, !oc ? 'Pick an occasion, then set the weather.' : 'Set the temperature to get an outfit.'));
       return;
     }
-    var ctx = { temp: st.temp, rain: st.rain, occasion: st.occasion };
+    var ctx = { temp: st.temp, cond: st.cond, occasion: oc, worn: lastWornMap() };
 
     /* Tenues enregistrées prêtes pour cette occasion */
-    var mine = data.outfits.filter(function (of) { return of.occasions.indexOf(st.occasion) > -1; })
+    var mine = data.outfits.filter(function (of) { return of.occasions.some(function (t) { return oc.tags.indexOf(t) > -1; }); })
       .map(function (of) { var stt = outfitStatus(of); return { of: of, st: stt, fit: stt.ready ? score(stt.o, ctx) : null }; })
       .filter(function (x) { return x.st.ready; })
       .sort(function (a, b) { return (b.fit ? b.fit.score : -999) - (a.fit ? a.fit.score : -999); });
     if (mine.length) {
-      root.appendChild(h('h2', { class: 'section-title' }, 'Your outfits ready for ' + occ(st.occasion).label.toLowerCase()));
+      root.appendChild(h('h2', { class: 'section-title' }, 'Your outfits ready for ' + oc.label.toLowerCase()));
       mine.slice(0, 3).forEach(function (x) {
         root.appendChild(savedCard(x.of, x.st, {
-          weatherNote: x.fit ? null : 'Not ideal for this weather',
-          onWear: function () { wear(st, x.st.o); }
+          weatherNote: x.fit ? null : 'Doesn’t match today’s weather or your style rules',
+          onWear: function () { wear(st, x.st.o, []); }
         }));
       });
     }
@@ -437,37 +648,69 @@
       root.appendChild(h('div', { class: 'card wr-none' },
         h('div', { class: 'card-title' }, 'No complete outfit available'),
         h('p', { class: 'sheet-text' }, miss.length
-          ? 'Missing clean pieces for ' + occ(st.occasion).label.toLowerCase() + ': ' + miss.join(', ') + '.'
-          : 'Nothing fits this weather with the clean clothes you have (e.g. a warm enough jacket, or pieces light enough for the heat).'),
-        h('p', { class: 'hint' }, 'Tag more clothes with this occasion in the Closet, or mark some laundry as clean.')));
+          ? 'Missing clean pieces for ' + oc.label.toLowerCase() + ': ' + miss.join(', ') + '.'
+          : 'No combination of your clean clothes follows the weather and your style rules (silhouette, palette, 3 colours max).'),
+        h('p', { class: 'hint' }, 'Tag more clothes for this context in the Closet, check their fit, or mark some laundry as clean. You can also build it yourself.'),
+        h('button', { class: 'btn btn-secondary btn-block', onclick: function () { compose(st, {}); } }, 'Build it myself')));
       return;
     }
     if (pick >= list.length) pick = 0;
     var c = list[pick];
     root.appendChild(h('h2', { class: 'section-title' }, 'Suggested outfit · ' + (pick + 1) + ' of ' + list.length));
     root.appendChild(outfitCard(c.o, c.why));
+
+    /* Compléter la tenue */
+    var accs = accessorySuggestions(c.o, ctx, st);
+    root.appendChild(accessoryBlock(accs, st));
+
     root.appendChild(h('div', { class: 'bottom-actions' },
-      h('button', { class: 'btn btn-primary btn-block btn-lg', onclick: function () { wear(st, c.o); } }, 'Wear this ✓'),
-      list.length > 1 ? h('button', { class: 'btn btn-secondary btn-block', onclick: function () { pick = (pick + 1) % list.length; render(); } }, '↻ Show another one') : null,
+      h('button', { class: 'btn btn-primary btn-block btn-lg', onclick: function () {
+        wear(st, c.o, accs.filter(function (a) { return st.accAdded[a.x.id]; }).map(function (a) { return a.x; }));
+      } }, 'I wore this ✓'),
+      list.length > 1 ? h('button', { class: 'btn btn-secondary btn-block', onclick: function () { pick = (pick + 1) % list.length; st.accAdded = {}; persist(); render(); } }, '↻ Show another one') : null,
       h('div', { class: 'wr-twobtn' },
         h('button', { class: 'btn btn-ghost', onclick: function () { compose(st, c.o); } }, 'Swap a piece'),
-        h('button', { class: 'btn btn-ghost', onclick: function () { editOutfit(null, c.o, [st.occasion]); } }, '♡ Save outfit'))));
+        h('button', { class: 'btn btn-ghost', onclick: function () { editOutfit(null, c.o, oc.tags.slice(0, 1)); } }, '♡ Save outfit'))));
   }
 
-  function pieceLine(x, c) {
+  function accessoryBlock(accs, st) {
+    var box = h('section', { class: 'card wr-acc' }, h('div', { class: 'wr-acchead' },
+      h('span', { class: 'card-title' }, 'Complete your look'), h('span', { class: 'muted wr-accopt' }, 'Optional')));
+    if (!data.items.some(function (x) { return x.cat === 'acc'; })) {
+      box.appendChild(h('p', { class: 'hint' }, 'Add caps, beanies, scarves, bags or watches in the Closet (type “Accessories”) to get suggestions here.'));
+      return box;
+    }
+    if (!accs.length) { box.appendChild(h('p', { class: 'hint' }, 'No accessory to suggest for this outfit.')); return box; }
+    accs.forEach(function (a) {
+      var on = !!st.accAdded[a.x.id];
+      box.appendChild(h('div', { class: 'wr-accrow' + (on ? ' is-on' : '') }, swatch(a.x.color, true),
+        h('div', { class: 'wr-piecemain' },
+          h('div', { class: 'wr-piecename' }, a.x.name),
+          h('div', { class: 'list-sub' }, a.why),
+          a.x.location ? h('div', { class: 'wr-loc' }, '📍 ' + a.x.location) : null),
+        h('button', { class: 'btn btn-sm ' + (on ? 'btn-primary' : 'btn-secondary'), 'aria-pressed': on ? 'true' : 'false',
+          onclick: function () { if (on) delete st.accAdded[a.x.id]; else st.accAdded[a.x.id] = true; persist(); render(); } }, on ? 'Added ✓' : 'Add'),
+        h('button', { class: 'btn btn-icon', 'aria-label': 'Dismiss ' + a.x.name,
+          onclick: function () { st.accDismissed[a.x.id] = true; delete st.accAdded[a.x.id]; persist(); render(); } }, '✕')));
+    });
+    return box;
+  }
+
+  function pieceLine(x) {
     return h('div', { class: 'wr-piece' + (x.laundry ? ' is-dirty' : '') }, swatch(x.color, true),
       h('div', { class: 'wr-piecemain' },
         h('div', { class: 'wr-piecename' }, x.name),
-        h('div', { class: 'list-sub' }, pieceSub(x, c)),
+        h('div', { class: 'list-sub' }, pieceSub(x)),
         x.location ? h('div', { class: 'wr-loc' }, '📍 ' + x.location) : null),
       x.laundry ? h('span', { class: 'badge wr-dirtybadge' }, '🧺 Laundry') : null);
   }
 
-  function outfitCard(o, why) {
+  function outfitCard(o, why, acc) {
     var card = h('div', { class: 'card wr-outfit' });
     card.appendChild(h('div', { class: 'wr-palette', 'aria-hidden': 'true' },
-      CATS.map(function (c) { return o[c.id] ? h('span', { style: { background: color(o[c.id].color).hex } }) : null; })));
-    CATS.forEach(function (c) { if (o[c.id]) card.appendChild(pieceLine(o[c.id], c)); });
+      CORE.map(function (c) { return o[c.id] ? h('span', { style: { background: color(o[c.id].color).hex } }) : null; })));
+    CORE.forEach(function (c) { if (o[c.id]) card.appendChild(pieceLine(o[c.id])); });
+    (acc || []).forEach(function (x) { card.appendChild(pieceLine(x)); });
     if (why && why.length) card.appendChild(h('ul', { class: 'wr-why' }, why.slice(0, 4).map(function (w) { return h('li', null, w); })));
     return card;
   }
@@ -477,39 +720,39 @@
     var o = stt.o;
     var card = h('div', { class: 'card wr-outfit wr-saved' });
     card.appendChild(h('div', { class: 'wr-palette', 'aria-hidden': 'true' },
-      CATS.map(function (c) { return o[c.id] ? h('span', { style: { background: color(o[c.id].color).hex } }) : null; })));
+      CORE.map(function (c) { return o[c.id] ? h('span', { style: { background: color(o[c.id].color).hex } }) : null; })));
     card.appendChild(h('div', { class: 'wr-savedhead' },
       h('div', null,
         h('div', { class: 'wr-savedname' }, of.name),
-        h('div', { class: 'list-sub' }, of.occasions.map(function (id) { return occ(id).icon + ' ' + occ(id).label; }).join(' · '))),
+        h('div', { class: 'list-sub' }, of.occasions.map(function (id) { return tag(id).icon + ' ' + tag(id).label; }).join(' · '))),
       stt.ready ? h('span', { class: 'badge wr-readybadge' }, 'Ready ✓')
         : !stt.complete ? h('span', { class: 'badge wr-dirtybadge' }, 'Incomplete')
         : h('span', { class: 'badge wr-dirtybadge' }, stt.dirty.length + ' in laundry')));
     if (opts.weatherNote) card.appendChild(h('p', { class: 'wr-weathernote' }, '⚠︎ ' + opts.weatherNote));
-    CATS.forEach(function (c) { if (o[c.id]) card.appendChild(pieceLine(o[c.id], c)); });
+    CORE.forEach(function (c) { if (o[c.id]) card.appendChild(pieceLine(o[c.id])); });
     if (of.note) card.appendChild(h('p', { class: 'hint wr-savednote' }, of.note));
     card.appendChild(h('div', { class: 'wr-savedbtns' },
-      stt.ready && opts.onWear ? h('button', { class: 'btn btn-primary btn-sm', onclick: opts.onWear }, 'Wear this ✓') : null,
+      stt.ready && opts.onWear ? h('button', { class: 'btn btn-primary btn-sm', onclick: opts.onWear }, 'I wore this ✓') : null,
       h('button', { class: 'btn btn-ghost btn-sm', onclick: function () { editOutfit(of); } }, 'Edit')));
     return card;
   }
 
   /* Choisir soi-même une pièce par catégorie. */
-  function piecePicker(draft, onlyClean, onChange) {
+  function piecePicker(draft, onlyClean) {
     var wrap = h('div');
     function paint() {
       wrap.innerHTML = '';
-      CATS.forEach(function (c) {
+      CORE.forEach(function (c) {
         var opts = data.items.filter(function (x) { return x.cat === c.id && (!onlyClean || !x.laundry); })
           .sort(function (a, b) { return a.name.localeCompare(b.name); });
         var optional = c.id === 'outer' || c.id === 'layer';
         wrap.appendChild(h('div', { class: 'field-label wr-pickhead' }, c.label + (optional ? ' (optional)' : '')));
         var row = h('div', { class: 'wr-pickrow' });
         if (optional) row.appendChild(h('button', { class: 'wr-pick' + (!draft[c.id] ? ' is-active' : ''), type: 'button',
-          onclick: function () { draft[c.id] = null; paint(); if (onChange) onChange(); } }, 'None'));
+          onclick: function () { draft[c.id] = null; paint(); } }, 'None'));
         opts.forEach(function (x) {
           row.appendChild(h('button', { class: 'wr-pick' + (draft[c.id] && draft[c.id].id === x.id ? ' is-active' : ''), type: 'button',
-            onclick: function () { draft[c.id] = x; paint(); if (onChange) onChange(); } }, swatch(x.color), x.name + (x.laundry ? ' 🧺' : '')));
+            onclick: function () { draft[c.id] = x; paint(); } }, swatch(x.color), x.name + (x.laundry ? ' 🧺' : '')));
         });
         if (!opts.length && !optional) row.appendChild(h('span', { class: 'muted' }, onlyClean ? 'Nothing clean' : 'Nothing yet'));
         wrap.appendChild(row);
@@ -520,66 +763,87 @@
   }
 
   function compose(st, base) {
-    var draft = { outer: base.outer, layer: base.layer, top: base.top, bottom: base.bottom, shoes: base.shoes };
+    var draft = { outer: base.outer || null, layer: base.layer || null, top: base.top || null, bottom: base.bottom || null, shoes: base.shoes || null };
+    var oc = occ(st.occasion);
     ui.sheet(function (close) {
       return [
         h('h2', { class: 'sheet-title' }, 'Build your outfit'),
-        h('p', { class: 'sheet-text' }, 'Only clean clothes are shown.'),
+        h('p', { class: 'sheet-text' }, 'Only clean clothes are shown. Your picks are kept as they are, even if they break a style rule.'),
         piecePicker(draft, true),
         h('div', { class: 'sheet-actions' },
           h('button', { class: 'btn btn-primary btn-block', onclick: function () {
             if (!draft.top || !draft.bottom || !draft.shoes) { ui.toast('Pick a top, a bottom and shoes'); return; }
-            close(); wear(st, draft);
-          } }, 'Wear this ✓'),
+            close(); wear(st, draft, []);
+          } }, 'I wore this ✓'),
           h('button', { class: 'btn btn-secondary btn-block', onclick: function () {
             if (!draft.top || !draft.bottom || !draft.shoes) { ui.toast('Pick a top, a bottom and shoes'); return; }
-            close(); editOutfit(null, draft, st.occasion ? [st.occasion] : []);
+            close(); editOutfit(null, draft, oc ? oc.tags.slice(0, 1) : []);
           } }, '♡ Save as an outfit'),
           h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, 'Cancel'))
       ];
     }, { modal: true });
   }
 
-  function wear(st, o) {
-    var ids = CATS.map(function (c) { return o[c.id] ? o[c.id].id : null; }).filter(Boolean);
-    ids.forEach(function (id) { var x = item(id); x.lastWorn = today(); x.worn = (x.worn || 0) + 1; });
-    st.outfit = ids; st.worn = true;
-    data.history.unshift({ date: today(), occasion: st.occasion, temp: st.temp, rain: st.rain, items: ids });
-    data.history = data.history.slice(0, 120);
+  /* « I wore this » : enregistre la tenue dans l'historique (date + heure, pièces, occasion, météo). */
+  function wear(st, o, accs) {
+    var pieces = CORE.map(function (c) { return o[c.id]; }).filter(Boolean);
+    accs = accs || [];
+    var now = new Date();
+    pieces.concat(accs).forEach(function (x) { x.lastWorn = today(); x.worn = (x.worn || 0) + 1; });
+    var entry = {
+      id: ui.uid(), at: now.toISOString(), date: today(),
+      occasion: st.occasion, temp: st.temp, cond: st.cond || 'clear',
+      items: pieces.map(function (x) { return x.id; }), acc: accs.map(function (x) { return x.id; }),
+      pieces: pieces.concat(accs).map(snap)
+    };
+    data.history.unshift(entry);
+    data.history = data.history.slice(0, 365);
+    st.outfit = entry.items; st.acc = entry.acc; st.entryId = entry.id; st.worn = true;
     persist(); view = 'today'; render(); window.scrollTo(0, 0);
-    ui.toast('Have a great day!');
+    ui.toast('Saved to your history. Have a great day!');
   }
 
   function renderWorn(st) {
     var o = {};
     st.outfit.forEach(function (id) { var x = item(id); if (x) o[x.cat] = x; });
+    var accs = (st.acc || []).map(item).filter(Boolean);
     var oc = occ(st.occasion);
     root.appendChild(h('h2', { class: 'section-title' }, 'Today’s outfit' + (oc ? ' · ' + oc.icon + ' ' + oc.label : '')));
-    root.appendChild(outfitCard(o, null));
+    root.appendChild(outfitCard(o, null, accs));
     root.appendChild(h('div', { class: 'bottom-actions' },
       h('button', { class: 'btn btn-primary btn-block btn-lg', onclick: function () { sortLaundry(st); } }, 'Back home: sort the laundry'),
-      h('button', { class: 'btn btn-secondary btn-block', onclick: function () { editOutfit(null, o, st.occasion ? [st.occasion] : []); } }, '♡ Save as an outfit'),
+      h('button', { class: 'btn btn-secondary btn-block', onclick: function () { editOutfit(null, o, oc ? oc.tags.slice(0, 1) : []); } }, '♡ Save as an outfit'),
       h('button', { class: 'btn btn-ghost btn-block', onclick: function () {
-        ui.confirm({ title: 'Change outfit?', message: 'Today’s outfit will be cleared so you can pick another one.', okLabel: 'Change outfit' })
+        ui.confirm({ title: 'Change outfit?', message: 'Today’s outfit will be removed from your history so you can pick another one.', okLabel: 'Change outfit' })
           .then(function (ok) {
             if (!ok) return;
-            data.history.shift();
-            st.outfit.forEach(function (id) {
-              var x = item(id); if (!x) return;
-              if (x.worn) x.worn--;
-              var prev = data.history.filter(function (e) { return e.items.indexOf(id) > -1; })[0];
-              x.lastWorn = prev ? prev.date : null;
-            });
-            st.worn = false; st.outfit = null; persist(); render();
+            removeEntry(st.entryId || (data.history[0] && data.history[0].id));
+            st.worn = false; st.outfit = null; st.acc = []; st.entryId = null; persist(); render();
           });
       } }, 'Change outfit')));
   }
 
+  /* Supprime une entrée d'historique et recalcule le dernier port des pièces concernées. */
+  function removeEntry(id) {
+    var e = data.history.filter(function (x) { return x.id === id; })[0];
+    if (!e) return;
+    data.history = data.history.filter(function (x) { return x.id !== id; });
+    (e.items || []).concat(e.acc || []).forEach(function (pid) {
+      var x = item(pid); if (!x) return;
+      if (x.worn) x.worn--;
+      var prev = data.history.filter(function (h2) { return (h2.items || []).concat(h2.acc || []).indexOf(pid) > -1; })[0];
+      x.lastWorn = prev ? prev.date : null;
+    });
+    var st = data.today;
+    if (st && st.entryId === id) { st.worn = false; st.outfit = null; st.acc = []; st.entryId = null; }
+  }
+
   /* Le soir : quelles pièces vont au linge ? Suggestion : haut (et sport) cochés, l'utilisateur décide. */
   function sortLaundry(st) {
-    var pieces = st.outfit.map(item).filter(Boolean);
+    var pieces = st.outfit.concat(st.acc || []).map(item).filter(Boolean);
+    var sport = occ(st.occasion) && occ(st.occasion).type === 'sport';
     var draft = {};
-    pieces.forEach(function (x) { draft[x.id] = x.cat === 'top' || (st.occasion === 'gym' && x.cat !== 'shoes' && x.cat !== 'outer'); });
+    pieces.forEach(function (x) { draft[x.id] = x.cat === 'top' || (sport && x.cat !== 'shoes' && x.cat !== 'outer' && x.cat !== 'acc'); });
     ui.sheet(function (close) {
       var wrap = h('div');
       function paint() {
@@ -607,10 +871,49 @@
     }, { modal: true });
   }
 
+  /* ----- Historique (journal) ----- */
+  function renderHistory() {
+    var list = data.history.slice().sort(function (a, b) { return a.at < b.at ? 1 : -1; });
+    if (!list.length) {
+      root.appendChild(h('div', { class: 'empty-state small' },
+        h('p', null, '📓 No outfit logged yet.'),
+        h('p', { class: 'muted' }, 'Tap “I wore this” on an outfit and it will appear here. Recent pieces are then suggested less often.')));
+      return;
+    }
+    root.appendChild(h('p', { class: 'hint' }, list.length + ' outfit' + (list.length === 1 ? '' : 's') + ' logged. Pieces worn in the last 3 days are suggested less; pieces not worn for a week come first.'));
+    var lastDay = null, journal = h('div', { class: 'wr-journal' });
+    list.forEach(function (e) {
+      var d = new Date(e.at);
+      var dayKey = e.date || e.at.slice(0, 10);
+      if (dayKey !== lastDay) {
+        lastDay = dayKey;
+        var ago = daysAgo(dayKey);
+        journal.appendChild(h('h2', { class: 'section-title wr-journalday' },
+          (ago === 0 ? 'Today · ' : ago === 1 ? 'Yesterday · ' : '') + d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: ago > 300 ? 'numeric' : undefined })));
+      }
+      var oc = occ(e.occasion);
+      var hasTime = !/T12:00:00$/.test(e.at);
+      journal.appendChild(h('article', { class: 'wr-entry' },
+        h('div', { class: 'wr-entryhead' },
+          h('div', null,
+            h('div', { class: 'wr-entryocc' }, oc ? oc.icon + ' ' + oc.label : 'Outfit'),
+            h('div', { class: 'list-sub' }, (hasTime ? d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) + ' · ' : '') + weatherText(e.temp, e.cond))),
+          h('button', { class: 'btn btn-icon', 'aria-label': 'Delete this entry', onclick: function () {
+            ui.confirm({ title: 'Delete this entry?', message: 'It will be removed from your history; the clothes stay in your closet.', okLabel: 'Delete', danger: true })
+              .then(function (ok) { if (!ok) return; removeEntry(e.id); persist(); render(); ui.toast('Entry deleted'); });
+          } }, '🗑')),
+        h('div', { class: 'wr-entrypieces' }, (e.pieces || []).map(function (p) {
+          var live = item(p.id);
+          return h('span', { class: 'wr-entrypiece' }, swatch(live ? live.color : p.color), live ? live.name : p.name);
+        }))));
+    });
+    root.appendChild(journal);
+  }
+
   /* ----- Tenues enregistrées ----- */
   function renderOutfits() {
     root.appendChild(h('div', { class: 'wr-filters' },
-      [['all', 'All'], ['ready', 'Ready ✓']].concat(OCCASIONS.map(function (o) { return [o.id, o.icon + ' ' + o.label]; })).map(function (f) {
+      [['all', 'All'], ['ready', 'Ready ✓']].concat(TAGS.map(function (t) { return [t.id, t.icon + ' ' + t.label]; })).map(function (f) {
         return h('button', { class: 'wr-pill' + (outfitFilter === f[0] ? ' is-active' : ''), onclick: function () { outfitFilter = f[0]; render(); } }, f[1]);
       })));
     var list = data.outfits.map(function (of) { return { of: of, st: outfitStatus(of) }; })
@@ -627,8 +930,11 @@
     var st = todayState();
     list.forEach(function (x) {
       root.appendChild(savedCard(x.of, x.st, { onWear: st.worn ? null : function () {
-        if (!st.occasion) st.occasion = x.of.occasions[0] || null;
-        wear(st, x.st.o);
+        if (!st.occasion) {
+          var first = OCCASIONS.filter(function (o) { return x.of.occasions.indexOf(o.tags[0]) > -1; })[0];
+          st.occasion = first ? first.id : null;
+        }
+        wear(st, x.st.o, []);
       } }));
     });
     if (data.outfits.length && !list.length) root.appendChild(h('p', { class: 'muted' }, 'No outfit matches this filter.'));
@@ -637,13 +943,13 @@
     root.appendChild(colourGuide());
   }
 
-  function editOutfit(of, prefill, occs) {
+  function editOutfit(of, prefill, tags) {
     var isNew = !of;
     var draft = {};
-    CATS.forEach(function (c) {
+    CORE.forEach(function (c) {
       draft[c.id] = of ? (of.items[c.id] ? item(of.items[c.id]) || null : null) : (prefill && prefill[c.id]) || null;
     });
-    var meta = { name: of ? of.name : '', occasions: of ? of.occasions.slice() : (occs || []).slice(), note: of ? of.note || '' : '' };
+    var meta = { name: of ? of.name : '', occasions: of ? of.occasions.slice() : (tags || []).slice(), note: of ? of.note || '' : '' };
     if (isNew && !meta.name && draft.top && draft.bottom) meta.name = color(draft.top.color).label + ' & ' + color(draft.bottom.color).label.toLowerCase();
     ui.sheet(function (close) {
       var err = h('p', { class: 'form-error', hidden: true });
@@ -651,14 +957,14 @@
       name.addEventListener('input', function () { meta.name = name.value; });
       var note = h('input', { class: 'input', type: 'text', value: meta.note, placeholder: 'e.g. Roll up the sleeves', 'aria-label': 'Note' });
       note.addEventListener('input', function () { meta.note = note.value; });
-      var occWrap = h('div', { class: 'wr-occs wr-occs-sm' });
+      var occWrap = h('div', { class: 'wr-filters wr-filters-wrap' });
       function paintOcc() {
         occWrap.innerHTML = '';
-        OCCASIONS.forEach(function (o) {
-          var on = meta.occasions.indexOf(o.id) > -1;
-          occWrap.appendChild(h('button', { class: 'wr-chip wr-occ' + (on ? ' is-active' : ''), type: 'button', 'aria-pressed': on ? 'true' : 'false',
-            onclick: function () { if (on) meta.occasions = meta.occasions.filter(function (i) { return i !== o.id; }); else meta.occasions.push(o.id); paintOcc(); } },
-            h('span', { class: 'wr-occicon', 'aria-hidden': 'true' }, o.icon), h('span', { class: 'wr-chiplabel' }, o.label)));
+        TAGS.forEach(function (t) {
+          var on = meta.occasions.indexOf(t.id) > -1;
+          occWrap.appendChild(h('button', { class: 'wr-pill' + (on ? ' is-active' : ''), type: 'button', 'aria-pressed': on ? 'true' : 'false',
+            onclick: function () { if (on) meta.occasions = meta.occasions.filter(function (i) { return i !== t.id; }); else meta.occasions.push(t.id); paintOcc(); } },
+            t.icon + ' ' + t.label));
         });
       }
       paintOcc();
@@ -666,9 +972,9 @@
         meta.name = meta.name.trim();
         if (!meta.name) { err.textContent = 'Give the outfit a name.'; err.hidden = false; return; }
         if (!draft.top || !draft.bottom || !draft.shoes) { err.textContent = 'Pick at least a top, a bottom and shoes.'; err.hidden = false; return; }
-        if (!meta.occasions.length) { err.textContent = 'Pick at least one occasion.'; err.hidden = false; return; }
+        if (!meta.occasions.length) { err.textContent = 'Pick at least one context.'; err.hidden = false; return; }
         var items = {};
-        CATS.forEach(function (c) { items[c.id] = draft[c.id] ? draft[c.id].id : null; });
+        CORE.forEach(function (c) { items[c.id] = draft[c.id] ? draft[c.id].id : null; });
         var rec = { id: of ? of.id : ui.uid(), name: meta.name, occasions: meta.occasions, items: items, note: meta.note.trim() };
         if (isNew) data.outfits.push(rec); else data.outfits[data.outfits.indexOf(of)] = rec;
         persist(); close(); render(); ui.toast(isNew ? 'Outfit saved' : 'Outfit updated');
@@ -676,7 +982,7 @@
       return [
         h('h2', { class: 'sheet-title' }, isNew ? 'New outfit' : 'Edit outfit'),
         h('label', { class: 'field' }, h('span', { class: 'field-label' }, 'Name'), name),
-        h('div', { class: 'field' }, h('span', { class: 'field-label' }, 'For'), occWrap),
+        h('div', { class: 'field' }, h('span', { class: 'field-label' }, 'Good for'), occWrap),
         h('p', { class: 'hint' }, 'All your clothes are listed, even those in the laundry (🧺).'),
         piecePicker(draft, false),
         h('label', { class: 'field' }, h('span', { class: 'field-label' }, 'Note (optional)'), note),
@@ -695,7 +1001,7 @@
   /* Guide des couleurs (paires, trios, chaussures) consultable. */
   function colourGuide() {
     var d = h('details', { class: 'card wr-guide' }, h('summary', null, '🎨 Colour guide'));
-    d.appendChild(h('p', { class: 'hint' }, 'The suggestions use these proven menswear combinations: neutrals as a base, at most one accent colour, light/dark contrast, and shoes matched to the trousers.'));
+    d.appendChild(h('p', { class: 'hint' }, 'The suggestions use these proven menswear combinations, filtered by your palette (My Style): neutrals as a base, light/dark contrast, and shoes matched to the trousers.'));
     d.appendChild(h('div', { class: 'field-label wr-pickhead' }, 'Trios'));
     COMBOS.trios.forEach(function (t) {
       d.appendChild(h('div', { class: 'wr-guiderow' }, swatch(t[0]), swatch(t[1]), swatch(t[2]), h('span', null, t[3])));
@@ -715,6 +1021,35 @@
     return d;
   }
 
+  /* ----- My Style (lecture seule) ----- */
+  function openStyle() {
+    ui.sheet(function (close) {
+      function rule(icon, title, body) {
+        return h('div', { class: 'wr-dnarow' }, h('span', { class: 'wr-dnaicon', 'aria-hidden': 'true' }, icon),
+          h('div', null, h('div', { class: 'wr-dnatitle' }, title), body));
+      }
+      return [
+        h('h2', { class: 'sheet-title' }, 'My Style'),
+        h('p', { class: 'sheet-text' }, 'Smart casual + street smart. Every suggestion follows these rules.'),
+        h('div', { class: 'wr-dna' },
+          rule('📐', 'Silhouette', h('p', { class: 'list-sub' }, 'Slim / fitted top → wide / relaxed bottom. Never both slim, never both loose.')),
+          rule('🎨', 'Colour palette', h('div', null,
+            h('div', { class: 'wr-dnaswatches' }, DNA.palette.map(function (c) {
+              return h('span', { class: 'wr-dnaswatch' }, swatch(c, true), h('span', null, color(c).label));
+            })),
+            h('p', { class: 'list-sub' }, 'Maximum ' + DNA.maxColours + ' colours per outfit. Charcoal counts as grey, camel as beige, denim as navy.'))),
+          rule('👞', 'Shoes', h('p', { class: 'list-sub' }, 'Always dark and structured (black, brown, navy…; leather shoes, boots, dark sneakers). Running / sport shoes only for sport. No sneakers for formal occasions.')),
+          rule('🌡️', 'Layering by temperature', h('ul', { class: 'wr-dnalist' },
+            h('li', null, 'Below ' + DNA.outerBelow + ' °C: outerwear is mandatory'),
+            h('li', null, 'Below ' + DNA.midLayerBelow + ' °C: mid layer is mandatory'),
+            h('li', null, 'Above ' + DNA.baseOnlyAbove + ' °C: base layer only (unless you add a layer yourself)'))),
+          rule('🧢', 'Finishers', h('p', { class: 'list-sub' }, 'Cap, beanie or scarf are optional finishers, suggested under each outfit with a watch or a bag (2 at most): beanie below ' + DNA.beanieBelow + ' °C, cap otherwise, scarf below ' + DNA.scarfBelow + ' °C or in the wind.'))),
+        h('p', { class: 'hint' }, 'Read-only for now.'),
+        h('div', { class: 'sheet-actions' }, h('button', { class: 'btn btn-primary btn-block', onclick: function () { close(); } }, 'Close'))
+      ];
+    });
+  }
+
   /* ----- Penderie ----- */
   function norm(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
 
@@ -722,11 +1057,11 @@
     if (!data.items.length) {
       root.appendChild(h('div', { class: 'card' },
         h('div', { class: 'card-title' }, 'Start your closet'),
-        h('p', { class: 'sheet-text' }, 'Add your clothes one by one, or load a starter set of basics that you can then edit, delete or complete.'),
+        h('p', { class: 'sheet-text' }, 'Add your clothes one by one, or load a starter set of basics in your palette that you can then edit, delete or complete.'),
         h('div', { class: 'stack' },
           h('button', { class: 'btn btn-primary btn-block', onclick: function () { editItem(null); } }, '+ Add a piece of clothing'),
           h('button', { class: 'btn btn-secondary btn-block', onclick: function () {
-            ui.confirm({ title: 'Load the starter set?', message: '23 basic pieces (jackets, sweaters, shirts, jeans, shoes…) will be added. Edit or delete them to match your real closet.', okLabel: 'Load the starter set' })
+            ui.confirm({ title: 'Load the starter set?', message: '27 basic pieces (jackets, sweaters, shirts, trousers, shoes, accessories…) will be added. Edit or delete them to match your real closet.', okLabel: 'Load the starter set' })
               .then(function (ok) { if (!ok) return; data.items = data.items.concat(starter()); persist(); render(); ui.toast('Starter set added'); });
           } }, 'Load a starter set'))));
       return;
@@ -738,7 +1073,7 @@
     search.addEventListener('keydown', function (e) { if (e.key === 'Enter') search.blur(); });
     root.appendChild(h('div', { class: 'wr-searchwrap' }, search));
     root.appendChild(h('div', { class: 'wr-filters' },
-      [['all', 'All'], ['clean', 'Clean'], ['laundry', '🧺 Laundry']].concat(OCCASIONS.map(function (o) { return [o.id, o.icon + ' ' + o.label]; })).map(function (f) {
+      [['all', 'All'], ['clean', 'Clean'], ['laundry', '🧺 Laundry']].concat(TAGS.map(function (t) { return [t.id, t.icon + ' ' + t.label]; })).map(function (f) {
         return h('button', { class: 'wr-pill' + (closetFilter === f[0] ? ' is-active' : ''), onclick: function () { closetFilter = f[0]; render(); } }, f[1]);
       })));
     root.appendChild(results);
@@ -751,14 +1086,15 @@
     box.innerHTML = '';
     var tokens = norm(closetQuery).split(/\s+/).filter(Boolean);
     var shown = 0;
+    var isTag = TAGS.some(function (t) { return t.id === closetFilter; });
     CATS.forEach(function (c) {
       var list = data.items.filter(function (x) {
         if (x.cat !== c.id) return false;
         if (closetFilter === 'clean' && x.laundry) return false;
         if (closetFilter === 'laundry' && !x.laundry) return false;
-        if (OCC_FORMALITY[closetFilter] && x.occasions.indexOf(closetFilter) < 0) return false;
+        if (isTag && x.occasions.indexOf(closetFilter) < 0) return false;
         if (!tokens.length) return true;
-        var hs = norm([x.name, x.subtype, color(x.color).label, formality(x.formality).label, x.material, x.pattern, x.brand, x.location, x.notes, c.label].join(' '));
+        var hs = norm([x.name, x.subtype, color(x.color).label, formality(x.formality).label, x.material, x.pattern, x.fit, x.brand, x.location, x.notes, c.label].join(' '));
         return tokens.every(function (t) { return hs.indexOf(t) > -1; });
       }).sort(function (a, b) { return a.name.localeCompare(b.name); });
       shown += list.length;
@@ -770,19 +1106,20 @@
   }
 
   function itemRow(x) {
-    var sub = [x.subtype, color(x.color).label, formality(x.formality).label, WARMTH[x.warmth]].filter(Boolean).join(' · ');
+    var sub = [x.subtype, color(x.color).label, x.cat !== 'acc' && x.cat !== 'shoes' && x.fit !== 'regular' ? (x.fit === 'slim' ? 'Slim' : 'Wide') : null,
+      x.cat !== 'acc' ? formality(x.formality).label : null].filter(Boolean).join(' · ');
     return h('button', { class: 'list-row list-row-btn wr-row' + (x.laundry ? ' is-dirty' : ''), onclick: function () { editItem(x); } },
       swatch(x.color, true),
       h('div', { class: 'wr-rowmain' },
         h('div', { class: 'list-title' }, x.name),
         h('div', { class: 'list-sub' }, sub),
-        h('div', { class: 'list-sub' }, x.occasions.map(function (id) { return occ(id).icon; }).join(' ') + (x.rainOk ? ' · ☔' : '') + (x.location ? ' · 📍 ' + x.location : ''))),
+        h('div', { class: 'list-sub' }, x.occasions.map(function (id) { return tag(id).icon; }).join(' ') + (x.rainOk ? ' · ☔' : '') + (x.location ? ' · 📍 ' + x.location : ''))),
       x.laundry ? h('span', { class: 'badge wr-dirtybadge' }, 'Laundry') : h('span', { class: 'chev', 'aria-hidden': 'true' }, '›'));
   }
 
   function editItem(x) {
     var isNew = !x;
-    var draft = x ? JSON.parse(JSON.stringify(x)) : complete({ id: ui.uid(), name: '', cat: 'top', color: 'navy', warmth: 1, occasions: ['chill'], rainOk: false, laundry: false, lastWorn: null, worn: 0, subtype: null, material: null });
+    var draft = x ? JSON.parse(JSON.stringify(x)) : complete({ id: ui.uid(), name: '', cat: 'top', color: 'navy', warmth: 1, occasions: ['chill'], rainOk: false, laundry: false, lastWorn: null, worn: 0, subtype: null, material: null, fit: 'regular' });
     ui.sheet(function (close) {
       var err = h('p', { class: 'form-error', hidden: true });
       function textInput(label, key, ph) {
@@ -809,28 +1146,30 @@
           onclick: function () { draft[key] = !draft[key]; paint(); } }, h('span', null, label), h('span', { class: 'wr-toggle', 'aria-hidden': 'true' }));
       }
       function paint() {
+        var isAcc = draft.cat === 'acc';
         body.innerHTML = '';
         body.appendChild(h('div', { class: 'field' }, h('span', { class: 'field-label' }, 'Type'),
-          seg(CATS.map(function (c) { return [c.id, c.label]; }), 'cat', function () {
+          seg(CATS.map(function (c) { return [c.id, c.id === 'top' ? 'Top' : c.label]; }), 'cat', function () {
             if (draft.subtype && cat(draft.cat).subtypes.indexOf(draft.subtype) < 0) draft.subtype = null;
           })));
-        body.appendChild(h('div', { class: 'field' }, h('span', { class: 'field-label' }, 'Kind (optional)'), pills(cat(draft.cat).subtypes, 'subtype')));
-        body.appendChild(h('div', { class: 'field' }, h('span', { class: 'field-label' }, 'Colour · ' + color(draft.color).label),
+        body.appendChild(h('div', { class: 'field' }, h('span', { class: 'field-label' }, isAcc ? 'Kind' : 'Kind (optional)'), pills(cat(draft.cat).subtypes, 'subtype')));
+        body.appendChild(h('div', { class: 'field' }, h('span', { class: 'field-label' }, 'Colour · ' + color(draft.color).label + (inPalette(draft.color) ? '' : ' (outside your palette)')),
           h('div', { class: 'wr-colors' }, COLORS.map(function (c) {
             return h('button', { class: 'wr-color' + (draft.color === c.id ? ' is-active' : ''), type: 'button', 'aria-label': c.label,
               'aria-pressed': draft.color === c.id ? 'true' : 'false', style: { background: c.hex }, onclick: function () { draft.color = c.id; paint(); } });
           }))));
+        if (!isAcc && draft.cat !== 'shoes') body.appendChild(h('div', { class: 'field' }, h('span', { class: 'field-label' }, 'Fit'), seg(FITS, 'fit')));
         body.appendChild(h('div', { class: 'field' }, h('span', { class: 'field-label' }, 'Pattern'), seg(PATTERNS, 'pattern')));
-        body.appendChild(h('div', { class: 'field' }, h('span', { class: 'field-label' }, 'Style'), seg(FORMALITY.map(function (f) { return [f.id, f.label]; }), 'formality')));
-        body.appendChild(h('div', { class: 'field' }, h('span', { class: 'field-label' }, 'Warmth'),
+        if (!isAcc) body.appendChild(h('div', { class: 'field' }, h('span', { class: 'field-label' }, 'Style'), seg(FORMALITY.map(function (f) { return [f.id, f.label]; }), 'formality')));
+        if (!isAcc) body.appendChild(h('div', { class: 'field' }, h('span', { class: 'field-label' }, 'Warmth'),
           seg([[1, 'Light'], [2, 'Medium'], [3, 'Warm']], 'warmth')));
         body.appendChild(h('div', { class: 'field' }, h('span', { class: 'field-label' }, 'Material (optional)'), pills(MATERIALS, 'material')));
         body.appendChild(h('div', { class: 'field' }, h('span', { class: 'field-label' }, 'Good for'),
-          h('div', { class: 'wr-occs wr-occs-sm' }, OCCASIONS.map(function (o) {
-            var on = draft.occasions.indexOf(o.id) > -1;
-            return h('button', { class: 'wr-chip wr-occ' + (on ? ' is-active' : ''), type: 'button', 'aria-pressed': on ? 'true' : 'false',
-              onclick: function () { if (on) draft.occasions = draft.occasions.filter(function (i) { return i !== o.id; }); else draft.occasions.push(o.id); paint(); } },
-              h('span', { class: 'wr-occicon', 'aria-hidden': 'true' }, o.icon), h('span', { class: 'wr-chiplabel' }, o.label));
+          h('div', { class: 'wr-filters wr-filters-wrap' }, TAGS.map(function (t) {
+            var on = draft.occasions.indexOf(t.id) > -1;
+            return h('button', { class: 'wr-pill' + (on ? ' is-active' : ''), type: 'button', 'aria-pressed': on ? 'true' : 'false',
+              onclick: function () { if (on) draft.occasions = draft.occasions.filter(function (i) { return i !== t.id; }); else draft.occasions.push(t.id); paint(); } },
+              t.icon + ' ' + t.label);
           }))));
         if (draft.cat === 'outer' || draft.cat === 'shoes') body.appendChild(toggleRow('☔ OK in the rain', 'rainOk'));
         body.appendChild(toggleRow('🧺 In the laundry (not available)', 'laundry'));
@@ -840,8 +1179,9 @@
       name.addEventListener('input', function () { draft.name = name.value; });
       function save() {
         draft.name = draft.name.trim();
-        if (!draft.name) { err.textContent = 'Give it a name.'; err.hidden = false; err.scrollIntoView({ block: 'center' }); return; }
-        if (!draft.occasions.length) { err.textContent = 'Pick at least one occasion.'; err.hidden = false; err.scrollIntoView({ block: 'center' }); return; }
+        var fail = !draft.name ? 'Give it a name.' : !draft.occasions.length ? 'Pick at least one context in “Good for”.'
+          : draft.cat === 'acc' && !draft.subtype ? 'Pick the kind of accessory (cap, scarf, watch…).' : null;
+        if (fail) { err.textContent = fail; err.hidden = false; err.scrollIntoView({ block: 'center' }); return; }
         if (draft.cat !== 'outer' && draft.cat !== 'shoes') draft.rainOk = false;
         ['location', 'brand', 'notes'].forEach(function (k) { draft[k] = (draft[k] || '').trim(); });
         if (isNew) data.items.push(draft);
@@ -864,7 +1204,7 @@
           h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, 'Cancel'),
           isNew ? null : h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: function () {
             var used = data.outfits.filter(function (of) { return of.items[x.cat] === x.id; });
-            ui.confirm({ title: 'Delete “' + x.name + '”?', message: 'It will be removed from your closet' + (used.length ? ' and from ' + used.length + ' saved outfit' + (used.length === 1 ? '' : 's') : '') + '.', okLabel: 'Delete', danger: true })
+            ui.confirm({ title: 'Delete “' + x.name + '”?', message: 'It will be removed from your closet' + (used.length ? ' and from ' + used.length + ' saved outfit' + (used.length === 1 ? '' : 's') : '') + '. Your history keeps its name.', okLabel: 'Delete', danger: true })
               .then(function (ok) {
                 if (!ok) return;
                 data.items = data.items.filter(function (i) { return i.id !== x.id; });
@@ -897,5 +1237,6 @@
   }
 
   S2.app.registerTab({ id: 'garde-robe', label: 'Wardrobe', order: 20, icon: ICON, mount: mount });
-  S2.wardrobe = { score: score }; /* exposé pour les tests */
+  /* Exposé pour Réglages (« My Style ») et pour les tests. */
+  S2.wardrobe = { score: score, openStyle: openStyle, occasions: OCCASIONS, dna: DNA };
 })();

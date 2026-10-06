@@ -4,7 +4,7 @@
   var S2 = window.S2;
   var ui = S2.ui, h = ui.h;
   var NS = 'settings';
-  var VERSION = '0.8.0';
+  var VERSION = '0.9.0';
 
   function get() { return S2.storage.load(NS, { theme: 'auto', lastExport: null }); }
   function set(patch) {
@@ -122,6 +122,13 @@
 
     var fileInput = h('input', { type: 'file', accept: 'application/json,.json', class: 'sr-only', id: 'import-file',
       onchange: function () { onImportFile(fileInput); } });
+
+    if (S2.wardrobe && S2.wardrobe.openStyle) {
+      c.appendChild(h('h2', { class: 'section-title' }, 'My Style'));
+      c.appendChild(h('div', { class: 'card' },
+        h('p', { class: 'sheet-text' }, 'Smart casual + street smart: the rules every Wardrobe suggestion follows.'),
+        h('div', { class: 'stack' }, h('button', { class: 'btn btn-secondary btn-block', onclick: function () { S2.wardrobe.openStyle(); } }, '✦ View My Style'))));
+    }
 
     c.appendChild(h('h2', { class: 'section-title' }, 'Backup'));
     c.appendChild(h('div', { class: 'card' },
