@@ -1,5 +1,15 @@
 # Changelog — Sandeep 2.0
 
+## 0.11.0 — 2026-10-06
+- Wardrobe **performance**: 3-stage search with per-piece shortlists instead of trying every combination. A 105-piece closet went from ~4 s to well under 0.3 s; “Show another one” is instant (cached). Quality checked against the exhaustive search in tests.
+- **Learns your taste**: 👍 / 👎 on each suggestion (the outfit and its pairs of pieces), wearing an outfit counts as a small 👍; disliked outfits never come back. ★ **Favourite** pieces rotate back more often.
+- **Today** puts the outfit first: occasion and weather collapse into one tappable bar.
+- **Faster entry**: picking a kind fills fit, material, style, contexts, washing and length; **Duplicate** a piece; **Select** several pieces to send to the laundry, mark clean, favourite, set contexts or storage place, or delete.
+- **Photos** for each piece (compressed, shown in outfits, closet and laundry; included in backups).
+- **Wears before washing** per piece (e.g. jeans 6, T-shirt 1, leather never): the evening laundry sheet pre-ticks pieces that are due.
+- **Insights** in History: most worn, never worn, forgotten for 2 months, cost per wear (optional price).
+- Engine split into `garde-robe-engine.js` (pure, testable) with an automated test suite (`node tests/run.js`) run by GitHub on every pull request.
+
 ## 0.10.0 — 2026-10-06
 - Wardrobe Style DNA rewritten as **creative guidelines** (structured street smart, oversized tailoring): rules now rank outfits instead of excluding them, so a great outfit that bends one can win. Such outfits show a “✦ Creative pick” note.
 - New preferences: **tonal looks** (all black / cream / brown / grey) and shades of the same family, signature fitted-top / wide-bottom contrast (volume on volume allowed when tonal), **cropped / waist-length outerwear** (new Length field; long coats “wear it open”), visible layers, **one subtle statement pattern** (thin stripe, tonal pinstripe, plaid, houndstooth), **one statement texture** (leather, suede, fleece, knit, wool, corduroy, shearling) over smooth pieces; loud prints, logos and bright colours ranked lower.

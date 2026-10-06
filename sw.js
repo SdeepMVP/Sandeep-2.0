@@ -14,6 +14,7 @@ var ASSETS = [
   './js/core/app.js',
   './js/tabs/muscu.js',
   './js/tabs/garde-robe-combos.js',
+  './js/tabs/garde-robe-engine.js',
   './js/tabs/garde-robe.js',
   './js/tabs/cuisine-recipes.js',
   './js/tabs/cuisine.js',

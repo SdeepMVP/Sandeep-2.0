@@ -24,6 +24,8 @@ Application personnelle « hub de vie », utilisée uniquement sur iPhone, insta
 ## Process
 - Après chaque changement, ajouter une entrée courte (en anglais) dans **CHANGELOG.md** (date, version, quoi) et incrémenter `VERSION` dans `js/settings.js`.
 - Tester sur un viewport iPhone (390 × 844) avant de pousser.
+- Lancer `node tests/run.js` avant de pousser ; toute nouvelle règle du moteur Wardrobe s'accompagne d'un test. Garder le moteur pur (testable sous Node) et la recherche de tenues sous 300 ms pour 100+ pièces.
+- Les photos de Wardrobe sont compressées (320 px, JPEG) dans `sandeep2:garde-robe-photos` : elles sont incluses dans l'export JSON.
 
 ## Structure
 ```
@@ -37,6 +39,8 @@ js/core/app.js        registre des onglets, navigation
 js/tabs/*.js          un fichier par onglet (muscu.js, garde-robe.js, …)
 js/tabs/cuisine-recipes.js  recettes intégrées de Kitchen (nouvel id = ajoutée aux données existantes)
 js/tabs/garde-robe-combos.js  combinaisons de couleurs (paires, trios, chaussures) utilisées par Wardrobe
+js/tabs/garde-robe-engine.js  moteur PUR de Wardrobe (règles, notes, recherche, apprentissage) : pas de DOM ni de stockage
+tests/run.js          tests automatiques du moteur (`node tests/run.js`, sans dépendance), lancés par GitHub sur chaque PR
 js/settings.js        écran Réglages
 js/main.js            démarrage
 ```

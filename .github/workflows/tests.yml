@@ -1,0 +1,22 @@
+# Tests automatiques du moteur Wardrobe (sans dépendance).
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  engine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node tests/run.js
+      - name: Syntax check of every script
+        run: for f in js/*.js js/core/*.js js/tabs/*.js sw.js; do node --check "$f" || exit 1; done
