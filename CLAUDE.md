@@ -15,14 +15,14 @@ Application personnelle « hub de vie », utilisée uniquement sur iPhone, insta
   - Chaque onglet stocke ses données sous **sa propre clé** localStorage (`sandeep2:<id>`) via `S2.storage`. Un onglet ne lit/écrit jamais les données d'un autre.
   - **Ajouter un onglet ne doit jamais casser les existants** : le rendu de chaque onglet est isolé (try/catch dans `js/core/app.js`), pas de CSS global non préfixé dans un onglet (préfixer les classes par l'id de l'onglet, ex. `.mu-`).
 - **Données dans localStorage**, avec **Export / Import JSON** dans l'écran Réglages (l'export inclut automatiquement toutes les clés `sandeep2:*`, donc tout nouvel onglet est sauvegardé sans travail supplémentaire). Toute évolution du format de données doit rester compatible avec les anciens exports (migrations dans le `load` de l'onglet).
-- Service worker (`sw.js`) en « stale-while-revalidate » pour un usage hors-ligne à la salle. Ajouter tout nouveau fichier à la liste `ASSETS` de `sw.js` et incrémenter `CACHE_VERSION`.
+- Service worker (`sw.js`) pour un usage hors-ligne à la salle. Ajouter tout nouveau fichier à la liste `ASSETS` de `sw.js`. Ne pas toucher au jeton `__BUILD__` : le workflow Pages (`.github/workflows/pages.yml`) le remplace par le SHA du commit, ce qui déclenche la mise à jour automatique de l'app installée (`js/main.js` recharge dès que l'utilisateur ne saisit rien). Tout ce qui est mergé sur `main` est publié sur https://sdeepmvp.github.io/Sandeep-2.0/.
 
 ## Style visuel
 - Minimal, palette neutre et terreuse : crème, beige, camel, brun chocolat, bleu marine. Typographie propre (police système), chiffres tabulaires.
 - Mode clair **et** sombre : couleurs définies comme variables CSS dans `:root` (`css/app.css`), thème Auto / Clair / Sombre réglable dans Réglages.
 
 ## Process
-- Après chaque changement, ajouter une entrée courte dans **CHANGELOG.md** (date, version, quoi).
+- Après chaque changement, ajouter une entrée courte dans **CHANGELOG.md** (date, version, quoi) et incrémenter `VERSION` dans `js/settings.js`.
 - Tester sur un viewport iPhone (390 × 844) avant de pousser.
 
 ## Structure

@@ -25,6 +25,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      # Nouvelle version du cache à chaque publication → mise à jour auto de l'app installée.
+      - run: sed -i "s/__BUILD__/${{ github.sha }}/" sw.js
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
