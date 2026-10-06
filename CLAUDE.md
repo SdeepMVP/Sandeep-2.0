@@ -35,6 +35,7 @@ js/core/storage.js    stockage par espace de noms, export/import
 js/core/ui.js         helpers DOM, feuilles (bottom sheets), confirmations, toasts
 js/core/app.js        registre des onglets, navigation
 js/tabs/*.js          un fichier par onglet (muscu.js, garde-robe.js, …)
+js/tabs/cuisine-recipes.js  recettes intégrées de Kitchen (nouvel id = ajoutée aux données existantes)
 js/settings.js        écran Réglages
 js/main.js            démarrage
 ```
