@@ -1,7 +1,9 @@
-/* Cache hors-ligne « stale-while-revalidate » : l'app s'ouvre instantanément,
-   même sans réseau à la salle ; les mises à jour arrivent au lancement suivant.
-   Ajouter tout nouveau fichier à ASSETS et incrémenter CACHE_VERSION. */
-var CACHE_VERSION = 'sandeep2-v1';
+/* Cache hors-ligne : l'app s'ouvre instantanément, même sans réseau à la salle.
+   Mises à jour : à chaque publication, le workflow GitHub Pages remplace __BUILD__
+   par l'identifiant du commit. Ce fichier change donc, le navigateur installe le
+   nouveau service worker, et js/main.js recharge l'app automatiquement.
+   Ajouter tout nouveau fichier à ASSETS (les autres sont mis en cache au premier usage). */
+var CACHE_VERSION = 'sandeep2-__BUILD__';
 var ASSETS = [
   './',
   './index.html',
@@ -23,7 +25,7 @@ var ASSETS = [
 ];
 
 self.addEventListener('install', function (e) {
-  e.waitUntil(caches.open(CACHE_VERSION).then(function (c) { return c.addAll(ASSETS); }).then(function () { return self.skipWaiting(); }));
+  e.waitUntil(caches.open(CACHE_VERSION).then(function (c) { return c.addAll(ASSETS.map(function (u) { return new Request(u, { cache: 'reload' }); })); }).then(function () { return self.skipWaiting(); }));
 });
 
 self.addEventListener('activate', function (e) {

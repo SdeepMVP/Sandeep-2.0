@@ -4,7 +4,7 @@
   var S2 = window.S2;
   var ui = S2.ui, h = ui.h;
   var NS = 'settings';
-  var VERSION = '0.1.0';
+  var VERSION = '0.2.0';
 
   function get() { return S2.storage.load(NS, { theme: 'auto', lastExport: null }); }
   function set(patch) {
@@ -97,6 +97,16 @@
     });
   }
 
+  function checkUpdate() {
+    if (!('serviceWorker' in navigator)) { ui.toast('Mises à jour indisponibles ici'); return; }
+    navigator.serviceWorker.getRegistration().then(function (reg) {
+      if (!reg) { ui.toast('Ouvre l’app depuis son adresse en ligne'); return; }
+      return reg.update().then(function () {
+        ui.toast(reg.installing || reg.waiting ? 'Mise à jour en cours…' : 'Tu as la dernière version');
+      });
+    }).catch(function () { ui.toast('Pas de réseau : réessaie plus tard'); });
+  }
+
   function mount(c) {
     var s = get();
     var themes = [['auto', 'Auto'], ['light', 'Clair'], ['dark', 'Sombre']];
@@ -136,6 +146,12 @@
         h('li', null, 'Ouvre cette page dans Safari.'),
         h('li', null, 'Touche le bouton Partager (carré avec une flèche).'),
         h('li', null, 'Choisis « Sur l’écran d’accueil », puis « Ajouter ».'))));
+
+    c.appendChild(h('h2', { class: 'section-title' }, 'Mises à jour'));
+    c.appendChild(h('div', { class: 'card' },
+      h('p', { class: 'sheet-text' }, 'Les nouvelles versions s’installent toutes seules à l’ouverture de l’app (avec du réseau).'),
+      h('div', { class: 'stack' },
+        h('button', { class: 'btn btn-secondary btn-block', onclick: checkUpdate }, 'Vérifier maintenant'))));
 
     c.appendChild(h('p', { class: 'hint center' }, 'Sandeep 2.0 · version ' + VERSION));
   }

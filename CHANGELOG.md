@@ -1,5 +1,9 @@
 # Changelog — Sandeep 2.0
 
+## 0.2.0 — 2026-10-06
+- Mise à jour automatique : l'app installée détecte chaque nouvelle version publiée et se recharge toute seule (en attendant la fin d'une saisie), avec le message « Application mise à jour ».
+- Réglages : bouton « Vérifier maintenant » et affichage de la version.
+
 ## 0.1.1 — 2026-10-06
 - Publication automatique sur GitHub Pages via GitHub Actions (`.github/workflows/pages.yml`).
 
