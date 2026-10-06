@@ -510,3 +510,27 @@ input[type="date"].input { display: block; line-height: 48px; }
   border: 0; border-bottom: 1px solid var(--border); text-align: left; font-size: 16px; }
 .wr-box { flex-shrink: 0; width: 28px; height: 28px; border-radius: 8px; border: 2px solid var(--border); display: grid; place-items: center; font-weight: 800; color: var(--surface); }
 .wr-check.is-on .wr-box { background: var(--good); border-color: var(--good); }
+.wr-twobtn { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.wr-piecemain { flex: 1; min-width: 0; }
+.wr-loc { font-size: 13px; color: var(--text-2); margin-top: 2px; }
+.wr-piece.is-dirty .wr-piecename { color: var(--muted); }
+.wr-savedhead { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; padding: 8px 14px 6px; }
+.wr-savedname { font-size: 17px; font-weight: 700; }
+.wr-readybadge { background: var(--good-bg); color: var(--good); }
+.wr-weathernote { font-size: 13px; color: var(--keep); margin: 0 14px 4px; }
+.wr-savednote { margin: 8px 14px 0; }
+.wr-savedbtns { display: flex; gap: 8px; justify-content: flex-end; padding: 10px 14px 4px; }
+.wr-filters { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 6px; margin: 4px 0; scrollbar-width: none; }
+.wr-filters::-webkit-scrollbar { display: none; }
+.wr-filters-wrap { flex-wrap: wrap; overflow: visible; }
+.wr-pill { flex-shrink: 0; min-height: 40px; padding: 0 14px; border-radius: 999px; white-space: nowrap;
+  background: var(--surface); border: 1.5px solid var(--border); font-size: 14px; font-weight: 600; color: var(--text-2); }
+.wr-pill.is-active { border-color: var(--accent); color: var(--text); background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
+.wr-searchwrap { position: sticky; top: calc(env(safe-area-inset-top) + 56px); z-index: 5; background: var(--bg); padding: 4px 0 2px; }
+.wr-search { font-size: 17px; }
+.wr-noresult { margin: 16px 4px; }
+.wr-guide summary { font-weight: 700; min-height: 36px; cursor: pointer; }
+.wr-guiderow { display: flex; align-items: center; gap: 6px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.wr-guiderow:last-child { border-bottom: 0; }
+.wr-guiderow > span:last-child { margin-left: 4px; }
+.wr-guideshoes { align-items: flex-start; }
