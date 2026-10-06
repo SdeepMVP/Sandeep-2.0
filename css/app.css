@@ -464,3 +464,49 @@ input[type="date"].input { display: block; line-height: 48px; }
 .hb-day.is-today { outline: 2px solid var(--accent); outline-offset: 1px; }
 .hb-sheetchecks { margin: 10px 0; }
 .hb-textarea { min-height: 90px; padding: 10px 12px; line-height: 1.45; }
+
+/* ---------- Onglet Wardrobe (préfixe wr-) ---------- */
+.wr-nav { margin-top: 0; }
+.wr-temps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.wr-occs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.wr-chip { display: grid; justify-items: center; align-content: center; gap: 2px; min-height: 64px; padding: 8px 4px;
+  background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; text-align: center; }
+.wr-chip.is-active { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
+.wr-chiplabel { font-weight: 650; font-size: 14px; }
+.wr-chipsub { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.wr-occicon { font-size: 22px; line-height: 1; }
+.wr-occs-sm .wr-chip { min-height: 56px; }
+.wr-rain { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 52px; margin-top: 10px;
+  padding: 0 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; font-weight: 600; text-align: left; }
+.wr-toggle { position: relative; flex-shrink: 0; width: 50px; height: 30px; border-radius: 15px; background: var(--surface-2); transition: background .15s; }
+.wr-toggle::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,.2); transition: transform .15s; }
+.wr-rain.is-active .wr-toggle { background: var(--good); }
+.wr-rain.is-active .wr-toggle::after { transform: translateX(20px); }
+.wr-swatch { display: inline-block; flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%; border: 1px solid rgba(0,0,0,.15); vertical-align: middle; }
+.wr-swatch.is-big { width: 30px; height: 30px; }
+.wr-outfit { padding: 0 0 8px; overflow: hidden; }
+.wr-palette { display: flex; height: 14px; margin-bottom: 6px; }
+.wr-palette span { flex: 1; }
+.wr-piece { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+.wr-piecename { font-weight: 650; }
+.wr-why { margin: 8px 14px 4px; padding-left: 18px; font-size: 13px; color: var(--good); display: grid; gap: 2px; }
+.wr-none .sheet-text { margin-bottom: 4px; }
+.wr-row { gap: 12px; justify-content: flex-start; }
+.wr-rowmain { flex: 1; min-width: 0; }
+.wr-row.is-dirty .list-title { color: var(--muted); }
+.wr-dirtybadge { background: var(--keep-bg); color: var(--keep); }
+.wr-seg { flex-wrap: wrap; }
+.wr-seg .seg { flex: 1 0 28%; }
+.wr-colors { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+.wr-color { aspect-ratio: 1; min-height: 40px; border-radius: 50%; border: 1px solid rgba(0,0,0,.15); padding: 0; }
+.wr-color.is-active { outline: 3px solid var(--accent); outline-offset: 2px; }
+.wr-pickhead { margin: 14px 2px 6px; }
+.wr-pickrow { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.wr-pickrow::-webkit-scrollbar { display: none; }
+.wr-pick { flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; white-space: nowrap;
+  background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; font-size: 14px; font-weight: 600; }
+.wr-pick.is-active { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
+.wr-check { width: 100%; display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 8px 4px; background: transparent;
+  border: 0; border-bottom: 1px solid var(--border); text-align: left; font-size: 16px; }
+.wr-box { flex-shrink: 0; width: 28px; height: 28px; border-radius: 8px; border: 2px solid var(--border); display: grid; place-items: center; font-weight: 800; color: var(--surface); }
+.wr-check.is-on .wr-box { background: var(--good); border-color: var(--good); }
