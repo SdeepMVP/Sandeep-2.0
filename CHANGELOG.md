@@ -1,5 +1,12 @@
 # Changelog — Sandeep 2.0
 
+## 0.10.0 — 2026-10-06
+- Wardrobe Style DNA rewritten as **creative guidelines** (structured street smart, oversized tailoring): rules now rank outfits instead of excluding them, so a great outfit that bends one can win. Such outfits show a “✦ Creative pick” note.
+- New preferences: **tonal looks** (all black / cream / brown / grey) and shades of the same family, signature fitted-top / wide-bottom contrast (volume on volume allowed when tonal), **cropped / waist-length outerwear** (new Length field; long coats “wear it open”), visible layers, **one subtle statement pattern** (thin stripe, tonal pinstripe, plaid, houndstooth), **one statement texture** (leather, suede, fleece, knit, wool, corduroy, shearling) over smooth pieces; loud prints, logos and bright colours ranked lower.
+- Palette: white, cream, beige, sand, khaki, grey, black, chocolate brown, dark navy, taupe (sand and taupe added). A subtle extra colour carried by a pattern is tolerated.
+- Softer layering guidance: base only above 22 °C, mid layer 14–22 °C, outerwear below 14 °C, “the right call” below 6 °C. Shoes: dark and structured as a tendency; light sneakers allowed (not for formal).
+- Accessories: necklace and chain wallet added; up to 2 subtle details per outfit. My Style screen updated.
+
 ## 0.9.0 — 2026-10-06
 - Wardrobe **Style DNA** (smart casual + street smart) applied to every suggestion: slim top → wide bottom (never both slim or both loose), palette white/black/beige/brown/cream/navy/khaki/grey with 3 colours max, dark structured shoes (sport shoes only for sport), mid layer below 14 °C, outerwear below 6 °C, base layer only above 22 °C. Read-only **My Style** screen (Wardrobe › Today, and Settings).
 - **21 occasions** in 6 groups (Work, Daily life, Social, Formal, Sport & wellness, Travel) in a scrollable chip row; per-type rules (sport only from activewear, no sneakers for formal, no hoodies/joggers for work).
