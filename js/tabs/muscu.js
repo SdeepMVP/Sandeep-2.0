@@ -11,9 +11,9 @@
   var RPE_VALUES = [6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10];
 
   var CATS = {
-    main:      { label: 'Mouvement principal', short: 'Principal',  rpe: [7.5, 8],  inc: '+2,5 kg' },
-    secondary: { label: 'Composé secondaire',  short: 'Secondaire', rpe: [8, 8.5],  inc: '+2,5 kg' },
-    isolation: { label: 'Isolation',           short: 'Isolation',  rpe: [8.5, 9],  inc: '+1 à 2 kg' }
+    main:      { label: 'Main lift', short: 'Main',  rpe: [7.5, 8],  inc: '+2.5 kg' },
+    secondary: { label: 'Secondary compound',  short: 'Secondary', rpe: [8, 8.5],  inc: '+2.5 kg' },
+    isolation: { label: 'Isolation',           short: 'Isolation',  rpe: [8.5, 9],  inc: '+1 to 2 kg' }
   };
 
   var ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg>';
@@ -105,7 +105,7 @@
       var e = hist[i].entries[exId];
       if (e && e.snap) return e.snap.name;
     }
-    return 'Exercice supprimé';
+    return 'Deleted exercise';
   }
   function snapOf(s, option) {
     return { name: option.name, category: s.category, sets: s.sets, repMin: s.repMin, repMax: s.repMax };
@@ -160,29 +160,29 @@
     if (!sets.length) return null;
     var cat = CATS[snap.category] || CATS.secondary;
     var topW = Math.max.apply(null, sets.map(function (s) { return s.w || 0; }));
-    var wTxt = topW ? num(topW) + ' kg' : 'la même charge';
+    var wTxt = topW ? num(topW) + ' kg' : 'the same weight';
     if (sets.some(function (s) { return s.r === null || s.w === null; })) {
-      return { type: 'info', text: 'Complète poids et reps pour obtenir une suggestion.' };
+      return { type: 'info', text: 'Fill in weight and reps to get a suggestion.' };
     }
     if (sets.some(function (s) { return s.rpe === null; })) {
-      return { type: 'info', text: 'Renseigne le RPE de chaque série pour obtenir une suggestion.' };
+      return { type: 'info', text: 'Enter the RPE for every set to get a suggestion.' };
     }
     if (sets.length < snap.sets) {
-      return { type: 'keep', text: 'Garder ' + wTxt,
-        detail: sets.length + ' série(s) sur ' + snap.sets + ' faites.' };
+      return { type: 'keep', text: 'Keep ' + wTxt,
+        detail: sets.length + ' of ' + snap.sets + ' set(s) done.' };
     }
     var high = sets.some(function (s) { return s.rpe >= RPE_CUTOFF; });
     var allTop = sets.every(function (s) { return s.r >= snap.repMax; });
     if (allTop && !high) {
-      return { type: 'up', text: 'Augmenter la charge (' + cat.inc + ')',
-        detail: 'Toutes les séries à ' + snap.repMax + ' reps avec un RPE < 9,5.' };
+      return { type: 'up', text: 'Increase the weight (' + cat.inc + ')',
+        detail: 'All sets at ' + snap.repMax + ' reps with RPE below 9.5.' };
     }
     if (high) {
-      return { type: 'keep', text: 'Garder ' + wTxt,
-        detail: 'RPE ≥ 9,5 sur au moins une série : consolider avant d’augmenter.' };
+      return { type: 'keep', text: 'Keep ' + wTxt,
+        detail: 'RPE 9.5+ on at least one set: consolidate before going up.' };
     }
-    return { type: 'keep', text: 'Garder ' + wTxt,
-      detail: 'Viser ' + snap.repMax + ' reps sur toutes les séries.' };
+    return { type: 'keep', text: 'Keep ' + wTxt,
+      detail: 'Aim for ' + snap.repMax + ' reps on every set.' };
   }
 
   function rpeRange(cat) {
@@ -191,7 +191,7 @@
   }
   function setsSummary(sets) {
     return sets.map(function (s) {
-      return num(s.w) + '×' + (s.r === null ? '?' : s.r) + (s.rpe !== null && s.rpe !== undefined ? ' @' + num(s.rpe) : '');
+      return (s.w === null ? '?' : num(s.w)) + '×' + (s.r === null ? '?' : s.r) + (s.rpe !== null && s.rpe !== undefined ? ' @' + num(s.rpe) : '');
     }).join(' · ');
   }
 
@@ -219,7 +219,7 @@
 
   function render() {
     root.innerHTML = '';
-    var tabs = [['session', active() ? 'Séance en cours' : 'Séance'], ['history', 'Historique'], ['program', 'Programme']];
+    var tabs = [['session', active() ? 'Workout in progress' : 'Workout'], ['history', 'History'], ['program', 'Program']];
     root.appendChild(h('div', { class: 'segmented mu-nav', role: 'tablist' },
       tabs.map(function (t) {
         return h('button', { class: 'seg' + (view === t[0] ? ' is-active' : ''), role: 'tab',
@@ -240,7 +240,7 @@
     var last = done[done.length - 1];
     if (pickWeek === null) pickWeek = last ? last.week : 1;
 
-    body.appendChild(h('h2', { class: 'section-title' }, 'Nouvelle séance'));
+    body.appendChild(h('h2', { class: 'section-title' }, 'New workout'));
 
     var grid = h('div', { class: 'mu-daygrid' });
     data.days.forEach(function (d) {
@@ -251,29 +251,29 @@
         onclick: function () { pickDay = d.id; render(); }
       },
         h('span', { class: 'mu-dayname' }, d.name),
-        h('span', { class: 'mu-daymeta' }, d.slots.length + ' exercice' + (d.slots.length > 1 ? 's' : '')),
-        h('span', { class: 'mu-daymeta' }, lastOfDay ? 'Dernière : ' + ui.date(lastOfDay.startedAt) + ' (S' + lastOfDay.week + ')' : 'Jamais faite')));
+        h('span', { class: 'mu-daymeta' }, d.slots.length + ' exercise' + (d.slots.length === 1 ? '' : 's')),
+        h('span', { class: 'mu-daymeta' }, lastOfDay ? 'Last: ' + ui.date(lastOfDay.startedAt) + ' (W' + lastOfDay.week + ')' : 'Never done')));
     });
     body.appendChild(grid);
 
     body.appendChild(h('div', { class: 'card mu-weekcard' },
-      h('div', { class: 'field-label' }, 'Semaine du programme'),
+      h('div', { class: 'field-label' }, 'Program week'),
       h('div', { class: 'stepper' },
-        h('button', { class: 'btn btn-step', 'aria-label': 'Semaine précédente', disabled: pickWeek <= 1,
+        h('button', { class: 'btn btn-step', 'aria-label': 'Previous week', disabled: pickWeek <= 1,
           onclick: function () { pickWeek = Math.max(1, pickWeek - 1); render(); } }, '−'),
         h('div', { class: 'stepper-value' }, h('span', { class: 'stepper-num' }, pickWeek), h('span', { class: 'muted' }, ' / ' + WEEKS)),
-        h('button', { class: 'btn btn-step', 'aria-label': 'Semaine suivante', disabled: pickWeek >= WEEKS,
+        h('button', { class: 'btn btn-step', 'aria-label': 'Next week', disabled: pickWeek >= WEEKS,
           onclick: function () { pickWeek = Math.min(WEEKS, pickWeek + 1); render(); } }, '+')),
       h('p', { class: 'hint' }, pickWeek === 1
-        ? 'Semaine 1 = référence : pas d’objectifs ni de suggestions.'
-        : (last ? 'Dernière séance enregistrée : semaine ' + last.week + '.' : ''))));
+        ? 'Week 1 = baseline: no targets or suggestions.'
+        : (last ? 'Last saved workout: week ' + last.week + '.' : ''))));
 
     body.appendChild(h('div', { class: 'bottom-actions' },
       h('button', { class: 'btn btn-primary btn-block btn-lg', disabled: !pickDay, onclick: startSession },
-        pickDay ? 'Commencer ' + day(pickDay).name + ' · S' + pickWeek : 'Choisis un jour')));
+        pickDay ? 'Start ' + day(pickDay).name + ' · W' + pickWeek : 'Pick a day')));
 
     if (done.length) {
-      body.appendChild(h('h2', { class: 'section-title' }, 'Dernières séances'));
+      body.appendChild(h('h2', { class: 'section-title' }, 'Recent workouts'));
       body.appendChild(h('div', { class: 'list' }, done.slice(-4).reverse().map(sessionRow)));
     }
   }
@@ -283,8 +283,8 @@
     var nSets = Object.keys(s.entries).reduce(function (n, k) { return n + s.entries[k].sets.length; }, 0);
     return h('div', { class: 'list-row' },
       h('div', null,
-        h('div', { class: 'list-title' }, (d ? d.name : s.dayId) + ' · Semaine ' + s.week),
-        h('div', { class: 'list-sub' }, ui.longDate(s.startedAt) + ' · ' + nSets + ' séries')));
+        h('div', { class: 'list-title' }, (d ? d.name : s.dayId) + ' · Week ' + s.week),
+        h('div', { class: 'list-sub' }, ui.longDate(s.startedAt) + ' · ' + nSets + ' sets')));
   }
 
   function startSession() {
@@ -329,27 +329,27 @@
     var d = day(s.dayId);
     body.appendChild(h('div', { class: 'card mu-sessionhead' },
       h('div', null,
-        h('div', { class: 'mu-sessiontitle' }, (d ? d.name : s.dayId) + ' · Semaine ' + s.week),
-        h('div', { class: 'list-sub' }, 'Commencée ' + ui.longDate(s.startedAt) + ' à ' +
-          new Date(s.startedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }))),
-      h('div', { class: 'autosave', id: 'mu-autosave' }, 'Enregistrement auto')));
+        h('div', { class: 'mu-sessiontitle' }, (d ? d.name : s.dayId) + ' · Week ' + s.week),
+        h('div', { class: 'list-sub' }, 'Started ' + ui.longDate(s.startedAt) + ' at ' +
+          new Date(s.startedAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }))),
+      h('div', { class: 'autosave', id: 'mu-autosave' }, 'Auto-save on')));
 
     if (s.week === 1) {
-      body.appendChild(h('p', { class: 'note' }, 'Semaine 1 : séance de référence. Note simplement ce que tu fais, sans objectif.'));
+      body.appendChild(h('p', { class: 'note' }, 'Week 1: baseline workout. Just log what you do, no targets.'));
     }
-    body.appendChild(h('p', { class: 'hint' }, 'Les valeurs grises = dernière fois. Touche ✓ pour les reprendre, ou tape seulement ce qui change.'));
+    body.appendChild(h('p', { class: 'hint' }, 'Grey values = last time. Tap ✓ to reuse them, or type only what changes.'));
 
     if (!d || !d.slots.length) {
       body.appendChild(h('div', { class: 'empty-state small' },
-        h('p', null, 'Aucun exercice pour ce jour.'),
-        h('button', { class: 'btn btn-secondary', onclick: function () { programDay = s.dayId; go('program'); } }, 'Ajouter des exercices')));
+        h('p', null, 'No exercises for this day.'),
+        h('button', { class: 'btn btn-secondary', onclick: function () { programDay = s.dayId; go('program'); } }, 'Add exercises')));
     } else {
       d.slots.forEach(function (sl) { body.appendChild(exerciseCard(s, sl)); });
     }
 
     body.appendChild(h('div', { class: 'bottom-actions' },
-      h('button', { class: 'btn btn-primary btn-block btn-lg', onclick: finishSession }, 'Terminer la séance'),
-      h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: abandonSession }, 'Abandonner la séance')));
+      h('button', { class: 'btn btn-primary btn-block btn-lg', onclick: finishSession }, 'Finish workout'),
+      h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: abandonSession }, 'Discard workout')));
   }
 
   function exerciseCard(s, sl) {
@@ -365,7 +365,7 @@
 
     card.appendChild(h('div', { class: 'mu-exhead' },
       h('h3', { class: 'mu-exname' }, option.name),
-      h('button', { class: 'btn btn-icon', 'aria-label': 'Historique de ' + option.name,
+      h('button', { class: 'btn btn-icon', 'aria-label': 'History of ' + option.name,
         onclick: function () { historyEx = option.id; go('history'); } , html: chartIcon() })));
 
     if (sl.options.length > 1) {
@@ -378,26 +378,26 @@
     card.appendChild(h('div', { class: 'mu-meta' },
       h('span', { class: 'badge badge-' + sl.category }, cat.short),
       h('span', null, sl.sets + ' × ' + sl.repMin + '–' + sl.repMax + ' reps'),
-      baseline ? h('span', { class: 'muted' }, 'Référence') : h('span', null, 'RPE cible ' + rpeRange(sl.category))));
+      baseline ? h('span', { class: 'muted' }, 'Baseline') : h('span', null, 'Target RPE ' + rpeRange(sl.category))));
 
     if (prev) {
       card.appendChild(h('div', { class: 'mu-last' },
-        h('span', { class: 'muted' }, 'Dernière fois (' + ui.date(prev.session.startedAt) + ', S' + prev.session.week + ') : '),
+        h('span', { class: 'muted' }, 'Last time (' + ui.date(prev.session.startedAt) + ', W' + prev.session.week + '): '),
         setsSummary(prevEntry.sets)));
       if (!baseline && prev.session.week !== 1) {
         var ps = progression(prevEntry.sets, prevEntry.snap || snapOf(sl, option));
         if (ps && ps.type !== 'info') {
           card.appendChild(h('div', { class: 'mu-prevsugg is-' + ps.type },
-            h('strong', null, 'Suggestion pour aujourd’hui : '), ps.text));
+            h('strong', null, 'Suggestion for today: '), ps.text));
         }
       }
     } else {
-      card.appendChild(h('div', { class: 'mu-last muted' }, 'Première fois sur cet exercice.'));
+      card.appendChild(h('div', { class: 'mu-last muted' }, 'First time on this exercise.'));
     }
 
     var table = h('div', { class: 'mu-sets' },
       h('div', { class: 'mu-setrow mu-sethead' },
-        h('span', null, 'Série'), h('span', null, 'kg'), h('span', null, 'Reps'), h('span', null, 'RPE'), h('span', { class: 'sr-only' }, 'Valider')));
+        h('span', null, 'Set'), h('span', null, 'kg'), h('span', null, 'Reps'), h('span', null, 'RPE'), h('span', { class: 'sr-only' }, 'Confirm')));
     for (var i = 0; i < nSets; i++) table.appendChild(setRow(s, sl, option, i, prevSet(prevEntry, i), card));
     card.appendChild(table);
 
@@ -408,11 +408,11 @@
         while (e.sets.length < nSets) e.sets.push(emptySet());
         e.sets.push(emptySet());
         persist(); replaceCard(card, s, sl);
-      } }, '+ Série'),
+      } }, '+ Set'),
       extra > 0 ? h('button', { class: 'btn btn-ghost btn-sm', onclick: function () {
         var e = entryFor(s, sl, option);
         e.sets.pop(); persist(); replaceCard(card, s, sl);
-      } }, '− Série') : null));
+      } }, '− Set') : null));
 
     card.appendChild(h('div', { class: 'mu-sugg', 'data-sugg': '1' }));
     updateSuggestion(card, s, sl, option);
@@ -444,12 +444,12 @@
     }
 
     var w = h('input', { class: 'input mu-in', type: 'text', inputmode: 'decimal', autocomplete: 'off',
-      'aria-label': 'Poids série ' + (i + 1) + ' en kg',
+      'aria-label': 'Set ' + (i + 1) + ' weight in kg',
       placeholder: prev && prev.w !== null ? num(prev.w) : 'kg', value: cur.w !== null ? num(cur.w) : '' });
     w.addEventListener('input', function () { getSet(s, sl, option, i).w = ui.parseNum(w.value); changed(); });
 
     var r = h('input', { class: 'input mu-in', type: 'text', inputmode: 'numeric', pattern: '[0-9]*', autocomplete: 'off',
-      'aria-label': 'Répétitions série ' + (i + 1),
+      'aria-label': 'Set ' + (i + 1) + ' reps',
       placeholder: prev && prev.r !== null ? String(prev.r) : 'reps', value: cur.r !== null ? String(cur.r) : '' });
     r.addEventListener('input', function () {
       var n = ui.parseNum(r.value);
@@ -458,7 +458,7 @@
     });
 
     var sel = h('select', { class: 'input mu-in mu-rpe' + (cur.rpe === null ? ' is-placeholder' : ''),
-      'aria-label': 'RPE série ' + (i + 1) },
+      'aria-label': 'Set ' + (i + 1) + ' RPE' },
       h('option', { value: '' }, prev && prev.rpe !== null && prev.rpe !== undefined ? num(prev.rpe) : '—'),
       RPE_VALUES.map(function (v) { return h('option', { value: String(v) }, num(v)); }));
     sel.value = cur.rpe === null ? '' : String(cur.rpe);
@@ -469,7 +469,7 @@
     });
 
     var check = h('button', { class: 'btn btn-check' + (cur.done ? ' is-on' : ''),
-      'aria-label': (cur.done ? 'Annuler la validation de la série ' : 'Valider la série ') + (i + 1),
+      'aria-label': (cur.done ? 'Unconfirm set ' : 'Confirm set ') + (i + 1),
       'aria-pressed': cur.done ? 'true' : 'false',
       onclick: function () {
         var set = getSet(s, sl, option, i);
@@ -510,7 +510,7 @@
     var p = progression(sets, snapOf(sl, option));
     if (!p) return;
     box.classList.add('is-' + p.type);
-    box.appendChild(h('div', null, h('strong', null, 'Prochaine séance : '), p.text));
+    box.appendChild(h('div', null, h('strong', null, 'Next workout: '), p.text));
     if (p.detail) box.appendChild(h('div', { class: 'mu-suggdetail' }, p.detail));
   }
 
@@ -518,10 +518,10 @@
   function flashSaved() {
     var el = document.getElementById('mu-autosave');
     if (!el) return;
-    el.textContent = 'Enregistré ✓';
+    el.textContent = 'Saved ✓';
     el.classList.add('is-saved');
     clearTimeout(savedTimer);
-    savedTimer = setTimeout(function () { el.classList.remove('is-saved'); el.textContent = 'Enregistrement auto'; }, 1500);
+    savedTimer = setTimeout(function () { el.classList.remove('is-saved'); el.textContent = 'Auto-save on'; }, 1500);
   }
 
   function finishSession() {
@@ -532,11 +532,11 @@
       count += s.entries[k].sets.filter(isLogged).length;
     });
     ui.confirm({
-      title: 'Terminer la séance ?',
+      title: 'Finish the workout?',
       message: count
-        ? count + ' série(s) seront enregistrées. Les séries jamais touchées sont ignorées ; les cases laissées grises reprennent la valeur de la dernière fois.'
-        : 'Aucune série saisie : la séance sera enregistrée vide.',
-      okLabel: 'Terminer et enregistrer'
+        ? count + ' set(s) will be saved. Untouched sets are skipped; fields left grey take last time’s value.'
+        : 'No sets logged: the workout will be saved empty.',
+      okLabel: 'Finish and save'
     }).then(function (ok) {
       if (!ok) return;
       /* Fige les séries : on garde les séries saisies, en complétant avec les valeurs grises. */
@@ -561,7 +561,7 @@
       s.finishedAt = new Date().toISOString();
       data.activeId = null;
       persist();
-      ui.toast('Séance enregistrée');
+      ui.toast('Workout saved');
       pickWeek = s.week;
       render();
       window.scrollTo(0, 0);
@@ -569,8 +569,8 @@
   }
 
   function abandonSession() {
-    ui.confirm({ title: 'Abandonner la séance ?', message: 'Toutes les séries saisies pour cette séance seront supprimées.',
-      okLabel: 'Supprimer la séance', danger: true }).then(function (ok) {
+    ui.confirm({ title: 'Discard the workout?', message: 'All sets logged in this workout will be deleted.',
+      okLabel: 'Delete workout', danger: true }).then(function (ok) {
       if (!ok) return;
       var s = active();
       data.sessions = data.sessions.filter(function (x) { return x.id !== s.id; });
@@ -600,9 +600,9 @@
 
     body.appendChild(h('div', { class: 'segmented small' },
       h('button', { class: 'seg' + (historyMode === 'exercises' ? ' is-active' : ''),
-        onclick: function () { historyMode = 'exercises'; render(); } }, 'Par exercice'),
+        onclick: function () { historyMode = 'exercises'; render(); } }, 'By exercise'),
       h('button', { class: 'seg' + (historyMode === 'sessions' ? ' is-active' : ''),
-        onclick: function () { historyMode = 'sessions'; render(); } }, 'Séances')));
+        onclick: function () { historyMode = 'sessions'; render(); } }, 'Workouts')));
 
     if (historyMode === 'sessions') return renderSessionsList(body);
 
@@ -622,7 +622,7 @@
     });
     var ids = Object.keys(orphans);
     if (ids.length) {
-      body.appendChild(h('h2', { class: 'section-title' }, 'Exercices retirés du programme'));
+      body.appendChild(h('h2', { class: 'section-title' }, 'Exercises removed from the program'));
       body.appendChild(h('div', { class: 'list' }, ids.map(function (id) { return exerciseRow(id, exName(id)); })));
     }
   }
@@ -634,19 +634,19 @@
       h('div', null,
         h('div', { class: 'list-title' }, name),
         h('div', { class: 'list-sub' }, hist.length
-          ? hist.length + ' séance' + (hist.length > 1 ? 's' : '') + ' · 1RM estimé ' + num(last.best ? last.best.value : 0, 1) + ' kg'
-          : 'Pas encore de données')),
+          ? hist.length + ' workout' + (hist.length === 1 ? '' : 's') + ' · Est. 1RM ' + num(last.best ? last.best.value : 0, 1) + ' kg'
+          : 'No data yet')),
       h('span', { class: 'chev', 'aria-hidden': 'true' }, '›'));
   }
 
   function renderExerciseHistory(body, exId) {
     var name = exName(exId);
     var hist = historyFor(exId);
-    body.appendChild(h('button', { class: 'btn btn-ghost btn-sm back', onclick: function () { historyEx = null; render(); } }, '‹ Retour'));
+    body.appendChild(h('button', { class: 'btn btn-ghost btn-sm back', onclick: function () { historyEx = null; render(); } }, '‹ Back'));
     body.appendChild(h('h2', { class: 'page-title' }, name));
 
     if (!hist.length) {
-      body.appendChild(h('p', { class: 'muted' }, 'Aucune séance enregistrée pour cet exercice.'));
+      body.appendChild(h('p', { class: 'muted' }, 'No workouts saved for this exercise.'));
       return;
     }
     var pts = hist.filter(function (x) { return x.best; }).map(function (x) {
@@ -656,24 +656,24 @@
     var last = pts[pts.length - 1];
 
     body.appendChild(h('div', { class: 'stats' },
-      h('div', { class: 'stat' }, h('div', { class: 'stat-label' }, '1RM estimé (dernier)'), h('div', { class: 'stat-value' }, last ? num(last.v, 1) + ' kg' : '—')),
-      h('div', { class: 'stat' }, h('div', { class: 'stat-label' }, 'Record'), h('div', { class: 'stat-value' }, best ? num(best, 1) + ' kg' : '—'))));
+      h('div', { class: 'stat' }, h('div', { class: 'stat-label' }, 'Est. 1RM (latest)'), h('div', { class: 'stat-value' }, last ? num(last.v, 1) + ' kg' : '—')),
+      h('div', { class: 'stat' }, h('div', { class: 'stat-label' }, 'All-time best'), h('div', { class: 'stat-value' }, best ? num(best, 1) + ' kg' : '—'))));
 
     body.appendChild(h('div', { class: 'card' },
-      h('div', { class: 'card-title' }, '1RM estimé au fil du temps'),
+      h('div', { class: 'card-title' }, 'Estimated 1RM over time'),
       lineChart(pts),
-      h('p', { class: 'hint' }, 'Formule d’Epley sur la meilleure série : poids × (1 + reps / 30).')));
+      h('p', { class: 'hint' }, 'Epley formula on the best set: weight × (1 + reps / 30).')));
 
-    body.appendChild(h('h2', { class: 'section-title' }, 'Séances'));
+    body.appendChild(h('h2', { class: 'section-title' }, 'Workouts'));
     hist.slice().reverse().forEach(function (x) {
       body.appendChild(h('div', { class: 'card mu-histcard' },
         h('div', { class: 'mu-histhead' },
           h('span', { class: 'list-title' }, ui.longDate(x.session.startedAt)),
-          h('span', { class: 'muted' }, 'S' + x.session.week)),
+          h('span', { class: 'muted' }, 'W' + x.session.week)),
         h('ol', { class: 'mu-histsets' }, x.entry.sets.map(function (st, i) {
           var isBest = x.best && x.best.index === i;
           return h('li', { class: isBest ? 'is-best' : '' },
-            h('span', null, num(st.w) + ' kg × ' + st.r + (st.rpe !== null && st.rpe !== undefined ? ' @ RPE ' + num(st.rpe) : '')),
+            h('span', null, (st.w === null ? '?' : num(st.w)) + ' kg × ' + (st.r === null ? '?' : st.r) + (st.rpe !== null && st.rpe !== undefined ? ' @ RPE ' + num(st.rpe) : '')),
             isBest ? h('span', { class: 'mu-e1rm' }, '1RM ≈ ' + num(x.best.value, 1)) : null);
         }))));
     });
@@ -683,7 +683,7 @@
   function lineChart(pts) {
     var W = 340, H = 190, L = 44, R = 14, T = 16, B = 28;
     var wrap = h('div', { class: 'chart' });
-    if (pts.length === 0) { wrap.appendChild(h('p', { class: 'muted' }, 'Pas de données.')); return wrap; }
+    if (pts.length === 0) { wrap.appendChild(h('p', { class: 'muted' }, 'No data.')); return wrap; }
     var vs = pts.map(function (p) { return p.v; });
     var min = Math.min.apply(null, vs), max = Math.max.apply(null, vs);
     var pad = Math.max((max - min) * 0.15, 2.5);
@@ -702,7 +702,7 @@
       return e;
     }
     var svg = s('svg', { viewBox: '0 0 ' + W + ' ' + H, class: 'chart-svg', role: 'img',
-      'aria-label': '1RM estimé : de ' + num(pts[0].v, 1) + ' à ' + num(pts[pts.length - 1].v, 1) + ' kg' });
+      'aria-label': 'Estimated 1RM: from ' + num(pts[0].v, 1) + ' to ' + num(pts[pts.length - 1].v, 1) + ' kg' });
     for (var g = 0; g <= 3; g++) {
       var gv = min + (max - min) * g / 3;
       svg.appendChild(s('line', { x1: L, x2: W - R, y1: y(gv), y2: y(gv), class: 'chart-grid' }));
@@ -728,7 +728,7 @@
       guide.setAttribute('x1', cx); guide.setAttribute('x2', cx); guide.setAttribute('visibility', 'visible');
       focus.setAttribute('cx', cx); focus.setAttribute('cy', cy); focus.setAttribute('visibility', 'visible');
       tip.hidden = false;
-      tip.textContent = p.label + ' · S' + p.week + ' · ' + num(p.v, 1) + ' kg';
+      tip.textContent = p.label + ' · W' + p.week + ' · ' + num(p.v, 1) + ' kg';
       var leftPct = Math.min(Math.max(cx / W * 100, 18), 82);
       tip.style.left = leftPct + '%';
     }
@@ -741,12 +741,12 @@
 
   function renderSessionsList(body) {
     var list = finished().reverse();
-    if (!list.length) { body.appendChild(h('p', { class: 'muted' }, 'Aucune séance terminée pour l’instant.')); return; }
+    if (!list.length) { body.appendChild(h('p', { class: 'muted' }, 'No finished workouts yet.')); return; }
     list.forEach(function (s) {
       var d = day(s.dayId);
       var card = h('details', { class: 'card mu-sesscard' },
         h('summary', null,
-          h('span', { class: 'list-title' }, (d ? d.name : s.dayId) + ' · S' + s.week),
+          h('span', { class: 'list-title' }, (d ? d.name : s.dayId) + ' · W' + s.week),
           h('span', { class: 'list-sub' }, ui.longDate(s.startedAt))));
       Object.keys(s.entries).forEach(function (exId) {
         var e = s.entries[exId];
@@ -754,15 +754,15 @@
           h('div', { class: 'mu-sessexname' }, (e.snap && e.snap.name) || exName(exId)),
           h('div', { class: 'list-sub' }, setsSummary(e.sets))));
       });
-      if (!Object.keys(s.entries).length) card.appendChild(h('p', { class: 'muted' }, 'Séance vide.'));
+      if (!Object.keys(s.entries).length) card.appendChild(h('p', { class: 'muted' }, 'Empty workout.'));
       card.appendChild(h('button', { class: 'btn btn-ghost btn-sm danger-text', onclick: function () {
-        ui.confirm({ title: 'Supprimer cette séance ?', message: 'Elle disparaîtra de l’historique. Action définitive.',
-          okLabel: 'Supprimer', danger: true }).then(function (ok) {
+        ui.confirm({ title: 'Delete this workout?', message: 'It will be removed from your history. This cannot be undone.',
+          okLabel: 'Delete', danger: true }).then(function (ok) {
           if (!ok) return;
           data.sessions = data.sessions.filter(function (x) { return x.id !== s.id; });
           persist(); render();
         });
-      } }, 'Supprimer la séance'));
+      } }, 'Delete workout'));
       body.appendChild(card);
     });
   }
@@ -776,29 +776,29 @@
     })));
     var d = day(programDay) || data.days[0];
     if (active() && active().dayId === d.id) {
-      body.appendChild(h('p', { class: 'note' }, 'Séance en cours sur ce jour : les modifications s’appliquent tout de suite.'));
+      body.appendChild(h('p', { class: 'note' }, 'Workout in progress on this day: changes apply right away.'));
     }
     if (!d.slots.length) {
-      body.appendChild(h('div', { class: 'empty-state small' }, h('p', null, 'Aucun exercice pour ' + d.name + '.')));
+      body.appendChild(h('div', { class: 'empty-state small' }, h('p', null, 'No exercises for ' + d.name + '.')));
     }
     var list = h('div', { class: 'list' });
     d.slots.forEach(function (sl, i) {
       var cat = CATS[sl.category] || CATS.secondary;
       list.appendChild(h('div', { class: 'list-row mu-progrow' },
         h('div', { class: 'mu-progmain' },
-          h('div', { class: 'list-title' }, sl.options.map(function (o) { return o.name; }).join(' OU ')),
+          h('div', { class: 'list-title' }, sl.options.map(function (o) { return o.name; }).join(' OR ')),
           h('div', { class: 'list-sub' },
             h('span', { class: 'badge badge-' + sl.category }, cat.short), ' ',
             sl.sets + ' × ' + sl.repMin + '–' + sl.repMax + ' · RPE ' + rpeRange(sl.category))),
         h('div', { class: 'mu-progbtns' },
-          h('button', { class: 'btn btn-icon', 'aria-label': 'Monter', disabled: i === 0, onclick: function () { move(d, i, -1); } }, '↑'),
-          h('button', { class: 'btn btn-icon', 'aria-label': 'Descendre', disabled: i === d.slots.length - 1, onclick: function () { move(d, i, 1); } }, '↓'),
-          h('button', { class: 'btn btn-icon', 'aria-label': 'Modifier', onclick: function () { editSlot(d, sl); } }, '✎'))));
+          h('button', { class: 'btn btn-icon', 'aria-label': 'Move up', disabled: i === 0, onclick: function () { move(d, i, -1); } }, '↑'),
+          h('button', { class: 'btn btn-icon', 'aria-label': 'Move down', disabled: i === d.slots.length - 1, onclick: function () { move(d, i, 1); } }, '↓'),
+          h('button', { class: 'btn btn-icon', 'aria-label': 'Edit', onclick: function () { editSlot(d, sl); } }, '✎'))));
     });
     body.appendChild(list);
     body.appendChild(h('div', { class: 'bottom-actions' },
-      h('button', { class: 'btn btn-secondary btn-block btn-lg', onclick: function () { editSlot(d, null); } }, '+ Ajouter un exercice')));
-    body.appendChild(h('p', { class: 'hint' }, 'RPE cible par catégorie : principal 7,5–8 · secondaire 8–8,5 · isolation 8,5–9. Un exercice avec plusieurs variantes te laisse en choisir une à chaque séance.'));
+      h('button', { class: 'btn btn-secondary btn-block btn-lg', onclick: function () { editSlot(d, null); } }, '+ Add an exercise')));
+    body.appendChild(h('p', { class: 'hint' }, 'Target RPE by category: main 7.5–8 · secondary 8–8.5 · isolation 8.5–9. An exercise with several variants lets you pick one each workout.'));
   }
 
   function move(d, i, dir) {
@@ -820,10 +820,10 @@
         optWrap.innerHTML = '';
         draft.options.forEach(function (o, i) {
           var inp = h('input', { class: 'input', type: 'text', value: o.name, autocomplete: 'off', autocapitalize: 'words',
-            placeholder: i === 0 ? 'Nom de l’exercice' : 'Variante', 'aria-label': i === 0 ? 'Nom' : 'Variante ' + i });
+            placeholder: i === 0 ? 'Exercise name' : 'Variant', 'aria-label': i === 0 ? 'Name' : 'Variant ' + i });
           inp.addEventListener('input', function () { o.name = inp.value; });
           optWrap.appendChild(h('div', { class: 'mu-optrow' }, inp,
-            draft.options.length > 1 ? h('button', { class: 'btn btn-icon', 'aria-label': 'Retirer cette variante',
+            draft.options.length > 1 ? h('button', { class: 'btn btn-icon', 'aria-label': 'Remove this variant',
               onclick: function () { draft.options.splice(i, 1); renderOpts(); } }, '×') : null));
         });
       }
@@ -849,10 +849,10 @@
         draft.options = draft.options.map(function (o) { o.name = (o.name || '').trim(); return o; })
           .filter(function (o) { return o.name; });
         var problem = null;
-        if (!draft.options.length) problem = 'Donne un nom à l’exercice.';
-        else if (!draft.sets || draft.sets < 1 || draft.sets > 12) problem = 'Nombre de séries entre 1 et 12.';
-        else if (!draft.repMin || !draft.repMax || draft.repMin < 1 || draft.repMax > 100) problem = 'Renseigne la fourchette de reps.';
-        else if (draft.repMin > draft.repMax) problem = 'Le minimum de reps doit être ≤ au maximum.';
+        if (!draft.options.length) problem = 'Give the exercise a name.';
+        else if (!draft.sets || draft.sets < 1 || draft.sets > 12) problem = 'Number of sets between 1 and 12.';
+        else if (!draft.repMin || !draft.repMax || draft.repMin < 1 || draft.repMax > 100) problem = 'Fill in the rep range.';
+        else if (draft.repMin > draft.repMax) problem = 'Min reps must be ≤ max reps.';
         if (problem) {
           if (!draft.options.length) draft.options.push({ id: ui.uid(), name: '' });
           err.textContent = problem; err.hidden = false; renderOpts(); return;
@@ -861,12 +861,12 @@
         if (isNew) d.slots.push(draft);
         else d.slots[d.slots.indexOf(sl)] = draft;
         persist(); close(); render();
-        ui.toast(isNew ? 'Exercice ajouté' : 'Exercice modifié');
+        ui.toast(isNew ? 'Exercise added' : 'Exercise updated');
       }
 
       function remove() {
-        ui.confirm({ title: 'Retirer cet exercice ?', message: 'Il sera retiré du programme ' + d.name + '. Son historique est conservé.',
-          okLabel: 'Retirer', danger: true }).then(function (ok) {
+        ui.confirm({ title: 'Remove this exercise?', message: 'It will be removed from the ' + d.name + ' program. Its history is kept.',
+          okLabel: 'Remove', danger: true }).then(function (ok) {
           if (!ok) return;
           d.slots.splice(d.slots.indexOf(sl), 1);
           persist(); close(); render();
@@ -874,25 +874,25 @@
       }
 
       return [
-        h('h2', { class: 'sheet-title' }, isNew ? 'Nouvel exercice · ' + d.name : 'Modifier l’exercice'),
-        h('div', { class: 'field' }, h('span', { class: 'field-label' }, 'Nom (et variantes éventuelles)'), optWrap,
+        h('h2', { class: 'sheet-title' }, isNew ? 'New exercise · ' + d.name : 'Edit exercise'),
+        h('div', { class: 'field' }, h('span', { class: 'field-label' }, 'Name (and optional variants)'), optWrap,
           h('button', { class: 'btn btn-ghost btn-sm', type: 'button', onclick: function () {
             draft.options.push({ id: ui.uid(), name: '' }); renderOpts();
             var ins = optWrap.querySelectorAll('input'); ins[ins.length - 1].focus();
-          } }, '+ Ajouter une variante (au choix par séance)')),
-        h('div', { class: 'field' }, h('span', { class: 'field-label' }, 'Catégorie'), catSeg),
+          } }, '+ Add a variant (pick one per workout)')),
+        h('div', { class: 'field' }, h('span', { class: 'field-label' }, 'Category'), catSeg),
         h('div', { class: 'form-grid' },
-          numField('Séries', 'sets'), numField('Reps min', 'repMin'), numField('Reps max', 'repMax')),
+          numField('Sets', 'sets'), numField('Min reps', 'repMin'), numField('Max reps', 'repMax')),
         err,
         h('div', { class: 'sheet-actions' },
-          h('button', { class: 'btn btn-primary btn-block', onclick: save }, 'Enregistrer'),
-          h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, 'Annuler'),
-          isNew ? null : h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: remove }, 'Retirer du programme'))
+          h('button', { class: 'btn btn-primary btn-block', onclick: save }, 'Save'),
+          h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, 'Cancel'),
+          isNew ? null : h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: remove }, 'Remove from program'))
       ];
     }, { modal: true });
   }
 
-  S2.app.registerTab({ id: 'muscu', label: 'Muscu', icon: ICON, mount: mount, order: 10 });
+  S2.app.registerTab({ id: 'muscu', label: 'Gym', icon: ICON, mount: mount, order: 10 });
 
   /* Exposé pour les tests / la console. */
   S2.muscu = { e1rm: e1rm, progression: progression };

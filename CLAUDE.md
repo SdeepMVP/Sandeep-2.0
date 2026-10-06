@@ -3,7 +3,7 @@
 Application personnelle « hub de vie », utilisée uniquement sur iPhone, installée sur l'écran d'accueil.
 
 ## Règles produit
-- **Nom de l'app : Sandeep 2.0.** L'interface est **entièrement en français** (libellés, messages, dates, nombres avec virgule décimale). Les noms d'exercices saisis par l'utilisateur restent tels quels.
+- **Nom de l'app : Sandeep 2.0.** L'interface est **entièrement en anglais** (libellés, messages, aide, confirmations), à la demande de l'utilisateur le 6 octobre 2026 (elle était en français jusqu'à la v0.2.0). Nombres avec point décimal (la virgule reste acceptée à la saisie, clavier iPhone FR), dates au format `en-GB` (jj/mm). Les noms d'exercices saisis par l'utilisateur restent tels quels. Les ids d'onglets et les clés de stockage (`muscu`, `garde-robe`…) ne changent pas, pour ne pas perdre de données.
 - **Mobile-first (iPhone)** : grandes zones tactiles (≥ 44 px, idéalement 48 px), clavier numérique pour toute saisie de nombre (`inputmode="decimal"` pour les poids, `inputmode="numeric"` pour les entiers ; accepter la virgule), champs en 16 px minimum (pas de zoom iOS), utilisable **à une main à la salle** (actions principales en bas de l'écran), respect des safe areas (`env(safe-area-inset-*)`).
 - **Contrôle manuel total** : aucune récupération automatique de données externes, aucune décision automatique. Les suggestions sont permises mais l'utilisateur confirme toujours (suppression, import, fin de séance… passent par une confirmation).
 
@@ -22,7 +22,7 @@ Application personnelle « hub de vie », utilisée uniquement sur iPhone, insta
 - Mode clair **et** sombre : couleurs définies comme variables CSS dans `:root` (`css/app.css`), thème Auto / Clair / Sombre réglable dans Réglages.
 
 ## Process
-- Après chaque changement, ajouter une entrée courte dans **CHANGELOG.md** (date, version, quoi) et incrémenter `VERSION` dans `js/settings.js`.
+- Après chaque changement, ajouter une entrée courte (en anglais) dans **CHANGELOG.md** (date, version, quoi) et incrémenter `VERSION` dans `js/settings.js`.
 - Tester sur un viewport iPhone (390 × 844) avant de pousser.
 
 ## Structure

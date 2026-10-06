@@ -60,13 +60,13 @@
     return new Promise(function (resolve) {
       sheet(function (close) {
         return [
-          h('h2', { class: 'sheet-title' }, o.title || 'Confirmer'),
+          h('h2', { class: 'sheet-title' }, o.title || 'Confirm'),
           o.message ? h('p', { class: 'sheet-text' }, o.message) : null,
           h('div', { class: 'sheet-actions' },
             h('button', { class: 'btn ' + (o.danger ? 'btn-danger' : 'btn-primary') + ' btn-block',
-              onclick: function () { close(true); } }, o.okLabel || 'Confirmer'),
+              onclick: function () { close(true); } }, o.okLabel || 'Confirm'),
             h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(false); } },
-              o.cancelLabel || 'Annuler'))
+              o.cancelLabel || 'Cancel'))
         ];
       }, { onClose: function (r) { resolve(r === true); } });
     });
@@ -82,11 +82,11 @@
     toastTimer = setTimeout(function () { t.classList.remove('is-visible'); }, 2200);
   }
 
-  /* Nombres et dates au format français. */
+  /* Number and date formatting (English UI; commas still accepted on input). */
   function num(n, digits) {
     if (n === null || n === undefined || isNaN(n)) return '';
     var r = digits === undefined ? Math.round(n * 100) / 100 : Number(n.toFixed(digits));
-    return String(r).replace('.', ',');
+    return String(r);
   }
   function parseNum(s) {
     if (s === null || s === undefined) return null;
@@ -99,10 +99,10 @@
     var d = new Date(iso);
     var o = { day: '2-digit', month: '2-digit' };
     if (withYear) o.year = '2-digit';
-    return d.toLocaleDateString('fr-FR', o);
+    return d.toLocaleDateString('en-GB', o);
   }
   function longDate(iso) {
-    return new Date(iso).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+    return new Date(iso).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
   }
 
   function uid() {

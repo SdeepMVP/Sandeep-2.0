@@ -35,7 +35,7 @@
       },
         h('span', { class: 'tab-icon', html: t.icon || '', 'aria-hidden': 'true' }),
         h('span', { class: 'tab-label' }, t.label),
-        t.soon ? h('span', { class: 'tab-badge' }, 'bientôt') : null
+        t.soon ? h('span', { class: 'tab-badge' }, 'soon') : null
       ));
     });
   }
@@ -62,8 +62,8 @@
       console.error('Erreur dans l’onglet', tab.id, e);
       container.innerHTML = '';
       container.appendChild(h('div', { class: 'card card-error' },
-        h('h2', null, 'Oups, cet onglet a rencontré un problème'),
-        h('p', null, 'Les autres onglets et tes données ne sont pas touchés. Fais un export dans Réglages par sécurité.'),
+        h('h2', null, 'Oops, this tab ran into a problem'),
+        h('p', null, 'Other tabs and your data are not affected. Export a backup in Settings to be safe.'),
         h('pre', { class: 'error-detail' }, String(e && e.message || e))));
     }
   }
@@ -72,7 +72,7 @@
     container.appendChild(h('div', { class: 'empty-state' },
       h('div', { class: 'empty-icon', html: tab.icon || '', 'aria-hidden': 'true' }),
       h('h2', null, tab.label),
-      h('p', null, 'Bientôt disponible.'),
+      h('p', null, 'Coming soon.'),
       tab.teaser ? h('p', { class: 'muted' }, tab.teaser) : null));
   }
 

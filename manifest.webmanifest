@@ -1,8 +1,8 @@
 {
   "name": "Sandeep 2.0",
   "short_name": "Sandeep 2.0",
-  "description": "Mon hub de vie personnel.",
-  "lang": "fr",
+  "description": "My personal life hub.",
+  "lang": "en",
   "start_url": "./#muscu",
   "scope": "./",
   "display": "standalone",

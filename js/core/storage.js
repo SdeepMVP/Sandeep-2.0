@@ -54,7 +54,7 @@
   function importAll(obj) {
     if (!obj || typeof obj !== 'object' || obj.app !== 'Sandeep 2.0' ||
         !obj.data || typeof obj.data !== 'object') {
-      throw new Error('Ce fichier n’est pas une sauvegarde Sandeep 2.0.');
+      throw new Error('This file is not a Sandeep 2.0 backup.');
     }
     var backup = exportAll();
     try {
@@ -67,7 +67,7 @@
       Object.keys(backup.data).forEach(function (ns) {
         localStorage.setItem(PREFIX + ns, JSON.stringify(backup.data[ns]));
       });
-      throw new Error('Import impossible (stockage plein ?). Données précédentes restaurées.');
+      throw new Error('Import failed (storage full?). Previous data restored.');
     }
   }
 
