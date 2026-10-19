@@ -1,5 +1,8 @@
 # Changelog — Sandeep 2.0
 
+## 0.13.0 — 2026-10-19
+- Habits: new built-in daily habit **Pelvic floor routine** with three boxes (Kegels 3 × 10, reverse Kegels 10, belly breathing 2 min), its streak, last-7-days strip and how-to note. Added automatically to existing data; can be edited or deleted like any habit.
+
 ## 0.12.0 — 2026-10-06
 - Wardrobe **Complete your wardrobe** (from the Closet): ranks the purchases that would unlock the most new good outfits across 6 typical days (weekend, office, date night, summer weekend, cold city day, wedding), with the reason (new outfits with your pieces, first outfit possible for an occasion, upgraded best look) and alternative colours.
 - **Days you can’t dress for yet**: when an occasion needs several missing pieces, a simple starter set is proposed.

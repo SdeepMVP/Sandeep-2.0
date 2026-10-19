@@ -33,7 +33,10 @@
     { id: 'creatine', type: 'check', name: 'Creatine', slots: [{ id: 'dose', label: 'Daily dose' }] },
     { id: 'medication', type: 'check', name: 'Medication', slots: [{ id: 'am', label: 'Morning' }, { id: 'pm', label: 'Evening' }] },
     { id: 'sleep', type: 'check', name: 'Sleep schedule', note: 'Bedtime counts for the night of that day.',
-      slots: [{ id: 'bed', label: 'In bed before midnight' }, { id: 'wake', label: 'Up before 9:00' }] }
+      slots: [{ id: 'bed', label: 'In bed before midnight' }, { id: 'wake', label: 'Up before 9:00' }] },
+    { id: 'pelvic-floor', type: 'check', name: 'Pelvic floor routine',
+      note: 'Kegels: squeeze 5 s, relax 5 s, 10 times, 3 sets spread over the day. Reverse Kegels: gently push as if to pee, then relax fully, 10 times. Breathing: 2 min from the belly, in 4 s, out 6 s.',
+      slots: [{ id: 'kegel', label: 'Kegels · 3 × 10' }, { id: 'reverse', label: 'Reverse Kegels · 10' }, { id: 'breath', label: 'Belly breathing · 2 min' }] }
   ];
 
   function defaults() {
