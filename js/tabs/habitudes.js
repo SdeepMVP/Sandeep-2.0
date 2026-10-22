@@ -60,6 +60,7 @@
     if (!d || !Array.isArray(d.habits)) { d = defaults(); S2.storage.save(NS, d); }
     d.logs = d.logs || {};
     d.removedDefaults = d.removedDefaults || [];
+    d.weekNotes = d.weekNotes || {};
     var added = false;
     DEFAULT_CHECKS.forEach(function (def) {
       if (d.habits.some(function (x) { return x.id === def.id; }) || d.removedDefaults.indexOf(def.id) > -1) return;
@@ -147,7 +148,8 @@
   }
 
   /* ---------- Rendu ---------- */
-  var view = 'daily'; // daily | quit
+  var view = 'daily'; // daily | weeks | quit
+  var weekOffset = 0;  // 0 = semaine en cours, -1 = semaine précédente…
 
   function mount(container) {
     data = loadData();
@@ -163,8 +165,10 @@
     var q = quitHabit();
     root.appendChild(h('div', { class: 'segmented hb-nav' },
       h('button', { class: 'seg' + (view === 'daily' ? ' is-active' : ''), onclick: function () { view = 'daily'; render(); } }, 'Daily'),
+      h('button', { class: 'seg' + (view === 'weeks' ? ' is-active' : ''), onclick: function () { view = 'weeks'; render(); } }, 'Weeks'),
       q ? h('button', { class: 'seg' + (view === 'quit' ? ' is-active' : ''), onclick: function () { view = 'quit'; render(); } }, q.name) : null));
     if (view === 'quit' && q) renderQuit(q);
+    else if (view === 'weeks') renderWeeks();
     else renderDaily();
   }
 
@@ -316,6 +320,160 @@
           isNew ? null : h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: remove }, 'Delete this habit'))
       ];
     }, { modal: true });
+  }
+
+  /* ---------- Progrès semaine par semaine (lundi → dimanche) ---------- */
+  var TREND_WEEKS = 12;
+  function weekStart(k) { var d = parseKey(k); return addDays(k, -((d.getDay() + 6) % 7)); }
+  function shortDate(k) { return parseKey(k).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); }
+  function weekLabel(ws) { return shortDate(ws) + ' – ' + shortDate(addDays(ws, 6)); }
+
+  /* Cases cochées / cases possibles sur les jours suivis de la semaine (jours futurs et avant le début exclus). */
+  function weekCheck(hb, ws) {
+    var tk = today(), done = 0, possible = 0, full = 0, days = 0;
+    for (var i = 0; i < 7; i++) {
+      var k = addDays(ws, i);
+      if (k > tk || k < hb.startDate) continue;
+      var n = doneCount(hb, k);
+      if (k === tk && n < hb.slots.length) continue; /* aujourd'hui ne compte qu'une fois complet, comme les séries */
+      days++; possible += hb.slots.length; done += n;
+      if (n === hb.slots.length) full++;
+    }
+    return { done: done, possible: possible, full: full, days: days, pct: possible ? done / possible : null };
+  }
+  function weekAll(ws) {
+    var done = 0, possible = 0;
+    checkHabits().forEach(function (hb) { var w = weekCheck(hb, ws); done += w.done; possible += w.possible; });
+    return { done: done, possible: possible, pct: possible ? done / possible : null };
+  }
+  function weekQuit(hb, ws) {
+    var tk = today(), logged = 0, smoked = 0, free = 0, cravings = 0, days = 0;
+    for (var i = 0; i < 7; i++) {
+      var k = addDays(ws, i);
+      if (k > tk || k < hb.startDate) continue;
+      days++;
+      var l = dayLog(hb, k);
+      if (!l) continue;
+      logged++; smoked += l.count; cravings += l.cravings || 0;
+      if (l.count === 0) free++;
+    }
+    return { days: days, logged: logged, smoked: smoked, free: free, cravings: cravings };
+  }
+  function pctText(p) { return p === null ? '—' : Math.round(p * 100) + '%'; }
+  /* Écart en points avec la semaine précédente. */
+  function deltaChip(cur, prev) {
+    if (cur === null || prev === null) return null;
+    var d = Math.round((cur - prev) * 100);
+    if (d === 0) return h('span', { class: 'hb-delta' }, '= last week');
+    return h('span', { class: 'hb-delta ' + (d > 0 ? 'is-up' : 'is-down') }, (d > 0 ? '▲ +' : '▼ ') + d + ' pts');
+  }
+  function earliestStart() {
+    return data.habits.reduce(function (m, hb) { return hb.startDate < m ? hb.startDate : m; }, today());
+  }
+
+  function renderWeeks() {
+    var tk = today(), cur = weekStart(tk);
+    var first = weekStart(earliestStart());
+    var minOffset = -Math.round(daysBetween(first, cur) / 7);
+    if (weekOffset < minOffset) weekOffset = minOffset;
+    if (weekOffset > 0) weekOffset = 0;
+    var ws = addDays(cur, weekOffset * 7), prev = addDays(ws, -7);
+    var all = weekAll(ws), allPrev = ws > first ? weekAll(prev) : { pct: null };
+    var go = function (n) { weekOffset += n; render(); };
+
+    /* En-tête : navigation entre semaines (gros boutons, à une main). */
+    root.appendChild(h('div', { class: 'card hb-weekhead' },
+      h('button', { class: 'btn btn-icon', 'aria-label': 'Previous week', disabled: weekOffset <= minOffset, onclick: function () { go(-1); } }, '‹'),
+      h('div', { class: 'hb-weektitle' },
+        h('div', { class: 'list-title' }, weekOffset === 0 ? 'This week' : weekOffset === -1 ? 'Last week' : weekLabel(ws)),
+        h('div', { class: 'list-sub' }, weekOffset >= -1 ? weekLabel(ws) : Math.abs(weekOffset) + ' weeks ago')),
+      h('button', { class: 'btn btn-icon', 'aria-label': 'Next week', disabled: weekOffset >= 0, onclick: function () { go(1); } }, '›')));
+
+    /* Score de la semaine. */
+    root.appendChild(h('section', { class: 'card hb-weekscore' },
+      h('div', { class: 'hb-todayhead' },
+        h('span', { class: 'card-title' }, 'Daily habits'),
+        deltaChip(all.pct, allPrev.pct)),
+      h('div', { class: 'hb-bignum' }, pctText(all.pct)),
+      h('div', { class: 'hb-progress' }, h('span', { style: { width: (all.pct || 0) * 100 + '%' } })),
+      h('p', { class: 'hint' }, all.possible
+        ? all.done + ' of ' + all.possible + ' boxes ticked' + (weekOffset === 0 ? ' so far this week.' : '.')
+        : 'Nothing to track this week.')));
+
+    /* Détail par habitude. */
+    root.appendChild(h('h2', { class: 'section-title' }, 'By habit'));
+    var list = h('div', { class: 'list' });
+    checkHabits().forEach(function (hb) {
+      var w = weekCheck(hb, ws), wp = ws > first ? weekCheck(hb, prev) : { pct: null };
+      var dots = h('div', { class: 'hb-dots', 'aria-hidden': 'true' });
+      for (var i = 0; i < 7; i++) {
+        var k = addDays(ws, i), n = doneCount(hb, k);
+        dots.appendChild(h('i', { class: 'hb-dot ' + (k > tk || k < hb.startDate ? 'is-off' : n === hb.slots.length ? 'is-free' : n ? 'is-part' : 'is-empty') }));
+      }
+      list.appendChild(h('div', { class: 'list-row hb-weekrow' },
+        h('div', { class: 'hb-weekrowmain' },
+          h('div', { class: 'list-title' }, hb.name),
+          h('div', { class: 'list-sub' }, w.days ? w.full + ' / ' + w.days + ' full day' + (w.days === 1 ? '' : 's') : 'Not started yet'),
+          dots),
+        h('div', { class: 'hb-weekrowside' },
+          h('span', { class: 'hb-weekpct' }, pctText(w.pct)),
+          deltaChip(w.pct, wp.pct))));
+    });
+    root.appendChild(list);
+
+    /* Tabac. */
+    var q = quitHabit();
+    if (q) {
+      var qw = weekQuit(q, ws), qp = ws > first ? weekQuit(q, prev) : null;
+      var avg = function (w) { return w && w.logged ? num(w.smoked / w.logged, 1) : '—'; };
+      root.appendChild(h('h2', { class: 'section-title' }, '🚭 ' + q.name));
+      root.appendChild(h('div', { class: 'stats hb-stats' },
+        stat('Smoke-free days', qw.days ? qw.free + ' / ' + qw.days : '—'),
+        stat('Cigarettes', qw.logged ? qw.smoked : '—'),
+        stat('Cravings resisted', qw.cravings),
+        stat('Per day (week before)', avg(qw) + ' (' + avg(qp) + ')')));
+      if (qw.days > qw.logged) root.appendChild(h('p', { class: 'hint' }, (qw.days - qw.logged) + ' day' + (qw.days - qw.logged === 1 ? '' : 's') + ' not logged this week.'));
+    }
+
+    /* Tendance : 12 dernières semaines (touchez une barre pour l'ouvrir). */
+    root.appendChild(h('h2', { class: 'section-title' }, 'Last ' + TREND_WEEKS + ' weeks'));
+    var bars = h('div', { class: 'hb-bars', role: 'list' });
+    var tracked = [];
+    for (var j = TREND_WEEKS - 1; j >= 0; j--) {
+      (function (off) {
+        var s = addDays(cur, -off * 7), before = s < first;
+        var p = before ? null : weekAll(s).pct;
+        if (p !== null) tracked.push({ ws: s, pct: p, off: -off });
+        bars.appendChild(h('button', { class: 'hb-bar' + (-off === weekOffset ? ' is-sel' : '') + (before ? ' is-before' : ''), role: 'listitem',
+          disabled: before, 'aria-label': 'Week of ' + weekLabel(s) + ': ' + pctText(p),
+          onclick: function () { weekOffset = -off; render(); } },
+          h('span', { class: 'hb-barval' }, p === null ? '' : Math.round(p * 100)),
+          h('span', { class: 'hb-bartrack' }, h('span', { class: 'hb-barfill', style: { height: (p || 0) * 100 + '%' } })),
+          h('span', { class: 'hb-barlabel' }, parseKey(s).getDate() + '/' + (parseKey(s).getMonth() + 1))));
+      })(j);
+    }
+    root.appendChild(h('div', { class: 'card hb-trend' }, bars,
+      tracked.length > 1 ? (function () {
+        var done = tracked.filter(function (t) { return t.off < 0; });
+        var avg = done.length ? done.reduce(function (n, t) { return n + t.pct; }, 0) / done.length : null;
+        var best = tracked.reduce(function (b, t) { return !b || t.pct > b.pct ? t : b; }, null);
+        return h('div', { class: 'hb-substats' },
+          avg === null ? null : h('span', null, 'Average: ' + pctText(avg)),
+          h('span', null, 'Best: ' + pctText(best.pct) + ' (' + shortDate(best.ws) + ')'));
+      })() : null));
+
+    /* Note de la semaine (facultative, saisie manuelle). */
+    root.appendChild(h('h2', { class: 'section-title' }, 'Week notes'));
+    var note = h('textarea', { class: 'input hb-textarea', rows: 3, 'aria-label': 'Notes for this week',
+      placeholder: 'What went well? What got in the way? One thing to change next week…' });
+    note.value = data.weekNotes[ws] || '';
+    note.addEventListener('change', function () {
+      var v = note.value.trim();
+      if (v) data.weekNotes[ws] = v; else delete data.weekNotes[ws];
+      persist(); ui.toast('Note saved');
+    });
+    root.appendChild(h('div', { class: 'card' }, note,
+      h('p', { class: 'hint' }, 'Saved when you leave the field. Weeks run Monday to Sunday; today counts once all its boxes are ticked, and days before a habit started are not counted.')));
   }
 
   function renderQuit(hb) {

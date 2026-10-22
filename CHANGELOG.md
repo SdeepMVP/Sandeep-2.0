@@ -1,5 +1,8 @@
 # Changelog — Sandeep 2.0
 
+## 0.14.0 — 2026-10-22
+- Habits: new **Weeks** view to follow your progress week by week (Monday → Sunday): overall completion of your daily habits with the change vs last week, a score per habit with its 7-day dots, the smoke-free week (smoke-free days, cigarettes, cravings, vs last week), a 12-week trend chart (tap a bar to open that week; average and best week), and an optional note per week. Browse back to the first week you tracked.
+
 ## 0.13.0 — 2026-10-19
 - Habits: new built-in daily habit **Pelvic floor routine** with three boxes (Kegels 3 × 10, reverse Kegels 10, belly breathing 2 min), its streak, last-7-days strip and how-to note. Added automatically to existing data; can be edited or deleted like any habit.
 
