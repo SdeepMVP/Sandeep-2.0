@@ -639,3 +639,32 @@ input[type="date"].input { display: block; line-height: 48px; }
 .wr-ess { gap: 12px; justify-content: flex-start; }
 .wr-ess.is-have .wr-box { background: var(--good); border-color: var(--good); }
 .wr-ess.is-have .list-title { color: var(--text-2); }
+
+/* Habits · Weeks (v0.14) */
+.hb-weekhead { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px; }
+.hb-weekhead .btn-icon { min-width: 48px; min-height: 48px; font-size: 26px; }
+.hb-weekhead .btn-icon:disabled { opacity: .3; }
+.hb-weektitle { text-align: center; flex: 1; }
+.hb-bignum { font-size: 44px; font-weight: 750; line-height: 1.1; margin-top: 8px; color: var(--good); font-variant-numeric: tabular-nums; }
+.hb-delta { font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 999px; white-space: nowrap; color: var(--muted); background: var(--surface-2); }
+.hb-delta.is-up { color: var(--good); background: var(--good-bg); }
+.hb-delta.is-down { color: var(--keep); background: var(--keep-bg); }
+.hb-weekrow { align-items: center; gap: 10px; }
+.hb-weekrowmain { flex: 1; min-width: 0; }
+.hb-weekrowside { display: grid; justify-items: end; gap: 4px; }
+.hb-weekpct { font-size: 22px; font-weight: 750; font-variant-numeric: tabular-nums; }
+.hb-dots { display: flex; gap: 4px; margin-top: 6px; }
+.hb-dot.is-part { background: var(--keep-bg); border-color: transparent; }
+.hb-dot.is-off { opacity: .3; }
+.hb-trend { padding: 12px 10px 10px; }
+.hb-bars { display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; align-items: end; }
+.hb-bar { display: grid; justify-items: center; gap: 3px; padding: 2px 0; min-height: 44px; border-radius: 8px; background: none; border: 0; color: inherit; font: inherit; }
+.hb-bar.is-sel { background: var(--surface-2); }
+.hb-bar.is-before { opacity: .3; }
+.hb-barval { font-size: 10px; color: var(--text-2); min-height: 13px; font-variant-numeric: tabular-nums; }
+.hb-bartrack { width: 14px; height: 96px; border-radius: 4px; background: var(--surface-2); display: flex; align-items: flex-end; overflow: hidden; }
+.hb-bar.is-sel .hb-bartrack { background: var(--border); }
+.hb-barfill { display: block; width: 100%; background: var(--good); border-radius: 4px; }
+.hb-barlabel { font-size: 9px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.hb-trend .hb-substats { margin-top: 8px; }
+.hb-weeks-note, .hb-textarea { font: inherit; font-size: 16px; }
