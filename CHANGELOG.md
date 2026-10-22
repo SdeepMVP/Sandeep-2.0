@@ -1,5 +1,8 @@
 # Changelog — Sandeep 2.0
 
+## 0.15.0 — 2026-10-22
+- Habits: new built-in daily habit **Hair routine** (one box a day, with its streak, 7-day strip and weekly score). Added automatically to existing data; tap ✎ to split it into steps or delete it.
+
 ## 0.14.0 — 2026-10-22
 - Habits: new **Weeks** view to follow your progress week by week (Monday → Sunday): overall completion of your daily habits with the change vs last week, a score per habit with its 7-day dots, the smoke-free week (smoke-free days, cigarettes, cravings, vs last week), a 12-week trend chart (tap a bar to open that week; average and best week), and an optional note per week. Browse back to the first week you tracked.
 
