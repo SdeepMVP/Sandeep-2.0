@@ -47,7 +47,7 @@
     'Tap ✎ to split it into steps (e.g. wash, condition, style).': 'Touche ✎ pour la découper en étapes (ex. lavage, après-shampooing, coiffage).',
     'Done': 'Fait',
     'Quit smoking': 'Arrêter de fumer',
-    'Stop smoking completely: 0 cigarettes a day.': 'Arrêter complètement de fumer : 0 cigarette par jour.'
+    'Stop smoking completely: 0 cigarettes a day.': 'Arrêter complètement de fumer (0 cigarette par jour).'
   };
   var EN = {};
   Object.keys(FR).forEach(function (k) { EN[FR[k]] = k; });
@@ -532,55 +532,56 @@
 
     var head = h('div', { class: 'card hb-hero' },
       h('div', { class: 'hb-herohead' },
-        h('h2', { class: 'page-title' }, hb.name),
-        h('button', { class: 'btn btn-icon', 'aria-label': 'Habit settings', onclick: function () { editHabit(hb); },
+        h('h2', { class: 'page-title' }, tx(hb.name)),
+        h('button', { class: 'btn btn-icon', 'aria-label': L('Habit settings', 'Réglages de l’habitude'), onclick: function () { editHabit(hb); },
           html: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>' })),
-      h('p', { class: 'hb-goal' }, 'Goal: ' + hb.goal),
+      h('p', { class: 'hb-goal' }, L('Goal: ', 'Objectif : ') + tx(hb.goal)),
       h('div', { class: 'hb-streak' },
         h('span', { class: 'hb-streaknum' }, streak),
-        h('span', { class: 'hb-streaklabel' }, streak === 1 ? 'day smoke-free' : 'days smoke-free')),
+        h('span', { class: 'hb-streaklabel' }, pl(streak, L('day smoke-free', 'jour sans fumer'), L('days smoke-free', 'jours sans fumer')))),
       h('div', { class: 'hb-substats' },
-        h('span', null, 'Best: ' + best + ' day' + (best === 1 ? '' : 's')),
-        h('span', null, 'Day ' + sinceStart + ' since ' + ui.date(parseKey(hb.startDate).toISOString()))));
+        h('span', null, L('Best: ', 'Record : ') + best + ' ' + pl(best, L('day', 'jour'), L('days', 'jours'))),
+        h('span', null, L('Day ', 'Jour ') + sinceStart + L(' since ', ' depuis le ') + ui.date(parseKey(hb.startDate).toISOString()))));
     root.appendChild(head);
 
     /* Aujourd'hui */
     var count = t ? t.count : 0;
     var todayCard = h('section', { class: 'card hb-today' },
       h('div', { class: 'hb-todayhead' },
-        h('span', { class: 'card-title' }, 'Today'),
+        h('span', { class: 'card-title' }, L('Today', 'Aujourd’hui')),
         h('span', { class: 'hb-status ' + (!t ? 'is-info' : count === 0 ? 'is-up' : 'is-keep') },
-          !t ? 'Not logged yet' : count === 0 ? 'Smoke-free so far' : count + ' smoked')),
+          !t ? L('Not logged yet', 'Pas encore renseigné') : count === 0 ? L('Smoke-free so far', 'Sans tabac pour l’instant') : count + L(' smoked', pl(count, ' fumée', ' fumées')))),
       h('div', { class: 'hb-counter' },
-        h('button', { class: 'btn btn-step', 'aria-label': 'One cigarette less', disabled: !t || count === 0,
+        h('button', { class: 'btn btn-step', 'aria-label': L('One cigarette less', 'Une cigarette de moins'), disabled: !t || count === 0,
           onclick: function () { setDay(hb, tk, { count: Math.max(0, count - 1) }); render(); } }, '−'),
-        h('div', { class: 'hb-countval' }, h('span', { class: 'hb-countnum' }, t ? count : '–'), h('span', { class: 'muted' }, 'cigarettes')),
-        h('button', { class: 'btn btn-step', 'aria-label': 'I smoked one cigarette',
+        h('div', { class: 'hb-countval' }, h('span', { class: 'hb-countnum' }, t ? count : '–'), h('span', { class: 'muted' }, L('cigarettes', pl(count, 'cigarette', 'cigarettes')))),
+        h('button', { class: 'btn btn-step', 'aria-label': L('I smoked one cigarette', 'J’ai fumé une cigarette'),
           onclick: function () { setDay(hb, tk, { count: count + 1 }); render(); } }, '+')),
       h('div', { class: 'stack' },
         !t ? h('button', { class: 'btn btn-primary btn-block btn-lg', onclick: function () {
-          setDay(hb, tk, { count: 0 }); render(); ui.toast('Smoke-free day logged. Keep going!');
-        } }, 'Smoke-free today ✓') : null,
+          setDay(hb, tk, { count: 0 }); render(); ui.toast(L('Smoke-free day logged. Keep going!', 'Journée sans tabac enregistrée. Continue comme ça !'));
+        } }, L('Smoke-free today ✓', 'Sans tabac aujourd’hui ✓')) : null,
         h('button', { class: 'btn btn-secondary btn-block', onclick: function () {
           setDay(hb, tk, { cravings: ((t && t.cravings) || 0) + 1, count: count });
-          render(); ui.toast('Well done! A craving usually passes within a few minutes.');
-        } }, 'I resisted a craving' + (t && t.cravings ? ' (' + t.cravings + ' today)' : ''))),
-      h('p', { class: 'hint' }, 'Tap + each time you smoke. Log a smoke-free day at the end of the day, or come back to past days in the calendar.'));
+          render(); ui.toast(L('Well done! A craving usually passes within a few minutes.', 'Bien joué ! Une envie passe en général en quelques minutes.'));
+        } }, L('I resisted a craving', 'J’ai résisté à une envie') + (t && t.cravings ? ' (' + t.cravings + L(' today)', ' aujourd’hui)') : ''))),
+      h('p', { class: 'hint' }, L('Tap + each time you smoke. Log a smoke-free day at the end of the day, or come back to past days in the calendar.',
+        'Touche + à chaque cigarette. Note ta journée sans tabac le soir, ou reviens sur les jours passés dans le calendrier.')));
     root.appendChild(todayCard);
 
     /* Bilan */
     root.appendChild(h('div', { class: 'stats hb-stats' },
-      stat('Smoke-free days', tot.freeDays + ' / ' + tot.logged),
-      stat('Cravings resisted', tot.cravings),
-      stat('Cigarettes avoided', tot.avoided === null ? '—' : tot.avoided),
-      stat('Money saved', tot.saved === null ? '—' : tot.saved.toFixed(2) + ' €')));
+      stat(L('Smoke-free days', 'Jours sans tabac'), tot.freeDays + ' / ' + tot.logged),
+      stat(L('Cravings resisted', 'Envies résistées'), tot.cravings),
+      stat(L('Cigarettes avoided', 'Cigarettes évitées'), tot.avoided === null ? '—' : tot.avoided),
+      stat(L('Money saved', 'Argent économisé'), tot.saved === null ? '—' : money(tot.saved))));
     if (!hb.baselinePerDay || !hb.packPrice) {
       root.appendChild(h('button', { class: 'btn btn-ghost btn-block btn-sm', onclick: function () { editHabit(hb); } },
-        'Set your starting point to see cigarettes avoided and money saved ›'));
+        L('Set your starting point to see cigarettes avoided and money saved ›', 'Indique ton point de départ pour voir les cigarettes évitées et l’argent économisé ›')));
     }
 
     /* Calendrier des 28 derniers jours */
-    root.appendChild(h('h2', { class: 'section-title' }, 'Last ' + GRID_DAYS + ' days'));
+    root.appendChild(h('h2', { class: 'section-title' }, L('Last ' + GRID_DAYS + ' days', GRID_DAYS + ' derniers jours')));
     var grid = h('div', { class: 'hb-grid' });
     for (var i = GRID_DAYS - 1; i >= 0; i--) {
       (function (k) {
@@ -589,8 +590,8 @@
         var cls = 'hb-cell' + (before ? ' is-before' : !l ? ' is-empty' : l.count === 0 ? ' is-free' : ' is-smoked') + (k === tk ? ' is-today' : '');
         var d = parseKey(k);
         grid.appendChild(h('button', { class: cls, disabled: before,
-          'aria-label': d.toLocaleDateString(S2.locale, { weekday: 'long', day: 'numeric', month: 'long' }) + ': ' +
-            (!l ? 'not logged' : l.count === 0 ? 'smoke-free' : l.count + ' cigarettes'),
+          'aria-label': longDay(k) + L(': ', ' : ') +
+            (!l ? L('not logged', 'non renseigné') : l.count === 0 ? L('smoke-free', 'sans tabac') : l.count + L(' cigarettes', pl(l.count, ' cigarette', ' cigarettes'))),
           onclick: function () { editDay(hb, k); } },
           h('span', { class: 'hb-cellday' }, d.getDate()),
           h('span', { class: 'hb-cellval' }, !l || before ? '' : l.count === 0 ? '✓' : l.count)));
@@ -598,22 +599,23 @@
     }
     root.appendChild(grid);
     root.appendChild(h('div', { class: 'hb-legend' },
-      h('span', null, h('i', { class: 'hb-dot is-free' }), 'Smoke-free'),
-      h('span', null, h('i', { class: 'hb-dot is-smoked' }), 'Smoked'),
-      h('span', null, h('i', { class: 'hb-dot is-empty' }), 'Not logged')));
+      h('span', null, h('i', { class: 'hb-dot is-free' }), L('Smoke-free', 'Sans tabac')),
+      h('span', null, h('i', { class: 'hb-dot is-smoked' }), L('Smoked', 'Fumé')),
+      h('span', null, h('i', { class: 'hb-dot is-empty' }), L('Not logged', 'Non renseigné'))));
 
     /* Repères santé */
-    root.appendChild(h('h2', { class: 'section-title' }, 'Health milestones'));
+    root.appendChild(h('h2', { class: 'section-title' }, L('Health milestones', 'Repères santé')));
     root.appendChild(h('div', { class: 'list' }, MILESTONES.map(function (m) {
       var done = streak >= m.days;
       return h('div', { class: 'list-row hb-milestone' + (done ? ' is-done' : '') },
         h('div', null,
-          h('div', { class: 'list-title' }, (done ? '✓ ' : '') + (m.days === 365 ? '1 year' : m.days + ' day' + (m.days === 1 ? '' : 's')) + ' smoke-free'),
+          h('div', { class: 'list-title' }, (done ? '✓ ' : '') + (m.days === 365 ? L('1 year', '1 an') : m.days + ' ' + pl(m.days, L('day', 'jour'), L('days', 'jours'))) + L(' smoke-free', ' sans fumer')),
           h('div', { class: 'list-sub' }, m.text)),
-        done ? null : h('span', { class: 'muted hb-togo' }, (m.days - streak) + ' to go'));
+        done ? null : h('span', { class: 'muted hb-togo' }, L((m.days - streak) + ' to go', 'encore ' + (m.days - streak) + ' j')));
     })));
-    root.appendChild(h('p', { class: 'hint' }, 'Milestones based on the WHO and the American Cancer Society, counted from your current smoke-free streak.'));
-    root.appendChild(h('p', { class: 'hint' }, 'Need support? In France, Tabac Info Service: 39 89 (free).'));
+    root.appendChild(h('p', { class: 'hint' }, L('Milestones based on the WHO and the American Cancer Society, counted from your current smoke-free streak.',
+      'Repères basés sur l’OMS et l’American Cancer Society, comptés depuis ta série actuelle sans tabac.')));
+    root.appendChild(h('p', { class: 'hint' }, L('Need support? In France, Tabac Info Service: 39 89 (free).', 'Besoin d’aide ? Tabac Info Service : 39 89 (appel gratuit).')));
   }
 
   function stat(label, value) {
@@ -630,26 +632,26 @@
         var val = h('span', { class: 'hb-countnum' }, draft[key]);
         return h('div', { class: 'field' }, h('span', { class: 'field-label' }, label),
           h('div', { class: 'stepper' },
-            h('button', { class: 'btn btn-step', type: 'button', 'aria-label': label + ' minus one',
+            h('button', { class: 'btn btn-step', type: 'button', 'aria-label': label + L(' minus one', ' : moins un'),
               onclick: function () { draft[key] = Math.max(0, draft[key] - 1); val.textContent = draft[key]; } }, '−'),
             val,
-            h('button', { class: 'btn btn-step', type: 'button', 'aria-label': label + ' plus one',
+            h('button', { class: 'btn btn-step', type: 'button', 'aria-label': label + L(' plus one', ' : plus un'),
               onclick: function () { draft[key] += 1; val.textContent = draft[key]; } }, '+')));
       }
-      body.appendChild(stepper('Cigarettes smoked', 'count'));
-      body.appendChild(stepper('Cravings resisted', 'cravings'));
+      body.appendChild(stepper(L('Cigarettes smoked', 'Cigarettes fumées'), 'count'));
+      body.appendChild(stepper(L('Cravings resisted', 'Envies résistées'), 'cravings'));
       return [
-        h('h2', { class: 'sheet-title' }, parseKey(k).toLocaleDateString(S2.locale, { weekday: 'long', day: 'numeric', month: 'long' })),
-        h('p', { class: 'sheet-text' }, l ? 'Logged: ' + (l.count === 0 ? 'smoke-free' : l.count + ' cigarette' + (l.count === 1 ? '' : 's')) + '.' : 'Not logged yet.'),
+        h('h2', { class: 'sheet-title' }, longDay(k)),
+        h('p', { class: 'sheet-text' }, l ? L('Logged: ', 'Renseigné : ') + (l.count === 0 ? L('smoke-free', 'sans tabac') : l.count + ' ' + pl(l.count, 'cigarette', 'cigarettes')) + '.' : L('Not logged yet.', 'Pas encore renseigné.')),
         body,
         h('div', { class: 'sheet-actions' },
           h('button', { class: 'btn btn-primary btn-block', onclick: function () {
             setDay(hb, k, { count: draft.count, cravings: draft.cravings }); close(); render();
-          } }, 'Save'),
-          h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, 'Cancel'),
+          } }, L('Save', 'Enregistrer')),
+          h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, L('Cancel', 'Annuler')),
           l ? h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: function () {
             delete logsOf(hb)[k]; persist(); close(); render();
-          } }, 'Clear this day') : null)
+          } }, L('Clear this day', 'Effacer ce jour')) : null)
       ];
     }, { modal: true });
   }
@@ -665,32 +667,33 @@
         inp.addEventListener('input', function () { draft[key] = ui.parseNum(inp.value); });
         return h('label', { class: 'field' }, h('span', { class: 'field-label' }, label), inp);
       }
-      var date = h('input', { class: 'input', type: 'date', value: draft.startDate, max: today(), 'aria-label': 'Start date' });
+      var date = h('input', { class: 'input', type: 'date', value: draft.startDate, max: today(), 'aria-label': L('Start date', 'Date de début') });
       date.addEventListener('change', function () { draft.startDate = date.value; });
       return [
-        h('h2', { class: 'sheet-title' }, hb.name + ' · settings'),
-        h('label', { class: 'field' }, h('span', { class: 'field-label' }, 'Start date'), date),
-        numInput('Cigarettes per day before quitting', 'baselinePerDay', 'numeric', 'e.g. 10'),
+        h('h2', { class: 'sheet-title' }, tx(hb.name) + L(' · settings', ' · réglages')),
+        h('label', { class: 'field' }, h('span', { class: 'field-label' }, L('Start date', 'Date de début')), date),
+        numInput(L('Cigarettes per day before quitting', 'Cigarettes par jour avant d’arrêter'), 'baselinePerDay', 'numeric', L('e.g. 10', 'ex. 10')),
         h('div', { class: 'form-grid hb-grid2' },
-          numInput('Pack price (€)', 'packPrice', 'decimal', 'e.g. 12.50'),
-          numInput('Cigarettes per pack', 'perPack', 'numeric', '20')),
-        h('p', { class: 'hint' }, 'Used only to estimate cigarettes avoided and money saved. Leave empty if you prefer.'),
+          numInput(L('Pack price (€)', 'Prix du paquet (€)'), 'packPrice', 'decimal', L('e.g. 12.50', 'ex. 12,50')),
+          numInput(L('Cigarettes per pack', 'Cigarettes par paquet'), 'perPack', 'numeric', '20')),
+        h('p', { class: 'hint' }, L('Used only to estimate cigarettes avoided and money saved. Leave empty if you prefer.',
+          'Sert seulement à estimer les cigarettes évitées et l’argent économisé. Laisse vide si tu préfères.')),
         err,
         h('div', { class: 'sheet-actions' },
           h('button', { class: 'btn btn-primary btn-block', onclick: function () {
-            if (!draft.startDate || draft.startDate > today()) { err.textContent = 'Pick a start date that is not in the future.'; err.hidden = false; return; }
+            if (!draft.startDate || draft.startDate > today()) { err.textContent = L('Pick a start date that is not in the future.', 'Choisis une date de début qui n’est pas dans le futur.'); err.hidden = false; return; }
             if ((draft.baselinePerDay !== null && draft.baselinePerDay < 0) || (draft.packPrice !== null && draft.packPrice < 0) ||
-                (draft.perPack !== null && draft.perPack < 1)) { err.textContent = 'Check the numbers.'; err.hidden = false; return; }
+                (draft.perPack !== null && draft.perPack < 1)) { err.textContent = L('Check the numbers.', 'Vérifie les nombres.'); err.hidden = false; return; }
             hb.startDate = draft.startDate;
             hb.baselinePerDay = draft.baselinePerDay === null ? null : Math.round(draft.baselinePerDay);
             hb.packPrice = draft.packPrice;
             hb.perPack = draft.perPack === null ? 20 : Math.round(draft.perPack);
-            persist(); close(); render(); ui.toast('Settings saved');
-          } }, 'Save'),
-          h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, 'Cancel'))
+            persist(); close(); render(); ui.toast(L('Settings saved', 'Réglages enregistrés'));
+          } }, L('Save', 'Enregistrer')),
+          h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, L('Cancel', 'Annuler')))
       ];
     }, { modal: true });
   }
 
-  S2.app.registerTab({ id: 'habitudes', label: 'Habits', order: 40, icon: ICON, mount: mount });
+  S2.app.registerTab({ id: 'habitudes', label: L('Habits', 'Habitudes'), order: 40, icon: ICON, mount: mount });
 })();

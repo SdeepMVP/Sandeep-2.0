@@ -5,71 +5,92 @@
   'use strict';
   var S2 = (window.S2 = window.S2 || {});
   var COMBOS = S2.wardrobeCombos || { pairs: [], trios: [], shoes: {} };
+  /* Traduction : S2.L(en, fr) dans le navigateur ; sous Node (tests) i18n.js n'est pas chargé → anglais.
+     Les textes sont traduits à la définition des constantes, jamais dans les boucles de recherche.
+     Les valeurs enregistrées (catégories, sortes, couleurs, matières…) restent des clés anglaises. */
+  var L = S2.L || function (en) { return en; };
+  var FR = L('en', 'fr') === 'fr';
   function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
 
   /* Ordre = du haut du corps vers les pieds, tel qu'affiché dans une tenue. Les accessoires sont à part. */
   var CATS = [
-    { id: 'outer', label: 'Outerwear', hint: 'Jacket, coat',
+    { id: 'outer', label: L('Outerwear', 'Veste / manteau'), short: L('Outerwear', 'Veste'), hint: L('Jacket, coat', 'Veste, manteau'),
       subtypes: ['Jacket', 'Coat', 'Blazer', 'Bomber', 'Rain jacket', 'Puffer', 'Leather jacket', 'Denim jacket', 'Trench coat'] },
-    { id: 'layer', label: 'Mid layer', hint: 'Sweater, hoodie, overshirt',
+    { id: 'layer', label: L('Mid layer', 'Couche intermédiaire'), short: L('Mid layer', 'Couche'), hint: L('Sweater, hoodie, overshirt', 'Pull, sweat à capuche, surchemise'),
       subtypes: ['Sweater', 'Cardigan', 'Hoodie', 'Sweatshirt', 'Overshirt', 'Zip-up', 'Vest', 'Turtleneck'] },
-    { id: 'top', label: 'Top (base layer)', hint: 'T-shirt, shirt, polo',
+    { id: 'top', label: L('Top (base layer)', 'Haut (1re couche)'), short: L('Top', 'Haut'), hint: L('T-shirt, shirt, polo', 'T-shirt, chemise, polo'),
       subtypes: ['T-shirt', 'Shirt', 'Oxford shirt', 'Polo', 'Long-sleeve', 'Henley', 'Tank top', 'Sport top'] },
-    { id: 'bottom', label: 'Bottom', hint: 'Jeans, chinos, shorts',
+    { id: 'bottom', label: L('Bottom', 'Bas'), short: L('Bottom', 'Bas'), hint: L('Jeans, chinos, shorts', 'Jean, chino, short'),
       subtypes: ['Jeans', 'Chinos', 'Trousers', 'Cargo pants', 'Joggers', 'Track pants', 'Shorts', 'Sport shorts'] },
-    { id: 'shoes', label: 'Shoes', hint: 'Boots, leather shoes, sneakers',
+    { id: 'shoes', label: L('Shoes', 'Chaussures'), short: L('Shoes', 'Chaussures'), hint: L('Boots, leather shoes, sneakers', 'Boots, chaussures en cuir, baskets'),
       subtypes: ['Sneakers', 'Leather shoes', 'Loafers', 'Derbies', 'Boots', 'Chelsea boots', 'Running shoes', 'Sandals', 'Slides'] },
-    { id: 'acc', label: 'Accessories', hint: 'Cap, beanie, scarf, watch, necklace, chain wallet, bag',
+    { id: 'acc', label: L('Accessories', 'Accessoires'), short: L('Accessories', 'Access.'), hint: L('Cap, beanie, scarf, watch, necklace, chain wallet, bag', 'Casquette, bonnet, écharpe, montre, collier, chaîne de portefeuille, sac'),
       subtypes: ['Cap', 'Beanie', 'Scarf', 'Watch', 'Necklace', 'Chain wallet', 'Tote bag', 'Crossbody bag', 'Backpack'] }
   ];
   var CORE = CATS.filter(function (c) { return c.id !== 'acc'; });
+  /* Sortes de pièces : clé anglaise enregistrée → [libellé français, genre (m, f, mp, fp) pour accorder la couleur]. */
+  var KIND_FR = {
+    'Jacket': ['Veste', 'f'], 'Coat': ['Manteau', 'm'], 'Blazer': ['Blazer', 'm'], 'Bomber': ['Bomber', 'm'], 'Rain jacket': ['Imperméable', 'm'],
+    'Puffer': ['Doudoune', 'f'], 'Leather jacket': ['Veste en cuir', 'f'], 'Denim jacket': ['Veste en jean', 'f'], 'Trench coat': ['Trench', 'm'],
+    'Sweater': ['Pull', 'm'], 'Cardigan': ['Cardigan', 'm'], 'Hoodie': ['Sweat à capuche', 'm'], 'Sweatshirt': ['Sweat', 'm'], 'Overshirt': ['Surchemise', 'f'],
+    'Zip-up': ['Sweat zippé', 'm'], 'Vest': ['Gilet sans manches', 'm'], 'Turtleneck': ['Col roulé', 'm'],
+    'T-shirt': ['T-shirt', 'm'], 'Shirt': ['Chemise', 'f'], 'Oxford shirt': ['Chemise Oxford', 'f'], 'Polo': ['Polo', 'm'], 'Long-sleeve': ['T-shirt manches longues', 'm'],
+    'Henley': ['Henley', 'm'], 'Tank top': ['Débardeur', 'm'], 'Sport top': ['Haut de sport', 'm'],
+    'Jeans': ['Jean', 'm'], 'Chinos': ['Chino', 'm'], 'Trousers': ['Pantalon', 'm'], 'Cargo pants': ['Pantalon cargo', 'm'], 'Joggers': ['Jogging', 'm'],
+    'Track pants': ['Pantalon de survêt', 'm'], 'Shorts': ['Short', 'm'], 'Sport shorts': ['Short de sport', 'm'],
+    'Sneakers': ['Baskets', 'fp'], 'Leather shoes': ['Chaussures en cuir', 'fp'], 'Loafers': ['Mocassins', 'mp'], 'Derbies': ['Derbies', 'mp'], 'Boots': ['Boots', 'fp'],
+    'Chelsea boots': ['Chelsea boots', 'fp'], 'Running shoes': ['Chaussures de running', 'fp'], 'Sandals': ['Sandales', 'fp'], 'Slides': ['Claquettes', 'fp'],
+    'Cap': ['Casquette', 'f'], 'Beanie': ['Bonnet', 'm'], 'Scarf': ['Écharpe', 'f'], 'Watch': ['Montre', 'f'], 'Necklace': ['Collier', 'm'],
+    'Chain wallet': ['Chaîne de portefeuille', 'f'], 'Tote bag': ['Tote bag', 'm'], 'Crossbody bag': ['Sac bandoulière', 'm'], 'Backpack': ['Sac à dos', 'm']
+  };
+  function kindLabel(k) { return !k ? '' : FR && KIND_FR[k] ? KIND_FR[k][0] : k; }
 
   /* Contextes pour lesquels une pièce convient (« Good for »). Les ids historiques sont conservés. */
   var TAGS = [
-    { id: 'work', label: 'Work', icon: '💼' },
-    { id: 'chill', label: 'Casual', icon: '☕' },
-    { id: 'date', label: 'Date / dinner', icon: '🌹' },
-    { id: 'club', label: 'Night out', icon: '🪩' },
-    { id: 'formal', label: 'Dressed up', icon: '🎩' },
-    { id: 'gym', label: 'Sport', icon: '🏋️' },
-    { id: 'travel', label: 'Travel', icon: '✈️' }
+    { id: 'work', label: L('Work', 'Travail'), icon: '💼' },
+    { id: 'chill', label: L('Casual', 'Détente'), icon: '☕' },
+    { id: 'date', label: L('Date / dinner', 'Rendez-vous / dîner'), icon: '🌹' },
+    { id: 'club', label: L('Night out', 'Soirée'), icon: '🪩' },
+    { id: 'formal', label: L('Dressed up', 'Tenue chic'), icon: '🎩' },
+    { id: 'gym', label: L('Sport', 'Sport'), icon: '🏋️' },
+    { id: 'travel', label: L('Travel', 'Voyage'), icon: '✈️' }
   ];
 
   /* Occasions, groupées. type : work | casual | formal | sport. tags = contextes de pièces acceptés (le 1er est prioritaire).
      ideal = niveaux de formalité visés (0 sport, 1 casual, 2 smart casual, 3 formel). strict = pas de sweat / jogging. */
   var GROUPS = [
-    { id: 'work', label: 'Work', items: [
-      { id: 'wfh', label: 'Remote / WFH', icon: '🏠', type: 'work', tags: ['chill', 'work'], ideal: [1, 2] },
-      { id: 'office', label: 'Office casual', icon: '💼', type: 'work', tags: ['work'], ideal: [2], strict: true },
-      { id: 'meeting', label: 'Important meeting', icon: '📊', type: 'work', tags: ['work', 'formal'], ideal: [3, 2], strict: true, dressy: true },
-      { id: 'clientdinner', label: 'Client dinner', icon: '🍽️', type: 'work', tags: ['work', 'formal', 'date'], ideal: [2, 3], strict: true, dressy: true }
+    { id: 'work', label: L('Work', 'Travail'), items: [
+      { id: 'wfh', label: L('Remote / WFH', 'Télétravail'), icon: '🏠', type: 'work', tags: ['chill', 'work'], ideal: [1, 2] },
+      { id: 'office', label: L('Office casual', 'Bureau décontracté'), icon: '💼', type: 'work', tags: ['work'], ideal: [2], strict: true },
+      { id: 'meeting', label: L('Important meeting', 'Réunion importante'), icon: '📊', type: 'work', tags: ['work', 'formal'], ideal: [3, 2], strict: true, dressy: true },
+      { id: 'clientdinner', label: L('Client dinner', 'Dîner client'), icon: '🍽️', type: 'work', tags: ['work', 'formal', 'date'], ideal: [2, 3], strict: true, dressy: true }
     ] },
-    { id: 'daily', label: 'Daily life', items: [
-      { id: 'errands', label: 'Errands', icon: '🛒', type: 'casual', tags: ['chill'], ideal: [1] },
-      { id: 'weekend', label: 'Weekend casual', icon: '☕', type: 'casual', tags: ['chill'], ideal: [1, 2] },
-      { id: 'outdoors', label: 'Walk / outdoors', icon: '🌳', type: 'casual', tags: ['chill', 'travel'], ideal: [1] }
+    { id: 'daily', label: L('Daily life', 'Quotidien'), items: [
+      { id: 'errands', label: L('Errands', 'Courses'), icon: '🛒', type: 'casual', tags: ['chill'], ideal: [1] },
+      { id: 'weekend', label: L('Weekend casual', 'Week-end détente'), icon: '☕', type: 'casual', tags: ['chill'], ideal: [1, 2] },
+      { id: 'outdoors', label: L('Walk / outdoors', 'Balade / plein air'), icon: '🌳', type: 'casual', tags: ['chill', 'travel'], ideal: [1] }
     ] },
-    { id: 'social', label: 'Social', items: [
-      { id: 'friends', label: 'Dinner with friends', icon: '🍝', type: 'casual', tags: ['chill', 'date'], ideal: [1, 2] },
-      { id: 'datenight', label: 'Date night', icon: '🌹', type: 'casual', tags: ['date'], ideal: [2] },
-      { id: 'bar', label: 'Bar / lounge', icon: '🍸', type: 'casual', tags: ['date', 'club'], ideal: [2] },
-      { id: 'club', label: 'Club / night out', icon: '🪩', type: 'casual', tags: ['club'], ideal: [2, 1], night: true },
-      { id: 'party', label: 'House party', icon: '🎉', type: 'casual', tags: ['chill', 'club'], ideal: [1, 2] }
+    { id: 'social', label: L('Social', 'Sorties'), items: [
+      { id: 'friends', label: L('Dinner with friends', 'Dîner entre amis'), icon: '🍝', type: 'casual', tags: ['chill', 'date'], ideal: [1, 2] },
+      { id: 'datenight', label: L('Date night', 'Rendez-vous'), icon: '🌹', type: 'casual', tags: ['date'], ideal: [2] },
+      { id: 'bar', label: L('Bar / lounge', 'Bar / lounge'), icon: '🍸', type: 'casual', tags: ['date', 'club'], ideal: [2] },
+      { id: 'club', label: L('Club / night out', 'Club / soirée'), icon: '🪩', type: 'casual', tags: ['club'], ideal: [2, 1], night: true },
+      { id: 'party', label: L('House party', 'Soirée chez des amis'), icon: '🎉', type: 'casual', tags: ['chill', 'club'], ideal: [1, 2] }
     ] },
-    { id: 'formal', label: 'Formal', items: [
-      { id: 'wedding', label: 'Wedding (guest)', icon: '💍', type: 'formal', tags: ['formal'], ideal: [3] },
-      { id: 'gala', label: 'Ceremony / gala', icon: '🎩', type: 'formal', tags: ['formal'], ideal: [3] },
-      { id: 'interview', label: 'Job interview', icon: '🤝', type: 'formal', tags: ['formal', 'work'], ideal: [3, 2] }
+    { id: 'formal', label: L('Formal', 'Habillé'), items: [
+      { id: 'wedding', label: L('Wedding (guest)', 'Mariage (invitation)'), icon: '💍', type: 'formal', tags: ['formal'], ideal: [3] },
+      { id: 'gala', label: L('Ceremony / gala', 'Cérémonie / gala'), icon: '🎩', type: 'formal', tags: ['formal'], ideal: [3] },
+      { id: 'interview', label: L('Job interview', 'Entretien d’embauche'), icon: '🤝', type: 'formal', tags: ['formal', 'work'], ideal: [3, 2] }
     ] },
-    { id: 'sport', label: 'Sport & wellness', items: [
-      { id: 'gym', label: 'Gym / weights', icon: '🏋️', type: 'sport', tags: ['gym'], ideal: [0] },
-      { id: 'running', label: 'Running / outdoor sport', icon: '🏃', type: 'sport', tags: ['gym'], ideal: [0] },
-      { id: 'yoga', label: 'Yoga / recovery', icon: '🧘', type: 'sport', tags: ['gym'], ideal: [0] }
+    { id: 'sport', label: L('Sport & wellness', 'Sport & bien-être'), items: [
+      { id: 'gym', label: L('Gym / weights', 'Salle / muscu'), icon: '🏋️', type: 'sport', tags: ['gym'], ideal: [0] },
+      { id: 'running', label: L('Running / outdoor sport', 'Course / sport dehors'), icon: '🏃', type: 'sport', tags: ['gym'], ideal: [0] },
+      { id: 'yoga', label: L('Yoga / recovery', 'Yoga / récupération'), icon: '🧘', type: 'sport', tags: ['gym'], ideal: [0] }
     ] },
-    { id: 'travel', label: 'Travel', items: [
-      { id: 'airport', label: 'Airport / long travel', icon: '✈️', type: 'casual', tags: ['travel', 'chill'], ideal: [1] },
-      { id: 'citytrip', label: 'City trip', icon: '🏙️', type: 'casual', tags: ['travel', 'chill'], ideal: [1, 2] },
-      { id: 'beach', label: 'Beach / holiday', icon: '🏖️', type: 'casual', tags: ['travel', 'chill'], ideal: [1], beach: true }
+    { id: 'travel', label: L('Travel', 'Voyage'), items: [
+      { id: 'airport', label: L('Airport / long travel', 'Aéroport / long trajet'), icon: '✈️', type: 'casual', tags: ['travel', 'chill'], ideal: [1] },
+      { id: 'citytrip', label: L('City trip', 'Week-end en ville'), icon: '🏙️', type: 'casual', tags: ['travel', 'chill'], ideal: [1, 2] },
+      { id: 'beach', label: L('Beach / holiday', 'Plage / vacances'), icon: '🏖️', type: 'casual', tags: ['travel', 'chill'], ideal: [1], beach: true }
     ] }
   ];
   var OCCASIONS = [];
@@ -78,57 +99,79 @@
   var LEGACY_OCC = { work: 'office', gym: 'gym', club: 'club', date: 'datenight', chill: 'weekend' };
 
   var CONDITIONS = [
-    { id: 'clear', label: 'Clear', icon: '☀️' },
-    { id: 'cloudy', label: 'Cloudy', icon: '☁️' },
-    { id: 'rain', label: 'Rain', icon: '🌧️' },
-    { id: 'wind', label: 'Wind', icon: '💨' },
-    { id: 'snow', label: 'Snow', icon: '❄️' }
+    { id: 'clear', label: L('Clear', 'Dégagé'), icon: '☀️' },
+    { id: 'cloudy', label: L('Cloudy', 'Nuageux'), icon: '☁️' },
+    { id: 'rain', label: L('Rain', 'Pluie'), icon: '🌧️' },
+    { id: 'wind', label: L('Wind', 'Vent'), icon: '💨' },
+    { id: 'snow', label: L('Snow', 'Neige'), icon: '❄️' }
   ];
-  var WARMTH = { 1: 'Light', 2: 'Medium', 3: 'Warm' };
-  var FITS = [['slim', 'Slim / fitted'], ['regular', 'Regular'], ['wide', 'Wide / relaxed']];
+  var WARMTH = { 1: L('Light', 'Légère'), 2: L('Medium', 'Moyenne'), 3: L('Warm', 'Chaude') };
+  var FITS = [['slim', L('Slim / fitted', 'Slim / ajustée')], ['regular', L('Regular', 'Normale')], ['wide', L('Wide / relaxed', 'Ample / large')]];
+  /* Forme courte de la coupe, dans les sous-titres. */
+  var FIT_SHORT = { slim: L('Slim', 'Slim'), wide: L('Wide', 'Ample') };
   var FORMALITY = [
-    { id: 'sport', label: 'Sport', lvl: 0 },
-    { id: 'casual', label: 'Casual', lvl: 1 },
-    { id: 'smart', label: 'Smart casual', lvl: 2 },
-    { id: 'formal', label: 'Formal', lvl: 3 }
+    { id: 'sport', label: L('Sport', 'Sport'), lvl: 0 },
+    { id: 'casual', label: L('Casual', 'Décontracté'), lvl: 1 },
+    { id: 'smart', label: L('Smart casual', 'Chic décontracté'), lvl: 2 },
+    { id: 'formal', label: L('Formal', 'Formel'), lvl: 3 }
   ];
   /* Motifs : subtils (une pièce « statement » idéale) ou voyants (à éviter dans cet esprit). */
-  var PATTERNS = [['solid', 'Solid'], ['stripes', 'Thin stripe'], ['pinstripe', 'Tonal pinstripe'], ['check', 'Plaid / check'],
-    ['houndstooth', 'Houndstooth'], ['texture', 'Texture'], ['print', 'Print'], ['graphic', 'Logo / graphic']];
+  var PATTERNS = [['solid', L('Solid', 'Uni')], ['stripes', L('Thin stripe', 'Fine rayure')], ['pinstripe', L('Tonal pinstripe', 'Rayure ton sur ton')],
+    ['check', L('Plaid / check', 'Carreaux')], ['houndstooth', L('Houndstooth', 'Pied-de-poule')], ['texture', L('Texture', 'Texturé')],
+    ['print', L('Print', 'Imprimé')], ['graphic', L('Logo / graphic', 'Logo / graphique')]];
   var SUBTLE_PATTERNS = ['stripes', 'pinstripe', 'check', 'houndstooth'];
   var LOUD_PATTERNS = ['print', 'graphic'];
   var MATERIALS = ['Cotton', 'Linen', 'Wool', 'Knit', 'Fleece', 'Corduroy', 'Denim', 'Leather', 'Suede', 'Shearling', 'Technical', 'Synthetic'];
+  /* Matières : clé anglaise enregistrée → libellé affiché. */
+  var MATERIAL_FR = { Cotton: 'Coton', Linen: 'Lin', Wool: 'Laine', Knit: 'Maille', Fleece: 'Polaire', Corduroy: 'Velours côtelé', Denim: 'Denim',
+    Leather: 'Cuir', Suede: 'Daim', Shearling: 'Mouton retourné', Technical: 'Technique', Synthetic: 'Synthétique' };
+  function materialLabel(m) { return !m ? '' : FR && MATERIAL_FR[m] ? MATERIAL_FR[m] : m; }
   /* Matières « statement » : une par tenue sur des pièces lisses donne de la profondeur. */
   var STATEMENT_TEXTURES = ['Leather', 'Suede', 'Fleece', 'Knit', 'Wool', 'Corduroy', 'Shearling'];
-  var LENGTHS = [['cropped', 'Cropped'], ['waist', 'Waist'], ['hip', 'Hip'], ['long', 'Long']];
+  var LENGTHS = [['cropped', L('Cropped', 'Courte')], ['waist', L('Waist', 'Taille')], ['hip', L('Hip', 'Hanches')], ['long', L('Long', 'Longue')]];
 
   /* Couleurs : les neutres vont avec tout ; les couleurs « accent » se limitent à une par tenue. */
   var COLORS = [
-    { id: 'black', label: 'Black', hex: '#1E1E1E', neutral: true, dark: true },
-    { id: 'charcoal', label: 'Charcoal', hex: '#45464A', neutral: true, dark: true },
-    { id: 'grey', label: 'Grey', hex: '#9A9A9A', neutral: true },
-    { id: 'white', label: 'White', hex: '#F7F5F0', neutral: true, light: true },
-    { id: 'cream', label: 'Cream', hex: '#EDE3CF', neutral: true, light: true },
-    { id: 'beige', label: 'Beige', hex: '#D6C3A1', neutral: true, light: true },
-    { id: 'sand', label: 'Sand', hex: '#CDB892', neutral: true, light: true },
-    { id: 'khaki', label: 'Khaki', hex: '#B9A57A', neutral: true },
-    { id: 'taupe', label: 'Taupe', hex: '#8B7D6B', neutral: true },
-    { id: 'camel', label: 'Camel', hex: '#B8895A', neutral: true },
-    { id: 'brown', label: 'Chocolate', hex: '#4E3524', neutral: true, dark: true },
-    { id: 'navy', label: 'Dark navy', hex: '#1F2A44', neutral: true, dark: true },
-    { id: 'denim', label: 'Denim', hex: '#4A6A8A', neutral: true },
-    { id: 'lightblue', label: 'Light blue', hex: '#A9C6E3', neutral: true, light: true },
-    { id: 'olive', label: 'Olive', hex: '#6B6B3A', neutral: true },
-    { id: 'burgundy', label: 'Burgundy', hex: '#6D1F2A', dark: true },
-    { id: 'red', label: 'Red', hex: '#B3262E' },
-    { id: 'green', label: 'Green', hex: '#2F6B45', dark: true },
-    { id: 'teal', label: 'Teal', hex: '#2A7A7A' },
-    { id: 'blue', label: 'Blue', hex: '#2E5EAA' },
-    { id: 'pink', label: 'Pink', hex: '#E3A6B4', light: true },
-    { id: 'yellow', label: 'Yellow', hex: '#E0C04A', light: true },
-    { id: 'orange', label: 'Orange', hex: '#D9772B' },
-    { id: 'purple', label: 'Purple', hex: '#6A4C93', dark: true }
+    { id: 'black', label: L('Black', 'Noir'), fr: 'noir|noire|noirs|noires', hex: '#1E1E1E', neutral: true, dark: true },
+    { id: 'charcoal', label: L('Charcoal', 'Anthracite'), hex: '#45464A', neutral: true, dark: true },
+    { id: 'grey', label: L('Grey', 'Gris'), fr: 'gris|grise|gris|grises', hex: '#9A9A9A', neutral: true },
+    { id: 'white', label: L('White', 'Blanc'), fr: 'blanc|blanche|blancs|blanches', hex: '#F7F5F0', neutral: true, light: true },
+    { id: 'cream', label: L('Cream', 'Crème'), hex: '#EDE3CF', neutral: true, light: true },
+    { id: 'beige', label: L('Beige', 'Beige'), fr: 'beige|beige|beiges|beiges', hex: '#D6C3A1', neutral: true, light: true },
+    { id: 'sand', label: L('Sand', 'Sable'), hex: '#CDB892', neutral: true, light: true },
+    { id: 'khaki', label: L('Khaki', 'Kaki'), hex: '#B9A57A', neutral: true },
+    { id: 'taupe', label: L('Taupe', 'Taupe'), hex: '#8B7D6B', neutral: true },
+    { id: 'camel', label: L('Camel', 'Camel'), hex: '#B8895A', neutral: true },
+    { id: 'brown', label: L('Chocolate', 'Chocolat'), hex: '#4E3524', neutral: true, dark: true },
+    { id: 'navy', label: L('Dark navy', 'Bleu marine'), hex: '#1F2A44', neutral: true, dark: true },
+    { id: 'denim', label: L('Denim', 'Denim'), hex: '#4A6A8A', neutral: true },
+    { id: 'lightblue', label: L('Light blue', 'Bleu clair'), hex: '#A9C6E3', neutral: true, light: true },
+    { id: 'olive', label: L('Olive', 'Olive'), hex: '#6B6B3A', neutral: true },
+    { id: 'burgundy', label: L('Burgundy', 'Bordeaux'), hex: '#6D1F2A', dark: true },
+    { id: 'red', label: L('Red', 'Rouge'), fr: 'rouge|rouge|rouges|rouges', hex: '#B3262E' },
+    { id: 'green', label: L('Green', 'Vert'), fr: 'vert|verte|verts|vertes', hex: '#2F6B45', dark: true },
+    { id: 'teal', label: L('Teal', 'Bleu canard'), hex: '#2A7A7A' },
+    { id: 'blue', label: L('Blue', 'Bleu'), fr: 'bleu|bleue|bleus|bleues', hex: '#2E5EAA' },
+    { id: 'pink', label: L('Pink', 'Rose'), fr: 'rose|rose|roses|roses', hex: '#E3A6B4', light: true },
+    { id: 'yellow', label: L('Yellow', 'Jaune'), fr: 'jaune|jaune|jaunes|jaunes', hex: '#E0C04A', light: true },
+    { id: 'orange', label: L('Orange', 'Orange'), hex: '#D9772B' },
+    { id: 'purple', label: L('Purple', 'Violet'), fr: 'violet|violette|violets|violettes', hex: '#6A4C93', dark: true }
   ];
+  /* Couleur accordée en français (g = m, f, mp, fp) ; les couleurs invariables (crème, kaki, marine…) ne changent pas. */
+  var GENDER_IDX = { m: 0, f: 1, mp: 2, fp: 3 };
+  function colorAdj(id, g) {
+    var c = color(id);
+    if (!FR) return c.label.toLowerCase();
+    return c.fr ? c.fr.split('|')[GENDER_IDX[g] || 0] : c.label.toLowerCase();
+  }
+  /* Nom par défaut d'une pièce (« Black leather jacket » / « Veste en cuir noire ») : devient une donnée utilisateur. */
+  function pieceName(kind, col) {
+    if (!FR) return color(col).label + ' ' + kind.toLowerCase();
+    var k = KIND_FR[kind] || [kind, 'm'];
+    return k[0] + ' ' + colorAdj(col, k[1]);
+  }
+  function patternLabel(id) { var p = PATTERNS.filter(function (x) { return x[0] === id; })[0]; return p ? p[1] : id; }
+  function lengthLabel(id) { var p = LENGTHS.filter(function (x) { return x[0] === id; })[0]; return p ? p[1] : id; }
   var ACCENT_PAIRS = [['burgundy', 'green'], ['orange', 'teal'], ['yellow', 'purple'], ['pink', 'green'], ['red', 'teal']];
 
   /* ---------- Style DNA : street smart structuré, influences tailoring oversize ----------
@@ -150,6 +193,7 @@
     scarfBelow: 8
   };
   var FAMILY_LABEL = { white: 'white', cream: 'cream', beige: 'beige', sand: 'sand', khaki: 'khaki', taupe: 'taupe', brown: 'brown', grey: 'grey', black: 'black', navy: 'navy' };
+  var FAMILY_FR = { white: 'blanc', cream: 'crème', beige: 'beige', sand: 'sable', khaki: 'kaki', taupe: 'taupe', brown: 'marron', grey: 'gris', black: 'noir', navy: 'marine' };
   var STRUCTURED_SHOES = ['Leather shoes', 'Loafers', 'Derbies', 'Boots', 'Chelsea boots', 'Sneakers'];
   var SPORT_SHOES = ['Running shoes'];
   var CASUAL_SHOES = ['Sandals', 'Slides'];
@@ -171,6 +215,36 @@
     if (x.formality === 'sport') return false;
     return !x.subtype || STRUCTURED_SHOES.indexOf(x.subtype) > -1;
   }
+  /* Raisons affichées sous une tenue : traduites une fois ici (score() tourne des milliers de fois). */
+  var WHY = {
+    baseOnly: L('Base layer is enough above ' + DNA.baseOnlyAbove + ' °C', 'Au-dessus de ' + DNA.baseOnlyAbove + ' °C, la 1re couche suffit'),
+    shorts: L('Shorts for the heat', 'Un short pour la chaleur'),
+    mid: L('A mid layer adds depth without overheating', 'Une couche intermédiaire donne de la profondeur sans tenir chaud'),
+    outer: L('Outerwear feels natural below ' + DNA.outerBelow + ' °C', 'Sous ' + DNA.outerBelow + ' °C, une veste s’impose naturellement'),
+    outerStrong: L('Outerwear is the right call below ' + DNA.outerStrongBelow + ' °C', 'Sous ' + DNA.outerStrongBelow + ' °C, le manteau est le bon choix'),
+    rain: L('Rain-proof jacket', 'Veste imperméable'),
+    linen: L('Linen breathes in the heat', 'Le lin respire par la chaleur'),
+    sameFamily: L('Shades of the same family', 'Nuances d’une même famille'),
+    signature: L('Fitted top, wide bottom: the signature contrast', 'Haut ajusté, bas ample : le contraste signature'),
+    balanced: L('Loose top, slim bottom: balanced proportions', 'Haut ample, bas slim : proportions équilibrées'),
+    volume: L('Volume on volume, kept intentional by the tonal palette', 'Volume sur volume, rendu intentionnel par le ton sur ton'),
+    cropped: L('Cropped jacket keeps the proportion', 'Veste courte : la proportion est respectée'),
+    waist: L('Waist-length jacket keeps the proportion', 'Veste à la taille : la proportion est respectée'),
+    longCoat: L('Long coat: wear it open', 'Manteau long : à porter ouvert'),
+    layers: L('Each layer stays visible', 'Chaque couche reste visible'),
+    fourth: L('A 4th colour, kept subtle in the pattern', 'Une 4e couleur, discrète dans le motif'),
+    extra: L('A extra colour, kept subtle in the pattern', 'Une couleur en plus, discrète dans le motif'),
+    liked: L('You liked this outfit', 'Tu as aimé cette tenue'),
+    pairs: L('Pairings you liked before', 'Des associations que tu as aimées'),
+    lighter: L('Lighter shoes: lifts the look', 'Chaussures claires : elles allègent la tenue'),
+    tonal: {}, pattern: {}, texture: {}
+  };
+  COLORS.forEach(function (c) {
+    WHY.tonal[c.id] = L('All ' + (FAMILY_LABEL[c.id] || c.label.toLowerCase()) + ': tonal look', 'Tout en ' + (FAMILY_FR[c.id] || c.label.toLowerCase()) + ' : ton sur ton');
+  });
+  PATTERNS.forEach(function (p) { WHY.pattern[p[0]] = L('One subtle pattern carries the interest (' + p[1].toLowerCase() + ')', 'Un motif discret fait tout l’intérêt (' + p[1].toLowerCase() + ')'); });
+  MATERIALS.forEach(function (m) { WHY.texture[m] = L('Texture mix: ' + m.toLowerCase() + ' against smooth pieces', 'Mix de matières : ' + materialLabel(m).toLowerCase() + ' contre des pièces lisses'); });
+
   function weatherText(t, c) { return (t === null || t === undefined ? '?' : t) + ' °C · ' + cond(c).icon + ' ' + cond(c).label; }
 
   /* ---------- Dates ---------- */
@@ -262,22 +336,22 @@
       if (o.layer && !ctx.free) s -= o.layer.warmth > 1 ? 35 : 20;
       if (o.outer && !(wet && o.outer.rainOk && o.outer.warmth === 1)) s -= o.outer.warmth > 1 ? 30 : 15;
       if (o.top.warmth > 1) s -= 10;
-      if (!o.layer && !o.outer) why.push('Base layer is enough above ' + DNA.baseOnlyAbove + ' °C');
-      if (shorts && t >= 25 && oc.type === 'casual') { s += oc.beach ? 18 : 12; why.push('Shorts for the heat'); }
+      if (!o.layer && !o.outer) why.push(WHY.baseOnly);
+      if (shorts && t >= 25 && oc.type === 'casual') { s += oc.beach ? 18 : 12; why.push(WHY.shorts); }
       else if (!shorts && t >= 27 && oc.type === 'casual') s -= 6;
     } else if (t >= DNA.midLayerFrom) {
-      if (o.layer) { s += 6; why.push('A mid layer adds depth without overheating'); if (o.layer.warmth === 3 && t >= 18) s -= 8; }
+      if (o.layer) { s += 6; why.push(WHY.mid); if (o.layer.warmth === 3 && t >= 18) s -= 8; }
       if (o.outer && o.outer.warmth === 3) s -= 20;
       else if (o.outer && o.outer.warmth === 2 && !wet && t >= 18) s -= 12;
       if (shorts && t < 18 && !sport) s -= 15;
     } else if (t >= DNA.outerStrongBelow) {
-      if (o.outer) { s += 8; why.push('Outerwear feels natural below ' + DNA.outerBelow + ' °C'); if (o.outer.warmth === 3 && t >= 10) s -= 6; }
+      if (o.outer) { s += 8; why.push(WHY.outer); if (o.outer.warmth === 3 && t >= 10) s -= 6; }
       else s -= 10;
       if (!o.layer && !sport) s -= 4;
       if (shorts && !sport) s -= 30;
     } else {
       if (o.outer) {
-        s += 12; why.push('Outerwear is the right call below ' + DNA.outerStrongBelow + ' °C');
+        s += 12; why.push(WHY.outerStrong);
         if (o.outer.warmth === 3) s += 6; else if (o.outer.warmth === 1) s -= 10;
       } else s -= 35;
       if (!o.layer) s -= 8;
@@ -286,7 +360,7 @@
     if (shorts && oc.type === 'work') s -= 30;
     if (wet) {
       if (t <= DNA.baseOnlyAbove && !o.outer) s -= 10;
-      if (o.outer && o.outer.rainOk) { s += 10; why.push('Rain-proof jacket'); }
+      if (o.outer && o.outer.rainOk) { s += 10; why.push(WHY.rain); }
       else if (o.outer) s -= 8;
       if (o.shoes.rainOk) s += 4; else s -= 6;
       if (o.shoes.material === 'Suede') s -= 12;
@@ -295,7 +369,7 @@
     if (ctx.cond === 'wind' && t < 18) { if (o.outer) s += 4; else s -= 6; }
     var linen = wear.filter(function (x) { return x.material === 'Linen'; }).length;
     var wool = wear.filter(function (x) { return x.material === 'Wool' || x.material === 'Knit' || x.material === 'Shearling'; }).length;
-    if (t > DNA.baseOnlyAbove) { s += linen * 5 - wool * 8; if (linen) why.push('Linen breathes in the heat'); }
+    if (t > DNA.baseOnlyAbove) { s += linen * 5 - wool * 8; if (linen) why.push(WHY.linen); }
     if (t < 10 && wool) s += Math.min(wool, 2) * 3;
 
     /* --- Couleurs : familles, ton sur ton --- */
@@ -311,27 +385,27 @@
       var f = family(x.color); if (fams.indexOf(f) < 0) fams.push(f);
     });
     var tonal = wearFams.length === 1, sameFamily = !tonal && groups.length === 1;
-    if (tonal) { s += 14; why.unshift('All ' + (FAMILY_LABEL[wearFams[0]] || color(wear[0].color).label.toLowerCase()) + ': tonal look'); }
-    else if (sameFamily) { s += 8; why.push('Shades of the same family'); }
+    if (tonal) { s += 14; why.unshift(WHY.tonal[wearFams[0]] || WHY.tonal[wear[0].color] || WHY.tonal.grey); }
+    else if (sameFamily) { s += 8; why.push(WHY.sameFamily); }
 
     /* --- Silhouette : contraste haut / bas (direction, pas obligation) --- */
     var volume = false;
     if (!sport) {
       var tf = o.top.fit, bf = o.bottom.fit;
-      if (tf === 'slim' && bf === 'wide') { s += 10; why.unshift('Fitted top, wide bottom: the signature contrast'); }
-      else if (tf === 'wide' && bf === 'slim') { s += 4; why.push('Loose top, slim bottom: balanced proportions'); }
+      if (tf === 'slim' && bf === 'wide') { s += 10; why.unshift(WHY.signature); }
+      else if (tf === 'wide' && bf === 'slim') { s += 4; why.push(WHY.balanced); }
       else if (tf === 'slim' && bf === 'slim') s -= 8;
       else if (tf === 'wide' && bf === 'wide') { volume = true; s -= 6; }
       else if (bf === 'wide') s += 4;
-      if (volume && (tonal || sameFamily)) { s += 8; bends.push('Volume on volume, kept intentional by the tonal palette'); }
+      if (volume && (tonal || sameFamily)) { s += 8; bends.push(WHY.volume); }
     }
     if (o.outer) {
-      if (o.outer.length === 'cropped' || o.outer.length === 'waist') { s += 5; why.push((o.outer.length === 'cropped' ? 'Cropped' : 'Waist-length') + ' jacket keeps the proportion'); }
-      else if (o.outer.length === 'long') why.push('Long coat: wear it open');
+      if (o.outer.length === 'cropped' || o.outer.length === 'waist') { s += 5; why.push(o.outer.length === 'cropped' ? WHY.cropped : WHY.waist); }
+      else if (o.outer.length === 'long') why.push(WHY.longCoat);
     }
     /* Chaque couche visible : le haut qui dépasse au col ou à l'ourlet. */
     if (o.layer) {
-      if (value(color(o.layer.color)) !== value(color(o.top.color))) { s += 3; why.push('Each layer stays visible'); }
+      if (value(color(o.layer.color)) !== value(color(o.top.color))) { s += 3; why.push(WHY.layers); }
       else if (o.layer.color === o.top.color && !tonal) s -= 3;
     }
 
@@ -347,7 +421,7 @@
       else if (effective === 3) s += 0;
       else if (effective === 4) s -= 10;
       else if (effective > 4) s -= 25;
-      if (fams.length > 3 && effective <= 3) bends.push('A ' + (fams.length === 4 ? '4th' : 'extra') + ' colour, kept subtle in the pattern');
+      if (fams.length > 3 && effective <= 3) bends.push(fams.length === 4 ? WHY.fourth : WHY.extra);
     }
     var off = parts.filter(function (x) { return !inPalette(x.color); });
     var bright = parts.filter(function (x) { return !color(x.color).neutral; });
@@ -356,13 +430,13 @@
     /* --- Motif : une pièce statement subtile --- */
     var subtle = parts.filter(function (x) { return SUBTLE_PATTERNS.indexOf(x.pattern) > -1; });
     var loud = parts.filter(function (x) { return LOUD_PATTERNS.indexOf(x.pattern) > -1; });
-    if (subtle.length === 1) { s += 6; why.push('One subtle pattern carries the interest (' + PATTERNS.filter(function (p) { return p[0] === subtle[0].pattern; })[0][1].toLowerCase() + ')'); }
+    if (subtle.length === 1) { s += 6; why.push(WHY.pattern[subtle[0].pattern]); }
     else if (subtle.length > 1) s -= 12;
     loud.forEach(function (x) { s -= x.pattern === 'graphic' ? 10 : 8; });
 
     /* --- Texture : une matière statement sur des pièces lisses --- */
     var tex = wear.filter(function (x) { return STATEMENT_TEXTURES.indexOf(x.material) > -1; });
-    if (tex.length === 1 && wear.length > 1) { s += 6; why.push('Texture mix: ' + tex[0].material.toLowerCase() + ' against smooth pieces'); }
+    if (tex.length === 1 && wear.length > 1) { s += 6; why.push(WHY.texture[tex[0].material]); }
     else if (tex.length === 2) s += 2;
     else if (tex.length > 2) s -= 3;
 
@@ -404,7 +478,7 @@
     /* --- Chaussures : sombres et structurées (tendance) --- */
     if (!sport) {
       if (isDarkShoe(o.shoes) && isStructured(o.shoes)) s += 6;
-      else if (!isDarkShoe(o.shoes)) { s -= 4; if (s > 0) bends.push('Lighter shoes: lifts the look'); }
+      else if (!isDarkShoe(o.shoes)) { s -= 4; if (s > 0) bends.push(WHY.lighter); }
       if (CASUAL_SHOES.indexOf(o.shoes.subtype) > -1 && !oc.beach) s -= 20;
     }
     var rule = COMBOS.shoes[o.bottom.color];
@@ -422,17 +496,17 @@
       var key = comboKey(o);
       if (pr.disliked && pr.disliked[key]) s -= 60;
       var liked = pr.liked && pr.liked[key];
-      if (liked) { s += 12; why.unshift('You liked this outfit'); }
+      if (liked) { s += 12; why.unshift(WHY.liked); }
       var pairPts = 0;
       pairKeys(parts).forEach(function (k) { pairPts += (pr.pairs && pr.pairs[k]) || 0; });
       pairPts = clamp(pairPts, -6, 6);
       s += pairPts * 3;
-      if (pairPts >= 2 && !liked) why.unshift('Pairings you liked before');
+      if (pairPts >= 2 && !liked) why.unshift(WHY.pairs);
       parts.forEach(function (x) { s += clamp((pr.items && pr.items[x.id]) || 0, -3, 3); });
     }
 
     /* Une tenue qui plie une ligne directrice ne garde la mention que si elle reste bien classée. */
-    if (s < 100) bends = bends.filter(function (b) { return b.indexOf('Lighter shoes') < 0; });
+    if (s < 100) bends = bends.filter(function (b) { return b !== WHY.lighter; });
     return { score: s, why: why, bends: bends };
   }
 
@@ -577,8 +651,8 @@
       if (pool(items, c, oc).length) return;
       var tagged = items.filter(function (x) { return x.cat === c && x.occasions.some(function (t) { return oc.tags.indexOf(t) > -1; }); });
       var dirty = tagged.filter(function (x) { return x.laundry; }).length;
-      var label = c === 'shoes' && oc.type === 'formal' ? 'Dressed-up shoes (no sneakers)' : catLabel(c);
-      out.push(label + (dirty ? ' (' + dirty + ' in the laundry)' : ''));
+      var label = c === 'shoes' && oc.type === 'formal' ? L('Dressed-up shoes (no sneakers)', 'Chaussures habillées (pas de baskets)') : catLabel(c);
+      out.push(label + (dirty ? L(' (' + dirty + ' in the laundry)', ' (' + dirty + ' au linge)') : ''));
     });
     return out;
   }
@@ -605,16 +679,16 @@
     function of(subs) { return clean.filter(function (x) { return subs.indexOf(x.subtype) > -1; }); }
     var casual = oc.type !== 'work' && oc.type !== 'formal';
     var kinds = [];
-    if (t < DNA.scarfBelow || ctx.cond === 'wind') kinds.push({ list: of(['Scarf']), why: ctx.cond === 'wind' ? 'Scarf: it’s windy' : 'Scarf below ' + DNA.scarfBelow + ' °C' });
+    if (t < DNA.scarfBelow || ctx.cond === 'wind') kinds.push({ list: of(['Scarf']), why: ctx.cond === 'wind' ? L('Scarf: it’s windy', 'Écharpe : il y a du vent') : L('Scarf below ' + DNA.scarfBelow + ' °C', 'Écharpe sous ' + DNA.scarfBelow + ' °C') });
     /* Couvre-chef : jamais pour les occasions habillées ; au travail, seulement le bonnet quand il fait froid. */
     if (oc.type !== 'formal') {
-      if (t < DNA.beanieBelow || ctx.cond === 'snow') kinds.push({ list: of(['Beanie']), why: 'Beanie for the cold' });
-      else if (casual && (oc.ideal[0] <= 1 || oc.type === 'sport')) kinds.push({ list: of(['Cap']), why: 'Cap: the street finish' });
+      if (t < DNA.beanieBelow || ctx.cond === 'snow') kinds.push({ list: of(['Beanie']), why: L('Beanie for the cold', 'Bonnet contre le froid') });
+      else if (casual && (oc.ideal[0] <= 1 || oc.type === 'sport')) kinds.push({ list: of(['Cap']), why: L('Cap: the street finish', 'Casquette : la touche street') });
     }
-    kinds.push({ list: of(['Watch']), why: 'Watch: a considered detail' });
-    if (oc.type !== 'sport') kinds.push({ list: of(['Necklace']), why: 'Necklace: subtle, under the collar' });
-    if (casual && oc.type !== 'sport') kinds.push({ list: of(['Chain wallet']), why: 'Chain wallet: a quiet street detail' });
-    if (oc.type !== 'sport') kinds.push({ list: of(['Tote bag', 'Crossbody bag', 'Backpack']), why: 'Bag for your essentials' });
+    kinds.push({ list: of(['Watch']), why: L('Watch: a considered detail', 'Montre : un détail soigné') });
+    if (oc.type !== 'sport') kinds.push({ list: of(['Necklace']), why: L('Necklace: subtle, under the collar', 'Collier : discret, sous le col') });
+    if (casual && oc.type !== 'sport') kinds.push({ list: of(['Chain wallet']), why: L('Chain wallet: a quiet street detail', 'Chaîne de portefeuille : un détail street discret') });
+    if (oc.type !== 'sport') kinds.push({ list: of(['Tote bag', 'Crossbody bag', 'Backpack']), why: L('Bag for your essentials', 'Un sac pour tes essentiels') });
     var out = [];
     kinds.forEach(function (k) {
       if (out.length >= 2 || !k.list.length) return;
@@ -701,12 +775,12 @@
      permet, si elle améliore la meilleure tenue, ou si elle débloque une occasion jusque-là impossible.
      Aucune donnée externe : tout est calculé à partir de la penderie et des lignes directrices. */
   var SHOP_CONTEXTS = [
-    { occasion: 'weekend', temp: 16, cond: 'clear', label: 'Mild weekend' },
-    { occasion: 'office', temp: 12, cond: 'cloudy', label: 'Cool office day' },
-    { occasion: 'datenight', temp: 18, cond: 'clear', label: 'Date night' },
-    { occasion: 'weekend', temp: 27, cond: 'clear', label: 'Summer weekend' },
-    { occasion: 'citytrip', temp: 4, cond: 'clear', label: 'Cold city day' },
-    { occasion: 'wedding', temp: 19, cond: 'clear', label: 'Wedding' }
+    { occasion: 'weekend', temp: 16, cond: 'clear', label: L('Mild weekend', 'Week-end doux') },
+    { occasion: 'office', temp: 12, cond: 'cloudy', label: L('Cool office day', 'Journée fraîche au bureau') },
+    { occasion: 'datenight', temp: 18, cond: 'clear', label: L('Date night', 'Rendez-vous') },
+    { occasion: 'weekend', temp: 27, cond: 'clear', label: L('Summer weekend', 'Week-end d’été') },
+    { occasion: 'citytrip', temp: 4, cond: 'clear', label: L('Cold city day', 'Journée froide en ville') },
+    { occasion: 'wedding', temp: 19, cond: 'clear', label: L('Wedding', 'Mariage') }
   ];
   var SHOP_KINDS = Object.keys(DEFAULTS).filter(function (k) {
     var d = DEFAULTS[k];
@@ -714,7 +788,7 @@
   });
   function uniq(a) { return a.filter(function (x, i) { return a.indexOf(x) === i; }); }
   function virtualPiece(kind, col, pattern) {
-    var v = { id: 'shop:' + kind + ':' + col, name: color(col).label + ' ' + kind.toLowerCase(), color: col, pattern: pattern || 'solid',
+    var v = { id: 'shop:' + kind + ':' + col, name: pieceName(kind, col), color: col, pattern: pattern || 'solid',
       laundry: false, lastWorn: null, worn: 0, fav: false, virtual: true };
     applyDefaults(v, kind);
     return complete(v);
@@ -863,24 +937,24 @@
   function isDarkCol(c) { return ['black', 'navy', 'brown', 'charcoal'].indexOf(c) > -1; }
   function isLightEarth(c) { return ['cream', 'beige', 'sand', 'khaki', 'taupe', 'camel', 'white'].indexOf(c) > -1; }
   var ESSENTIALS = [
-    { id: 'tee-white', label: 'White T-shirt', kind: 'T-shirt', color: 'white', match: function (x) { return x.cat === 'top' && x.subtype === 'T-shirt' && x.color === 'white'; } },
-    { id: 'tee-black', label: 'Black T-shirt', kind: 'T-shirt', color: 'black', match: function (x) { return x.cat === 'top' && x.subtype === 'T-shirt' && x.color === 'black'; } },
-    { id: 'knit-top', label: 'Knit polo or fitted knit', kind: 'Polo', color: 'cream', match: function (x) { return x.cat === 'top' && (x.subtype === 'Polo' || x.material === 'Knit'); } },
-    { id: 'shirt', label: 'Crisp light shirt', kind: 'Oxford shirt', color: 'white', match: function (x) { return x.cat === 'top' && (x.subtype === 'Shirt' || x.subtype === 'Oxford shirt') && color(x.color).light; } },
-    { id: 'knit-layer', label: 'Knit sweater or cardigan', kind: 'Sweater', color: 'grey', match: function (x) { return x.cat === 'layer' && ['Sweater', 'Cardigan', 'Turtleneck'].indexOf(x.subtype) > -1; } },
-    { id: 'pattern', label: 'One piece with a subtle pattern', kind: 'Overshirt', color: 'taupe', pattern: 'houndstooth', match: function (x) { return x.cat !== 'acc' && SUBTLE_PATTERNS.indexOf(x.pattern) > -1; } },
-    { id: 'wide-dark', label: 'Wide tailored trousers, dark', kind: 'Trousers', color: 'navy', match: function (x) { return x.cat === 'bottom' && x.fit === 'wide' && x.subtype === 'Trousers' && isDarkCol(x.color); } },
-    { id: 'wide-light', label: 'Wide trousers in a light earth tone', kind: 'Trousers', color: 'sand', match: function (x) { return x.cat === 'bottom' && x.fit === 'wide' && x.warmth > 1 && isLightEarth(x.color); } },
-    { id: 'wide-jeans', label: 'Wide jeans', kind: 'Jeans', color: 'black', match: function (x) { return x.cat === 'bottom' && x.subtype === 'Jeans' && x.fit === 'wide'; } },
-    { id: 'cropped', label: 'Cropped or waist-length jacket', kind: 'Leather jacket', color: 'black', match: function (x) { return x.cat === 'outer' && (x.length === 'cropped' || x.length === 'waist'); } },
-    { id: 'long-coat', label: 'Long coat (worn open)', kind: 'Coat', color: 'beige', match: function (x) { return x.cat === 'outer' && x.length === 'long' && x.warmth >= 2; } },
-    { id: 'rain', label: 'Rain-proof outer layer', kind: 'Trench coat', color: 'beige', match: function (x) { return x.cat === 'outer' && x.rainOk; } },
-    { id: 'boots', label: 'Dark boots', kind: 'Chelsea boots', color: 'black', match: function (x) { return x.cat === 'shoes' && (x.subtype === 'Boots' || x.subtype === 'Chelsea boots') && isDarkShoe(x); } },
-    { id: 'brown-shoes', label: 'Brown leather shoes', kind: 'Derbies', color: 'brown', match: function (x) { return x.cat === 'shoes' && ['Leather shoes', 'Derbies', 'Loafers'].indexOf(x.subtype) > -1 && x.color === 'brown'; } },
-    { id: 'dark-sneakers', label: 'Dark leather sneakers', kind: 'Sneakers', color: 'black', match: function (x) { return x.cat === 'shoes' && x.subtype === 'Sneakers' && isDarkShoe(x); } },
-    { id: 'watch', label: 'Watch', kind: 'Watch', color: 'brown', match: function (x) { return x.cat === 'acc' && x.subtype === 'Watch'; } },
-    { id: 'headwear', label: 'Cap or beanie', kind: 'Cap', color: 'black', match: function (x) { return x.cat === 'acc' && (x.subtype === 'Cap' || x.subtype === 'Beanie'); } },
-    { id: 'scarf', label: 'Scarf', kind: 'Scarf', color: 'grey', match: function (x) { return x.cat === 'acc' && x.subtype === 'Scarf'; } }
+    { id: 'tee-white', label: L('White T-shirt', 'T-shirt blanc'), kind: 'T-shirt', color: 'white', match: function (x) { return x.cat === 'top' && x.subtype === 'T-shirt' && x.color === 'white'; } },
+    { id: 'tee-black', label: L('Black T-shirt', 'T-shirt noir'), kind: 'T-shirt', color: 'black', match: function (x) { return x.cat === 'top' && x.subtype === 'T-shirt' && x.color === 'black'; } },
+    { id: 'knit-top', label: L('Knit polo or fitted knit', 'Polo ou haut en maille ajusté'), kind: 'Polo', color: 'cream', match: function (x) { return x.cat === 'top' && (x.subtype === 'Polo' || x.material === 'Knit'); } },
+    { id: 'shirt', label: L('Crisp light shirt', 'Chemise claire et nette'), kind: 'Oxford shirt', color: 'white', match: function (x) { return x.cat === 'top' && (x.subtype === 'Shirt' || x.subtype === 'Oxford shirt') && color(x.color).light; } },
+    { id: 'knit-layer', label: L('Knit sweater or cardigan', 'Pull en maille ou cardigan'), kind: 'Sweater', color: 'grey', match: function (x) { return x.cat === 'layer' && ['Sweater', 'Cardigan', 'Turtleneck'].indexOf(x.subtype) > -1; } },
+    { id: 'pattern', label: L('One piece with a subtle pattern', 'Une pièce à motif discret'), kind: 'Overshirt', color: 'taupe', pattern: 'houndstooth', match: function (x) { return x.cat !== 'acc' && SUBTLE_PATTERNS.indexOf(x.pattern) > -1; } },
+    { id: 'wide-dark', label: L('Wide tailored trousers, dark', 'Pantalon large de tailleur, foncé'), kind: 'Trousers', color: 'navy', match: function (x) { return x.cat === 'bottom' && x.fit === 'wide' && x.subtype === 'Trousers' && isDarkCol(x.color); } },
+    { id: 'wide-light', label: L('Wide trousers in a light earth tone', 'Pantalon large ton terre clair'), kind: 'Trousers', color: 'sand', match: function (x) { return x.cat === 'bottom' && x.fit === 'wide' && x.warmth > 1 && isLightEarth(x.color); } },
+    { id: 'wide-jeans', label: L('Wide jeans', 'Jean large'), kind: 'Jeans', color: 'black', match: function (x) { return x.cat === 'bottom' && x.subtype === 'Jeans' && x.fit === 'wide'; } },
+    { id: 'cropped', label: L('Cropped or waist-length jacket', 'Veste courte ou à la taille'), kind: 'Leather jacket', color: 'black', match: function (x) { return x.cat === 'outer' && (x.length === 'cropped' || x.length === 'waist'); } },
+    { id: 'long-coat', label: L('Long coat (worn open)', 'Manteau long (porté ouvert)'), kind: 'Coat', color: 'beige', match: function (x) { return x.cat === 'outer' && x.length === 'long' && x.warmth >= 2; } },
+    { id: 'rain', label: L('Rain-proof outer layer', 'Veste imperméable'), kind: 'Trench coat', color: 'beige', match: function (x) { return x.cat === 'outer' && x.rainOk; } },
+    { id: 'boots', label: L('Dark boots', 'Boots foncées'), kind: 'Chelsea boots', color: 'black', match: function (x) { return x.cat === 'shoes' && (x.subtype === 'Boots' || x.subtype === 'Chelsea boots') && isDarkShoe(x); } },
+    { id: 'brown-shoes', label: L('Brown leather shoes', 'Chaussures en cuir marron'), kind: 'Derbies', color: 'brown', match: function (x) { return x.cat === 'shoes' && ['Leather shoes', 'Derbies', 'Loafers'].indexOf(x.subtype) > -1 && x.color === 'brown'; } },
+    { id: 'dark-sneakers', label: L('Dark leather sneakers', 'Baskets en cuir foncées'), kind: 'Sneakers', color: 'black', match: function (x) { return x.cat === 'shoes' && x.subtype === 'Sneakers' && isDarkShoe(x); } },
+    { id: 'watch', label: L('Watch', 'Montre'), kind: 'Watch', color: 'brown', match: function (x) { return x.cat === 'acc' && x.subtype === 'Watch'; } },
+    { id: 'headwear', label: L('Cap or beanie', 'Casquette ou bonnet'), kind: 'Cap', color: 'black', match: function (x) { return x.cat === 'acc' && (x.subtype === 'Cap' || x.subtype === 'Beanie'); } },
+    { id: 'scarf', label: L('Scarf', 'Écharpe'), kind: 'Scarf', color: 'grey', match: function (x) { return x.cat === 'acc' && x.subtype === 'Scarf'; } }
   ];
   function essentials(items) {
     return ESSENTIALS.map(function (e) { return { e: e, have: items.filter(function (x) { return !x.virtual && e.match(x); }) }; });
@@ -891,6 +965,8 @@
     CONDITIONS: CONDITIONS, WARMTH: WARMTH, FITS: FITS, FORMALITY: FORMALITY, PATTERNS: PATTERNS, SUBTLE_PATTERNS: SUBTLE_PATTERNS,
     LOUD_PATTERNS: LOUD_PATTERNS, MATERIALS: MATERIALS, STATEMENT_TEXTURES: STATEMENT_TEXTURES, LENGTHS: LENGTHS, COLORS: COLORS,
     DNA: DNA, DEFAULTS: DEFAULTS, COMBOS: COMBOS,
+    FIT_SHORT: FIT_SHORT, kindLabel: kindLabel, materialLabel: materialLabel, patternLabel: patternLabel, lengthLabel: lengthLabel,
+    colorAdj: colorAdj, pieceName: pieceName,
     color: color, cat: cat, catLabel: catLabel, tag: tag, occ: occ, cond: cond, formality: formality, value: value,
     family: family, inPalette: inPalette, isDarkShoe: isDarkShoe, isStructured: isStructured, weatherText: weatherText,
     keyOf: keyOf, today: today, daysAgo: daysAgo,
