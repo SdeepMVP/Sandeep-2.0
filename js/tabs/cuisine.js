@@ -85,7 +85,7 @@
 
   /* ---------- Recherche (nom OU ingrédients, sans accents, plusieurs mots = tous requis) ---------- */
   function norm(s) {
-    return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    return String(s || '').toLowerCase().replace(/œ/g, 'oe').replace(/æ/g, 'ae').normalize('NFD').replace(/[̀-ͯ]/g, ''); /* « oeufs » trouve « œufs » */
   }
   function haystack(r, v) {
     var parts = [v.name].concat(v.tags, r.keywords || [], v.ingredients);
