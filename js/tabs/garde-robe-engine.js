@@ -77,7 +77,7 @@
       { id: 'club', label: L('Club / night out', 'Club / soirée'), icon: '🪩', type: 'casual', tags: ['club'], ideal: [2, 1], night: true },
       { id: 'party', label: L('House party', 'Soirée chez des amis'), icon: '🎉', type: 'casual', tags: ['chill', 'club'], ideal: [1, 2] }
     ] },
-    { id: 'formal', label: L('Formal', 'Habillé'), items: [
+    { id: 'formal', label: L('Formal', 'Chic'), items: [
       { id: 'wedding', label: L('Wedding (guest)', 'Mariage (invitation)'), icon: '💍', type: 'formal', tags: ['formal'], ideal: [3] },
       { id: 'gala', label: L('Ceremony / gala', 'Cérémonie / gala'), icon: '🎩', type: 'formal', tags: ['formal'], ideal: [3] },
       { id: 'interview', label: L('Job interview', 'Entretien d’embauche'), icon: '🤝', type: 'formal', tags: ['formal', 'work'], ideal: [3, 2] }
@@ -128,7 +128,7 @@
   function materialLabel(m) { return !m ? '' : FR && MATERIAL_FR[m] ? MATERIAL_FR[m] : m; }
   /* Matières « statement » : une par tenue sur des pièces lisses donne de la profondeur. */
   var STATEMENT_TEXTURES = ['Leather', 'Suede', 'Fleece', 'Knit', 'Wool', 'Corduroy', 'Shearling'];
-  var LENGTHS = [['cropped', L('Cropped', 'Courte')], ['waist', L('Waist', 'Taille')], ['hip', L('Hip', 'Hanches')], ['long', L('Long', 'Longue')]];
+  var LENGTHS = [['cropped', L('Cropped', 'Courte')], ['waist', L('Waist', 'À la taille')], ['hip', L('Hip', 'Aux hanches')], ['long', L('Long', 'Longue')]];
 
   /* Couleurs : les neutres vont avec tout ; les couleurs « accent » se limitent à une par tenue. */
   var COLORS = [
@@ -142,9 +142,9 @@
     { id: 'khaki', label: L('Khaki', 'Kaki'), hex: '#B9A57A', neutral: true },
     { id: 'taupe', label: L('Taupe', 'Taupe'), hex: '#8B7D6B', neutral: true },
     { id: 'camel', label: L('Camel', 'Camel'), hex: '#B8895A', neutral: true },
-    { id: 'brown', label: L('Chocolate', 'Chocolat'), hex: '#4E3524', neutral: true, dark: true },
+    { id: 'brown', label: L('Chocolate', 'Chocolat'), fr: 'marron|marron|marron|marron', hex: '#4E3524', neutral: true, dark: true },
     { id: 'navy', label: L('Dark navy', 'Bleu marine'), hex: '#1F2A44', neutral: true, dark: true },
-    { id: 'denim', label: L('Denim', 'Denim'), hex: '#4A6A8A', neutral: true },
+    { id: 'denim', label: L('Denim', 'Denim'), fr: 'bleu|bleue|bleus|bleues', hex: '#4A6A8A', neutral: true },
     { id: 'lightblue', label: L('Light blue', 'Bleu clair'), hex: '#A9C6E3', neutral: true, light: true },
     { id: 'olive', label: L('Olive', 'Olive'), hex: '#6B6B3A', neutral: true },
     { id: 'burgundy', label: L('Burgundy', 'Bordeaux'), hex: '#6D1F2A', dark: true },

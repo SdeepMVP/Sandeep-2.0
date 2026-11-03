@@ -6,7 +6,12 @@
   var NS = 'settings';
   var VERSION = '0.18.0';
 
-  function get() { return S2.storage.load(NS, { theme: 'auto', lastExport: null }); }
+  function get() {
+    var s = S2.storage.load(NS, null) || {};
+    if (!s.theme) s.theme = 'auto'; /* réglages enregistrés par S2.setLang avant tout choix de thème */
+    if (s.lastExport === undefined) s.lastExport = null;
+    return s;
+  }
   function set(patch) {
     var s = get();
     Object.keys(patch).forEach(function (k) { s[k] = patch[k]; });
