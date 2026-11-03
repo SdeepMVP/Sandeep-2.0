@@ -2,6 +2,7 @@
 (function () {
   'use strict';
   var S2 = (window.S2 = window.S2 || {});
+  var L = S2.L;
 
   /* h('div', {class: 'x', onclick: fn}, 'texte', enfant, [enfants]) */
   function h(tag, attrs) {
@@ -60,13 +61,13 @@
     return new Promise(function (resolve) {
       sheet(function (close) {
         return [
-          h('h2', { class: 'sheet-title' }, o.title || 'Confirm'),
+          h('h2', { class: 'sheet-title' }, o.title || L('Confirm', 'Confirmer')),
           o.message ? h('p', { class: 'sheet-text' }, o.message) : null,
           h('div', { class: 'sheet-actions' },
             h('button', { class: 'btn ' + (o.danger ? 'btn-danger' : 'btn-primary') + ' btn-block',
-              onclick: function () { close(true); } }, o.okLabel || 'Confirm'),
+              onclick: function () { close(true); } }, o.okLabel || L('Confirm', 'Confirmer')),
             h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(false); } },
-              o.cancelLabel || 'Cancel'))
+              o.cancelLabel || L('Cancel', 'Annuler')))
         ];
       }, { onClose: function (r) { resolve(r === true); } });
     });
@@ -82,11 +83,11 @@
     toastTimer = setTimeout(function () { t.classList.remove('is-visible'); }, 2200);
   }
 
-  /* Number and date formatting (English UI; commas still accepted on input). */
+  /* Nombres et dates selon la langue (point en anglais, virgule en français ; les deux acceptés à la saisie). */
   function num(n, digits) {
     if (n === null || n === undefined || isNaN(n)) return '';
     var r = digits === undefined ? Math.round(n * 100) / 100 : Number(n.toFixed(digits));
-    return String(r);
+    return S2.lang === 'fr' ? String(r).replace('.', ',') : String(r);
   }
   function parseNum(s) {
     if (s === null || s === undefined) return null;
@@ -99,10 +100,10 @@
     var d = new Date(iso);
     var o = { day: '2-digit', month: '2-digit' };
     if (withYear) o.year = '2-digit';
-    return d.toLocaleDateString('en-GB', o);
+    return d.toLocaleDateString(S2.locale, o);
   }
   function longDate(iso) {
-    return new Date(iso).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+    return new Date(iso).toLocaleDateString(S2.locale, { weekday: 'long', day: 'numeric', month: 'long' });
   }
 
   function uid() {

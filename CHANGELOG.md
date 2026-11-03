@@ -1,5 +1,10 @@
 # Changelog — Sandeep 2.0
 
+## 0.18.0 — 2026-11-03
+- **Language switch** in Settings: **English / Français** for the whole app (Gym, Wardrobe, Kitchen, Habits, Settings), so it can follow whoever is using it. The app reloads in the chosen language; English stays the default.
+- Built-in texts are translated (default habits, wardrobe kinds, colours and reasons, the 40 built-in recipes in both languages); your data is never changed, and names you typed yourself are shown as you wrote them. Dates and decimals follow the language (e.g. 1.5 vs 1,5, “12 Oct” vs « 12 oct. »).
+- Kitchen follows the app language instead of always being French.
+
 ## 0.17.0 — 2026-11-03
 - Cuisine: **40 recipes** (15 breakfast & snacks, 25 lunch & dinner), all in French and high in protein. New: avocado toast with soft eggs, chocolate protein porridge, fromage blanc with apple & walnuts, tuna & skyr toast, breakfast burrito, no-bake protein bars, express shakshuka; paprika chicken & sweet potato tray bake, beef noodle stir-fry, lean homemade burgers, teriyaki salmon, red lentil dahl with eggs, shrimp poke bowl, express bolognese, chicken & black bean quesadillas, pan-fried gnocchi with chicken & pesto, mustard turkey escalopes, express chicken ramen, lentil, feta & egg salad, tortilla pizza. Added automatically to existing data.
 
