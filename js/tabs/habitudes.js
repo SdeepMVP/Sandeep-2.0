@@ -4,6 +4,7 @@
   'use strict';
   var S2 = window.S2;
   var ui = S2.ui, h = ui.h, num = ui.num;
+  var L = S2.L;
   var NS = 'habitudes';
   var SCHEMA = 1;
   var GRID_DAYS = 28;
@@ -12,12 +13,47 @@
 
   /* Repères santé après la dernière cigarette (OMS / American Cancer Society). */
   var MILESTONES = [
-    { days: 1,   text: 'Carbon monoxide in your blood is back to normal.' },
-    { days: 3,   text: 'Nicotine is out of your body; taste and smell start to improve.' },
-    { days: 14,  text: 'Circulation and lung function begin to improve (2 weeks – 3 months).' },
-    { days: 30,  text: 'Coughing and shortness of breath start to decrease (1 – 9 months).' },
-    { days: 365, text: 'Your excess risk of heart disease is half that of a smoker.' }
+    { days: 1,   text: L('Carbon monoxide in your blood is back to normal.', 'Le monoxyde de carbone dans ton sang revient à la normale.') },
+    { days: 3,   text: L('Nicotine is out of your body; taste and smell start to improve.', 'La nicotine a quitté ton corps ; le goût et l’odorat commencent à revenir.') },
+    { days: 14,  text: L('Circulation and lung function begin to improve (2 weeks – 3 months).', 'La circulation et la fonction pulmonaire s’améliorent (2 semaines – 3 mois).') },
+    { days: 30,  text: L('Coughing and shortness of breath start to decrease (1 – 9 months).', 'La toux et l’essoufflement diminuent (1 – 9 mois).') },
+    { days: 365, text: L('Your excess risk of heart disease is half that of a smoker.', 'Ton risque supplémentaire de maladie cardiaque est divisé par deux par rapport à un fumeur.') }
   ];
+
+  /* ---------- Langue ---------- */
+  /* Pluriel : en anglais tout sauf 1, en français au-delà de 1 (0 et 1 au singulier). */
+  function pl(n, one, many) { return (S2.lang === 'fr' ? n > 1 : n !== 1) ? many : one; }
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+  function longDay(k) { return cap(parseKey(k).toLocaleDateString(S2.locale, { weekday: 'long', day: 'numeric', month: 'long' })); }
+  function money(x) { var v = x.toFixed(2); return (S2.lang === 'fr' ? v.replace('.', ',') : v) + ' €'; }
+  /* Habitudes intégrées : enregistrées en anglais dans les données (l'utilisateur peut les renommer).
+     On les traduit seulement à l'affichage, tant que le texte enregistré est encore celui d'origine. */
+  var FR = {
+    'Creatine': 'Créatine',
+    'Daily dose': 'Dose du jour',
+    'Medication': 'Médicaments',
+    'Morning': 'Matin',
+    'Evening': 'Soir',
+    'Sleep schedule': 'Horaires de sommeil',
+    'Bedtime counts for the night of that day.': 'Le coucher compte pour la nuit de ce jour-là.',
+    'In bed before midnight': 'Au lit avant minuit',
+    'Up before 9:00': 'Debout avant 9 h',
+    'Pelvic floor routine': 'Routine périnée',
+    'Kegels: squeeze 5 s, relax 5 s, 10 times, 3 sets spread over the day. Reverse Kegels: gently push as if to pee, then relax fully, 10 times. Breathing: 2 min from the belly, in 4 s, out 6 s.':
+      'Kegels : contracte 5 s, relâche 5 s, 10 fois, 3 séries réparties dans la journée. Kegels inversés : pousse doucement comme pour faire pipi, puis relâche complètement, 10 fois. Respiration : 2 min par le ventre, inspire 4 s, expire 6 s.',
+    'Reverse Kegels · 10': 'Kegels inversés · 10',
+    'Belly breathing · 2 min': 'Respiration abdominale · 2 min',
+    'Hair routine': 'Routine cheveux',
+    'Tap ✎ to split it into steps (e.g. wash, condition, style).': 'Touche ✎ pour la découper en étapes (ex. lavage, après-shampooing, coiffage).',
+    'Done': 'Fait',
+    'Quit smoking': 'Arrêter de fumer',
+    'Stop smoking completely: 0 cigarettes a day.': 'Arrêter complètement de fumer : 0 cigarette par jour.'
+  };
+  var EN = {};
+  Object.keys(FR).forEach(function (k) { EN[FR[k]] = k; });
+  function tx(s) { return S2.lang === 'fr' && FR[s] || s; }
+  /* Inverse, à l'enregistrement : un texte resté égal à la traduction reprend le texte d'origine (il suit la langue). */
+  function untx(s) { return S2.lang === 'fr' && EN[s] || s; }
 
   /* ---------- Dates (jour local) ---------- */
   function pad(n) { return String(n).padStart(2, '0'); }
@@ -166,9 +202,11 @@
     root.innerHTML = '';
     var q = quitHabit();
     root.appendChild(h('div', { class: 'segmented hb-nav' },
-      h('button', { class: 'seg' + (view === 'daily' ? ' is-active' : ''), onclick: function () { view = 'daily'; render(); } }, 'Daily'),
-      h('button', { class: 'seg' + (view === 'weeks' ? ' is-active' : ''), onclick: function () { view = 'weeks'; render(); } }, 'Weeks'),
-      q ? h('button', { class: 'seg' + (view === 'quit' ? ' is-active' : ''), onclick: function () { view = 'quit'; render(); } }, q.name) : null));
+      h('button', { class: 'seg' + (view === 'daily' ? ' is-active' : ''), onclick: function () { view = 'daily'; render(); } }, L('Daily', 'Jour')),
+      h('button', { class: 'seg' + (view === 'weeks' ? ' is-active' : ''), onclick: function () { view = 'weeks'; render(); } }, L('Weeks', 'Semaines')),
+      /* nom d'origine : libellé court « Tabac » en français pour que les trois boutons tiennent */
+      q ? h('button', { class: 'seg' + (view === 'quit' ? ' is-active' : ''), onclick: function () { view = 'quit'; render(); } },
+        q.name === 'Quit smoking' ? L('Quit smoking', 'Tabac') : q.name) : null));
     if (view === 'quit' && q) renderQuit(q);
     else if (view === 'weeks') renderWeeks();
     else renderDaily();
@@ -182,30 +220,30 @@
 
     var card = h('section', { class: 'card hb-daily' },
       h('div', { class: 'hb-todayhead' },
-        h('span', { class: 'card-title' }, 'Today · ' + parseKey(tk).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })),
+        h('span', { class: 'card-title' }, L('Today · ', 'Aujourd’hui · ') + parseKey(tk).toLocaleDateString(S2.locale, { weekday: 'long', day: 'numeric', month: 'long' })),
         h('span', { class: 'hb-status ' + (total && done === total ? 'is-up' : 'is-info') }, done + ' / ' + total)),
       h('div', { class: 'hb-progress' }, h('span', { style: { width: (total ? done / total * 100 : 0) + '%' } })));
     list.forEach(function (hb) {
-      if (hb.slots.length > 1) card.appendChild(h('div', { class: 'hb-group' }, hb.name));
+      if (hb.slots.length > 1) card.appendChild(h('div', { class: 'hb-group' }, tx(hb.name)));
       hb.slots.forEach(function (sl) {
         var on = !!(dayLog(hb, tk) && dayLog(hb, tk).done && dayLog(hb, tk).done[sl.id]);
         card.appendChild(h('button', { class: 'hb-check' + (on ? ' is-on' : ''), role: 'checkbox', 'aria-checked': on ? 'true' : 'false',
-          onclick: function () { toggleSlot(hb, tk, sl.id); render(); if (!on && complete(hb, tk)) ui.toast(hb.name + ': done for today ✓'); } },
+          onclick: function () { toggleSlot(hb, tk, sl.id); render(); if (!on && complete(hb, tk)) ui.toast(tx(hb.name) + L(': done for today ✓', ' : fait pour aujourd’hui ✓')); } },
           h('span', { class: 'hb-box', 'aria-hidden': 'true' }, on ? '✓' : ''),
-          h('span', { class: 'hb-checktext' }, hb.slots.length > 1 ? sl.label : hb.name)));
+          h('span', { class: 'hb-checktext' }, hb.slots.length > 1 ? tx(sl.label) : tx(hb.name))));
       });
     });
-    if (!list.length) card.appendChild(h('p', { class: 'muted' }, 'No daily habits yet.'));
+    if (!list.length) card.appendChild(h('p', { class: 'muted' }, L('No daily habits yet.', 'Aucune habitude quotidienne pour l’instant.')));
     var q = quitHabit();
     if (q) {
       var s = currentStreak(q);
       card.appendChild(h('button', { class: 'hb-quitlink', onclick: function () { view = 'quit'; render(); window.scrollTo(0, 0); } },
-        h('span', null, '🚭 ' + q.name),
-        h('span', { class: 'hb-quitstreak' }, s + ' day' + (s === 1 ? '' : 's') + ' smoke-free ›')));
+        h('span', null, '🚭 ' + tx(q.name)),
+        h('span', { class: 'hb-quitstreak' }, s + ' ' + pl(s, L('day smoke-free', 'jour sans fumer'), L('days smoke-free', 'jours sans fumer')) + ' ›')));
     }
     root.appendChild(card);
 
-    root.appendChild(h('h2', { class: 'section-title' }, 'Streaks · last 7 days'));
+    root.appendChild(h('h2', { class: 'section-title' }, L('Streaks · last 7 days', 'Séries · 7 derniers jours')));
     list.forEach(function (hb) {
       var streak = checkStreak(hb), best = checkBest(hb);
       var strip = h('div', { class: 'hb-week' });
@@ -215,27 +253,28 @@
           var cls = 'hb-day' + (before ? ' is-before' : n === hb.slots.length ? ' is-free' : n ? ' is-part' : ' is-empty') + (k === tk ? ' is-today' : '');
           var d = parseKey(k);
           strip.appendChild(h('button', { class: cls,
-            'aria-label': d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) + ': ' + n + ' of ' + hb.slots.length,
+            'aria-label': longDay(k) + L(': ', ' : ') + n + L(' of ', ' sur ') + hb.slots.length,
             onclick: function () { editCheckDay(hb, k); } },
-            h('span', { class: 'hb-dayname' }, d.toLocaleDateString('en-GB', { weekday: 'narrow' })),
+            h('span', { class: 'hb-dayname' }, d.toLocaleDateString(S2.locale, { weekday: 'narrow' })),
             h('span', { class: 'hb-dayval' }, before ? '' : n === hb.slots.length ? '✓' : n ? n + '/' + hb.slots.length : '')));
         })(addDays(tk, -i));
       }
       root.appendChild(h('div', { class: 'card hb-habit' },
         h('div', { class: 'hb-habithead' },
           h('div', null,
-            h('div', { class: 'list-title' }, hb.name),
-            h('div', { class: 'list-sub' }, hb.slots.length > 1 ? hb.slots.map(function (sl) { return sl.label; }).join(' · ') : 'Once a day')),
+            h('div', { class: 'list-title' }, tx(hb.name)),
+            h('div', { class: 'list-sub' }, hb.slots.length > 1 ? hb.slots.map(function (sl) { return tx(sl.label); }).join(' · ') : L('Once a day', 'Une fois par jour'))),
           h('div', { class: 'hb-habitstreak' },
             h('span', { class: 'hb-streaksmall' }, streak),
-            h('span', { class: 'list-sub' }, 'day' + (streak === 1 ? '' : 's') + ' · best ' + best)),
-          h('button', { class: 'btn btn-icon', 'aria-label': 'Edit ' + hb.name, onclick: function () { editCheckHabit(hb); } }, '✎')),
+            h('span', { class: 'list-sub' }, pl(streak, L('day', 'jour'), L('days', 'jours')) + L(' · best ', ' · record ') + best)),
+          h('button', { class: 'btn btn-icon', 'aria-label': L('Edit ', 'Modifier ') + tx(hb.name), onclick: function () { editCheckHabit(hb); } }, '✎')),
         strip,
-        hb.note ? h('p', { class: 'hint' }, hb.note) : null));
+        hb.note ? h('p', { class: 'hint' }, tx(hb.note)) : null));
     });
-    root.appendChild(h('p', { class: 'hint' }, 'Tap a day to fix it after the fact. A streak counts the days where every box was ticked; today only counts once it is complete.'));
+    root.appendChild(h('p', { class: 'hint' }, L('Tap a day to fix it after the fact. A streak counts the days where every box was ticked; today only counts once it is complete.',
+      'Touche un jour pour le corriger après coup. Une série compte les jours où toutes les cases sont cochées ; aujourd’hui ne compte qu’une fois complet.')));
     root.appendChild(h('div', { class: 'bottom-actions' },
-      h('button', { class: 'btn btn-secondary btn-block btn-lg', onclick: function () { editCheckHabit(null); } }, '+ Add a habit')));
+      h('button', { class: 'btn btn-secondary btn-block btn-lg', onclick: function () { editCheckHabit(null); } }, L('+ Add a habit', '+ Ajouter une habitude'))));
   }
 
   /* Modifier les cases d'un jour passé (ou d'aujourd'hui). */
@@ -250,13 +289,13 @@
           box.appendChild(h('button', { class: 'hb-check' + (draft[sl.id] ? ' is-on' : ''), type: 'button', role: 'checkbox',
             'aria-checked': draft[sl.id] ? 'true' : 'false', onclick: function () { draft[sl.id] = !draft[sl.id]; paint(); } },
             h('span', { class: 'hb-box', 'aria-hidden': 'true' }, draft[sl.id] ? '✓' : ''),
-            h('span', { class: 'hb-checktext' }, hb.slots.length > 1 ? sl.label : hb.name)));
+            h('span', { class: 'hb-checktext' }, hb.slots.length > 1 ? tx(sl.label) : tx(hb.name))));
         });
       }
       paint();
       return [
-        h('h2', { class: 'sheet-title' }, hb.name),
-        h('p', { class: 'sheet-text' }, parseKey(k).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })),
+        h('h2', { class: 'sheet-title' }, tx(hb.name)),
+        h('p', { class: 'sheet-text' }, longDay(k)),
         box,
         h('div', { class: 'sheet-actions' },
           h('button', { class: 'btn btn-primary btn-block', onclick: function () {
@@ -267,8 +306,8 @@
               if (k < hb.startDate) hb.startDate = k; /* jour rattrapé avant le début : le suivi commence plus tôt */
             } else delete logsOf(hb)[k];
             persist(); close(); render();
-          } }, 'Save'),
-          h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, 'Cancel'))
+          } }, L('Save', 'Enregistrer')),
+          h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, L('Cancel', 'Annuler')))
       ];
     }, { modal: true });
   }
@@ -276,18 +315,19 @@
   /* Ajouter / modifier / supprimer une habitude à cocher. */
   function editCheckHabit(hb) {
     var isNew = !hb;
-    var draft = { name: hb ? hb.name : '', slots: hb && hb.slots.length > 1 ? hb.slots.map(function (sl) { return sl.label; }).join('\n') : '' };
+    /* champs pré-remplis avec le texte affiché (traduit) ; untx() le ramène à l'original à l'enregistrement */
+    var draft = { name: hb ? tx(hb.name) : '', slots: hb && hb.slots.length > 1 ? hb.slots.map(function (sl) { return tx(sl.label); }).join('\n') : '' };
     ui.sheet(function (close) {
       var err = h('p', { class: 'form-error', hidden: true });
-      var name = h('input', { class: 'input', type: 'text', value: draft.name, placeholder: 'e.g. Drink 2 L of water', 'aria-label': 'Habit name', autocapitalize: 'sentences' });
+      var name = h('input', { class: 'input', type: 'text', value: draft.name, placeholder: L('e.g. Drink 2 L of water', 'ex. Boire 2 L d’eau'), 'aria-label': L('Habit name', 'Nom de l’habitude'), autocapitalize: 'sentences' });
       name.addEventListener('input', function () { draft.name = name.value; });
-      var slots = h('textarea', { class: 'input hb-textarea', rows: 3, placeholder: 'Morning\nEvening', 'aria-label': 'Times of day' });
+      var slots = h('textarea', { class: 'input hb-textarea', rows: 3, placeholder: L('Morning\nEvening', 'Matin\nSoir'), 'aria-label': L('Times of day', 'Moments de la journée') });
       slots.value = draft.slots;
       slots.addEventListener('input', function () { draft.slots = slots.value; });
       function save() {
-        var n = draft.name.trim();
-        if (!n) { err.textContent = 'Give the habit a name.'; err.hidden = false; return; }
-        var labels = draft.slots.split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
+        var n = untx(draft.name.trim());
+        if (!n) { err.textContent = L('Give the habit a name.', 'Donne un nom à l’habitude.'); err.hidden = false; return; }
+        var labels = draft.slots.split('\n').map(function (x) { return untx(x.trim()); }).filter(Boolean);
         var old = hb ? hb.slots : [];
         var newSlots = labels.length > 1
           ? labels.map(function (lab) {
@@ -298,28 +338,29 @@
         if (labels.length === 1) newSlots[0].label = labels[0];
         if (isNew) data.habits.push({ id: 'h-' + ui.uid(), type: 'check', name: n, slots: newSlots, startDate: today() });
         else { hb.name = n; hb.slots = newSlots; }
-        persist(); close(); render(); ui.toast(isNew ? 'Habit added' : 'Habit updated');
+        persist(); close(); render(); ui.toast(isNew ? L('Habit added', 'Habitude ajoutée') : L('Habit updated', 'Habitude modifiée'));
       }
       function remove() {
-        ui.confirm({ title: 'Delete “' + hb.name + '”?', message: 'The habit and its history will be removed.', okLabel: 'Delete', danger: true })
+        ui.confirm({ title: L('Delete “' + hb.name + '”?', 'Supprimer « ' + tx(hb.name) + ' » ?'),
+          message: L('The habit and its history will be removed.', 'L’habitude et son historique seront supprimés.'), okLabel: L('Delete', 'Supprimer'), danger: true })
           .then(function (ok) {
             if (!ok) return;
             data.habits = data.habits.filter(function (x) { return x.id !== hb.id; });
             delete data.logs[hb.id];
             if (DEFAULT_CHECKS.some(function (d) { return d.id === hb.id; })) data.removedDefaults.push(hb.id);
-            persist(); close(); render(); ui.toast('Habit deleted');
+            persist(); close(); render(); ui.toast(L('Habit deleted', 'Habitude supprimée'));
           });
       }
       return [
-        h('h2', { class: 'sheet-title' }, isNew ? 'New habit' : 'Edit habit'),
-        h('label', { class: 'field' }, h('span', { class: 'field-label' }, 'Name'), name),
-        h('label', { class: 'field' }, h('span', { class: 'field-label' }, 'Several times a day? One per line (optional)'), slots,
-          h('span', { class: 'hint' }, 'Leave empty for a single box per day.')),
+        h('h2', { class: 'sheet-title' }, isNew ? L('New habit', 'Nouvelle habitude') : L('Edit habit', 'Modifier l’habitude')),
+        h('label', { class: 'field' }, h('span', { class: 'field-label' }, L('Name', 'Nom')), name),
+        h('label', { class: 'field' }, h('span', { class: 'field-label' }, L('Several times a day? One per line (optional)', 'Plusieurs fois par jour ? Une par ligne (facultatif)')), slots,
+          h('span', { class: 'hint' }, L('Leave empty for a single box per day.', 'Laisse vide pour une seule case par jour.'))),
         err,
         h('div', { class: 'sheet-actions' },
-          h('button', { class: 'btn btn-primary btn-block', onclick: save }, isNew ? 'Add the habit' : 'Save changes'),
-          h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, 'Cancel'),
-          isNew ? null : h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: remove }, 'Delete this habit'))
+          h('button', { class: 'btn btn-primary btn-block', onclick: save }, isNew ? L('Add the habit', 'Ajouter l’habitude') : L('Save changes', 'Enregistrer')),
+          h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, L('Cancel', 'Annuler')),
+          isNew ? null : h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: remove }, L('Delete this habit', 'Supprimer cette habitude')))
       ];
     }, { modal: true });
   }
@@ -327,7 +368,7 @@
   /* ---------- Progrès semaine par semaine (lundi → dimanche) ---------- */
   var TREND_WEEKS = 12;
   function weekStart(k) { var d = parseKey(k); return addDays(k, -((d.getDay() + 6) % 7)); }
-  function shortDate(k) { return parseKey(k).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); }
+  function shortDate(k) { return parseKey(k).toLocaleDateString(S2.locale, { day: 'numeric', month: 'short' }); }
   function weekLabel(ws) { return shortDate(ws) + ' – ' + shortDate(addDays(ws, 6)); }
 
   /* Cases cochées / cases possibles sur les jours suivis de la semaine (jours futurs et avant le début exclus). */
@@ -361,12 +402,12 @@
     }
     return { days: days, logged: logged, smoked: smoked, free: free, cravings: cravings };
   }
-  function pctText(p) { return p === null ? '—' : Math.round(p * 100) + '%'; }
+  function pctText(p) { return p === null ? '—' : Math.round(p * 100) + L('%', '\u00a0%'); }
   /* Écart en points avec la semaine précédente. */
   function deltaChip(cur, prev) {
     if (cur === null || prev === null) return null;
     var d = Math.round((cur - prev) * 100);
-    if (d === 0) return h('span', { class: 'hb-delta' }, '= last week');
+    if (d === 0) return h('span', { class: 'hb-delta' }, L('= last week', '= semaine dernière'));
     return h('span', { class: 'hb-delta ' + (d > 0 ? 'is-up' : 'is-down') }, (d > 0 ? '▲ +' : '▼ ') + d + ' pts');
   }
   function earliestStart() {
@@ -385,25 +426,26 @@
 
     /* En-tête : navigation entre semaines (gros boutons, à une main). */
     root.appendChild(h('div', { class: 'card hb-weekhead' },
-      h('button', { class: 'btn btn-icon', 'aria-label': 'Previous week', disabled: weekOffset <= minOffset, onclick: function () { go(-1); } }, '‹'),
+      h('button', { class: 'btn btn-icon', 'aria-label': L('Previous week', 'Semaine précédente'), disabled: weekOffset <= minOffset, onclick: function () { go(-1); } }, '‹'),
       h('div', { class: 'hb-weektitle' },
-        h('div', { class: 'list-title' }, weekOffset === 0 ? 'This week' : weekOffset === -1 ? 'Last week' : weekLabel(ws)),
-        h('div', { class: 'list-sub' }, weekOffset >= -1 ? weekLabel(ws) : Math.abs(weekOffset) + ' weeks ago')),
-      h('button', { class: 'btn btn-icon', 'aria-label': 'Next week', disabled: weekOffset >= 0, onclick: function () { go(1); } }, '›')));
+        h('div', { class: 'list-title' }, weekOffset === 0 ? L('This week', 'Cette semaine') : weekOffset === -1 ? L('Last week', 'Semaine dernière') : weekLabel(ws)),
+        h('div', { class: 'list-sub' }, weekOffset >= -1 ? weekLabel(ws) : L(Math.abs(weekOffset) + ' weeks ago', 'Il y a ' + Math.abs(weekOffset) + ' semaines'))),
+      h('button', { class: 'btn btn-icon', 'aria-label': L('Next week', 'Semaine suivante'), disabled: weekOffset >= 0, onclick: function () { go(1); } }, '›')));
 
     /* Score de la semaine. */
     root.appendChild(h('section', { class: 'card hb-weekscore' },
       h('div', { class: 'hb-todayhead' },
-        h('span', { class: 'card-title' }, 'Daily habits'),
+        h('span', { class: 'card-title' }, L('Daily habits', 'Habitudes quotidiennes')),
         deltaChip(all.pct, allPrev.pct)),
       h('div', { class: 'hb-bignum' }, pctText(all.pct)),
       h('div', { class: 'hb-progress' }, h('span', { style: { width: (all.pct || 0) * 100 + '%' } })),
       h('p', { class: 'hint' }, all.possible
-        ? all.done + ' of ' + all.possible + ' boxes ticked' + (weekOffset === 0 ? ' so far this week.' : '.')
-        : 'Nothing to track this week.')));
+        ? L(all.done + ' of ' + all.possible + ' boxes ticked' + (weekOffset === 0 ? ' so far this week.' : '.'),
+            all.done + ' ' + pl(all.done, 'case cochée', 'cases cochées') + ' sur ' + all.possible + (weekOffset === 0 ? ' pour l’instant cette semaine.' : '.'))
+        : L('Nothing to track this week.', 'Rien à suivre cette semaine.'))));
 
     /* Détail par habitude. */
-    root.appendChild(h('h2', { class: 'section-title' }, 'By habit'));
+    root.appendChild(h('h2', { class: 'section-title' }, L('By habit', 'Par habitude')));
     var list = h('div', { class: 'list' });
     checkHabits().forEach(function (hb) {
       var w = weekCheck(hb, ws), wp = ws > first ? weekCheck(hb, prev) : { pct: null };
@@ -414,8 +456,8 @@
       }
       list.appendChild(h('div', { class: 'list-row hb-weekrow' },
         h('div', { class: 'hb-weekrowmain' },
-          h('div', { class: 'list-title' }, hb.name),
-          h('div', { class: 'list-sub' }, w.days ? w.full + ' / ' + w.days + ' full day' + (w.days === 1 ? '' : 's') : 'Not started yet'),
+          h('div', { class: 'list-title' }, tx(hb.name)),
+          h('div', { class: 'list-sub' }, w.days ? w.full + ' / ' + w.days + ' ' + pl(w.days, L('full day', 'jour complet'), L('full days', 'jours complets')) : L('Not started yet', 'Pas encore commencée')),
           dots),
         h('div', { class: 'hb-weekrowside' },
           h('span', { class: 'hb-weekpct' }, pctText(w.pct)),
@@ -428,17 +470,20 @@
     if (q) {
       var qw = weekQuit(q, ws), qp = ws > first ? weekQuit(q, prev) : null;
       var avg = function (w) { return w && w.logged ? num(w.smoked / w.logged, 1) : '—'; };
-      root.appendChild(h('h2', { class: 'section-title' }, '🚭 ' + q.name));
+      root.appendChild(h('h2', { class: 'section-title' }, '🚭 ' + tx(q.name)));
       root.appendChild(h('div', { class: 'stats hb-stats' },
-        stat('Smoke-free days', qw.days ? qw.free + ' / ' + qw.days : '—'),
-        stat('Cigarettes', qw.logged ? qw.smoked : '—'),
-        stat('Cravings resisted', qw.cravings),
-        stat('Per day (week before)', avg(qw) + ' (' + avg(qp) + ')')));
-      if (qw.days > qw.logged) root.appendChild(h('p', { class: 'hint' }, (qw.days - qw.logged) + ' day' + (qw.days - qw.logged === 1 ? '' : 's') + ' not logged this week.'));
+        stat(L('Smoke-free days', 'Jours sans tabac'), qw.days ? qw.free + ' / ' + qw.days : '—'),
+        stat(L('Cigarettes', 'Cigarettes'), qw.logged ? qw.smoked : '—'),
+        stat(L('Cravings resisted', 'Envies résistées'), qw.cravings),
+        stat(L('Per day (week before)', 'Par jour (sem. d’avant)'), avg(qw) + ' (' + avg(qp) + ')')));
+      if (qw.days > qw.logged) {
+        var nl = qw.days - qw.logged;
+        root.appendChild(h('p', { class: 'hint' }, nl + ' ' + pl(nl, L('day not logged this week.', 'jour non renseigné cette semaine.'), L('days not logged this week.', 'jours non renseignés cette semaine.'))));
+      }
     }
 
     /* Tendance : 12 dernières semaines (touchez une barre pour l'ouvrir). */
-    root.appendChild(h('h2', { class: 'section-title' }, 'Last ' + TREND_WEEKS + ' weeks'));
+    root.appendChild(h('h2', { class: 'section-title' }, L('Last ' + TREND_WEEKS + ' weeks', TREND_WEEKS + ' dernières semaines')));
     var bars = h('div', { class: 'hb-bars', role: 'list' });
     var tracked = [];
     for (var j = TREND_WEEKS - 1; j >= 0; j--) {
@@ -447,7 +492,7 @@
         var p = before ? null : weekAll(s).pct;
         if (p !== null) tracked.push({ ws: s, pct: p, off: -off });
         bars.appendChild(h('button', { class: 'hb-bar' + (-off === weekOffset ? ' is-sel' : '') + (before ? ' is-before' : ''), role: 'listitem',
-          disabled: before, 'aria-label': 'Week of ' + weekLabel(s) + ': ' + pctText(p),
+          disabled: before, 'aria-label': L('Week of ', 'Semaine du ') + weekLabel(s) + L(': ', ' : ') + pctText(p),
           onclick: function () { weekOffset = -off; render(); } },
           h('span', { class: 'hb-barval' }, p === null ? '' : Math.round(p * 100)),
           h('span', { class: 'hb-bartrack' }, h('span', { class: 'hb-barfill', style: { height: (p || 0) * 100 + '%' } })),
@@ -460,22 +505,23 @@
         var avg = done.length ? done.reduce(function (n, t) { return n + t.pct; }, 0) / done.length : null;
         var best = tracked.reduce(function (b, t) { return !b || t.pct > b.pct ? t : b; }, null);
         return h('div', { class: 'hb-substats' },
-          avg === null ? null : h('span', null, 'Average: ' + pctText(avg)),
-          h('span', null, 'Best: ' + pctText(best.pct) + ' (' + shortDate(best.ws) + ')'));
+          avg === null ? null : h('span', null, L('Average: ', 'Moyenne : ') + pctText(avg)),
+          h('span', null, L('Best: ', 'Meilleure : ') + pctText(best.pct) + ' (' + shortDate(best.ws) + ')'));
       })() : null));
 
     /* Note de la semaine (facultative, saisie manuelle). */
-    root.appendChild(h('h2', { class: 'section-title' }, 'Week notes'));
-    var note = h('textarea', { class: 'input hb-textarea', rows: 3, 'aria-label': 'Notes for this week',
-      placeholder: 'What went well? What got in the way? One thing to change next week…' });
+    root.appendChild(h('h2', { class: 'section-title' }, L('Week notes', 'Notes de la semaine')));
+    var note = h('textarea', { class: 'input hb-textarea', rows: 3, 'aria-label': L('Notes for this week', 'Notes de cette semaine'),
+      placeholder: L('What went well? What got in the way? One thing to change next week…', 'Qu’est-ce qui a bien marché ? Qu’est-ce qui a coincé ? Une chose à changer la semaine prochaine…') });
     note.value = data.weekNotes[ws] || '';
     note.addEventListener('change', function () {
       var v = note.value.trim();
       if (v) data.weekNotes[ws] = v; else delete data.weekNotes[ws];
-      persist(); ui.toast('Note saved');
+      persist(); ui.toast(L('Note saved', 'Note enregistrée'));
     });
     root.appendChild(h('div', { class: 'card' }, note,
-      h('p', { class: 'hint' }, 'Saved when you leave the field. Weeks run Monday to Sunday; today counts once all its boxes are ticked, and days before a habit started are not counted.')));
+      h('p', { class: 'hint' }, L('Saved when you leave the field. Weeks run Monday to Sunday; today counts once all its boxes are ticked, and days before a habit started are not counted.',
+        'Enregistrée quand tu quittes le champ. Les semaines vont du lundi au dimanche ; aujourd’hui compte une fois toutes ses cases cochées, et les jours avant le début d’une habitude ne comptent pas.'))));
   }
 
   function renderQuit(hb) {
@@ -543,7 +589,7 @@
         var cls = 'hb-cell' + (before ? ' is-before' : !l ? ' is-empty' : l.count === 0 ? ' is-free' : ' is-smoked') + (k === tk ? ' is-today' : '');
         var d = parseKey(k);
         grid.appendChild(h('button', { class: cls, disabled: before,
-          'aria-label': d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) + ': ' +
+          'aria-label': d.toLocaleDateString(S2.locale, { weekday: 'long', day: 'numeric', month: 'long' }) + ': ' +
             (!l ? 'not logged' : l.count === 0 ? 'smoke-free' : l.count + ' cigarettes'),
           onclick: function () { editDay(hb, k); } },
           h('span', { class: 'hb-cellday' }, d.getDate()),
@@ -593,7 +639,7 @@
       body.appendChild(stepper('Cigarettes smoked', 'count'));
       body.appendChild(stepper('Cravings resisted', 'cravings'));
       return [
-        h('h2', { class: 'sheet-title' }, parseKey(k).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })),
+        h('h2', { class: 'sheet-title' }, parseKey(k).toLocaleDateString(S2.locale, { weekday: 'long', day: 'numeric', month: 'long' })),
         h('p', { class: 'sheet-text' }, l ? 'Logged: ' + (l.count === 0 ? 'smoke-free' : l.count + ' cigarette' + (l.count === 1 ? '' : 's')) + '.' : 'Not logged yet.'),
         body,
         h('div', { class: 'sheet-actions' },
