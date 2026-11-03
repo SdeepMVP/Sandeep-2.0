@@ -9,6 +9,7 @@ var ASSETS = [
   './index.html',
   './manifest.webmanifest',
   './css/app.css',
+  './js/core/i18n.js',
   './js/core/storage.js',
   './js/core/ui.js',
   './js/core/app.js',

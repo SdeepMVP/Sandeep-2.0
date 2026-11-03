@@ -1,12 +1,17 @@
-/* Écran Réglages : thème, export / import JSON, effacement. Données : "sandeep2:settings". */
+/* Écran Réglages : langue, thème, export / import JSON, effacement. Données : "sandeep2:settings". */
 (function () {
   'use strict';
   var S2 = window.S2;
-  var ui = S2.ui, h = ui.h;
+  var ui = S2.ui, h = ui.h, L = S2.L;
   var NS = 'settings';
-  var VERSION = '0.17.0';
+  var VERSION = '0.18.0';
 
-  function get() { return S2.storage.load(NS, { theme: 'auto', lastExport: null }); }
+  function get() {
+    var s = S2.storage.load(NS, null) || {};
+    if (!s.theme) s.theme = 'auto'; /* réglages enregistrés par S2.setLang avant tout choix de thème */
+    if (s.lastExport === undefined) s.lastExport = null;
+    return s;
+  }
   function set(patch) {
     var s = get();
     Object.keys(patch).forEach(function (k) { s[k] = patch[k]; });
@@ -36,7 +41,7 @@
     var name = fileName();
     var file;
     try { file = new File([json], name, { type: 'application/json' }); } catch (e) { file = null; }
-    var done = function () { set({ lastExport: new Date().toISOString() }); S2.app.refresh(); ui.toast('Backup exported'); };
+    var done = function () { set({ lastExport: new Date().toISOString() }); S2.app.refresh(); ui.toast(L('Backup exported', 'Sauvegarde exportée')); };
     /* Sur iPhone : feuille de partage → « Enregistrer dans Fichiers ». */
     if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
       navigator.share({ files: [file], title: name }).then(done).catch(function (e) {
@@ -59,8 +64,8 @@
     var json = JSON.stringify(S2.storage.exportAll());
     navigator.clipboard.writeText(json).then(function () {
       set({ lastExport: new Date().toISOString() }); S2.app.refresh();
-      ui.toast('JSON copied to clipboard');
-    }, function () { ui.toast('Copy failed'); });
+      ui.toast(L('JSON copied to clipboard', 'JSON copié dans le presse-papiers'));
+    }, function () { ui.toast(L('Copy failed', 'La copie a échoué')); });
   }
 
   function onImportFile(input) {
@@ -70,15 +75,16 @@
     var reader = new FileReader();
     reader.onload = function () {
       var obj;
-      try { obj = JSON.parse(reader.result); } catch (e) { ui.toast('Unreadable JSON file'); return; }
-      if (!obj || obj.app !== 'Sandeep 2.0' || !obj.data) { ui.toast('This is not a Sandeep 2.0 backup'); return; }
+      try { obj = JSON.parse(reader.result); } catch (e) { ui.toast(L('Unreadable JSON file', 'Fichier JSON illisible')); return; }
+      if (!obj || obj.app !== 'Sandeep 2.0' || !obj.data) { ui.toast(L('This is not a Sandeep 2.0 backup', 'Ce n’est pas une sauvegarde Sandeep 2.0')); return; }
       var muscu = obj.data.muscu;
       var n = muscu && muscu.sessions ? muscu.sessions.length : 0;
       ui.confirm({
-        title: 'Import this backup?',
-        message: 'Backup from ' + (obj.exportedAt ? ui.longDate(obj.exportedAt) : 'unknown date') + ' (' + n +
-          ' gym workout(s)). All current data will be replaced. Export first if needed.',
-        okLabel: 'Replace my data', danger: true
+        title: L('Import this backup?', 'Importer cette sauvegarde ?'),
+        message: L('Backup from ', 'Sauvegarde du ') + (obj.exportedAt ? ui.longDate(obj.exportedAt) : L('unknown date', 'date inconnue')) + ' (' + n +
+          L(' gym workout(s)). All current data will be replaced. Export first if needed.',
+            ' séance(s) de muscu). Toutes les données actuelles seront remplacées. Exporte d’abord si besoin.'),
+        okLabel: L('Replace my data', 'Remplacer mes données'), danger: true
       }).then(function (ok) {
         if (!ok) return;
         try { S2.storage.importAll(obj); } catch (e) { ui.toast(e.message); return; }
@@ -89,76 +95,89 @@
   }
 
   function wipe() {
-    ui.confirm({ title: 'Erase everything?', message: 'All app data will be deleted from this iPhone. Export a backup first.',
-      okLabel: 'Continue', danger: true }).then(function (ok) {
+    ui.confirm({ title: L('Erase everything?', 'Tout effacer ?'),
+      message: L('All app data will be deleted from this iPhone. Export a backup first.', 'Toutes les données de l’app seront supprimées de cet iPhone. Exporte d’abord une sauvegarde.'),
+      okLabel: L('Continue', 'Continuer'), danger: true }).then(function (ok) {
       if (!ok) return;
-      return ui.confirm({ title: 'Are you sure?', message: 'This cannot be undone.', okLabel: 'Erase permanently', danger: true })
+      return ui.confirm({ title: L('Are you sure?', 'Vraiment ?'), message: L('This cannot be undone.', 'C’est irréversible.'),
+        okLabel: L('Erase permanently', 'Effacer définitivement'), danger: true })
         .then(function (ok2) { if (ok2) { S2.storage.clearAll(); location.hash = '#muscu'; location.reload(); } });
     });
   }
 
   function checkUpdate() {
-    if (!('serviceWorker' in navigator)) { ui.toast('Updates unavailable here'); return; }
+    if (!('serviceWorker' in navigator)) { ui.toast(L('Updates unavailable here', 'Mises à jour indisponibles ici')); return; }
     navigator.serviceWorker.getRegistration().then(function (reg) {
-      if (!reg) { ui.toast('Open the app from its online address'); return; }
+      if (!reg) { ui.toast(L('Open the app from its online address', 'Ouvre l’app depuis son adresse en ligne')); return; }
       return reg.update().then(function () {
-        ui.toast(reg.installing || reg.waiting ? 'Updating…' : 'You have the latest version');
+        ui.toast(reg.installing || reg.waiting ? L('Updating…', 'Mise à jour…') : L('You have the latest version', 'Tu as la dernière version'));
       });
-    }).catch(function () { ui.toast('No network: try again later'); });
+    }).catch(function () { ui.toast(L('No network: try again later', 'Pas de réseau : réessaie plus tard')); });
   }
 
   function mount(c) {
     var s = get();
-    var themes = [['auto', 'Auto'], ['light', 'Light'], ['dark', 'Dark']];
+    var themes = [['auto', 'Auto'], ['light', L('Light', 'Clair')], ['dark', L('Dark', 'Sombre')]];
+    var langs = [['en', 'English'], ['fr', 'Français']];
 
-    c.appendChild(h('h2', { class: 'section-title' }, 'Appearance'));
+    /* Langue de toute l'app : enregistrée puis rechargement (les données ne changent pas). */
+    c.appendChild(h('h2', { class: 'section-title' }, L('Language', 'Langue')));
     c.appendChild(h('div', { class: 'card' },
-      h('div', { class: 'field-label' }, 'Theme'),
+      h('div', { class: 'segmented' }, langs.map(function (l) {
+        return h('button', { class: 'seg' + (S2.lang === l[0] ? ' is-active' : ''), lang: l[0], 'aria-pressed': S2.lang === l[0] ? 'true' : 'false',
+          onclick: function () { if (S2.lang !== l[0]) S2.setLang(l[0]); } }, l[1]);
+      })),
+      h('p', { class: 'hint' }, L('Changes the whole app. Your data stays the same; names you typed yourself are not translated.',
+        'Change toute l’app. Tes données ne changent pas ; les noms que tu as saisis toi-même ne sont pas traduits.'))));
+
+    c.appendChild(h('h2', { class: 'section-title' }, L('Appearance', 'Apparence')));
+    c.appendChild(h('div', { class: 'card' },
+      h('div', { class: 'field-label' }, L('Theme', 'Thème')),
       h('div', { class: 'segmented' }, themes.map(function (t) {
         return h('button', { class: 'seg' + (s.theme === t[0] ? ' is-active' : ''),
           onclick: function () { set({ theme: t[0] }); applyTheme(); S2.app.refresh(); } }, t[1]);
       })),
-      h('p', { class: 'hint' }, 'Auto follows your iPhone setting.')));
+      h('p', { class: 'hint' }, L('Auto follows your iPhone setting.', 'Auto suit le réglage de ton iPhone.'))));
 
     var fileInput = h('input', { type: 'file', accept: 'application/json,.json', class: 'sr-only', id: 'import-file',
       onchange: function () { onImportFile(fileInput); } });
 
     if (S2.wardrobe && S2.wardrobe.openStyle) {
-      c.appendChild(h('h2', { class: 'section-title' }, 'My Style'));
+      c.appendChild(h('h2', { class: 'section-title' }, L('My Style', 'Mon style')));
       c.appendChild(h('div', { class: 'card' },
-        h('p', { class: 'sheet-text' }, 'Smart casual + street smart: the rules every Wardrobe suggestion follows.'),
-        h('div', { class: 'stack' }, h('button', { class: 'btn btn-secondary btn-block', onclick: function () { S2.wardrobe.openStyle(); } }, '✦ View My Style'))));
+        h('p', { class: 'sheet-text' }, L('Smart casual + street smart: the rules every Wardrobe suggestion follows.', 'Smart casual + street smart : les règles que suit chaque suggestion de la Garde-robe.')),
+        h('div', { class: 'stack' }, h('button', { class: 'btn btn-secondary btn-block', onclick: function () { S2.wardrobe.openStyle(); } }, L('✦ View My Style', '✦ Voir mon style')))));
     }
 
-    c.appendChild(h('h2', { class: 'section-title' }, 'Backup'));
+    c.appendChild(h('h2', { class: 'section-title' }, L('Backup', 'Sauvegarde')));
     c.appendChild(h('div', { class: 'card' },
-      h('p', { class: 'sheet-text' }, 'Your data lives only on this iPhone. Export a JSON file regularly (e.g. to Files or iCloud Drive).'),
-      h('p', { class: 'hint' }, s.lastExport ? 'Last export: ' + ui.longDate(s.lastExport) : 'No export yet.'),
+      h('p', { class: 'sheet-text' }, L('Your data lives only on this iPhone. Export a JSON file regularly (e.g. to Files or iCloud Drive).', 'Tes données sont uniquement sur cet iPhone. Exporte régulièrement un fichier JSON (par ex. dans Fichiers ou iCloud Drive).')),
+      h('p', { class: 'hint' }, s.lastExport ? L('Last export: ', 'Dernier export : ') + ui.longDate(s.lastExport) : L('No export yet.', 'Aucun export pour l’instant.')),
       h('div', { class: 'stack' },
-        h('button', { class: 'btn btn-primary btn-block btn-lg', onclick: doExport }, 'Export (JSON)'),
-        h('button', { class: 'btn btn-secondary btn-block', onclick: function () { fileInput.click(); } }, 'Import a JSON file'),
-        navigator.clipboard ? h('button', { class: 'btn btn-ghost btn-block', onclick: copyJson }, 'Copy JSON') : null),
+        h('button', { class: 'btn btn-primary btn-block btn-lg', onclick: doExport }, L('Export (JSON)', 'Exporter (JSON)')),
+        h('button', { class: 'btn btn-secondary btn-block', onclick: function () { fileInput.click(); } }, L('Import a JSON file', 'Importer un fichier JSON')),
+        navigator.clipboard ? h('button', { class: 'btn btn-ghost btn-block', onclick: copyJson }, L('Copy JSON', 'Copier le JSON')) : null),
       fileInput));
 
-    c.appendChild(h('h2', { class: 'section-title' }, 'Data'));
+    c.appendChild(h('h2', { class: 'section-title' }, L('Data', 'Données')));
     var keys = S2.storage.keys();
     var bytes = keys.reduce(function (n, k) { return n + (localStorage.getItem('sandeep2:' + k) || '').length; }, 0);
     c.appendChild(h('div', { class: 'card' },
-      h('p', { class: 'sheet-text' }, 'Spaces: ' + (keys.join(', ') || 'none') + ' · ' + ui.num(bytes / 1024, 1) + ' KB used.'),
-      h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: wipe }, 'Erase everything')));
+      h('p', { class: 'sheet-text' }, L('Spaces: ', 'Espaces : ') + (keys.join(', ') || L('none', 'aucun')) + ' · ' + ui.num(bytes / 1024, 1) + L(' KB used.', ' Ko utilisés.')),
+      h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: wipe }, L('Erase everything', 'Tout effacer'))));
 
-    c.appendChild(h('h2', { class: 'section-title' }, 'Install on iPhone'));
+    c.appendChild(h('h2', { class: 'section-title' }, L('Install on iPhone', 'Installer sur l’iPhone')));
     c.appendChild(h('div', { class: 'card' },
       h('ol', { class: 'steps' },
-        h('li', null, 'Open this page in Safari.'),
-        h('li', null, 'Tap the Share button (square with an arrow).'),
-        h('li', null, 'Choose “Add to Home Screen”, then “Add”.'))));
+        h('li', null, L('Open this page in Safari.', 'Ouvre cette page dans Safari.')),
+        h('li', null, L('Tap the Share button (square with an arrow).', 'Touche le bouton Partager (carré avec une flèche).')),
+        h('li', null, L('Choose “Add to Home Screen”, then “Add”.', 'Choisis « Sur l’écran d’accueil », puis « Ajouter ».')))));
 
-    c.appendChild(h('h2', { class: 'section-title' }, 'Updates'));
+    c.appendChild(h('h2', { class: 'section-title' }, L('Updates', 'Mises à jour')));
     c.appendChild(h('div', { class: 'card' },
-      h('p', { class: 'sheet-text' }, 'New versions install automatically when you open the app (with a network connection).'),
+      h('p', { class: 'sheet-text' }, L('New versions install automatically when you open the app (with a network connection).', 'Les nouvelles versions s’installent toutes seules à l’ouverture de l’app (avec du réseau).')),
       h('div', { class: 'stack' },
-        h('button', { class: 'btn btn-secondary btn-block', onclick: checkUpdate }, 'Check now'))));
+        h('button', { class: 'btn btn-secondary btn-block', onclick: checkUpdate }, L('Check now', 'Vérifier maintenant')))));
 
     c.appendChild(h('p', { class: 'hint center' }, 'Sandeep 2.0 · version ' + VERSION));
   }
@@ -166,7 +185,7 @@
   S2.settings = { applyTheme: applyTheme, get: get, VERSION: VERSION };
 
   S2.app.registerTab({
-    id: 'reglages', label: 'Settings', title: 'Settings', order: 90, mount: mount,
+    id: 'reglages', label: L('Settings', 'Réglages'), title: L('Settings', 'Réglages'), order: 90, mount: mount,
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>'
   });
 })();

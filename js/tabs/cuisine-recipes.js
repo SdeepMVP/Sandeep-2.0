@@ -1,9 +1,11 @@
-/* Recettes intégrées de l'onglet Cuisine (copiées dans les données de l'utilisateur au premier lancement).
+/* Recettes intégrées de l'onglet Cuisine / Kitchen (copiées dans les données de l'utilisateur au premier lancement).
    Pour en ajouter : nouvel id unique ; elles seront ajoutées automatiquement aux données existantes.
-   Textes en français (onglet utilisé aussi par la compagne de l'utilisateur) ; `keywords` = mots anglais
-   pour la recherche. Valeurs nutritionnelles approximatives, par portion.
-   Les 10 premières recettes gardent le même nombre d'ingrédients et d'étapes que leur version anglaise
-   (les cases cochées sont enregistrées par position). */
+   Bilingue : les champs principaux (name, tags, ingredients, steps, tips) sont en français et servent de
+   référence enregistrée ; `en` contient la version anglaise, affichée quand l'app est en anglais tant que
+   la recette n'a pas été modifiée. `en.ingredients` et `en.steps` doivent avoir EXACTEMENT le même nombre
+   de lignes, dans le même ordre (les cases cochées sont enregistrées par position), et commencer par la
+   quantité quand la ligne française le fait (ajustement aux portions). `keywords` = mots en plus pour la recherche.
+   Valeurs nutritionnelles approximatives, par portion. */
 (function () {
   'use strict';
   var S2 = (window.S2 = window.S2 || {});
@@ -30,7 +32,28 @@
         'Continue de plier lentement 2 à 3 minutes. Retire du feu quand les œufs sont encore un peu baveux : ils finissent de cuire tout seuls.',
         'Sers sur la tartine et parsème de ciboulette.'
       ],
-      tips: 'Feu doux et arrêt tôt : des œufs crémeux, pas caoutchouteux.'
+      tips: 'Feu doux et arrêt tôt : des œufs crémeux, pas caoutchouteux.',
+      en: {
+        name: 'Cottage Cheese Scrambled Eggs',
+        tags: ['eggs', 'cottage cheese'],
+        ingredients: [
+          '3 eggs',
+          '100 g cottage cheese',
+          '1 slice wholegrain bread',
+          '5 g butter',
+          '1 tbsp chopped chives',
+          'Salt & pepper'
+        ],
+        steps: [
+          'Crack the eggs into a bowl, add the cottage cheese, a pinch of salt and pepper, and whisk with a fork.',
+          'Put the bread in the toaster.',
+          'Melt the butter in a non-stick pan over medium-low heat.',
+          'Pour in the eggs. Wait 20 seconds, then gently push them from the edges to the centre with a spatula.',
+          'Keep folding slowly for 2–3 minutes. Take the pan off the heat while the eggs still look slightly wet: they finish cooking on their own.',
+          'Serve on the toast and sprinkle with chives.'
+        ],
+        tips: 'Low heat and stopping early give creamy eggs, not rubbery ones.'
+      }
     },
     {
       id: 'b-skyr-bowl', name: 'Bowl skyr énergie', category: 'breakfast',
@@ -50,7 +73,26 @@
         'Parsème de granola.',
         'Arrose de beurre de cacahuète et de miel. Mange tout de suite pour que le granola reste croquant.'
       ],
-      tips: 'Ajoute 15 g de whey dans le skyr pour environ 12 g de protéines en plus.'
+      tips: 'Ajoute 15 g de whey dans le skyr pour environ 12 g de protéines en plus.',
+      en: {
+        name: 'Skyr Power Bowl',
+        tags: ['skyr', 'yogurt', 'berries', 'peanut butter'],
+        ingredients: [
+          '250 g plain skyr (or 0% Greek yogurt)',
+          '30 g granola',
+          '100 g berries (fresh or frozen)',
+          '15 g peanut butter',
+          '1 tsp honey',
+          '1 pinch cinnamon'
+        ],
+        steps: [
+          'Spoon the skyr into a bowl and stir in the cinnamon.',
+          'Add the berries. If they are frozen, microwave them for 30 seconds first so they get juicy.',
+          'Sprinkle the granola on top.',
+          'Drizzle with the peanut butter and honey. Eat right away so the granola stays crunchy.'
+        ],
+        tips: 'Stir 15 g of whey into the skyr for about 12 g of extra protein.'
+      }
     },
     {
       id: 'b-banana-pancakes', name: 'Pancakes protéinés à la banane', category: 'breakfast',
@@ -74,7 +116,30 @@
         'Cuis environ 2 minutes, jusqu’à ce que des bulles apparaissent, puis retourne et cuis encore 1 minute.',
         'Empile-les et ajoute ta garniture.'
       ],
-      tips: 'Reste à feu moyen, pas fort : la whey brûle vite.'
+      tips: 'Reste à feu moyen, pas fort : la whey brûle vite.',
+      en: {
+        name: 'Banana Protein Pancakes',
+        tags: ['banana', 'eggs', 'oats', 'whey'],
+        ingredients: [
+          '1 ripe banana',
+          '2 eggs',
+          '40 g oat flakes',
+          '30 g whey protein (vanilla or plain)',
+          '1/2 tsp baking powder',
+          '1 pinch cinnamon',
+          '5 g oil or butter for the pan',
+          'Toppings: skyr, berries or a little maple syrup'
+        ],
+        steps: [
+          'Put the banana, eggs, oats, whey, baking powder and cinnamon in a blender. Blend for 30 seconds until smooth. (No blender? Mash the banana with a fork and use fine oats.)',
+          'Let the batter rest for 2 minutes; it thickens slightly.',
+          'Heat a non-stick pan over medium heat and brush it with a little oil.',
+          'Pour small pancakes, about 2 tablespoons of batter each.',
+          'Cook for about 2 minutes, until bubbles appear on top, then flip and cook 1 more minute.',
+          'Stack them up and add your toppings.'
+        ],
+        tips: 'Keep the heat at medium, not high: whey burns quickly.'
+      }
     },
     {
       id: 'b-salmon-wrap', name: 'Wrap saumon fumé & cottage cheese', category: 'breakfast',
@@ -96,7 +161,28 @@
         'Dispose le saumon, le concombre et la roquette sur le tiers du bas.',
         'Rabats les côtés, puis roule bien serré en partant du bas. Coupe en deux.'
       ],
-      tips: 'Emballé dans de l’aluminium, il se garde quelques heures au frigo : un en-cas facile pour le travail.'
+      tips: 'Emballé dans de l’aluminium, il se garde quelques heures au frigo : un en-cas facile pour le travail.',
+      en: {
+        name: 'Smoked Salmon & Cottage Cheese Wrap',
+        tags: ['smoked salmon', 'salmon', 'cottage cheese', 'wrap'],
+        ingredients: [
+          '1 large wholegrain tortilla',
+          '80 g cottage cheese',
+          '75 g smoked salmon',
+          '1/4 cucumber',
+          '1 handful rocket or spinach',
+          '1/2 lemon',
+          'Dill (fresh or dried) & black pepper'
+        ],
+        steps: [
+          'Slice the cucumber into thin sticks.',
+          'Mix the cottage cheese with dill, a squeeze of lemon and black pepper.',
+          'Spread the mix over the tortilla, leaving 2 cm free around the edge.',
+          'Lay the salmon, cucumber and rocket on the lower third.',
+          'Fold in the sides, then roll it up tightly from the bottom. Cut in half.'
+        ],
+        tips: 'Wrapped in foil, it keeps for a few hours in the fridge: an easy work snack.'
+      }
     },
     {
       id: 'b-overnight-oats', name: 'Overnight oats protéinés', category: 'breakfast',
@@ -117,7 +203,27 @@
         'Le matin, mélange : si c’est trop épais, ajoute un trait de lait.',
         'Ajoute les fruits et le miel, et mange froid.'
       ],
-      tips: 'Prépare 3 bocaux d’un coup : ils se gardent 3 jours au frigo.'
+      tips: 'Prépare 3 bocaux d’un coup : ils se gardent 3 jours au frigo.',
+      en: {
+        name: 'Protein Overnight Oats',
+        tags: ['oats', 'skyr', 'whey', 'chia'],
+        ingredients: [
+          '50 g oat flakes',
+          '150 g plain skyr',
+          '20 g whey protein (vanilla)',
+          '100 ml milk (or plant milk)',
+          '1 tbsp chia seeds',
+          '80 g fruit (banana, grated apple or berries)',
+          '1 tsp honey (optional)'
+        ],
+        steps: [
+          'The night before, mix the oats, skyr, whey, milk and chia in a jar until there are no lumps.',
+          'Close the jar and leave it in the fridge overnight (at least 4 hours).',
+          'In the morning, stir: if it is too thick, add a splash of milk.',
+          'Add the fruit and honey, and eat cold.'
+        ],
+        tips: 'Make 3 jars at once: they keep for 3 days in the fridge.'
+      }
     },
     {
       id: 'b-ham-omelette', name: 'Omelette jambon, fromage & épinards', category: 'breakfast',
@@ -139,7 +245,28 @@
         'Quand le dessus est presque pris, ajoute le jambon et le fromage sur une moitié.',
         'Replie l’omelette, laisse 30 secondes pour faire fondre le fromage, puis fais glisser dans l’assiette.'
       ],
-      tips: 'Une tranche de pain complet à côté pour un petit-déjeuner complet.'
+      tips: 'Une tranche de pain complet à côté pour un petit-déjeuner complet.',
+      en: {
+        name: 'Ham, Cheese & Spinach Omelette',
+        tags: ['eggs', 'ham', 'cheese', 'spinach'],
+        ingredients: [
+          '3 eggs',
+          '2 slices cooked ham',
+          '20 g grated cheese',
+          '1 handful spinach',
+          '5 g butter',
+          'Salt & pepper'
+        ],
+        steps: [
+          'Whisk the eggs with a pinch of salt and pepper.',
+          'Cut the ham into strips.',
+          'Melt the butter in a non-stick pan over medium heat. Wilt the spinach for 1 minute.',
+          'Pour in the eggs and let them set for 1 minute, pushing the edges towards the centre.',
+          'When the top is almost set, add the ham and cheese on one half.',
+          'Fold the omelette, leave it 30 seconds for the cheese to melt, then slide it onto the plate.'
+        ],
+        tips: 'Add a slice of wholegrain bread on the side for a complete breakfast.'
+      }
     },
     {
       id: 'b-pb-smoothie', name: 'Smoothie banane & cacahuète', category: 'breakfast',
@@ -158,7 +285,25 @@
         'Mixe 45 secondes jusqu’à ce que ce soit bien lisse.',
         'Goûte : ajoute un trait de lait s’il est trop épais. Bois tout de suite.'
       ],
-      tips: 'Garde des rondelles de banane au congélateur : le smoothie devient épais comme un milkshake.'
+      tips: 'Garde des rondelles de banane au congélateur : le smoothie devient épais comme un milkshake.',
+      en: {
+        name: 'Banana Peanut Butter Smoothie',
+        tags: ['banana', 'peanut butter', 'whey', 'milk'],
+        ingredients: [
+          '1 banana (ideally frozen in chunks)',
+          '30 g whey protein (vanilla or chocolate)',
+          '250 ml semi-skimmed milk',
+          '15 g peanut butter',
+          '20 g oat flakes',
+          '3 ice cubes (if the banana is not frozen)'
+        ],
+        steps: [
+          'Put all the ingredients in the blender, milk first.',
+          'Blend for 45 seconds until completely smooth.',
+          'Taste: add a splash of milk if it is too thick. Drink right away.'
+        ],
+        tips: 'Keep banana slices in the freezer: the smoothie gets as thick as a milkshake.'
+      }
     },
     {
       id: 'b-egg-muffins', name: 'Muffins aux œufs (à préparer à l’avance)', category: 'breakfast',
@@ -181,7 +326,29 @@
         'Parsème de fromage et enfourne 18 à 20 minutes, jusqu’à ce qu’ils soient gonflés et pris au centre.',
         'Laisse tiédir 5 minutes avant de démouler.'
       ],
-      tips: 'Ils se gardent 4 jours au frigo : 20 secondes au micro-ondes le matin.'
+      tips: 'Ils se gardent 4 jours au frigo : 20 secondes au micro-ondes le matin.',
+      en: {
+        name: 'Make-Ahead Egg Muffins',
+        tags: ['eggs', 'peppers', 'cheese', 'ham'],
+        ingredients: [
+          '6 eggs',
+          '100 g diced ham (or turkey)',
+          '1/2 pepper',
+          '1 handful spinach',
+          '30 g grated cheese',
+          '1 tsp oil for the tin',
+          'Salt, pepper & paprika'
+        ],
+        steps: [
+          'Preheat the oven to 180 °C and oil 6 holes of a muffin tin (or use silicone cases).',
+          'Dice the pepper finely and roughly chop the spinach.',
+          'Share the ham, pepper and spinach between the holes.',
+          'Whisk the eggs with salt, pepper and paprika, then pour over until three-quarters full.',
+          'Sprinkle with cheese and bake for 18–20 minutes, until puffed and set in the centre.',
+          'Let them cool for 5 minutes before turning out.'
+        ],
+        tips: 'They keep for 4 days in the fridge: 20 seconds in the microwave in the morning.'
+      }
     },
     {
       id: 'b-avocado-toast', name: 'Tartines avocat, œufs mollets & cottage', category: 'breakfast',
@@ -202,7 +369,27 @@
         'Étale l’avocat sur les tartines, puis le cottage cheese.',
         'Écale les œufs, coupe-les en deux et pose-les dessus. Termine avec le piment.'
       ],
-      tips: 'Œufs mollets : 6 minutes pile depuis l’eau qui bout, pour un jaune coulant.'
+      tips: 'Œufs mollets : 6 minutes pile depuis l’eau qui bout, pour un jaune coulant.',
+      en: {
+        name: 'Avocado Toast, Soft-Boiled Eggs & Cottage Cheese',
+        tags: ['avocado', 'eggs', 'cottage cheese', 'bread'],
+        ingredients: [
+          '2 eggs',
+          '2 slices wholegrain bread',
+          '1/2 avocado',
+          '80 g cottage cheese',
+          '1/2 lemon',
+          'Chilli flakes, salt & pepper'
+        ],
+        steps: [
+          'Lower the eggs into boiling water and time 6 minutes, then run them under cold water.',
+          'Toast the bread.',
+          'Mash the avocado with a fork with a squeeze of lemon, salt and pepper.',
+          'Spread the avocado on the toast, then the cottage cheese.',
+          'Peel the eggs, halve them and lay them on top. Finish with the chilli flakes.'
+        ],
+        tips: 'Soft-boiled eggs: exactly 6 minutes from boiling water for a runny yolk.'
+      }
     },
     {
       id: 'b-choco-porridge', name: 'Porridge protéiné au chocolat', category: 'breakfast',
@@ -222,7 +409,26 @@
         'Hors du feu, ajoute la whey et le cacao et mélange bien (la whey fait des grumeaux si elle cuit).',
         'Verse dans un bol, ajoute la banane en rondelles et les noisettes.'
       ],
-      tips: 'Au micro-ondes : 2 minutes en 2 fois, en remuant entre les deux.'
+      tips: 'Au micro-ondes : 2 minutes en 2 fois, en remuant entre les deux.',
+      en: {
+        name: 'Chocolate Protein Porridge',
+        tags: ['oats', 'whey', 'chocolate', 'banana'],
+        ingredients: [
+          '50 g oat flakes',
+          '250 ml semi-skimmed milk',
+          '25 g whey protein (chocolate)',
+          '1 tsp unsweetened cocoa powder',
+          '1/2 banana',
+          '10 g chopped hazelnuts'
+        ],
+        steps: [
+          'Put the oats and milk in a saucepan over medium heat.',
+          'Cook for 4–5 minutes, stirring, until creamy.',
+          'Off the heat, add the whey and cocoa and stir well (whey goes lumpy if it cooks).',
+          'Pour into a bowl and top with the sliced banana and hazelnuts.'
+        ],
+        tips: 'In the microwave: 2 minutes in two goes, stirring in between.'
+      }
     },
     {
       id: 'b-fromage-blanc-apple', name: 'Fromage blanc, pomme & noix', category: 'breakfast',
@@ -240,7 +446,24 @@
         'Verse le fromage blanc dans un bol avec la cannelle.',
         'Ajoute la pomme, les noix concassées et le miel.'
       ],
-      tips: 'Avec une poire ou des fruits rouges, ça marche aussi très bien.'
+      tips: 'Avec une poire ou des fruits rouges, ça marche aussi très bien.',
+      en: {
+        name: 'Fromage Blanc, Apple & Walnuts',
+        tags: ['fromage blanc', 'apple', 'walnuts', 'snack'],
+        ingredients: [
+          '250 g 0% fromage blanc (or quark)',
+          '1 apple',
+          '15 g walnut halves',
+          '1 tsp honey',
+          '1 pinch cinnamon'
+        ],
+        steps: [
+          'Dice the apple small (keep the skin on).',
+          'Spoon the fromage blanc into a bowl with the cinnamon.',
+          'Add the apple, the crushed walnuts and the honey.'
+        ],
+        tips: 'A pear or berries work very well too.'
+      }
     },
     {
       id: 'b-tuna-toast', name: 'Tartines thon, skyr & concombre', category: 'breakfast',
@@ -260,7 +483,26 @@
         'Fais griller le pain si tu veux et coupe le concombre en fines rondelles.',
         'Étale le thon sur les tartines et ajoute le concombre.'
       ],
-      tips: 'La préparation au thon se garde 2 jours au frigo dans une boîte fermée.'
+      tips: 'La préparation au thon se garde 2 jours au frigo dans une boîte fermée.',
+      en: {
+        name: 'Tuna, Skyr & Cucumber Toast',
+        tags: ['tuna', 'skyr', 'bread', 'snack'],
+        ingredients: [
+          '1 can tuna in water (about 110 g drained)',
+          '40 g skyr',
+          '1 tsp mustard',
+          '2 slices wholegrain bread',
+          '1/4 cucumber',
+          'Chives, salt & pepper'
+        ],
+        steps: [
+          'Drain the tuna and flake it into a bowl.',
+          'Add the skyr, mustard, chives, salt and pepper, and mix.',
+          'Toast the bread if you like and slice the cucumber thinly.',
+          'Spread the tuna on the toast and top with the cucumber.'
+        ],
+        tips: 'The tuna mix keeps for 2 days in the fridge in a closed container.'
+      }
     },
     {
       id: 'b-breakfast-burrito', name: 'Burrito petit-déj œufs & dinde', category: 'breakfast',
@@ -282,7 +524,28 @@
         'Réchauffe la tortilla 20 secondes, garnis-la avec les œufs, le fromage et la salsa.',
         'Rabats les côtés et roule bien serré.'
       ],
-      tips: 'Emballé dans du papier aluminium, il se mange facilement sur le pouce.'
+      tips: 'Emballé dans du papier aluminium, il se mange facilement sur le pouce.',
+      en: {
+        name: 'Egg & Turkey Breakfast Burrito',
+        tags: ['eggs', 'turkey', 'wrap', 'cheese'],
+        ingredients: [
+          '2 eggs',
+          '2 slices turkey breast',
+          '1 large wholegrain tortilla',
+          '20 g grated cheese',
+          '1/2 pepper',
+          '1 tsp oil',
+          'Salsa or hot sauce (optional)'
+        ],
+        steps: [
+          'Dice the pepper small and cut the turkey into strips.',
+          'Heat the oil in a pan over medium heat and cook the pepper for 2 minutes.',
+          'Add the beaten eggs and gently scramble them with the turkey for 2 minutes.',
+          'Warm the tortilla for 20 seconds, then fill it with the eggs, cheese and salsa.',
+          'Fold in the sides and roll it up tightly.'
+        ],
+        tips: 'Wrapped in foil, it is easy to eat on the go.'
+      }
     },
     {
       id: 'b-protein-bars', name: 'Barres protéinées sans cuisson', category: 'breakfast',
@@ -304,7 +567,28 @@
         'Tasse bien la pâte dans le plat et mets au frigo au moins 1 heure.',
         'Découpe en 6 barres.'
       ],
-      tips: 'Elles se gardent 1 semaine au frigo, emballées une par une.'
+      tips: 'Elles se gardent 1 semaine au frigo, emballées une par une.',
+      en: {
+        name: 'No-Bake Protein Bars',
+        tags: ['oats', 'whey', 'peanut butter', 'snack'],
+        ingredients: [
+          '120 g oat flakes',
+          '60 g whey protein (vanilla or chocolate)',
+          '100 g peanut butter',
+          '50 g honey',
+          '60 ml milk',
+          '30 g dark chocolate chips'
+        ],
+        steps: [
+          'Line a small dish (about 20 × 15 cm) with baking paper.',
+          'In a large bowl, mix the oats and whey.',
+          'Warm the peanut butter and honey for 20 seconds in the microwave, then add them with the milk.',
+          'Stir into a thick dough (add a splash of milk if it crumbles), then the chocolate chips.',
+          'Press the dough firmly into the dish and chill for at least 1 hour.',
+          'Cut into 6 bars.'
+        ],
+        tips: 'They keep for 1 week in the fridge, wrapped individually.'
+      }
     },
     {
       id: 'b-shakshuka', name: 'Shakshuka express', category: 'breakfast',
@@ -328,7 +612,30 @@
         'Couvre et cuis 5 à 6 minutes, jusqu’à ce que les blancs soient pris et les jaunes encore coulants.',
         'Émiette la feta, parsème de persil et mange avec du pain.'
       ],
-      tips: 'Parfait pour un brunch du week-end : double les quantités dans une grande poêle.'
+      tips: 'Parfait pour un brunch du week-end : double les quantités dans une grande poêle.',
+      en: {
+        name: 'Quick Shakshuka',
+        tags: ['eggs', 'tomatoes', 'peppers', 'feta'],
+        ingredients: [
+          '3 eggs',
+          '200 g canned chopped tomatoes',
+          '1/2 pepper',
+          '1/2 onion',
+          '1 garlic clove',
+          '20 g feta',
+          '1 tsp olive oil',
+          'Cumin, paprika, salt & parsley'
+        ],
+        steps: [
+          'Slice the onion, dice the pepper and mince the garlic.',
+          'Heat the oil in a small pan over medium heat. Cook the onion and pepper for 4 minutes, then the garlic and spices for 30 seconds.',
+          'Add the tomatoes, season with salt and simmer for 5 minutes.',
+          'Make 3 small wells and crack an egg into each.',
+          'Cover and cook for 5–6 minutes, until the whites are set and the yolks still runny.',
+          'Crumble over the feta, sprinkle with parsley and eat with bread.'
+        ],
+        tips: 'Perfect for a weekend brunch: double the quantities in a large pan.'
+      }
     },
 
     /* ---------- Déjeuner & dîner ---------- */
@@ -356,7 +663,32 @@
         'Verse la sauce et remue 1 minute, jusqu’à ce qu’elle épaississe et enrobe le poulet.',
         'Sers le riz, le brocoli et le poulet dans un bol. Parsème de sésame et d’oignon nouveau émincé.'
       ],
-      tips: 'Fais 3 portions d’un coup : elles se gardent 3 jours au frigo.'
+      tips: 'Fais 3 portions d’un coup : elles se gardent 3 jours au frigo.',
+      en: {
+        name: 'Honey Garlic Chicken Rice Bowl',
+        tags: ['chicken', 'rice', 'broccoli'],
+        ingredients: [
+          '200 g chicken breast',
+          '75 g rice (uncooked), or 1 microwave rice pouch',
+          '150 g broccoli',
+          '2 garlic cloves',
+          '1 tbsp honey',
+          '2 tbsp soy sauce',
+          '1 tsp cornflour',
+          '1 tsp oil',
+          'Sesame seeds & 1 spring onion (optional)'
+        ],
+        steps: [
+          'Start the rice following the pack instructions (or use a microwave pouch).',
+          'Cut the chicken into bite-size pieces and mince the garlic.',
+          'In a small bowl, mix the honey, soy sauce, cornflour, garlic and 3 tbsp of water: this is the sauce.',
+          'Cut the broccoli into small florets. Microwave them for 3–4 minutes in a covered bowl with a splash of water.',
+          'Heat the oil in a pan over medium-high heat. Cook the chicken for 5–6 minutes until golden and cooked through (no pink inside).',
+          'Pour in the sauce and stir for 1 minute until it thickens and coats the chicken.',
+          'Serve the rice, broccoli and chicken in a bowl. Top with sesame seeds and sliced spring onion.'
+        ],
+        tips: 'Make 3 portions at once for meal prep: they keep for 3 days in the fridge.'
+      }
     },
     {
       id: 'm-chicken-fajitas', name: 'Wraps fajitas au poulet', category: 'main',
@@ -382,7 +714,32 @@
         'Réchauffe les tortillas 20 secondes au micro-ondes ou 30 secondes dans une poêle sèche.',
         'Étale le yaourt sur chaque tortilla, ajoute le poulet et les légumes, le fromage et la salsa, puis roule.'
       ],
-      tips: 'Le yaourt à la place de la crème : aussi onctueux, avec plus de protéines et moins de calories.'
+      tips: 'Le yaourt à la place de la crème : aussi onctueux, avec plus de protéines et moins de calories.',
+      en: {
+        name: 'Chicken Fajita Wraps',
+        tags: ['chicken', 'peppers', 'wrap', 'cheese'],
+        ingredients: [
+          '180 g chicken breast',
+          '1 red pepper',
+          '1/2 onion',
+          '2 wholegrain tortillas',
+          '1 tsp fajita spice mix (or paprika, cumin & garlic powder)',
+          '1 tsp oil',
+          '50 g 0% Greek yogurt (or skyr)',
+          '30 g grated cheese',
+          '1/2 lime',
+          'Salsa or hot sauce (optional)'
+        ],
+        steps: [
+          'Slice the chicken, pepper and onion into thin strips.',
+          'Toss the chicken with the spice mix and a pinch of salt.',
+          'Heat the oil in a large pan over high heat. Cook the pepper and onion for 3–4 minutes until slightly charred, then push them to the side.',
+          'Add the chicken and cook for 5–6 minutes, stirring, until cooked through. Squeeze the lime over it.',
+          'Warm the tortillas for 20 seconds in the microwave or 30 seconds in a dry pan.',
+          'Spread the yogurt on each tortilla, add the chicken and vegetables, top with the cheese and salsa, and roll up.'
+        ],
+        tips: 'Yogurt instead of sour cream: just as creamy, with more protein and fewer calories.'
+      }
     },
     {
       id: 'm-korean-beef', name: 'Bowl de bœuf à la coréenne', category: 'main',
@@ -409,7 +766,33 @@
         'Émince le concombre et l’oignon nouveau.',
         'Sers le bœuf sur le riz avec l’œuf, le concombre, l’oignon nouveau, le sésame et le piment.'
       ],
-      tips: 'La dinde hachée marche aussi bien, et elle est encore plus maigre.'
+      tips: 'La dinde hachée marche aussi bien, et elle est encore plus maigre.',
+      en: {
+        name: 'Korean-Style Beef Bowl',
+        tags: ['beef', 'ground beef', 'rice', 'egg'],
+        ingredients: [
+          '150 g lean ground beef (5% fat)',
+          '75 g rice (uncooked), or 1 microwave rice pouch',
+          '1 egg',
+          '2 garlic cloves',
+          '1 tsp grated fresh ginger (or 1/2 tsp ground ginger)',
+          '2 tbsp soy sauce',
+          '1 tsp honey or brown sugar',
+          '1 tsp sesame oil',
+          '1/4 cucumber',
+          '1 spring onion, sesame seeds & chilli flakes (optional)'
+        ],
+        steps: [
+          'Start the rice.',
+          'In a small bowl, mix the soy sauce, honey, minced garlic and ginger.',
+          'Heat a pan over high heat and add the beef. Break it up with a spatula and cook for 5 minutes until browned.',
+          'Pour the sauce over the beef and cook for 1–2 minutes until sticky. Stir in the sesame oil.',
+          'In another pan, fry the egg (or boil it for 7 minutes for a jammy yolk).',
+          'Slice the cucumber and spring onion.',
+          'Serve the beef over the rice with the egg, cucumber, spring onion, sesame seeds and chilli flakes.'
+        ],
+        tips: 'Ground turkey works just as well and is even leaner.'
+      }
     },
     {
       id: 'm-lemon-salmon', name: 'Saumon ail-citron & pommes de terre', category: 'main',
@@ -434,7 +817,31 @@
         'Pour la sauce, mélange le skyr avec l’aneth, un filet de citron et une pincée de sel.',
         'Sers avec la sauce et des quartiers de citron.'
       ],
-      tips: 'Le saumon surgelé marche : décongèle-le au frigo la veille, ou ajoute 5 minutes de cuisson.'
+      tips: 'Le saumon surgelé marche : décongèle-le au frigo la veille, ou ajoute 5 minutes de cuisson.',
+      en: {
+        name: 'Lemon Garlic Salmon & Potatoes',
+        tags: ['salmon', 'fish', 'potatoes', 'green beans'],
+        ingredients: [
+          '1 salmon fillet (about 180 g)',
+          '250 g small potatoes',
+          '150 g green beans',
+          '1 tbsp olive oil',
+          '1 garlic clove',
+          '1/2 lemon',
+          '50 g skyr or Greek yogurt',
+          'Dill, salt, pepper & paprika'
+        ],
+        steps: [
+          'Preheat the oven (or air fryer) to 200 °C.',
+          'Cut the potatoes in half. Microwave them for 5 minutes in a covered bowl with a splash of water to give them a head start.',
+          'Put the potatoes and green beans on a tray. Toss with half the olive oil, salt, pepper and paprika. Roast for 10 minutes.',
+          'Mix the rest of the oil with the grated garlic, lemon zest, salt and pepper. Brush it over the salmon.',
+          'Add the salmon to the tray and roast for 10–12 minutes, until it flakes easily with a fork.',
+          'For the sauce, mix the skyr with dill, a squeeze of lemon and a pinch of salt.',
+          'Serve with the sauce and lemon wedges.'
+        ],
+        tips: 'Frozen salmon works: thaw it in the fridge overnight, or add 5 minutes of cooking.'
+      }
     },
     {
       id: 'm-tuna-pasta', name: 'Pâtes crémeuses au thon', category: 'main',
@@ -458,7 +865,30 @@
         'Retire la poêle du feu. Ajoute les pâtes égouttées, le thon et les épinards, puis la sauce au cottage cheese.',
         'Poivre, ajoute le piment et termine avec le basilic.'
       ],
-      tips: 'Ajoute la sauce hors du feu pour qu’elle reste crémeuse et ne tranche pas.'
+      tips: 'Ajoute la sauce hors du feu pour qu’elle reste crémeuse et ne tranche pas.',
+      en: {
+        name: 'Creamy Tuna Pasta',
+        tags: ['tuna', 'fish', 'pasta', 'cottage cheese', 'tomatoes'],
+        ingredients: [
+          '80 g pasta (wholewheat or protein pasta)',
+          '1 can tuna in water (about 110 g drained)',
+          '100 g cottage cheese',
+          '15 g grated parmesan',
+          '150 g cherry tomatoes',
+          '1 garlic clove',
+          '1 tsp olive oil',
+          '1 handful spinach, chilli flakes & basil (optional)'
+        ],
+        steps: [
+          'Cook the pasta in salted boiling water following the pack time. Keep a small cup of the cooking water before draining.',
+          'Meanwhile, halve the tomatoes and slice the garlic.',
+          'Heat the olive oil in a pan over medium heat. Cook the garlic for 30 seconds, then the tomatoes for 3–4 minutes until soft.',
+          'Blend or mash the cottage cheese with the parmesan and 2–3 tbsp of pasta water until smooth.',
+          'Take the pan off the heat. Add the drained pasta, tuna and spinach, then stir in the cottage cheese sauce.',
+          'Season with pepper and chilli flakes, and top with basil.'
+        ],
+        tips: 'Add the sauce off the heat so it stays creamy and does not split.'
+      }
     },
     {
       id: 'm-shrimp-fried-rice', name: 'Riz sauté aux crevettes & œufs', category: 'main',
@@ -482,7 +912,30 @@
         'Pousse le riz sur le côté, casse les œufs et brouille-les, puis mélange le tout.',
         'Remets les crevettes, ajoute la sauce soja et remue 1 minute. Termine avec l’oignon nouveau et quelques gouttes d’huile de sésame.'
       ],
-      tips: 'Le secret, c’est le riz froid : le riz chaud devient pâteux. Un sachet de riz express marche aussi.'
+      tips: 'Le secret, c’est le riz froid : le riz chaud devient pâteux. Un sachet de riz express marche aussi.',
+      en: {
+        name: 'Shrimp Egg Fried Rice',
+        tags: ['shrimp', 'prawns', 'eggs', 'rice', 'peas'],
+        ingredients: [
+          '150 g raw peeled prawns (shrimp)',
+          '2 eggs',
+          '150 g cooked rice (cold, ideally from the day before)',
+          '80 g frozen peas',
+          '1 garlic clove',
+          '2 tbsp soy sauce',
+          '2 tsp oil',
+          '1 spring onion & a few drops of sesame oil (optional)'
+        ],
+        steps: [
+          'Mince the garlic and slice the spring onion.',
+          'Heat 1 tsp of oil in a large pan or wok over high heat. Cook the prawns for 2 minutes until pink, then set them aside on a plate.',
+          'Add the rest of the oil, the garlic and the peas. Stir for 1 minute.',
+          'Add the cold rice and fry for 2–3 minutes, pressing it against the pan so it gets slightly crispy.',
+          'Push the rice to the side, crack in the eggs and scramble them, then mix everything together.',
+          'Return the prawns, add the soy sauce and stir for 1 minute. Finish with the spring onion and a few drops of sesame oil.'
+        ],
+        tips: 'Cold rice is the secret: fresh rice turns mushy. A microwave rice pouch also works.'
+      }
     },
     {
       id: 'm-coconut-curry', name: 'Curry de poulet express au lait de coco', category: 'main',
@@ -508,7 +961,32 @@
         'Verse le lait de coco et les tomates, puis laisse mijoter 8 minutes jusqu’à ce que le poulet soit cuit à cœur.',
         'Ajoute les épinards et remue jusqu’à ce qu’ils tombent. Sale, puis sers sur le riz avec la coriandre et le citron vert.'
       ],
-      tips: 'Encore meilleur le lendemain : parfait pour emporter au travail.'
+      tips: 'Encore meilleur le lendemain : parfait pour emporter au travail.',
+      en: {
+        name: 'Quick Coconut Chicken Curry',
+        tags: ['chicken', 'curry', 'rice', 'spinach'],
+        ingredients: [
+          '350 g chicken breast',
+          '150 g basmati rice (uncooked)',
+          '1 onion',
+          '2 garlic cloves',
+          '1 tbsp curry paste (or 2 tsp curry powder)',
+          '200 ml light coconut milk',
+          '200 g canned chopped tomatoes',
+          '2 handfuls spinach',
+          '1 tsp oil',
+          'Coriander & 1/2 lime (optional)'
+        ],
+        steps: [
+          'Start the rice.',
+          'Slice the onion, mince the garlic and cut the chicken into pieces.',
+          'Heat the oil in a deep pan over medium heat. Cook the onion for 3 minutes, then the garlic and curry paste for 1 minute.',
+          'Add the chicken and brown it for 4 minutes, stirring.',
+          'Pour in the coconut milk and tomatoes, then simmer for 8 minutes until the chicken is cooked through.',
+          'Stir in the spinach until it wilts. Season with salt, then serve over the rice with coriander and lime.'
+        ],
+        tips: 'Even better the next day: perfect to take to work.'
+      }
     },
     {
       id: 'm-chili', name: 'Chili con carne express', category: 'main',
@@ -534,7 +1012,32 @@
         'Verse les tomates et les haricots rincés. Laisse mijoter 10 minutes à feu doux, en remuant de temps en temps.',
         'Sale, goûte, puis sers sur le riz avec une cuillère de yaourt grec, la coriandre et un peu de cheddar.'
       ],
-      tips: 'Il se congèle très bien : fais une double dose.'
+      tips: 'Il se congèle très bien : fais une double dose.',
+      en: {
+        name: 'Quick Chilli con Carne',
+        tags: ['ground beef', 'kidney beans', 'rice', 'tomatoes'],
+        ingredients: [
+          '300 g lean ground beef (5% fat)',
+          '1 can kidney beans (about 250 g drained)',
+          '400 g canned chopped tomatoes',
+          '1 onion',
+          '1 pepper',
+          '2 garlic cloves',
+          '2 tsp chilli spice mix (or smoked paprika + cumin + chilli)',
+          '150 g rice (uncooked)',
+          '1 tsp oil',
+          'Greek yogurt, coriander & grated cheddar (optional)'
+        ],
+        steps: [
+          'Start the rice. Slice the onion, dice the pepper and mince the garlic.',
+          'Heat the oil in a deep pan over medium-high heat. Cook the onion and pepper for 4 minutes.',
+          'Add the beef and garlic. Break it up and cook for 5 minutes until browned.',
+          'Add the spices and stir for 30 seconds.',
+          'Pour in the tomatoes and the rinsed beans. Simmer for 10 minutes over low heat, stirring now and then.',
+          'Season, taste, then serve over the rice with a spoonful of Greek yogurt, coriander and a little cheddar.'
+        ],
+        tips: 'It freezes very well: make a double batch.'
+      }
     },
     {
       id: 'm-turkey-meatballs', name: 'Boulettes de dinde, sauce tomate & pâtes', category: 'main',
@@ -558,7 +1061,30 @@
         'Ajoute le reste de l’ail, puis le coulis de tomate. Couvre et laisse mijoter 8 minutes : les boulettes finissent de cuire dans la sauce.',
         'Sers sur les pâtes égouttées avec le reste du parmesan et du basilic.'
       ],
-      tips: 'Le poulet haché ou le bœuf 5 % marchent aussi.'
+      tips: 'Le poulet haché ou le bœuf 5 % marchent aussi.',
+      en: {
+        name: 'Turkey Meatballs, Tomato Sauce & Pasta',
+        tags: ['turkey', 'pasta', 'tomatoes', 'parmesan'],
+        ingredients: [
+          '400 g ground turkey',
+          '1 egg',
+          '30 g grated parmesan',
+          '2 garlic cloves',
+          '400 g tomato passata',
+          '160 g pasta (wholewheat or protein pasta)',
+          '1 tbsp olive oil',
+          'Oregano, basil, salt & pepper'
+        ],
+        steps: [
+          'Start cooking the pasta in salted boiling water.',
+          'In a large bowl, mix the turkey, egg, half the parmesan, 1 grated garlic clove, oregano, salt and pepper.',
+          'Shape about 16 meatballs with wet hands.',
+          'Heat the oil in a deep pan over medium-high heat and brown the meatballs for 5 minutes, turning them.',
+          'Add the rest of the garlic, then the passata. Cover and simmer for 8 minutes: the meatballs finish cooking in the sauce.',
+          'Serve over the drained pasta with the rest of the parmesan and basil.'
+        ],
+        tips: 'Ground chicken or 5% beef work too.'
+      }
     },
     {
       id: 'm-cod-quinoa', name: 'Cabillaud au four, quinoa & courgettes', category: 'main',
@@ -580,7 +1106,28 @@
         'Pose le cabillaud sur la plaque à côté des courgettes et cuis 10 à 12 minutes, jusqu’à ce qu’il soit blanc et s’effeuille.',
         'Sers sur le quinoa avec un filet de citron.'
       ],
-      tips: 'Le cabillaud surgelé marche : compte 5 minutes de plus.'
+      tips: 'Le cabillaud surgelé marche : compte 5 minutes de plus.',
+      en: {
+        name: 'Baked Cod, Quinoa & Courgette',
+        tags: ['cod', 'fish', 'quinoa', 'courgette'],
+        ingredients: [
+          '1 cod fillet (about 180 g)',
+          '60 g quinoa (uncooked)',
+          '1 courgette',
+          '1 tbsp olive oil',
+          '1/2 lemon',
+          '1 garlic clove',
+          'Paprika, dried herbs, salt & pepper'
+        ],
+        steps: [
+          'Preheat the oven to 200 °C. Rinse the quinoa and cook it for 12 minutes in twice its volume of salted water.',
+          'Cut the courgette into half-moons and put it on a tray with half the oil, salt and herbs. Roast for 8 minutes.',
+          'Mix the rest of the oil with the grated garlic, paprika and lemon zest. Brush it over the cod.',
+          'Put the cod on the tray next to the courgette and roast for 10–12 minutes, until white and flaky.',
+          'Serve over the quinoa with a squeeze of lemon.'
+        ],
+        tips: 'Frozen cod works: allow 5 extra minutes.'
+      }
     },
     {
       id: 'm-chicken-caesar', name: 'Salade César au poulet (version légère)', category: 'main',
@@ -606,7 +1153,32 @@
         'Coupe la romaine, le poulet en tranches et l’œuf en quartiers.',
         'Mélange la salade avec la sauce, puis ajoute le poulet, l’œuf, les croûtons et le reste du parmesan en copeaux.'
       ],
-      tips: 'Une sauce au skyr à la place de la mayonnaise : bien plus de protéines, beaucoup moins de gras.'
+      tips: 'Une sauce au skyr à la place de la mayonnaise : bien plus de protéines, beaucoup moins de gras.',
+      en: {
+        name: 'Light Chicken Caesar Salad',
+        tags: ['chicken', 'salad', 'parmesan', 'egg'],
+        ingredients: [
+          '180 g chicken breast',
+          '1 romaine heart',
+          '1 egg',
+          '20 g parmesan',
+          '1 slice wholegrain bread',
+          '60 g skyr or Greek yogurt',
+          '1 tsp mustard',
+          '1/2 lemon',
+          '1 tsp oil',
+          '1 small garlic clove, salt & pepper'
+        ],
+        steps: [
+          'Boil the egg for 9 minutes, then run it under cold water.',
+          'Flatten the chicken slightly, season and cook for 5–6 minutes per side in an oiled pan over medium-high heat.',
+          'Cut the bread into cubes and toast them for 2 minutes in the same pan: these are the croutons.',
+          'For the dressing, mix the skyr, mustard, juice of the half lemon, grated garlic, half the grated parmesan and a little pepper.',
+          'Chop the romaine, slice the chicken and cut the egg into quarters.',
+          'Toss the salad with the dressing, then add the chicken, egg, croutons and the rest of the parmesan in shavings.'
+        ],
+        tips: 'A skyr dressing instead of mayonnaise: much more protein, far less fat.'
+      }
     },
     {
       id: 'm-peanut-tofu', name: 'Tofu croustillant, sauce cacahuète & riz', category: 'main',
@@ -631,7 +1203,31 @@
         'Pour la sauce, mélange le beurre de cacahuète, la sauce soja, le miel, le jus de citron vert et 2 c. à soupe d’eau chaude.',
         'Sers le riz, le brocoli et le tofu, nappe de sauce et parsème de sésame.'
       ],
-      tips: 'Plus le tofu est sec, plus il croustille : ne saute pas l’étape du torchon.'
+      tips: 'Plus le tofu est sec, plus il croustille : ne saute pas l’étape du torchon.',
+      en: {
+        name: 'Crispy Tofu, Peanut Sauce & Rice',
+        tags: ['tofu', 'vegetarian', 'rice', 'broccoli', 'peanut'],
+        ingredients: [
+          '200 g firm tofu',
+          '60 g rice (uncooked)',
+          '150 g broccoli',
+          '1 tbsp cornflour',
+          '1 tbsp oil',
+          '20 g peanut butter',
+          '1 tbsp soy sauce',
+          '1 tsp honey or maple syrup',
+          '1/2 lime & sesame seeds (optional)'
+        ],
+        steps: [
+          'Start the rice. Drain the tofu, press it between two tea towels for 5 minutes, then cut it into cubes.',
+          'Roll the cubes in the cornflour with a pinch of salt.',
+          'Heat the oil in a non-stick pan over medium-high heat and brown the tofu for 8–10 minutes, turning it so it crisps on all sides.',
+          'Meanwhile, microwave the broccoli for 3–4 minutes in a covered bowl with a splash of water.',
+          'For the sauce, mix the peanut butter, soy sauce, honey, lime juice and 2 tbsp of hot water.',
+          'Serve the rice, broccoli and tofu, pour over the sauce and sprinkle with sesame seeds.'
+        ],
+        tips: 'The drier the tofu, the crispier it gets: do not skip the tea towel step.'
+      }
     },
     {
       id: 'm-paprika-chicken-tray', name: 'Poulet au paprika & patates douces sur plaque', category: 'main',
@@ -655,7 +1251,30 @@
         'Ajoute le poulet sur la plaque et cuis encore 15 à 18 minutes, jusqu’à ce qu’il soit doré et cuit à cœur.',
         'Mélange le skyr avec le jus du citron et une pincée de sel, et sers en sauce.'
       ],
-      tips: 'Une seule plaque, presque pas de vaisselle : idéal en semaine.'
+      tips: 'Une seule plaque, presque pas de vaisselle : idéal en semaine.',
+      en: {
+        name: 'Paprika Chicken & Sweet Potato Tray Bake',
+        tags: ['chicken', 'sweet potato', 'peppers', 'oven'],
+        ingredients: [
+          '400 g chicken thighs or breasts',
+          '2 sweet potatoes (about 500 g)',
+          '1 pepper',
+          '1 red onion',
+          '2 tbsp olive oil',
+          '2 tsp smoked paprika',
+          '100 g skyr',
+          '1/2 lemon, garlic powder, salt & pepper'
+        ],
+        steps: [
+          'Preheat the oven to 210 °C.',
+          'Cut the sweet potatoes into 2 cm cubes, and the pepper and onion into chunks.',
+          'On a large tray, toss the vegetables with half the oil, salt and pepper. Roast for 10 minutes.',
+          'Cut the chicken into large pieces and toss with the rest of the oil, the paprika, garlic powder and salt.',
+          'Add the chicken to the tray and roast for another 15–18 minutes, until golden and cooked through.',
+          'Mix the skyr with the lemon juice and a pinch of salt, and serve as a sauce.'
+        ],
+        tips: 'One tray, hardly any washing-up: ideal on weeknights.'
+      }
     },
     {
       id: 'm-beef-noodles', name: 'Wok de bœuf aux nouilles & légumes', category: 'main',
@@ -678,7 +1297,29 @@
         'Fais sauter les légumes 3 à 4 minutes : ils doivent rester croquants.',
         'Ajoute les nouilles, le bœuf et la sauce, et fais sauter 1 minute en remuant.'
       ],
-      tips: 'Le wok doit être très chaud : la viande saisit au lieu de bouillir.'
+      tips: 'Le wok doit être très chaud : la viande saisit au lieu de bouillir.',
+      en: {
+        name: 'Beef Noodle Stir-Fry',
+        tags: ['beef', 'noodles', 'broccoli', 'wok'],
+        ingredients: [
+          '150 g beef stir-fry strips (rump or flank)',
+          '70 g egg noodles (dry)',
+          '150 g stir-fry vegetables (broccoli, carrot, pepper, fresh or frozen)',
+          '1 garlic clove',
+          '1 tsp grated ginger',
+          '2 tbsp soy sauce',
+          '1 tbsp oyster sauce (or 1 tsp honey)',
+          '1 tsp oil'
+        ],
+        steps: [
+          'Cook the noodles following the pack, drain and rinse them under cold water.',
+          'Mix the soy sauce, oyster sauce, minced garlic, ginger and 2 tbsp of water.',
+          'Heat the oil in a wok over very high heat. Sear the beef for 1–2 minutes, then set it aside.',
+          'Stir-fry the vegetables for 3–4 minutes: they should stay crunchy.',
+          'Add the noodles, beef and sauce, and stir-fry for 1 minute.'
+        ],
+        tips: 'The wok must be very hot so the meat sears instead of stewing.'
+      }
     },
     {
       id: 'm-lean-burgers', name: 'Burgers maison maigres', category: 'main',
@@ -701,7 +1342,29 @@
         'Pendant ce temps, toaste le pain coupé en deux dans la poêle ou le grille-pain.',
         'Monte le burger : sauce, salade, steak, tomate en rondelles, et referme.'
       ],
-      tips: 'Une salade ou des légumes rôtis à côté plutôt que des frites pour rester léger.'
+      tips: 'Une salade ou des légumes rôtis à côté plutôt que des frites pour rester léger.',
+      en: {
+        name: 'Lean Homemade Burgers',
+        tags: ['ground beef', 'burger', 'cheese', 'lettuce'],
+        ingredients: [
+          '150 g lean ground beef (5% fat)',
+          '1 wholegrain burger bun',
+          '1 slice cheddar',
+          '1 tomato',
+          '2 lettuce leaves',
+          '30 g skyr',
+          '1 tsp mustard',
+          '1 gherkin, salt & pepper'
+        ],
+        steps: [
+          'Shape a patty slightly wider than the bun and press a small dip in the centre with your thumb (so it does not puff up).',
+          'Mix the skyr, mustard and chopped gherkin: this is the sauce.',
+          'Heat a pan over high heat. Salt the patty and cook for 3 minutes, flip it, add the cheddar and cook 2–3 more minutes.',
+          'Meanwhile, toast the halved bun in the pan or toaster.',
+          'Build the burger: sauce, lettuce, patty, sliced tomato, and close.'
+        ],
+        tips: 'A salad or roasted vegetables on the side instead of fries keeps it light.'
+      }
     },
     {
       id: 'm-teriyaki-salmon', name: 'Saumon teriyaki, riz & edamame', category: 'main',
@@ -724,7 +1387,29 @@
         'Baisse le feu, verse la sauce et laisse-la réduire 1 à 2 minutes en arrosant le saumon : il devient brillant.',
         'Sers sur le riz avec les edamame, le sésame et la cébette émincée.'
       ],
-      tips: 'La sauce caramélise vite : baisse bien le feu avant de la verser.'
+      tips: 'La sauce caramélise vite : baisse bien le feu avant de la verser.',
+      en: {
+        name: 'Teriyaki Salmon, Rice & Edamame',
+        tags: ['salmon', 'fish', 'rice', 'edamame'],
+        ingredients: [
+          '1 salmon fillet (about 180 g)',
+          '75 g rice (uncooked), or 1 microwave rice pouch',
+          '80 g frozen edamame',
+          '2 tbsp soy sauce',
+          '1 tbsp honey',
+          '1 tsp rice vinegar (or lemon juice)',
+          '1 tsp oil',
+          'Sesame seeds & 1 spring onion (optional)'
+        ],
+        steps: [
+          'Start the rice. Cook the edamame for 4 minutes in boiling water.',
+          'Mix the soy sauce, honey and vinegar.',
+          'Heat the oil in a pan over medium-high heat. Cook the salmon for 4 minutes skin side down, then 2 minutes on the other side.',
+          'Lower the heat, pour in the sauce and let it reduce for 1–2 minutes, basting the salmon: it turns glossy.',
+          'Serve over the rice with the edamame, sesame seeds and sliced spring onion.'
+        ],
+        tips: 'The sauce caramelises fast: turn the heat right down before pouring it in.'
+      }
     },
     {
       id: 'm-lentil-dahl', name: 'Dahl de lentilles corail & œufs', category: 'main',
@@ -749,7 +1434,31 @@
         'Pendant ce temps, cuis les œufs 7 minutes dans l’eau bouillante, puis écale-les.',
         'Ajoute les épinards au dahl et sale. Sers avec les œufs coupés en deux, le yaourt et la coriandre.'
       ],
-      tips: 'Les lentilles corail n’ont pas besoin de trempage : elles cuisent en 15 minutes.'
+      tips: 'Les lentilles corail n’ont pas besoin de trempage : elles cuisent en 15 minutes.',
+      en: {
+        name: 'Red Lentil Dahl & Eggs',
+        tags: ['lentils', 'vegetarian', 'eggs', 'spinach'],
+        ingredients: [
+          '160 g red lentils',
+          '4 eggs',
+          '200 ml light coconut milk',
+          '200 g canned chopped tomatoes',
+          '1 onion',
+          '2 garlic cloves',
+          '2 tsp curry powder',
+          '2 handfuls spinach',
+          '1 tsp oil',
+          '100 g Greek yogurt, coriander & lemon (optional)'
+        ],
+        steps: [
+          'Slice the onion and mince the garlic. Rinse the lentils.',
+          'Heat the oil in a saucepan over medium heat and cook the onion for 3 minutes, then the garlic and curry powder for 1 minute.',
+          'Add the lentils, coconut milk, tomatoes and 300 ml of water. Simmer for 15 minutes, stirring, until the lentils break down.',
+          'Meanwhile, boil the eggs for 7 minutes, then peel them.',
+          'Stir the spinach into the dahl and season with salt. Serve with the halved eggs, yogurt and coriander.'
+        ],
+        tips: 'Red lentils need no soaking: they cook in 15 minutes.'
+      }
     },
     {
       id: 'm-shrimp-poke', name: 'Poke bowl crevettes & edamame', category: 'main',
@@ -773,7 +1482,30 @@
         'Mets le riz au fond du bol et dispose dessus les crevettes, les edamame et les légumes.',
         'Arrose de sauce et parsème de sésame.'
       ],
-      tips: 'Le thon en boîte remplace très bien les crevettes.'
+      tips: 'Le thon en boîte remplace très bien les crevettes.',
+      en: {
+        name: 'Shrimp & Edamame Poke Bowl',
+        tags: ['shrimp', 'rice', 'edamame', 'avocado'],
+        ingredients: [
+          '150 g cooked peeled prawns (shrimp)',
+          '75 g rice (uncooked), or 1 microwave rice pouch',
+          '80 g frozen edamame',
+          '1/2 avocado',
+          '1/4 cucumber',
+          '1 carrot',
+          '2 tbsp soy sauce',
+          '1 tsp sesame oil',
+          'Sesame seeds & 1/2 lime'
+        ],
+        steps: [
+          'Cook the rice and let it cool slightly. Cook the edamame for 4 minutes in boiling water.',
+          'Dice the cucumber and avocado, and grate the carrot.',
+          'Mix the soy sauce, sesame oil and lime juice.',
+          'Put the rice at the bottom of the bowl and arrange the prawns, edamame and vegetables on top.',
+          'Drizzle with the sauce and sprinkle with sesame seeds.'
+        ],
+        tips: 'Canned tuna is a great swap for the prawns.'
+      }
     },
     {
       id: 'm-bolognese', name: 'Pâtes bolognaise express', category: 'main',
@@ -798,7 +1530,31 @@
         'Pendant ce temps, cuis les pâtes dans l’eau bouillante salée.',
         'Mélange les pâtes à la sauce et sers avec le parmesan et le basilic.'
       ],
-      tips: 'La sauce se congèle très bien : fais-en une grande casserole.'
+      tips: 'La sauce se congèle très bien : fais-en une grande casserole.',
+      en: {
+        name: 'Quick Pasta Bolognese',
+        tags: ['ground beef', 'pasta', 'tomatoes', 'parmesan'],
+        ingredients: [
+          '300 g lean ground beef (5% fat)',
+          '160 g spaghetti (wholewheat or protein pasta)',
+          '400 g tomato passata',
+          '1 onion',
+          '1 carrot',
+          '2 garlic cloves',
+          '1 tsp olive oil',
+          '20 g grated parmesan',
+          'Oregano, basil, salt & pepper'
+        ],
+        steps: [
+          'Finely chop the onion, carrot and garlic (or grate the carrot).',
+          'Heat the oil in a deep pan over medium heat and cook the vegetables for 4 minutes.',
+          'Add the beef, break it up and cook for 5 minutes until browned.',
+          'Pour in the passata, add the oregano, salt and pepper, and simmer for 12 minutes over low heat.',
+          'Meanwhile, cook the pasta in salted boiling water.',
+          'Toss the pasta with the sauce and serve with the parmesan and basil.'
+        ],
+        tips: 'The sauce freezes very well: make a big pot.'
+      }
     },
     {
       id: 'm-chicken-quesadillas', name: 'Quesadillas poulet & haricots noirs', category: 'main',
@@ -821,7 +1577,29 @@
         'Retourne-la à l’aide d’une assiette et cuis encore 2 minutes, jusqu’à ce que le fromage fonde.',
         'Coupe en 4 parts et sers avec le skyr et la salsa.'
       ],
-      tips: 'Un bon moyen d’utiliser un reste de poulet rôti.'
+      tips: 'Un bon moyen d’utiliser un reste de poulet rôti.',
+      en: {
+        name: 'Chicken & Black Bean Quesadillas',
+        tags: ['chicken', 'black beans', 'cheese', 'wrap'],
+        ingredients: [
+          '150 g cooked chicken (leftovers or grilled breast)',
+          '2 wholegrain tortillas',
+          '80 g canned black beans (rinsed)',
+          '40 g grated mozzarella',
+          '50 g sweetcorn',
+          '1 tsp fajita spice mix (or paprika & cumin)',
+          '50 g skyr or Greek yogurt',
+          'Salsa (optional)'
+        ],
+        steps: [
+          'Shred or chop the chicken into small pieces and mix it with the beans, sweetcorn and spices.',
+          'Spread half the cheese over one tortilla, add the filling, then the rest of the cheese. Cover with the second tortilla.',
+          'Heat a large dry pan over medium heat. Cook for 2–3 minutes until the underside is golden.',
+          'Flip it with the help of a plate and cook 2 more minutes, until the cheese melts.',
+          'Cut into 4 wedges and serve with the skyr and salsa.'
+        ],
+        tips: 'A great way to use up leftover roast chicken.'
+      }
     },
     {
       id: 'm-pesto-gnocchi', name: 'Gnocchis poêlés, poulet & pesto', category: 'main',
@@ -843,7 +1621,28 @@
         'Ajoute les tomates et les épinards 1 minute, puis remets le poulet.',
         'Hors du feu, mélange avec le pesto et parsème de parmesan.'
       ],
-      tips: 'Les gnocchis poêlés deviennent croustillants dehors et fondants dedans.'
+      tips: 'Les gnocchis poêlés deviennent croustillants dehors et fondants dedans.',
+      en: {
+        name: 'Pan-Fried Gnocchi, Chicken & Pesto',
+        tags: ['chicken', 'gnocchi', 'pesto', 'tomatoes'],
+        ingredients: [
+          '150 g chicken breast',
+          '200 g gnocchi',
+          '1 tbsp pesto',
+          '100 g cherry tomatoes',
+          '1 handful spinach',
+          '1 tsp olive oil',
+          '15 g grated parmesan'
+        ],
+        steps: [
+          'Dice the chicken and halve the tomatoes.',
+          'Heat the oil in a pan over medium-high heat and cook the chicken for 5–6 minutes until golden and cooked through. Set aside.',
+          'Put the gnocchi straight into the pan (no boiling first) and fry them for 5 minutes, stirring, until golden.',
+          'Add the tomatoes and spinach for 1 minute, then return the chicken.',
+          'Off the heat, stir in the pesto and sprinkle with parmesan.'
+        ],
+        tips: 'Pan-fried gnocchi turn crispy outside and soft inside.'
+      }
     },
     {
       id: 'm-mustard-turkey', name: 'Escalopes de dinde à la moutarde & haricots verts', category: 'main',
@@ -866,7 +1665,29 @@
         'Fais revenir l’échalote 1 minute dans la même poêle, puis ajoute la moutarde, la crème et 2 c. à soupe d’eau. Remue 1 minute.',
         'Remets les escalopes dans la sauce, poivre et sers avec les légumes et le persil.'
       ],
-      tips: 'Avec du skyr, ajoute-le hors du feu pour que la sauce ne tranche pas.'
+      tips: 'Avec du skyr, ajoute-le hors du feu pour que la sauce ne tranche pas.',
+      en: {
+        name: 'Mustard Turkey Escalopes & Green Beans',
+        tags: ['turkey', 'mustard', 'green beans', 'potatoes'],
+        ingredients: [
+          '2 turkey escalopes (about 180 g)',
+          '200 g potatoes',
+          '150 g green beans',
+          '1 tbsp wholegrain mustard',
+          '50 g light cream (or skyr)',
+          '1 shallot',
+          '1 tsp oil',
+          'Salt, pepper & parsley'
+        ],
+        steps: [
+          'Cut the potatoes into chunks and boil them for 12 minutes in salted water, adding the green beans for the last 6 minutes.',
+          'Slice the shallot.',
+          'Heat the oil in a pan over medium-high heat. Season the escalopes and cook for 3 minutes per side. Set them aside.',
+          'Cook the shallot for 1 minute in the same pan, then add the mustard, cream and 2 tbsp of water. Stir for 1 minute.',
+          'Return the escalopes to the sauce, season with pepper and serve with the vegetables and parsley.'
+        ],
+        tips: 'If using skyr, add it off the heat so the sauce does not split.'
+      }
     },
     {
       id: 'm-chicken-ramen', name: 'Ramen express au poulet & œuf', category: 'main',
@@ -890,7 +1711,30 @@
         'Cuis les nouilles dans le bouillon 3 minutes, en ajoutant les épinards à la fin.',
         'Verse dans un grand bol, ajoute le poulet, l’œuf coupé en deux, la cébette, le sésame et le piment.'
       ],
-      tips: 'Pocher le poulet dans le bouillon le garde tendre et parfume la soupe.'
+      tips: 'Pocher le poulet dans le bouillon le garde tendre et parfume la soupe.',
+      en: {
+        name: 'Quick Chicken & Egg Ramen',
+        tags: ['chicken', 'noodles', 'egg', 'soup'],
+        ingredients: [
+          '150 g chicken breast',
+          '1 egg',
+          '60 g ramen or egg noodles (dry)',
+          '500 ml chicken stock',
+          '2 tbsp soy sauce',
+          '1 garlic clove',
+          '1 tsp grated ginger',
+          '1 handful baby spinach or bok choy',
+          '1 spring onion, sesame seeds & chilli (optional)'
+        ],
+        steps: [
+          'Bring the stock to a simmer with the soy sauce, crushed garlic and ginger.',
+          'Add the whole chicken breast and poach for 10–12 minutes over low heat, until cooked through. Take it out and slice it.',
+          'Meanwhile, boil the egg for 7 minutes, then run it under cold water and peel it.',
+          'Cook the noodles in the stock for 3 minutes, adding the spinach at the end.',
+          'Pour into a large bowl, add the chicken, halved egg, spring onion, sesame seeds and chilli.'
+        ],
+        tips: 'Poaching the chicken in the stock keeps it tender and flavours the soup.'
+      }
     },
     {
       id: 'm-lentil-feta-salad', name: 'Salade de lentilles, feta & œufs', category: 'main',
@@ -913,7 +1757,29 @@
         'Dans le saladier, mélange l’huile, la moutarde, le jus du citron, le sel et le poivre.',
         'Ajoute les lentilles et les légumes et mélange. Termine avec la feta émiettée et les œufs en quartiers.'
       ],
-      tips: 'Elle se garde 2 jours au frigo : parfaite à emporter.'
+      tips: 'Elle se garde 2 jours au frigo : parfaite à emporter.',
+      en: {
+        name: 'Lentil, Feta & Egg Salad',
+        tags: ['lentils', 'feta', 'eggs', 'vegetarian', 'salad'],
+        ingredients: [
+          '200 g cooked lentils (canned or pouch, drained)',
+          '2 eggs',
+          '40 g feta',
+          '100 g cherry tomatoes',
+          '1/4 cucumber',
+          '1/4 red onion',
+          '1 tbsp olive oil',
+          '1 tsp mustard, 1/2 lemon, salt & pepper'
+        ],
+        steps: [
+          'Boil the eggs for 9 minutes, then run them under cold water.',
+          'Rinse and drain the lentils.',
+          'Halve the tomatoes, dice the cucumber and slice the onion very thinly.',
+          'In the salad bowl, mix the oil, mustard, lemon juice, salt and pepper.',
+          'Add the lentils and vegetables and toss. Finish with the crumbled feta and the egg quarters.'
+        ],
+        tips: 'It keeps for 2 days in the fridge: perfect to take with you.'
+      }
     },
     {
       id: 'm-tortilla-pizza', name: 'Pizza tortilla protéinée', category: 'main',
@@ -935,7 +1801,28 @@
         'Enfourne 7 à 9 minutes, jusqu’à ce que le bord soit croustillant et le fromage fondu.',
         'Ajoute la roquette et un filet d’huile d’olive à la sortie du four.'
       ],
-      tips: 'Remplace le jambon par du poulet cuit ou du thon pour varier.'
+      tips: 'Remplace le jambon par du poulet cuit ou du thon pour varier.',
+      en: {
+        name: 'Protein Tortilla Pizza',
+        tags: ['pizza', 'ham', 'mozzarella', 'wrap'],
+        ingredients: [
+          '2 wholegrain tortillas',
+          '4 tbsp tomato passata',
+          '3 slices cooked ham',
+          '1 ball light mozzarella (125 g)',
+          '4 mushrooms',
+          '1 handful rocket',
+          'Oregano & olive oil'
+        ],
+        steps: [
+          'Preheat the oven (or air fryer) to 220 °C.',
+          'Lay the tortillas on a tray and spread the passata right to the edge.',
+          'Add the torn ham, sliced mushrooms and mozzarella pieces. Sprinkle with oregano.',
+          'Bake for 7–9 minutes, until the edge is crisp and the cheese melted.',
+          'Top with the rocket and a drizzle of olive oil straight out of the oven.'
+        ],
+        tips: 'Swap the ham for cooked chicken or tuna for variety.'
+      }
     }
   ];
 })();

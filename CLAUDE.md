@@ -3,8 +3,7 @@
 Application personnelle « hub de vie », utilisée uniquement sur iPhone, installée sur l'écran d'accueil.
 
 ## Règles produit
-- **Nom de l'app : Sandeep 2.0.** L'interface est **entièrement en anglais** (libellés, messages, aide, confirmations), à la demande de l'utilisateur le 6 octobre 2026 (elle était en français jusqu'à la v0.2.0). Nombres avec point décimal (la virgule reste acceptée à la saisie, clavier iPhone FR), dates au format `en-GB` (jj/mm). Les noms d'exercices saisis par l'utilisateur restent tels quels. Les ids d'onglets et les clés de stockage (`muscu`, `garde-robe`…) ne changent pas, pour ne pas perdre de données.
-- **Exception : l'onglet Cuisine est en français** (demande du 3 novembre 2026, pour que la compagne de l'utilisateur puisse s'en servir) : interface, recettes intégrées et messages, virgule décimale dans les quantités. Les recettes gardent des `keywords` anglais pour la recherche. Le reste de l'app reste en anglais.
+- **Nom de l'app : Sandeep 2.0.** L'interface est **bilingue anglais / français**, au choix dans Réglages › Langue (demande du 3 novembre 2026 : l'utilisateur change selon la personne avec lui). Anglais par défaut. Tout texte visible passe par `S2.L('English', 'Français')` (`js/core/i18n.js`, chargé en premier) ; changer de langue recharge l'app. Les dates utilisent `S2.locale` (`en-GB` / `fr-FR`), `S2.ui.num` affiche un point en anglais et une virgule en français (les deux acceptés à la saisie). En français : tutoiement, formulations **neutres en genre** (l'app est partagée), typographie française. **Les données enregistrées ne sont jamais traduites** : valeurs, clés et ids restent tels quels ; les libellés intégrés (habitudes par défaut, types de pièces, couleurs, recettes intégrées non modifiées…) sont traduits à l'affichage ; ce que l'utilisateur a saisi s'affiche tel quel. Les ids d'onglets et les clés de stockage (`muscu`, `garde-robe`…) ne changent pas.
 - **Mobile-first (iPhone)** : grandes zones tactiles (≥ 44 px, idéalement 48 px), clavier numérique pour toute saisie de nombre (`inputmode="decimal"` pour les poids, `inputmode="numeric"` pour les entiers ; accepter la virgule), champs en 16 px minimum (pas de zoom iOS), utilisable **à une main à la salle** (actions principales en bas de l'écran), respect des safe areas (`env(safe-area-inset-*)`).
 - **Contrôle manuel total** : aucune récupération automatique de données externes, aucune décision automatique. Les suggestions sont permises mais l'utilisateur confirme toujours (suppression, import, fin de séance… passent par une confirmation).
 
@@ -34,11 +33,12 @@ index.html            coquille de l'app (barre d'onglets, zone de vue)
 manifest.webmanifest  installation écran d'accueil
 sw.js                 cache hors-ligne
 css/app.css           thème + composants partagés (+ styles préfixés par onglet)
+js/core/i18n.js       langue (S2.L, S2.lang, S2.locale, S2.setLang)
 js/core/storage.js    stockage par espace de noms, export/import
 js/core/ui.js         helpers DOM, feuilles (bottom sheets), confirmations, toasts
 js/core/app.js        registre des onglets, navigation
 js/tabs/*.js          un fichier par onglet (muscu.js, garde-robe.js, …)
-js/tabs/cuisine-recipes.js  recettes intégrées de Cuisine, en français (nouvel id = ajoutée aux données existantes)
+js/tabs/cuisine-recipes.js  recettes intégrées de Kitchen/Cuisine, en français + `en` (mêmes nombres de lignes ; nouvel id = ajoutée aux données existantes)
 js/tabs/garde-robe-combos.js  combinaisons de couleurs (paires, trios, chaussures) utilisées par Wardrobe
 js/tabs/garde-robe-engine.js  moteur PUR de Wardrobe (règles, notes, recherche, apprentissage) : pas de DOM ni de stockage
 tests/run.js          tests automatiques du moteur (`node tests/run.js`, sans dépendance), lancés par GitHub sur chaque PR
