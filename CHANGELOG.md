@@ -1,5 +1,10 @@
 # Changelog — Sandeep 2.0
 
+## 0.16.0 — 2026-11-03
+- Kitchen is now **in French** and renamed **Cuisine** in the tab bar (requested so it can be shared): screens, buttons, messages, recipes, decimal comma in quantities. Built-in recipes you never edited switch to French automatically, with your ingredient and step ticks kept; recipes you edited or added stay as they are. English words (e.g. “chicken”) still find recipes in search.
+- **10 new recipes** (20 in total): protein overnight oats, ham, cheese & spinach omelette, banana & peanut smoothie, make-ahead egg muffins, express chicken coconut curry, express chili con carne, turkey meatballs with tomato sauce & pasta, baked cod with quinoa & courgette, light chicken Caesar salad, crispy tofu with peanut sauce & rice.
+- The rest of the app stays in English.
+
 ## 0.15.0 — 2026-10-22
 - Habits: new built-in daily habit **Hair routine** (one box a day, with its streak, 7-day strip and weekly score). Added automatically to existing data; tap ✎ to split it into steps or delete it.
 
