@@ -1,5 +1,8 @@
 # Changelog — Sandeep 2.0
 
+## 0.17.0 — 2026-11-03
+- Cuisine: **40 recipes** (15 breakfast & snacks, 25 lunch & dinner), all in French and high in protein. New: avocado toast with soft eggs, chocolate protein porridge, fromage blanc with apple & walnuts, tuna & skyr toast, breakfast burrito, no-bake protein bars, express shakshuka; paprika chicken & sweet potato tray bake, beef noodle stir-fry, lean homemade burgers, teriyaki salmon, red lentil dahl with eggs, shrimp poke bowl, express bolognese, chicken & black bean quesadillas, pan-fried gnocchi with chicken & pesto, mustard turkey escalopes, express chicken ramen, lentil, feta & egg salad, tortilla pizza. Added automatically to existing data.
+
 ## 0.16.0 — 2026-11-03
 - Kitchen is now **in French** and renamed **Cuisine** in the tab bar (requested so it can be shared): screens, buttons, messages, recipes, decimal comma in quantities. Built-in recipes you never edited switch to French automatically, with your ingredient and step ticks kept; recipes you edited or added stay as they are. English words (e.g. “chicken”) still find recipes in search.
 - **10 new recipes** (20 in total): protein overnight oats, ham, cheese & spinach omelette, banana & peanut smoothie, make-ahead egg muffins, express chicken coconut curry, express chili con carne, turkey meatballs with tomato sauce & pasta, baked cod with quinoa & courgette, light chicken Caesar salad, crispy tofu with peanut sauce & rice.

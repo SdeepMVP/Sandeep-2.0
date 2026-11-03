@@ -87,7 +87,10 @@
   }
   /* Met au pluriel le nom qui suit la quantité (et l'adjectif placé devant : « petite gousse »). Pas les unités. */
   var UNITS = /^(g|kg|mg|ml|cl|dl|l|cm|c\.)$/i;
-  function plur(w) { return /[sxz]$/i.test(w) ? w : /eau$/i.test(w) ? w + 'x' : w + 's'; }
+  function plur(w) {
+    var m = w.match(/^(.*?)([,;.)]*)$/), core = m[1], tail = m[2]; /* « cornichon, » → « cornichons, » */
+    return (/[sxz]$/i.test(core) ? core : /eau$/i.test(core) ? core + 'x' : core + 's') + tail;
+  }
   function pluralize(rest) {
     var words = rest.split(' ');
     if (!words[0] || UNITS.test(words[0])) return rest;
