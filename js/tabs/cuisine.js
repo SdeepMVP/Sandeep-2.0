@@ -11,7 +11,7 @@
   var FR = S2.lang === 'fr';
   var ui = S2.ui, h = ui.h, num = ui.num;
   var NS = 'cuisine';
-  var SCHEMA = 2;
+  var SCHEMA = 3;
 
   var ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11h16v2a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6v-2zM2 11h2M20 11h2M9 7c0-1 1-1.5 1-2.5M13 7c0-1 1-1.5 1-2.5"/></svg>';
   var CATS = { breakfast: L('Breakfast & snack', 'Petit-déjeuner & en-cas'), main: L('Lunch & dinner', 'Déjeuner & dîner') };
@@ -21,6 +21,12 @@
   var LEGACY_EN = { 'b-cottage-eggs': '13yqel9', 'b-skyr-bowl': '1c896eo', 'b-banana-pancakes': '1vz9snt', 'b-salmon-wrap': 'ym5v8l',
     'm-honey-garlic-chicken': 'yiocr1', 'm-chicken-fajitas': 'qphei0', 'm-korean-beef': 'epn7mx', 'm-lemon-salmon': '3gb594',
     'm-tuna-pasta': '12umfqs', 'm-shrimp-fried-rice': 'r8w1dr' };
+  /* Recettes intégrées retirées en v0.19 (remplacées par celles du livret PDF, trop proches) : empreintes
+     des versions publiées (française, et anglaise d'origine pour les 3 premières). Une copie encore identique
+     est supprimée des données ; une recette modifiée par l'utilisateur est gardée. */
+  var REMOVED = { 'b-banana-pancakes': ['13r3ea0', '1vz9snt'], 'b-overnight-oats': ['ogq3qs'], 'b-ham-omelette': ['1qy4sr0'],
+    'b-egg-muffins': ['nwprkb'], 'b-avocado-toast': ['5brupa'], 'm-chicken-fajitas': ['16duqai', 'qphei0'], 'm-tuna-pasta': ['cswgtt', '12umfqs'],
+    'm-coconut-curry': ['ibwd26'], 'm-lean-burgers': ['z26ts9'], 'm-chicken-quesadillas': ['79kia7'], 'm-pesto-gnocchi': ['mlg1gd'] };
   function fingerprint(r) {
     var str = JSON.stringify([r.name, r.ingredients, r.steps, r.tips || '']), x = 5381;
     for (var i = 0; i < str.length; i++) x = ((x * 33) ^ str.charCodeAt(i)) >>> 0;
@@ -30,7 +36,9 @@
   /* ---------- Données ---------- */
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
   /* Copie d'une recette intégrée pour les données de l'utilisateur : texte français seulement (la traduction reste dans la source). */
-  function builtinCopy(src) { var c = clone(src); delete c.en; c.builtin = true; return c; }
+  function builtinCopy(src) { var c = clone(src); delete c.en; delete c.photo; c.builtin = true; return c; }
+  /* Photo d'une recette intégrée (img/recettes/…), lue dans la source : jamais enregistrée dans les données. */
+  function photoOf(r) { var src = r.builtin && BUILTIN[r.id]; return src && src.photo || null; }
 
   var BUILTIN = {}, BUILTIN_FP = {};
   (S2.cuisineRecipes || []).forEach(function (r) { BUILTIN[r.id] = r; BUILTIN_FP[r.id] = fingerprint(r); });
@@ -50,6 +58,14 @@
         if (!r.builtin || !BUILTIN[r.id] || LEGACY_EN[r.id] !== fingerprint(r)) return r;
         added = true;
         return builtinCopy(BUILTIN[r.id]);
+      });
+    }
+    /* Migration v3 : retire les copies non modifiées des recettes intégrées supprimées (et leurs cases cochées). */
+    if ((d.schema || 1) < 3) {
+      d.recipes = d.recipes.filter(function (r) {
+        var gone = r.builtin && REMOVED[r.id] && REMOVED[r.id].indexOf(fingerprint(r)) > -1;
+        if (gone) { delete d.checks[r.id]; added = true; }
+        return !gone;
       });
     }
     d.recipes.forEach(function (r) { have[r.id] = true; });
@@ -231,7 +247,9 @@
   }
 
   function card(r, v) {
-    return h('button', { class: 'card ck-card', onclick: function () { open(r.id); } },
+    var photo = photoOf(r);
+    return h('button', { class: 'card ck-card' + (photo ? ' has-photo' : ''), onclick: function () { open(r.id); } },
+      photo ? h('img', { class: 'ck-thumb', src: photo, alt: '', loading: 'lazy', decoding: 'async' }) : null,
       h('div', { class: 'ck-cardname' }, v.name),
       h('div', { class: 'ck-meta' },
         r.time ? h('span', null, '⏱ ' + r.time + ' min') : null,
@@ -250,6 +268,8 @@
     var tipLabel = L('Tip: ', 'Astuce : ');
 
     root.appendChild(h('button', { class: 'btn btn-ghost btn-sm back', onclick: back }, L('‹ Recipes', '‹ Recettes')));
+    var photo = photoOf(r);
+    if (photo) root.appendChild(h('img', { class: 'ck-hero', src: photo, alt: v.name, decoding: 'async' }));
     root.appendChild(h('h2', { class: 'page-title' }, v.name));
     root.appendChild(h('div', { class: 'ck-meta ck-meta-lg' },
       h('span', { class: 'badge' }, CATS[r.category] || OTHER),

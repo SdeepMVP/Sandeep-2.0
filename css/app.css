@@ -668,3 +668,9 @@ input[type="date"].input { display: block; line-height: 48px; }
 .hb-barlabel { font-size: 9px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .hb-trend .hb-substats { margin-top: 8px; }
 .hb-weeks-note, .hb-textarea { font: inherit; font-size: 16px; }
+
+/* Cuisine · photos des recettes du livret (v0.19) */
+.ck-card.has-photo { grid-template-columns: minmax(0, 1fr) 76px; column-gap: 12px; }
+.ck-card.has-photo > :not(.ck-thumb) { grid-column: 1; }
+.ck-thumb { grid-column: 2; grid-row: 1 / span 3; align-self: center; width: 76px; height: 76px; object-fit: cover; border-radius: 12px; background: var(--surface-2); }
+.ck-hero { display: block; width: 100%; max-width: 260px; aspect-ratio: 164 / 150; object-fit: cover; border-radius: var(--radius); margin: 4px auto 10px; background: var(--surface-2); }
