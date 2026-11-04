@@ -95,53 +95,6 @@
       }
     },
     {
-      id: 'b-banana-pancakes', name: 'Pancakes protéinés à la banane', category: 'breakfast',
-      time: 15, servings: 1, protein: 41, kcal: 560,
-      tags: ['banane', 'œufs', 'flocons d’avoine', 'whey'], keywords: ['banana', 'eggs', 'oats', 'pancakes', 'protein powder'],
-      ingredients: [
-        '1 banane (bien mûre)',
-        '2 œufs',
-        '40 g de flocons d’avoine',
-        '30 g de whey (vanille ou nature)',
-        '1/2 c. à café de levure chimique',
-        '1 pincée de cannelle',
-        '5 g d’huile ou de beurre pour la poêle',
-        'Garniture : skyr, fruits rouges ou un peu de sirop d’érable'
-      ],
-      steps: [
-        'Mets la banane, les œufs, les flocons, la whey, la levure et la cannelle dans un blender. Mixe 30 secondes jusqu’à obtenir une pâte lisse. (Pas de blender ? Écrase la banane à la fourchette et prends des flocons fins.)',
-        'Laisse reposer la pâte 2 minutes : elle épaissit un peu.',
-        'Fais chauffer une poêle antiadhésive à feu moyen et huile-la légèrement.',
-        'Verse des petits pancakes, environ 2 cuillères à soupe de pâte chacun.',
-        'Cuis environ 2 minutes, jusqu’à ce que des bulles apparaissent, puis retourne et cuis encore 1 minute.',
-        'Empile-les et ajoute ta garniture.'
-      ],
-      tips: 'Reste à feu moyen, pas fort : la whey brûle vite.',
-      en: {
-        name: 'Banana Protein Pancakes',
-        tags: ['banana', 'eggs', 'oats', 'whey'],
-        ingredients: [
-          '1 ripe banana',
-          '2 eggs',
-          '40 g oat flakes',
-          '30 g whey protein (vanilla or plain)',
-          '1/2 tsp baking powder',
-          '1 pinch cinnamon',
-          '5 g oil or butter for the pan',
-          'Toppings: skyr, berries or a little maple syrup'
-        ],
-        steps: [
-          'Put the banana, eggs, oats, whey, baking powder and cinnamon in a blender. Blend for 30 seconds until smooth. (No blender? Mash the banana with a fork and use fine oats.)',
-          'Let the batter rest for 2 minutes; it thickens slightly.',
-          'Heat a non-stick pan over medium heat and brush it with a little oil.',
-          'Pour small pancakes, about 2 tablespoons of batter each.',
-          'Cook for about 2 minutes, until bubbles appear on top, then flip and cook 1 more minute.',
-          'Stack them up and add your toppings.'
-        ],
-        tips: 'Keep the heat at medium, not high: whey burns quickly.'
-      }
-    },
-    {
       id: 'b-salmon-wrap', name: 'Wrap saumon fumé & cottage cheese', category: 'breakfast',
       time: 5, servings: 1, protein: 31, kcal: 400,
       tags: ['saumon fumé', 'saumon', 'cottage cheese', 'wrap'], keywords: ['smoked salmon', 'salmon', 'tortilla'],
@@ -185,90 +138,6 @@
       }
     },
     {
-      id: 'b-overnight-oats', name: 'Overnight oats protéinés', category: 'breakfast',
-      time: 5, servings: 1, protein: 36, kcal: 480,
-      tags: ['flocons d’avoine', 'skyr', 'whey', 'chia'], keywords: ['overnight oats', 'oats', 'yogurt', 'protein powder', 'chia'],
-      ingredients: [
-        '50 g de flocons d’avoine',
-        '150 g de skyr nature',
-        '20 g de whey (vanille)',
-        '100 ml de lait (ou boisson végétale)',
-        '1 c. à soupe de graines de chia',
-        '80 g de fruits (banane, pomme râpée ou fruits rouges)',
-        '1 c. à café de miel (facultatif)'
-      ],
-      steps: [
-        'La veille, mélange dans un bocal les flocons, le skyr, la whey, le lait et le chia jusqu’à ce qu’il n’y ait plus de grumeaux.',
-        'Ferme le bocal et laisse au frigo toute la nuit (au moins 4 heures).',
-        'Le matin, mélange : si c’est trop épais, ajoute un trait de lait.',
-        'Ajoute les fruits et le miel, et mange froid.'
-      ],
-      tips: 'Prépare 3 bocaux d’un coup : ils se gardent 3 jours au frigo.',
-      en: {
-        name: 'Protein Overnight Oats',
-        tags: ['oats', 'skyr', 'whey', 'chia'],
-        ingredients: [
-          '50 g oat flakes',
-          '150 g plain skyr',
-          '20 g whey protein (vanilla)',
-          '100 ml milk (or plant milk)',
-          '1 tbsp chia seeds',
-          '80 g fruit (banana, grated apple or berries)',
-          '1 tsp honey (optional)'
-        ],
-        steps: [
-          'The night before, mix the oats, skyr, whey, milk and chia in a jar until there are no lumps.',
-          'Close the jar and leave it in the fridge overnight (at least 4 hours).',
-          'In the morning, stir: if it is too thick, add a splash of milk.',
-          'Add the fruit and honey, and eat cold.'
-        ],
-        tips: 'Make 3 jars at once: they keep for 3 days in the fridge.'
-      }
-    },
-    {
-      id: 'b-ham-omelette', name: 'Omelette jambon, fromage & épinards', category: 'breakfast',
-      time: 10, servings: 1, protein: 38, kcal: 420,
-      tags: ['œufs', 'jambon', 'fromage', 'épinards'], keywords: ['omelette', 'eggs', 'ham', 'cheese', 'spinach'],
-      ingredients: [
-        '3 œufs',
-        '2 tranches de jambon blanc',
-        '20 g de fromage râpé',
-        '1 poignée d’épinards',
-        '5 g de beurre',
-        'Sel & poivre'
-      ],
-      steps: [
-        'Bats les œufs avec une pincée de sel et de poivre.',
-        'Coupe le jambon en lanières.',
-        'Fais fondre le beurre dans une poêle antiadhésive à feu moyen. Fais tomber les épinards 1 minute.',
-        'Verse les œufs et laisse prendre 1 minute en ramenant les bords vers le centre.',
-        'Quand le dessus est presque pris, ajoute le jambon et le fromage sur une moitié.',
-        'Replie l’omelette, laisse 30 secondes pour faire fondre le fromage, puis fais glisser dans l’assiette.'
-      ],
-      tips: 'Une tranche de pain complet à côté pour un petit-déjeuner complet.',
-      en: {
-        name: 'Ham, Cheese & Spinach Omelette',
-        tags: ['eggs', 'ham', 'cheese', 'spinach'],
-        ingredients: [
-          '3 eggs',
-          '2 slices cooked ham',
-          '20 g grated cheese',
-          '1 handful spinach',
-          '5 g butter',
-          'Salt & pepper'
-        ],
-        steps: [
-          'Whisk the eggs with a pinch of salt and pepper.',
-          'Cut the ham into strips.',
-          'Melt the butter in a non-stick pan over medium heat. Wilt the spinach for 1 minute.',
-          'Pour in the eggs and let them set for 1 minute, pushing the edges towards the centre.',
-          'When the top is almost set, add the ham and cheese on one half.',
-          'Fold the omelette, leave it 30 seconds for the cheese to melt, then slide it onto the plate.'
-        ],
-        tips: 'Add a slice of wholegrain bread on the side for a complete breakfast.'
-      }
-    },
-    {
       id: 'b-pb-smoothie', name: 'Smoothie banane & cacahuète', category: 'breakfast',
       time: 5, servings: 1, protein: 35, kcal: 470,
       tags: ['banane', 'beurre de cacahuète', 'whey', 'lait'], keywords: ['smoothie', 'shake', 'banana', 'peanut butter', 'protein powder'],
@@ -303,92 +172,6 @@
           'Taste: add a splash of milk if it is too thick. Drink right away.'
         ],
         tips: 'Keep banana slices in the freezer: the smoothie gets as thick as a milkshake.'
-      }
-    },
-    {
-      id: 'b-egg-muffins', name: 'Muffins aux œufs (à préparer à l’avance)', category: 'breakfast',
-      time: 25, servings: 2, protein: 30, kcal: 330,
-      tags: ['œufs', 'poivron', 'fromage', 'jambon'], keywords: ['egg muffins', 'eggs', 'meal prep', 'peppers', 'ham', 'cheese'],
-      ingredients: [
-        '6 œufs',
-        '100 g de dés de jambon (ou de dinde)',
-        '1/2 poivron',
-        '1 poignée d’épinards',
-        '30 g de fromage râpé',
-        '1 c. à café d’huile pour le moule',
-        'Sel, poivre & paprika'
-      ],
-      steps: [
-        'Préchauffe le four à 180 °C et huile 6 empreintes d’un moule à muffins (ou utilise des caissettes en silicone).',
-        'Coupe le poivron en petits dés et hache grossièrement les épinards.',
-        'Répartis le jambon, le poivron et les épinards dans les empreintes.',
-        'Bats les œufs avec le sel, le poivre et le paprika, puis verse-les par-dessus aux trois quarts.',
-        'Parsème de fromage et enfourne 18 à 20 minutes, jusqu’à ce qu’ils soient gonflés et pris au centre.',
-        'Laisse tiédir 5 minutes avant de démouler.'
-      ],
-      tips: 'Ils se gardent 4 jours au frigo : 20 secondes au micro-ondes le matin.',
-      en: {
-        name: 'Make-Ahead Egg Muffins',
-        tags: ['eggs', 'peppers', 'cheese', 'ham'],
-        ingredients: [
-          '6 eggs',
-          '100 g diced ham (or turkey)',
-          '1/2 pepper',
-          '1 handful spinach',
-          '30 g grated cheese',
-          '1 tsp oil for the tin',
-          'Salt, pepper & paprika'
-        ],
-        steps: [
-          'Preheat the oven to 180 °C and oil 6 holes of a muffin tin (or use silicone cases).',
-          'Dice the pepper finely and roughly chop the spinach.',
-          'Share the ham, pepper and spinach between the holes.',
-          'Whisk the eggs with salt, pepper and paprika, then pour over until three-quarters full.',
-          'Sprinkle with cheese and bake for 18–20 minutes, until puffed and set in the centre.',
-          'Let them cool for 5 minutes before turning out.'
-        ],
-        tips: 'They keep for 4 days in the fridge: 20 seconds in the microwave in the morning.'
-      }
-    },
-    {
-      id: 'b-avocado-toast', name: 'Tartines avocat, œufs mollets & cottage', category: 'breakfast',
-      time: 12, servings: 1, protein: 30, kcal: 520,
-      tags: ['avocat', 'œufs', 'cottage cheese', 'pain'], keywords: ['avocado toast', 'eggs', 'cottage cheese', 'bread'],
-      ingredients: [
-        '2 œufs',
-        '2 tranches de pain complet',
-        '1/2 avocat',
-        '80 g de cottage cheese',
-        '1/2 citron',
-        'Piment en flocons, sel & poivre'
-      ],
-      steps: [
-        'Plonge les œufs dans l’eau bouillante et compte 6 minutes, puis passe-les sous l’eau froide.',
-        'Fais griller le pain.',
-        'Écrase l’avocat à la fourchette avec un filet de citron, du sel et du poivre.',
-        'Étale l’avocat sur les tartines, puis le cottage cheese.',
-        'Écale les œufs, coupe-les en deux et pose-les dessus. Termine avec le piment.'
-      ],
-      tips: 'Œufs mollets : 6 minutes pile depuis l’eau qui bout, pour un jaune coulant.',
-      en: {
-        name: 'Avocado Toast, Soft-Boiled Eggs & Cottage Cheese',
-        tags: ['avocado', 'eggs', 'cottage cheese', 'bread'],
-        ingredients: [
-          '2 eggs',
-          '2 slices wholegrain bread',
-          '1/2 avocado',
-          '80 g cottage cheese',
-          '1/2 lemon',
-          'Chilli flakes, salt & pepper'
-        ],
-        steps: [
-          'Lower the eggs into boiling water and time 6 minutes, then run them under cold water.',
-          'Toast the bread.',
-          'Mash the avocado with a fork with a squeeze of lemon, salt and pepper.',
-          'Spread the avocado on the toast, then the cottage cheese.',
-          'Peel the eggs, halve them and lay them on top. Finish with the chilli flakes.'
-        ],
-        tips: 'Soft-boiled eggs: exactly 6 minutes from boiling water for a runny yolk.'
       }
     },
     {
@@ -638,6 +421,262 @@
       }
     },
 
+    /* ---------- Livret « Recettes protéinées » (PDF, 4 nov. 2026) : petits-déjeuners & brunchs, pour 2 personnes ---------- */
+    {
+      id: 'b-banana-skyr-pancakes', name: 'Pancakes protéinés à la banane', category: 'breakfast',
+      time: 20, servings: 2, protein: 32, kcal: 480, photo: 'img/recettes/b-banana-skyr-pancakes.jpg',
+      tags: ['banane', 'œufs', 'flocons d’avoine', 'skyr'], keywords: ['pancakes', 'banana', 'eggs', 'oats', 'skyr'],
+      ingredients: ['2 bananes', '4 œufs', '80 g de flocons d’avoine mixés', '200 g de skyr', '1 c. à café de levure chimique', 'Miel ou sirop d’érable'],
+      steps: [
+        'Écrase les bananes dans un saladier. Ajoute les œufs, les flocons d’avoine et la levure, puis mélange.',
+        'Fais chauffer une poêle légèrement huilée. Verse de petites portions de pâte et fais cuire les pancakes 2 à 3 minutes par face.',
+        'Sers avec le skyr et un filet de miel.'
+      ],
+      tips: 'Retourne les pancakes quand de petites bulles apparaissent sur le dessus.',
+      en: {
+        name: 'Banana Protein Pancakes', tags: ['banana', 'eggs', 'oats', 'skyr'],
+        ingredients: ['2 bananas', '4 eggs', '80 g blended oat flakes', '200 g skyr', '1 tsp baking powder', 'Honey or maple syrup'],
+        steps: [
+          'Mash the bananas in a bowl. Add the eggs, oats and baking powder, then mix.',
+          'Heat a lightly oiled pan. Pour in small amounts of batter and cook the pancakes for 2–3 minutes per side.',
+          'Serve with the skyr and a drizzle of honey.'
+        ],
+        tips: 'Flip the pancakes when small bubbles appear on top.'
+      }
+    },
+    {
+      id: 'b-choco-pb-bowlcake', name: 'Bowlcake chocolat & beurre de cacahuète', category: 'breakfast',
+      time: 10, servings: 2, protein: 30, kcal: 470, photo: 'img/recettes/b-choco-pb-bowlcake.jpg',
+      tags: ['flocons d’avoine', 'chocolat', 'beurre de cacahuète', 'skyr'], keywords: ['bowlcake', 'mug cake', 'chocolate', 'peanut butter', 'oats', 'microwave'],
+      ingredients: ['80 g de flocons d’avoine', '2 œufs', '200 g de skyr', '20 g de cacao non sucré', '30 g de beurre de cacahuète', '1 c. à café de levure chimique', 'Quelques pépites de chocolat'],
+      steps: [
+        'Répartis les flocons, les œufs, le skyr, le cacao et la levure dans deux bols adaptés au micro-ondes. Mélange chaque portion.',
+        'Fais cuire chaque bol environ 2 à 3 minutes, selon la puissance du micro-ondes. Le centre doit être pris.',
+        'Ajoute le beurre de cacahuète et quelques pépites de chocolat sur le dessus.'
+      ],
+      tips: 'Prends des bols assez grands : la pâte gonfle pendant la cuisson.',
+      en: {
+        name: 'Chocolate & Peanut Butter Bowl Cake', tags: ['oats', 'chocolate', 'peanut butter', 'skyr'],
+        ingredients: ['80 g oat flakes', '2 eggs', '200 g skyr', '20 g unsweetened cocoa', '30 g peanut butter', '1 tsp baking powder', 'A few chocolate chips'],
+        steps: [
+          'Share the oats, eggs, skyr, cocoa and baking powder between two microwave-safe bowls. Mix each one.',
+          'Microwave each bowl for about 2–3 minutes, depending on the power. The centre should be set.',
+          'Top with the peanut butter and a few chocolate chips.'
+        ],
+        tips: 'Use big enough bowls: the batter rises as it cooks.'
+      }
+    },
+    {
+      id: 'b-cheesecake-oats', name: 'Overnight oats façon cheesecake', category: 'breakfast',
+      time: 5, servings: 2, protein: 30, kcal: 420, photo: 'img/recettes/b-cheesecake-oats.jpg',
+      tags: ['flocons d’avoine', 'skyr', 'fromage frais', 'fruits rouges'], keywords: ['overnight oats', 'cheesecake', 'oats', 'skyr', 'berries'],
+      ingredients: ['80 g de flocons d’avoine', '300 g de skyr', '100 ml de lait', '100 g de fromage frais', '100 g de fraises ou de fruits rouges', 'Miel'],
+      steps: [
+        'Dans deux pots, répartis les flocons d’avoine, le skyr et le lait. Mélange.',
+        'Ajoute le fromage frais et les fruits sur le dessus. Sucre légèrement avec du miel si tu le souhaites.',
+        'Couvre et laisse reposer au réfrigérateur toute la nuit.'
+      ],
+      tips: 'Un biscuit émietté sur le dessus au moment de servir, et c’est encore plus « cheesecake ».',
+      en: {
+        name: 'Cheesecake Overnight Oats', tags: ['oats', 'skyr', 'cream cheese', 'berries'],
+        ingredients: ['80 g oat flakes', '300 g skyr', '100 ml milk', '100 g cream cheese', '100 g strawberries or berries', 'Honey'],
+        steps: [
+          'Share the oats, skyr and milk between two jars. Stir.',
+          'Top with the cream cheese and fruit. Sweeten lightly with honey if you like.',
+          'Cover and leave in the fridge overnight.'
+        ],
+        tips: 'Crumble a biscuit on top when serving for an even more cheesecake feel.'
+      }
+    },
+    {
+      id: 'b-choco-protein-crepes', name: 'Crêpes protéinées au chocolat', category: 'breakfast',
+      time: 20, servings: 2, protein: 30, kcal: 520, photo: 'img/recettes/b-choco-protein-crepes.jpg',
+      tags: ['crêpes', 'œufs', 'skyr', 'chocolat'], keywords: ['crepes', 'pancakes', 'chocolate', 'eggs', 'skyr'],
+      ingredients: ['4 œufs', '80 g de farine', '200 ml de lait', '200 g de skyr', '1 c. à soupe de cacao non sucré', 'Quelques carrés de chocolat'],
+      steps: [
+        'Dans un saladier, fouette les œufs avec la farine et le lait jusqu’à obtenir une pâte lisse.',
+        'Fais cuire les crêpes dans une poêle chaude légèrement graissée.',
+        'Mélange le skyr avec le cacao. Garnis les crêpes de cette crème et ajoute un peu de chocolat fondu.'
+      ],
+      tips: 'Ajoute la farine petit à petit en fouettant pour éviter les grumeaux.',
+      en: {
+        name: 'Chocolate Protein Crêpes', tags: ['crêpes', 'eggs', 'skyr', 'chocolate'],
+        ingredients: ['4 eggs', '80 g flour', '200 ml milk', '200 g skyr', '1 tbsp unsweetened cocoa', 'A few squares of chocolate'],
+        steps: [
+          'In a bowl, whisk the eggs with the flour and milk until smooth.',
+          'Cook the crêpes in a hot, lightly greased pan.',
+          'Mix the skyr with the cocoa. Fill the crêpes with this cream and add a little melted chocolate.'
+        ],
+        tips: 'Add the flour gradually while whisking to avoid lumps.'
+      }
+    },
+    {
+      id: 'b-protein-french-toast', name: 'French toast brioché protéiné', category: 'breakfast',
+      time: 15, servings: 2, protein: 32, kcal: 560, photo: 'img/recettes/b-protein-french-toast.jpg',
+      tags: ['brioche', 'œufs', 'skyr', 'fruits'], keywords: ['french toast', 'pain perdu', 'brioche', 'eggs', 'skyr'],
+      ingredients: ['4 tranches de brioche', '4 œufs', '200 ml de lait', '300 g de skyr', '1 pincée de cannelle', 'Fruits & miel'],
+      steps: [
+        'Bats les œufs avec le lait et la cannelle dans une assiette creuse.',
+        'Trempe les tranches de brioche dans le mélange, sans les laisser se défaire.',
+        'Fais-les dorer à la poêle quelques minutes de chaque côté.',
+        'Sers avec le skyr, des fruits et un filet de miel.'
+      ],
+      tips: 'Une brioche de la veille, un peu sèche, absorbe mieux sans se défaire.',
+      en: {
+        name: 'Protein Brioche French Toast', tags: ['brioche', 'eggs', 'skyr', 'fruit'],
+        ingredients: ['4 slices brioche', '4 eggs', '200 ml milk', '300 g skyr', '1 pinch cinnamon', 'Fruit & honey'],
+        steps: [
+          'Beat the eggs with the milk and cinnamon in a shallow dish.',
+          'Dip the brioche slices in the mix without letting them fall apart.',
+          'Fry them for a few minutes on each side until golden.',
+          'Serve with the skyr, fruit and a drizzle of honey.'
+        ],
+        tips: 'Day-old brioche, slightly dry, soaks up the mix without falling apart.'
+      }
+    },
+    {
+      id: 'b-avocado-egg-toasts', name: 'Toasts avocat, œufs & fromage frais', category: 'breakfast',
+      time: 15, servings: 2, protein: 28, kcal: 560, photo: 'img/recettes/b-avocado-egg-toasts.jpg',
+      tags: ['avocat', 'œufs', 'fromage frais', 'pain'], keywords: ['avocado toast', 'eggs', 'cream cheese', 'toast'],
+      ingredients: ['4 grandes tranches de pain aux céréales', '2 avocats', '4 œufs', '120 g de fromage frais nature', '1/2 citron', 'Sel, poivre & piment doux (facultatif)'],
+      steps: [
+        'Fais griller les tranches de pain aux céréales.',
+        'Écrase les avocats avec le jus de citron, du sel et du poivre.',
+        'Fais cuire les œufs au plat ou pochés, selon ta préférence.',
+        'Tartine chaque tranche de fromage frais, ajoute l’avocat puis un œuf. Termine avec du poivre ou du piment doux.'
+      ],
+      tips: 'Œufs pochés : un filet de vinaigre dans l’eau frémissante, 3 minutes de cuisson.',
+      en: {
+        name: 'Avocado, Egg & Cream Cheese Toasts', tags: ['avocado', 'eggs', 'cream cheese', 'bread'],
+        ingredients: ['4 large slices seeded bread', '2 avocados', '4 eggs', '120 g plain cream cheese', '1/2 lemon', 'Salt, pepper & mild chilli (optional)'],
+        steps: [
+          'Toast the slices of seeded bread.',
+          'Mash the avocados with the lemon juice, salt and pepper.',
+          'Fry or poach the eggs, as you prefer.',
+          'Spread each slice with cream cheese, add the avocado, then an egg. Finish with pepper or mild chilli.'
+        ],
+        tips: 'Poached eggs: a dash of vinegar in simmering water, 3 minutes.'
+      }
+    },
+    {
+      id: 'b-avocado-scrambled-feta', name: 'Toasts avocat, œufs brouillés & feta', category: 'breakfast',
+      time: 15, servings: 2, protein: 27, kcal: 520,
+      tags: ['avocat', 'œufs', 'feta', 'pain'], keywords: ['avocado toast', 'scrambled eggs', 'feta', 'toast'],
+      ingredients: ['4 tranches de pain aux céréales', '1 avocat', '4 œufs', '80 g de feta', '2 c. à soupe de fromage frais', 'Citron, poivre & ciboulette'],
+      steps: [
+        'Fais griller le pain et tartine-le avec le fromage frais.',
+        'Écrase l’avocat avec un peu de citron et répartis-le sur les tartines.',
+        'Bats les œufs et fais-les cuire doucement à la poêle en remuant pour obtenir des œufs brouillés moelleux.',
+        'Répartis les œufs sur les tartines. Émiette la feta et ajoute la ciboulette et le poivre.'
+      ],
+      tips: 'Pas de sel dans les œufs : la feta l’est déjà.',
+      en: {
+        name: 'Avocado, Scrambled Egg & Feta Toasts', tags: ['avocado', 'eggs', 'feta', 'bread'],
+        ingredients: ['4 slices seeded bread', '1 avocado', '4 eggs', '80 g feta', '2 tbsp cream cheese', 'Lemon, pepper & chives'],
+        steps: [
+          'Toast the bread and spread it with the cream cheese.',
+          'Mash the avocado with a little lemon and spread it over the toast.',
+          'Beat the eggs and cook them gently in a pan, stirring, for soft scrambled eggs.',
+          'Share the eggs over the toast. Crumble over the feta and add chives and pepper.'
+        ],
+        tips: 'No salt in the eggs: the feta is salty enough.'
+      }
+    },
+    {
+      id: 'b-salmon-avocado-toasts', name: 'Tartines saumon fumé, avocat & fromage frais', category: 'breakfast',
+      time: 15, servings: 2, protein: 30, kcal: 540, photo: 'img/recettes/b-salmon-avocado-toasts.jpg',
+      tags: ['saumon fumé', 'avocat', 'fromage frais', 'œufs'], keywords: ['smoked salmon', 'avocado', 'cream cheese', 'eggs', 'toast'],
+      ingredients: ['4 tranches de pain aux céréales', '1 avocat', '100 g de saumon fumé', '100 g de fromage frais', '2 œufs', 'Citron, aneth & poivre'],
+      steps: [
+        'Fais griller le pain et tartine chaque tranche de fromage frais mélangé à un peu de citron et d’aneth.',
+        'Ajoute l’avocat coupé en tranches et le saumon fumé.',
+        'Fais cuire les œufs mollets ou au plat, puis dépose-les sur les tartines. Ajoute du poivre.'
+      ],
+      tips: 'Œufs mollets : 6 minutes dans l’eau bouillante, puis eau froide.',
+      en: {
+        name: 'Smoked Salmon, Avocado & Cream Cheese Toasts', tags: ['smoked salmon', 'avocado', 'cream cheese', 'eggs'],
+        ingredients: ['4 slices seeded bread', '1 avocado', '100 g smoked salmon', '100 g cream cheese', '2 eggs', 'Lemon, dill & pepper'],
+        steps: [
+          'Toast the bread and spread each slice with cream cheese mixed with a little lemon and dill.',
+          'Add the sliced avocado and the smoked salmon.',
+          'Soft-boil or fry the eggs, then place them on the toast. Add pepper.'
+        ],
+        tips: 'Soft-boiled eggs: 6 minutes in boiling water, then cold water.'
+      }
+    },
+    {
+      id: 'b-cottage-egg-muffins', name: 'Muffins salés aux œufs, cottage cheese & légumes', category: 'breakfast',
+      time: 30, servings: 2, protein: 25, kcal: 380,
+      tags: ['œufs', 'cottage cheese', 'poivron', 'fromage'], keywords: ['egg muffins', 'eggs', 'cottage cheese', 'peppers', 'meal prep'],
+      ingredients: ['6 œufs', '150 g de cottage cheese', '60 g de fromage râpé', '1 poivron', '1 poignée de tomates cerises', 'Sel, poivre & herbes'],
+      steps: [
+        'Préchauffe le four à 180 °C. Coupe le poivron et les tomates en petits morceaux.',
+        'Bats les œufs avec le cottage cheese, le fromage râpé, le sel, le poivre et les herbes.',
+        'Répartis les légumes dans 6 moules à muffins légèrement huilés, puis verse le mélange aux œufs.',
+        'Enfourne environ 18 à 22 minutes, jusqu’à ce que les muffins soient pris. Sers-en trois par personne.'
+      ],
+      tips: 'Ils se gardent 3 à 4 jours au frigo : 20 secondes au micro-ondes le matin.',
+      en: {
+        name: 'Savoury Egg, Cottage Cheese & Veggie Muffins', tags: ['eggs', 'cottage cheese', 'peppers', 'cheese'],
+        ingredients: ['6 eggs', '150 g cottage cheese', '60 g grated cheese', '1 pepper', '1 handful cherry tomatoes', 'Salt, pepper & herbs'],
+        steps: [
+          'Preheat the oven to 180 °C. Cut the pepper and tomatoes into small pieces.',
+          'Beat the eggs with the cottage cheese, grated cheese, salt, pepper and herbs.',
+          'Share the vegetables between 6 lightly oiled muffin moulds, then pour in the egg mix.',
+          'Bake for about 18–22 minutes, until set. Serve three per person.'
+        ],
+        tips: 'They keep 3–4 days in the fridge: 20 seconds in the microwave in the morning.'
+      }
+    },
+    {
+      id: 'b-egg-avocado-bagel', name: 'Bagel œuf, avocat & fromage frais', category: 'breakfast',
+      time: 10, servings: 2, protein: 28, kcal: 560,
+      tags: ['bagel', 'œufs', 'avocat', 'fromage frais'], keywords: ['bagel', 'egg', 'avocado', 'cream cheese', 'breakfast sandwich'],
+      ingredients: ['2 bagels', '4 œufs', '1 avocat', '100 g de fromage frais', 'Quelques feuilles de roquette', 'Citron, sel & poivre'],
+      steps: [
+        'Coupe les bagels en deux et fais-les griller.',
+        'Fais cuire les œufs au plat ou brouillés.',
+        'Écrase l’avocat avec un peu de citron, du sel et du poivre.',
+        'Tartine les bagels de fromage frais, ajoute l’avocat, l’œuf et quelques feuilles de roquette. Referme et sers chaud.'
+      ],
+      tips: 'Emballé dans du papier aluminium, il se mange facilement sur le pouce.',
+      en: {
+        name: 'Egg, Avocado & Cream Cheese Bagel', tags: ['bagel', 'eggs', 'avocado', 'cream cheese'],
+        ingredients: ['2 bagels', '4 eggs', '1 avocado', '100 g cream cheese', 'A few rocket leaves', 'Lemon, salt & pepper'],
+        steps: [
+          'Halve the bagels and toast them.',
+          'Fry or scramble the eggs.',
+          'Mash the avocado with a little lemon, salt and pepper.',
+          'Spread the bagels with cream cheese, add the avocado, the egg and a few rocket leaves. Close and serve warm.'
+        ],
+        tips: 'Wrapped in foil, it is easy to eat on the go.'
+      }
+    },
+    {
+      id: 'b-tomato-mozza-egg-toast', name: 'Toast chaud tomate, mozzarella & œuf', category: 'breakfast',
+      time: 15, servings: 2, protein: 27, kcal: 520,
+      tags: ['œufs', 'mozzarella', 'tomates', 'pain'], keywords: ['toast', 'mozzarella', 'tomato', 'egg', 'oven'],
+      ingredients: ['4 grandes tranches de pain aux céréales', '4 œufs', '125 g de mozzarella', '2 tomates', '60 g de fromage frais', 'Basilic, sel & poivre'],
+      steps: [
+        'Préchauffe le four à 190 °C. Tartine le pain de fromage frais.',
+        'Ajoute les rondelles de tomate et la mozzarella. Assaisonne avec du basilic, du sel et du poivre.',
+        'Enfourne 8 à 10 minutes, jusqu’à ce que le fromage commence à fondre.',
+        'Pendant ce temps, fais cuire les œufs au plat. Dépose un œuf sur chaque tartine avant de servir.'
+      ],
+      tips: 'Égoutte bien la mozzarella sur du papier absorbant : le pain reste croustillant.',
+      en: {
+        name: 'Hot Tomato, Mozzarella & Egg Toast', tags: ['eggs', 'mozzarella', 'tomatoes', 'bread'],
+        ingredients: ['4 large slices seeded bread', '4 eggs', '125 g mozzarella', '2 tomatoes', '60 g cream cheese', 'Basil, salt & pepper'],
+        steps: [
+          'Preheat the oven to 190 °C. Spread the bread with cream cheese.',
+          'Add the tomato slices and mozzarella. Season with basil, salt and pepper.',
+          'Bake for 8–10 minutes, until the cheese starts to melt.',
+          'Meanwhile, fry the eggs. Put an egg on each toast before serving.'
+        ],
+        tips: 'Pat the mozzarella dry with kitchen paper so the bread stays crisp.'
+      }
+    },
+
     /* ---------- Déjeuner & dîner ---------- */
     {
       id: 'm-honey-garlic-chicken', name: 'Bowl poulet miel-ail & riz', category: 'main',
@@ -688,57 +727,6 @@
           'Serve the rice, broccoli and chicken in a bowl. Top with sesame seeds and sliced spring onion.'
         ],
         tips: 'Make 3 portions at once for meal prep: they keep for 3 days in the fridge.'
-      }
-    },
-    {
-      id: 'm-chicken-fajitas', name: 'Wraps fajitas au poulet', category: 'main',
-      time: 20, servings: 1, protein: 55, kcal: 700,
-      tags: ['poulet', 'poivron', 'wrap', 'fromage'], keywords: ['chicken', 'fajitas', 'peppers', 'tortilla', 'cheese'],
-      ingredients: [
-        '180 g de blanc de poulet',
-        '1 poivron (rouge)',
-        '1/2 oignon',
-        '2 tortillas complètes',
-        '1 c. à café d’épices fajitas (ou paprika, cumin & ail en poudre)',
-        '1 c. à café d’huile',
-        '50 g de yaourt grec 0 % (ou skyr)',
-        '30 g de fromage râpé',
-        '1/2 citron vert',
-        'Salsa ou sauce piquante (facultatif)'
-      ],
-      steps: [
-        'Coupe le poulet, le poivron et l’oignon en fines lanières.',
-        'Mélange le poulet avec les épices et une pincée de sel.',
-        'Fais chauffer l’huile dans une grande poêle à feu vif. Fais revenir le poivron et l’oignon 3 à 4 minutes jusqu’à ce qu’ils grillent un peu, puis pousse-les sur le côté.',
-        'Ajoute le poulet et cuis 5 à 6 minutes en remuant, jusqu’à ce qu’il soit cuit à cœur. Presse le citron vert par-dessus.',
-        'Réchauffe les tortillas 20 secondes au micro-ondes ou 30 secondes dans une poêle sèche.',
-        'Étale le yaourt sur chaque tortilla, ajoute le poulet et les légumes, le fromage et la salsa, puis roule.'
-      ],
-      tips: 'Le yaourt à la place de la crème : aussi onctueux, avec plus de protéines et moins de calories.',
-      en: {
-        name: 'Chicken Fajita Wraps',
-        tags: ['chicken', 'peppers', 'wrap', 'cheese'],
-        ingredients: [
-          '180 g chicken breast',
-          '1 red pepper',
-          '1/2 onion',
-          '2 wholegrain tortillas',
-          '1 tsp fajita spice mix (or paprika, cumin & garlic powder)',
-          '1 tsp oil',
-          '50 g 0% Greek yogurt (or skyr)',
-          '30 g grated cheese',
-          '1/2 lime',
-          'Salsa or hot sauce (optional)'
-        ],
-        steps: [
-          'Slice the chicken, pepper and onion into thin strips.',
-          'Toss the chicken with the spice mix and a pinch of salt.',
-          'Heat the oil in a large pan over high heat. Cook the pepper and onion for 3–4 minutes until slightly charred, then push them to the side.',
-          'Add the chicken and cook for 5–6 minutes, stirring, until cooked through. Squeeze the lime over it.',
-          'Warm the tortillas for 20 seconds in the microwave or 30 seconds in a dry pan.',
-          'Spread the yogurt on each tortilla, add the chicken and vegetables, top with the cheese and salsa, and roll up.'
-        ],
-        tips: 'Yogurt instead of sour cream: just as creamy, with more protein and fewer calories.'
       }
     },
     {
@@ -844,53 +832,6 @@
       }
     },
     {
-      id: 'm-tuna-pasta', name: 'Pâtes crémeuses au thon', category: 'main',
-      time: 15, servings: 1, protein: 54, kcal: 650,
-      tags: ['thon', 'poisson', 'pâtes', 'cottage cheese', 'tomates'], keywords: ['tuna', 'fish', 'pasta', 'cottage cheese', 'tomatoes'],
-      ingredients: [
-        '80 g de pâtes (complètes ou protéinées)',
-        '1 boîte de thon au naturel (environ 110 g égoutté)',
-        '100 g de cottage cheese',
-        '15 g de parmesan râpé',
-        '150 g de tomates cerises',
-        '1 gousse d’ail',
-        '1 c. à café d’huile d’olive',
-        '1 poignée d’épinards, piment en flocons & basilic (facultatif)'
-      ],
-      steps: [
-        'Cuis les pâtes dans l’eau bouillante salée selon le temps du paquet. Garde une petite tasse d’eau de cuisson avant d’égoutter.',
-        'Pendant ce temps, coupe les tomates en deux et émince l’ail.',
-        'Fais chauffer l’huile d’olive dans une poêle à feu moyen. Fais revenir l’ail 30 secondes, puis les tomates 3 à 4 minutes jusqu’à ce qu’elles ramollissent.',
-        'Mixe ou écrase le cottage cheese avec le parmesan et 2 à 3 c. à soupe d’eau de cuisson jusqu’à ce que ce soit lisse.',
-        'Retire la poêle du feu. Ajoute les pâtes égouttées, le thon et les épinards, puis la sauce au cottage cheese.',
-        'Poivre, ajoute le piment et termine avec le basilic.'
-      ],
-      tips: 'Ajoute la sauce hors du feu pour qu’elle reste crémeuse et ne tranche pas.',
-      en: {
-        name: 'Creamy Tuna Pasta',
-        tags: ['tuna', 'fish', 'pasta', 'cottage cheese', 'tomatoes'],
-        ingredients: [
-          '80 g pasta (wholewheat or protein pasta)',
-          '1 can tuna in water (about 110 g drained)',
-          '100 g cottage cheese',
-          '15 g grated parmesan',
-          '150 g cherry tomatoes',
-          '1 garlic clove',
-          '1 tsp olive oil',
-          '1 handful spinach, chilli flakes & basil (optional)'
-        ],
-        steps: [
-          'Cook the pasta in salted boiling water following the pack time. Keep a small cup of the cooking water before draining.',
-          'Meanwhile, halve the tomatoes and slice the garlic.',
-          'Heat the olive oil in a pan over medium heat. Cook the garlic for 30 seconds, then the tomatoes for 3–4 minutes until soft.',
-          'Blend or mash the cottage cheese with the parmesan and 2–3 tbsp of pasta water until smooth.',
-          'Take the pan off the heat. Add the drained pasta, tuna and spinach, then stir in the cottage cheese sauce.',
-          'Season with pepper and chilli flakes, and top with basil.'
-        ],
-        tips: 'Add the sauce off the heat so it stays creamy and does not split.'
-      }
-    },
-    {
       id: 'm-shrimp-fried-rice', name: 'Riz sauté aux crevettes & œufs', category: 'main',
       time: 15, servings: 1, protein: 50, kcal: 650,
       tags: ['crevettes', 'œufs', 'riz', 'petits pois'], keywords: ['shrimp', 'prawns', 'eggs', 'rice', 'peas', 'fried rice'],
@@ -935,57 +876,6 @@
           'Return the prawns, add the soy sauce and stir for 1 minute. Finish with the spring onion and a few drops of sesame oil.'
         ],
         tips: 'Cold rice is the secret: fresh rice turns mushy. A microwave rice pouch also works.'
-      }
-    },
-    {
-      id: 'm-coconut-curry', name: 'Curry de poulet express au lait de coco', category: 'main',
-      time: 20, servings: 2, protein: 45, kcal: 620,
-      tags: ['poulet', 'curry', 'riz', 'épinards'], keywords: ['chicken', 'curry', 'coconut', 'rice', 'spinach'],
-      ingredients: [
-        '350 g de blanc de poulet',
-        '150 g de riz basmati (cru)',
-        '1 oignon',
-        '2 gousses d’ail',
-        '1 c. à soupe de pâte de curry (ou 2 c. à café de curry en poudre)',
-        '200 ml de lait de coco allégé',
-        '200 g de tomates concassées en boîte',
-        '2 poignées d’épinards',
-        '1 c. à café d’huile',
-        'Coriandre & 1/2 citron vert (facultatif)'
-      ],
-      steps: [
-        'Lance la cuisson du riz.',
-        'Émince l’oignon, hache l’ail et coupe le poulet en morceaux.',
-        'Fais chauffer l’huile dans une sauteuse à feu moyen. Fais revenir l’oignon 3 minutes, puis l’ail et la pâte de curry 1 minute.',
-        'Ajoute le poulet et fais-le dorer 4 minutes en remuant.',
-        'Verse le lait de coco et les tomates, puis laisse mijoter 8 minutes jusqu’à ce que le poulet soit cuit à cœur.',
-        'Ajoute les épinards et remue jusqu’à ce qu’ils tombent. Sale, puis sers sur le riz avec la coriandre et le citron vert.'
-      ],
-      tips: 'Encore meilleur le lendemain : parfait pour emporter au travail.',
-      en: {
-        name: 'Quick Coconut Chicken Curry',
-        tags: ['chicken', 'curry', 'rice', 'spinach'],
-        ingredients: [
-          '350 g chicken breast',
-          '150 g basmati rice (uncooked)',
-          '1 onion',
-          '2 garlic cloves',
-          '1 tbsp curry paste (or 2 tsp curry powder)',
-          '200 ml light coconut milk',
-          '200 g canned chopped tomatoes',
-          '2 handfuls spinach',
-          '1 tsp oil',
-          'Coriander & 1/2 lime (optional)'
-        ],
-        steps: [
-          'Start the rice.',
-          'Slice the onion, mince the garlic and cut the chicken into pieces.',
-          'Heat the oil in a deep pan over medium heat. Cook the onion for 3 minutes, then the garlic and curry paste for 1 minute.',
-          'Add the chicken and brown it for 4 minutes, stirring.',
-          'Pour in the coconut milk and tomatoes, then simmer for 8 minutes until the chicken is cooked through.',
-          'Stir in the spinach until it wilts. Season with salt, then serve over the rice with coriander and lime.'
-        ],
-        tips: 'Even better the next day: perfect to take to work.'
       }
     },
     {
@@ -1322,51 +1212,6 @@
       }
     },
     {
-      id: 'm-lean-burgers', name: 'Burgers maison maigres', category: 'main',
-      time: 15, servings: 1, protein: 45, kcal: 610,
-      tags: ['bœuf haché', 'burger', 'fromage', 'salade'], keywords: ['burger', 'beef', 'ground beef', 'cheese'],
-      ingredients: [
-        '150 g de bœuf haché maigre (5 %)',
-        '1 pain à burger (complet)',
-        '1 tranche de cheddar',
-        '1 tomate',
-        '2 feuilles de salade',
-        '30 g de skyr',
-        '1 c. à café de moutarde',
-        '1 cornichon, sel & poivre'
-      ],
-      steps: [
-        'Forme un steak un peu plus large que le pain et creuse légèrement le centre avec le pouce (il ne gonflera pas).',
-        'Mélange le skyr, la moutarde et le cornichon haché : c’est la sauce.',
-        'Fais chauffer une poêle à feu vif. Sale le steak et cuis-le 3 minutes, retourne-le, pose le cheddar et cuis encore 2 à 3 minutes.',
-        'Pendant ce temps, toaste le pain coupé en deux dans la poêle ou le grille-pain.',
-        'Monte le burger : sauce, salade, steak, tomate en rondelles, et referme.'
-      ],
-      tips: 'Une salade ou des légumes rôtis à côté plutôt que des frites pour rester léger.',
-      en: {
-        name: 'Lean Homemade Burgers',
-        tags: ['ground beef', 'burger', 'cheese', 'lettuce'],
-        ingredients: [
-          '150 g lean ground beef (5% fat)',
-          '1 wholegrain burger bun',
-          '1 slice cheddar',
-          '1 tomato',
-          '2 lettuce leaves',
-          '30 g skyr',
-          '1 tsp mustard',
-          '1 gherkin, salt & pepper'
-        ],
-        steps: [
-          'Shape a patty slightly wider than the bun and press a small dip in the centre with your thumb (so it does not puff up).',
-          'Mix the skyr, mustard and chopped gherkin: this is the sauce.',
-          'Heat a pan over high heat. Salt the patty and cook for 3 minutes, flip it, add the cheddar and cook 2–3 more minutes.',
-          'Meanwhile, toast the halved bun in the pan or toaster.',
-          'Build the burger: sauce, lettuce, patty, sliced tomato, and close.'
-        ],
-        tips: 'A salad or roasted vegetables on the side instead of fries keeps it light.'
-      }
-    },
-    {
       id: 'm-teriyaki-salmon', name: 'Saumon teriyaki, riz & edamame', category: 'main',
       time: 20, servings: 1, protein: 48, kcal: 690,
       tags: ['saumon', 'poisson', 'riz', 'edamame'], keywords: ['salmon', 'teriyaki', 'fish', 'rice', 'edamame'],
@@ -1557,94 +1402,6 @@
       }
     },
     {
-      id: 'm-chicken-quesadillas', name: 'Quesadillas poulet & haricots noirs', category: 'main',
-      time: 15, servings: 1, protein: 50, kcal: 680,
-      tags: ['poulet', 'haricots noirs', 'fromage', 'wrap'], keywords: ['quesadilla', 'chicken', 'black beans', 'cheese', 'tortilla'],
-      ingredients: [
-        '150 g de poulet cuit (reste ou blanc grillé)',
-        '2 tortillas complètes',
-        '80 g de haricots noirs en boîte (rincés)',
-        '40 g de mozzarella râpée',
-        '50 g de maïs',
-        '1 c. à café d’épices fajitas (ou paprika & cumin)',
-        '50 g de skyr ou de yaourt grec',
-        'Salsa (facultatif)'
-      ],
-      steps: [
-        'Effiloche ou coupe le poulet en petits morceaux et mélange-le avec les haricots, le maïs et les épices.',
-        'Répartis la moitié du fromage sur une tortilla, ajoute la garniture puis le reste du fromage. Couvre avec la deuxième tortilla.',
-        'Fais chauffer une grande poêle sèche à feu moyen. Cuis 2 à 3 minutes jusqu’à ce que le dessous soit doré.',
-        'Retourne-la à l’aide d’une assiette et cuis encore 2 minutes, jusqu’à ce que le fromage fonde.',
-        'Coupe en 4 parts et sers avec le skyr et la salsa.'
-      ],
-      tips: 'Un bon moyen d’utiliser un reste de poulet rôti.',
-      en: {
-        name: 'Chicken & Black Bean Quesadillas',
-        tags: ['chicken', 'black beans', 'cheese', 'wrap'],
-        ingredients: [
-          '150 g cooked chicken (leftovers or grilled breast)',
-          '2 wholegrain tortillas',
-          '80 g canned black beans (rinsed)',
-          '40 g grated mozzarella',
-          '50 g sweetcorn',
-          '1 tsp fajita spice mix (or paprika & cumin)',
-          '50 g skyr or Greek yogurt',
-          'Salsa (optional)'
-        ],
-        steps: [
-          'Shred or chop the chicken into small pieces and mix it with the beans, sweetcorn and spices.',
-          'Spread half the cheese over one tortilla, add the filling, then the rest of the cheese. Cover with the second tortilla.',
-          'Heat a large dry pan over medium heat. Cook for 2–3 minutes until the underside is golden.',
-          'Flip it with the help of a plate and cook 2 more minutes, until the cheese melts.',
-          'Cut into 4 wedges and serve with the skyr and salsa.'
-        ],
-        tips: 'A great way to use up leftover roast chicken.'
-      }
-    },
-    {
-      id: 'm-pesto-gnocchi', name: 'Gnocchis poêlés, poulet & pesto', category: 'main',
-      time: 15, servings: 1, protein: 44, kcal: 690,
-      tags: ['poulet', 'gnocchis', 'pesto', 'tomates'], keywords: ['gnocchi', 'chicken', 'pesto', 'tomatoes'],
-      ingredients: [
-        '150 g de blanc de poulet',
-        '200 g de gnocchis',
-        '1 c. à soupe de pesto',
-        '100 g de tomates cerises',
-        '1 poignée d’épinards',
-        '1 c. à café d’huile d’olive',
-        '15 g de parmesan râpé'
-      ],
-      steps: [
-        'Coupe le poulet en dés et les tomates en deux.',
-        'Fais chauffer l’huile dans une poêle à feu moyen-vif et cuis le poulet 5 à 6 minutes jusqu’à ce qu’il soit doré et cuit à cœur. Réserve.',
-        'Mets les gnocchis directement dans la poêle (sans les cuire avant) et fais-les dorer 5 minutes en remuant.',
-        'Ajoute les tomates et les épinards 1 minute, puis remets le poulet.',
-        'Hors du feu, mélange avec le pesto et parsème de parmesan.'
-      ],
-      tips: 'Les gnocchis poêlés deviennent croustillants dehors et fondants dedans.',
-      en: {
-        name: 'Pan-Fried Gnocchi, Chicken & Pesto',
-        tags: ['chicken', 'gnocchi', 'pesto', 'tomatoes'],
-        ingredients: [
-          '150 g chicken breast',
-          '200 g gnocchi',
-          '1 tbsp pesto',
-          '100 g cherry tomatoes',
-          '1 handful spinach',
-          '1 tsp olive oil',
-          '15 g grated parmesan'
-        ],
-        steps: [
-          'Dice the chicken and halve the tomatoes.',
-          'Heat the oil in a pan over medium-high heat and cook the chicken for 5–6 minutes until golden and cooked through. Set aside.',
-          'Put the gnocchi straight into the pan (no boiling first) and fry them for 5 minutes, stirring, until golden.',
-          'Add the tomatoes and spinach for 1 minute, then return the chicken.',
-          'Off the heat, stir in the pesto and sprinkle with parmesan.'
-        ],
-        tips: 'Pan-fried gnocchi turn crispy outside and soft inside.'
-      }
-    },
-    {
       id: 'm-mustard-turkey', name: 'Escalopes de dinde à la moutarde & haricots verts', category: 'main',
       time: 20, servings: 1, protein: 50, kcal: 520,
       tags: ['dinde', 'moutarde', 'haricots verts', 'pommes de terre'], keywords: ['turkey', 'mustard', 'green beans', 'potatoes'],
@@ -1822,6 +1579,415 @@
           'Top with the rocket and a drizzle of olive oil straight out of the oven.'
         ],
         tips: 'Swap the ham for cooked chicken or tuna for variety.'
+      }
+    },
+    /* ---------- Livret « Recettes protéinées » (PDF, 4 nov. 2026) : plats salés, pour 2 personnes ---------- */
+    {
+      id: 'm-creamy-chicken-pasta', name: 'Pâtes crémeuses au poulet, parmesan & tomates', category: 'main',
+      time: 25, servings: 2, protein: 50, kcal: 680, photo: 'img/recettes/m-creamy-chicken-pasta.jpg',
+      tags: ['poulet', 'pâtes', 'cottage cheese', 'parmesan', 'tomates'], keywords: ['chicken', 'pasta', 'creamy', 'cottage cheese', 'parmesan', 'tomatoes'],
+      ingredients: ['200 g de pâtes', '240 g de blanc de poulet', '200 g de tomates cerises', '200 g de cottage cheese', '30 g de parmesan râpé', '2 gousses d’ail', '1 filet d’huile d’olive', 'Basilic, sel & poivre'],
+      steps: [
+        'Fais cuire les pâtes dans une grande casserole d’eau salée. Avant de les égoutter, garde une petite tasse d’eau de cuisson.',
+        'Pendant ce temps, coupe le poulet en morceaux. Fais-le dorer dans une poêle avec un filet d’huile et l’ail haché. Vérifie qu’il est bien cuit à cœur.',
+        'Ajoute les tomates cerises coupées en deux et laisse cuire 3 à 4 minutes.',
+        'Mixe le cottage cheese avec 3 à 4 cuillères à soupe d’eau de cuisson pour obtenir une sauce lisse.',
+        'Ajoute les pâtes et la sauce dans la poêle. Mélange doucement, ajuste la texture avec un peu d’eau de cuisson, puis termine avec le parmesan et le basilic.'
+      ],
+      tips: 'Ajoute l’eau de cuisson petit à petit : la sauce doit napper les pâtes sans être liquide.',
+      en: {
+        name: 'Creamy Chicken, Parmesan & Tomato Pasta', tags: ['chicken', 'pasta', 'cottage cheese', 'parmesan', 'tomatoes'],
+        ingredients: ['200 g pasta', '240 g chicken breast', '200 g cherry tomatoes', '200 g cottage cheese', '30 g grated parmesan', '2 garlic cloves', '1 drizzle of olive oil', 'Basil, salt & pepper'],
+        steps: [
+          'Cook the pasta in a large pan of salted water. Before draining, keep a small cup of the cooking water.',
+          'Meanwhile, cut the chicken into pieces. Brown it in a pan with a drizzle of oil and the chopped garlic. Make sure it is cooked through.',
+          'Add the halved cherry tomatoes and cook for 3–4 minutes.',
+          'Blend the cottage cheese with 3–4 tbsp of the cooking water until smooth.',
+          'Add the pasta and the sauce to the pan. Stir gently, loosen with a little cooking water, then finish with the parmesan and basil.'
+        ],
+        tips: 'Add the cooking water little by little: the sauce should coat the pasta without being runny.'
+      }
+    },
+    {
+      id: 'm-chicken-avocado-bowl', name: 'Bowl poulet, avocat & sauce au fromage blanc', category: 'main',
+      time: 25, servings: 2, protein: 45, kcal: 640, photo: 'img/recettes/m-chicken-avocado-bowl.jpg',
+      tags: ['poulet', 'riz', 'avocat', 'fromage blanc'], keywords: ['chicken', 'rice', 'avocado', 'bowl', 'quark'],
+      ingredients: ['240 g de blanc de poulet', '200 g de riz (cru)', '1 avocat', '200 g de fromage blanc', '1 poignée de tomates cerises', '1 citron', '1 gousse d’ail', 'Paprika, sel & poivre'],
+      steps: [
+        'Fais cuire le riz selon les indications du paquet.',
+        'Coupe le poulet en morceaux. Assaisonne-le avec le paprika, du sel et du poivre, puis fais-le cuire à la poêle jusqu’à ce qu’il soit bien cuit à cœur.',
+        'Mélange le fromage blanc avec un peu de jus de citron, l’ail pressé, du sel et du poivre.',
+        'Coupe l’avocat et les tomates. Répartis le riz, le poulet et les légumes dans deux bols, puis ajoute la sauce.'
+      ],
+      tips: 'Coupe l’avocat au dernier moment pour qu’il ne noircisse pas.',
+      en: {
+        name: 'Chicken & Avocado Bowl with Fromage Blanc Sauce', tags: ['chicken', 'rice', 'avocado', 'fromage blanc'],
+        ingredients: ['240 g chicken breast', '200 g rice (uncooked)', '1 avocado', '200 g fromage blanc (or quark)', '1 handful cherry tomatoes', '1 lemon', '1 garlic clove', 'Paprika, salt & pepper'],
+        steps: [
+          'Cook the rice following the pack instructions.',
+          'Cut the chicken into pieces. Season with paprika, salt and pepper, then pan-fry until cooked through.',
+          'Mix the fromage blanc with a little lemon juice, the crushed garlic, salt and pepper.',
+          'Slice the avocado and tomatoes. Share the rice, chicken and vegetables between two bowls, then add the sauce.'
+        ],
+        tips: 'Cut the avocado at the last minute so it does not brown.'
+      }
+    },
+    {
+      id: 'm-chicken-cheddar-wraps', name: 'Wraps poulet, cheddar & sauce crémeuse', category: 'main',
+      time: 20, servings: 2, protein: 45, kcal: 620, photo: 'img/recettes/m-chicken-cheddar-wraps.jpg',
+      tags: ['poulet', 'wrap', 'cheddar', 'skyr'], keywords: ['chicken', 'wrap', 'tortilla', 'cheddar', 'cheese'],
+      ingredients: ['4 tortillas', '240 g de blanc de poulet', '60 g de cheddar', '160 g de skyr nature', '2 tomates', 'Quelques feuilles de salade', 'Ail, paprika & citron'],
+      steps: [
+        'Coupe le poulet en fines lamelles. Assaisonne-le avec le paprika et fais-le cuire à la poêle jusqu’à ce qu’il soit bien cuit.',
+        'Prépare la sauce en mélangeant le skyr, un peu de jus de citron et l’ail pressé.',
+        'Répartis le poulet, le cheddar, les tomates et la salade sur les tortillas. Ajoute la sauce.',
+        'Roule les wraps et fais-les dorer quelques minutes à la poêle, sur chaque face.'
+      ],
+      tips: 'Pose les wraps côté fermeture contre la poêle en premier : ils restent bien fermés.',
+      en: {
+        name: 'Chicken & Cheddar Wraps with Creamy Sauce', tags: ['chicken', 'wrap', 'cheddar', 'skyr'],
+        ingredients: ['4 tortillas', '240 g chicken breast', '60 g cheddar', '160 g plain skyr', '2 tomatoes', 'A few lettuce leaves', 'Garlic, paprika & lemon'],
+        steps: [
+          'Slice the chicken into thin strips. Season with paprika and pan-fry until cooked through.',
+          'Make the sauce by mixing the skyr with a little lemon juice and the crushed garlic.',
+          'Share the chicken, cheddar, tomatoes and lettuce between the tortillas. Add the sauce.',
+          'Roll up the wraps and toast them in the pan for a few minutes on each side.'
+        ],
+        tips: 'Put the wraps seam-side down in the pan first so they stay closed.'
+      }
+    },
+    {
+      id: 'm-creamy-chicken-gnocchi', name: 'Gnocchis crémeux au poulet & parmesan', category: 'main',
+      time: 20, servings: 2, protein: 48, kcal: 700, photo: 'img/recettes/m-creamy-chicken-gnocchi.jpg',
+      tags: ['poulet', 'gnocchis', 'cottage cheese', 'parmesan'], keywords: ['chicken', 'gnocchi', 'creamy', 'cottage cheese', 'parmesan'],
+      ingredients: ['400 g de gnocchis', '240 g de blanc de poulet', '200 g de cottage cheese', '40 g de parmesan râpé', '1 poignée de tomates cerises', '2 gousses d’ail'],
+      steps: [
+        'Fais dorer les gnocchis dans une grande poêle, selon les indications du paquet. Réserve-les.',
+        'Coupe le poulet en morceaux et fais-le cuire dans la même poêle avec l’ail.',
+        'Mixe le cottage cheese avec 4 à 5 cuillères à soupe d’eau pour obtenir une sauce crémeuse.',
+        'Remets les gnocchis dans la poêle. Ajoute la sauce, les tomates coupées en deux et le parmesan. Réchauffe doucement sans faire bouillir.'
+      ],
+      tips: 'Ne fais pas bouillir la sauce : le cottage cheese resterait granuleux.',
+      en: {
+        name: 'Creamy Chicken & Parmesan Gnocchi', tags: ['chicken', 'gnocchi', 'cottage cheese', 'parmesan'],
+        ingredients: ['400 g gnocchi', '240 g chicken breast', '200 g cottage cheese', '40 g grated parmesan', '1 handful cherry tomatoes', '2 garlic cloves'],
+        steps: [
+          'Brown the gnocchi in a large pan, following the pack instructions. Set aside.',
+          'Cut the chicken into pieces and cook it in the same pan with the garlic.',
+          'Blend the cottage cheese with 4–5 tbsp of water until creamy.',
+          'Return the gnocchi to the pan. Add the sauce, the halved tomatoes and the parmesan. Warm through gently without boiling.'
+        ],
+        tips: 'Do not let the sauce boil or the cottage cheese turns grainy.'
+      }
+    },
+    {
+      id: 'm-garlic-shrimp-rice', name: 'Riz crémeux aux crevettes & à l’ail', category: 'main',
+      time: 20, servings: 2, protein: 43, kcal: 600, photo: 'img/recettes/m-garlic-shrimp-rice.jpg',
+      tags: ['crevettes', 'riz', 'fromage blanc', 'parmesan'], keywords: ['shrimp', 'prawns', 'rice', 'garlic', 'creamy'],
+      ingredients: ['300 g de crevettes décortiquées', '200 g de riz (cru)', '200 g de fromage blanc', '30 g de parmesan râpé', '2 gousses d’ail', '1/2 citron', 'Persil'],
+      steps: [
+        'Fais cuire le riz dans une casserole d’eau salée.',
+        'Fais revenir les crevettes dans une poêle avec l’ail haché, jusqu’à ce qu’elles soient bien cuites.',
+        'Baisse le feu. Ajoute le fromage blanc et le parmesan. Mélange doucement pour obtenir une sauce. Si elle est trop épaisse, ajoute une cuillère d’eau chaude.',
+        'Sers les crevettes en sauce sur le riz et ajoute un peu de citron et de persil.'
+      ],
+      tips: 'Les crevettes sont cuites dès qu’elles sont roses : ne les laisse pas plus longtemps.',
+      en: {
+        name: 'Creamy Garlic Shrimp Rice', tags: ['shrimp', 'rice', 'fromage blanc', 'parmesan'],
+        ingredients: ['300 g peeled prawns (shrimp)', '200 g rice (uncooked)', '200 g fromage blanc (or quark)', '30 g grated parmesan', '2 garlic cloves', '1/2 lemon', 'Parsley'],
+        steps: [
+          'Cook the rice in a pan of salted water.',
+          'Fry the prawns in a pan with the chopped garlic until cooked through.',
+          'Lower the heat. Add the fromage blanc and parmesan. Stir gently into a sauce. If it is too thick, add a spoonful of hot water.',
+          'Serve the prawns and sauce over the rice with a little lemon and parsley.'
+        ],
+        tips: 'Prawns are done as soon as they turn pink: do not cook them longer.'
+      }
+    },
+    {
+      id: 'm-chicken-mozza-quesadillas', name: 'Quesadillas au poulet & mozzarella', category: 'main',
+      time: 20, servings: 2, protein: 45, kcal: 620, photo: 'img/recettes/m-chicken-mozza-quesadillas.jpg',
+      tags: ['poulet', 'mozzarella', 'wrap', 'skyr'], keywords: ['quesadilla', 'chicken', 'mozzarella', 'cheese', 'tortilla'],
+      ingredients: ['4 tortillas', '240 g de blanc de poulet', '120 g de mozzarella', '100 g de skyr', '2 tomates', 'Paprika, ail & poivre'],
+      steps: [
+        'Coupe le poulet en petits morceaux. Assaisonne-le et fais-le cuire à la poêle.',
+        'Mélange le skyr avec un peu d’ail et de poivre pour préparer la sauce.',
+        'Répartis le poulet, la mozzarella et les tomates en petits dés sur deux tortillas. Referme avec les deux autres tortillas.',
+        'Fais dorer à la poêle à feu moyen, environ 2 à 3 minutes de chaque côté, jusqu’à ce que la mozzarella soit fondue. Coupe en parts et sers avec la sauce.'
+      ],
+      tips: 'Retourne-les à l’aide d’une assiette posée sur la poêle.',
+      en: {
+        name: 'Chicken & Mozzarella Quesadillas', tags: ['chicken', 'mozzarella', 'tortilla', 'skyr'],
+        ingredients: ['4 tortillas', '240 g chicken breast', '120 g mozzarella', '100 g skyr', '2 tomatoes', 'Paprika, garlic & pepper'],
+        steps: [
+          'Cut the chicken into small pieces. Season and pan-fry.',
+          'Mix the skyr with a little garlic and pepper for the sauce.',
+          'Spread the chicken, mozzarella and diced tomatoes over two tortillas. Cover with the other two.',
+          'Toast in a pan over medium heat for about 2–3 minutes per side, until the mozzarella melts. Cut into wedges and serve with the sauce.'
+        ],
+        tips: 'Flip them with the help of a plate placed over the pan.'
+      }
+    },
+    {
+      id: 'm-salmon-lemon-pasta', name: 'Pâtes au saumon, citron & fromage frais', category: 'main',
+      time: 20, servings: 2, protein: 42, kcal: 700,
+      tags: ['saumon', 'poisson', 'pâtes', 'fromage frais'], keywords: ['salmon', 'fish', 'pasta', 'lemon', 'cream cheese'],
+      ingredients: ['200 g de pâtes', '240 g de saumon', '120 g de fromage frais', '20 g de parmesan râpé', '1 citron', '1 gousse d’ail', 'Ciboulette'],
+      steps: [
+        'Fais cuire les pâtes. Garde une petite tasse d’eau de cuisson avant de les égoutter.',
+        'Fais cuire le saumon à la poêle, puis émiette-le en retirant la peau et les éventuelles arêtes.',
+        'Dans la poêle, mélange le fromage frais avec un peu de jus et de zeste de citron, l’ail et quelques cuillères d’eau de cuisson.',
+        'Ajoute les pâtes et le saumon. Mélange délicatement et termine avec le parmesan et la ciboulette.'
+      ],
+      tips: 'Râpe le zeste avant de presser le citron, c’est bien plus facile.',
+      en: {
+        name: 'Salmon, Lemon & Cream Cheese Pasta', tags: ['salmon', 'fish', 'pasta', 'cream cheese'],
+        ingredients: ['200 g pasta', '240 g salmon', '120 g cream cheese', '20 g grated parmesan', '1 lemon', '1 garlic clove', 'Chives'],
+        steps: [
+          'Cook the pasta. Keep a small cup of the cooking water before draining.',
+          'Pan-fry the salmon, then flake it, removing the skin and any bones.',
+          'In the pan, mix the cream cheese with a little lemon juice and zest, the garlic and a few spoonfuls of cooking water.',
+          'Add the pasta and salmon. Stir gently and finish with the parmesan and chives.'
+        ],
+        tips: 'Zest the lemon before squeezing it: much easier.'
+      }
+    },
+    {
+      id: 'm-chicken-coconut-curry', name: 'Poulet façon curry coco', category: 'main',
+      time: 25, servings: 2, protein: 45, kcal: 690, photo: 'img/recettes/m-chicken-coconut-curry.jpg',
+      tags: ['poulet', 'curry', 'riz', 'lait de coco'], keywords: ['chicken', 'curry', 'coconut', 'rice'],
+      ingredients: ['300 g de blanc de poulet', '200 g de riz (cru)', '200 ml de lait de coco', '160 g de skyr', '1 oignon', '2 gousses d’ail', '2 c. à café de curry'],
+      steps: [
+        'Fais cuire le riz.',
+        'Émince l’oignon et coupe le poulet en morceaux. Fais revenir l’oignon, l’ail et le poulet dans une sauteuse avec le curry.',
+        'Quand le poulet est doré, ajoute le lait de coco. Laisse mijoter jusqu’à ce que le poulet soit bien cuit.',
+        'Coupe le feu et incorpore le skyr pour garder une sauce onctueuse. Sers avec le riz.'
+      ],
+      tips: 'Le skyr ajouté hors du feu rend la sauce crémeuse sans la faire trancher.',
+      en: {
+        name: 'Coconut Curry Chicken', tags: ['chicken', 'curry', 'rice', 'coconut milk'],
+        ingredients: ['300 g chicken breast', '200 g rice (uncooked)', '200 ml coconut milk', '160 g skyr', '1 onion', '2 garlic cloves', '2 tsp curry powder'],
+        steps: [
+          'Cook the rice.',
+          'Slice the onion and cut the chicken into pieces. Fry the onion, garlic and chicken in a deep pan with the curry powder.',
+          'When the chicken is golden, add the coconut milk. Simmer until the chicken is cooked through.',
+          'Turn off the heat and stir in the skyr for a smooth sauce. Serve with the rice.'
+        ],
+        tips: 'Adding the skyr off the heat keeps the sauce creamy and stops it splitting.'
+      }
+    },
+    {
+      id: 'm-tuna-baked-potatoes', name: 'Pommes de terre gratinées au thon & cottage cheese', category: 'main',
+      time: 55, servings: 2, protein: 42, kcal: 560, photo: 'img/recettes/m-tuna-baked-potatoes.jpg',
+      tags: ['thon', 'poisson', 'pommes de terre', 'cottage cheese', 'four'], keywords: ['tuna', 'fish', 'baked potatoes', 'jacket potatoes', 'cottage cheese', 'cheddar'],
+      ingredients: ['500 g de pommes de terre', '240 g de thon égoutté', '200 g de cottage cheese', '40 g de cheddar râpé', '1 gousse d’ail', 'Ciboulette'],
+      steps: [
+        'Préchauffe le four à 200 °C. Lave les pommes de terre, pique-les avec une fourchette et fais-les cuire jusqu’à ce qu’elles soient tendres (environ 35 à 50 minutes selon leur taille).',
+        'Mélange le thon égoutté avec le cottage cheese, l’ail et la ciboulette.',
+        'Ouvre les pommes de terre en deux et répartis la préparation au thon dessus.',
+        'Ajoute le cheddar et remets au four 5 à 10 minutes, le temps de faire fondre le fromage.'
+      ],
+      tips: 'Pour gagner du temps, précuis les pommes de terre 8 à 10 minutes au micro-ondes avant le four.',
+      en: {
+        name: 'Tuna & Cottage Cheese Baked Potatoes', tags: ['tuna', 'fish', 'potatoes', 'cottage cheese', 'oven'],
+        ingredients: ['500 g potatoes', '240 g drained tuna', '200 g cottage cheese', '40 g grated cheddar', '1 garlic clove', 'Chives'],
+        steps: [
+          'Preheat the oven to 200 °C. Wash the potatoes, prick them with a fork and bake until tender (about 35–50 minutes depending on size).',
+          'Mix the drained tuna with the cottage cheese, garlic and chives.',
+          'Split the potatoes in half and spoon the tuna mix on top.',
+          'Add the cheddar and return to the oven for 5–10 minutes, until the cheese melts.'
+        ],
+        tips: 'To save time, microwave the potatoes for 8–10 minutes before they go in the oven.'
+      }
+    },
+    {
+      id: 'm-mozza-cottage-omelette', name: 'Omelette mozzarella & cottage cheese', category: 'main',
+      time: 15, servings: 2, protein: 38, kcal: 520,
+      tags: ['œufs', 'mozzarella', 'cottage cheese', 'tomates'], keywords: ['omelette', 'eggs', 'mozzarella', 'cottage cheese'],
+      ingredients: ['6 œufs', '200 g de cottage cheese', '80 g de mozzarella', '1 poignée de tomates cerises', '4 tranches de pain complet', 'Sel & poivre'],
+      steps: [
+        'Bats les œufs dans un saladier avec du sel et du poivre.',
+        'Verse la moitié du mélange dans une grande poêle antiadhésive légèrement huilée. Fais cuire à feu doux.',
+        'Ajoute la moitié du cottage cheese, de la mozzarella et des tomates coupées. Laisse prendre doucement, puis replie l’omelette.',
+        'Répète avec le reste des ingrédients pour préparer la deuxième omelette. Sers avec le pain grillé.'
+      ],
+      tips: 'Garde la première omelette au chaud dans une assiette couverte pendant que tu fais la deuxième.',
+      en: {
+        name: 'Mozzarella & Cottage Cheese Omelette', tags: ['eggs', 'mozzarella', 'cottage cheese', 'tomatoes'],
+        ingredients: ['6 eggs', '200 g cottage cheese', '80 g mozzarella', '1 handful cherry tomatoes', '4 slices wholegrain bread', 'Salt & pepper'],
+        steps: [
+          'Beat the eggs in a bowl with salt and pepper.',
+          'Pour half the mix into a large, lightly oiled non-stick pan. Cook over low heat.',
+          'Add half the cottage cheese, mozzarella and chopped tomatoes. Let it set gently, then fold the omelette.',
+          'Repeat with the rest of the ingredients for the second omelette. Serve with the toast.'
+        ],
+        tips: 'Keep the first omelette warm under a covered plate while you make the second.'
+      }
+    },
+    {
+      id: 'm-creamy-pesto-chicken-pasta', name: 'Pâtes au poulet façon pesto crémeux', category: 'main',
+      time: 20, servings: 2, protein: 50, kcal: 690, photo: 'img/recettes/m-creamy-pesto-chicken-pasta.jpg',
+      tags: ['poulet', 'pâtes', 'pesto', 'skyr'], keywords: ['chicken', 'pasta', 'pesto', 'creamy'],
+      ingredients: ['200 g de pâtes', '240 g de blanc de poulet', '200 g de skyr', '40 g de pesto', '30 g de parmesan râpé', '1 poignée de tomates cerises'],
+      steps: [
+        'Fais cuire les pâtes et garde un peu d’eau de cuisson.',
+        'Coupe le poulet en morceaux et fais-le cuire à la poêle jusqu’à ce qu’il soit bien cuit.',
+        'Mélange le skyr et le pesto dans un bol. Ajoute progressivement un peu d’eau de cuisson pour fluidifier la sauce.',
+        'Mélange les pâtes, le poulet et la sauce hors du feu. Ajoute les tomates et le parmesan.'
+      ],
+      tips: 'Mélange hors du feu : le skyr reste onctueux.',
+      en: {
+        name: 'Creamy Pesto Chicken Pasta', tags: ['chicken', 'pasta', 'pesto', 'skyr'],
+        ingredients: ['200 g pasta', '240 g chicken breast', '200 g skyr', '40 g pesto', '30 g grated parmesan', '1 handful cherry tomatoes'],
+        steps: [
+          'Cook the pasta and keep a little of the cooking water.',
+          'Cut the chicken into pieces and pan-fry until cooked through.',
+          'Mix the skyr and pesto in a bowl. Gradually add a little cooking water to loosen the sauce.',
+          'Toss the pasta, chicken and sauce off the heat. Add the tomatoes and parmesan.'
+        ],
+        tips: 'Mix off the heat so the skyr stays smooth.'
+      }
+    },
+    {
+      id: 'm-chicken-burger-bowl', name: 'Bowl façon burger au poulet', category: 'main',
+      time: 40, servings: 2, protein: 45, kcal: 650,
+      tags: ['poulet', 'pommes de terre', 'cheddar', 'skyr', 'four'], keywords: ['chicken', 'burger bowl', 'potatoes', 'cheddar'],
+      ingredients: ['300 g de blanc de poulet', '500 g de pommes de terre', '60 g de cheddar râpé', '200 g de skyr', '2 tomates', 'Salade', '1 c. à café de moutarde', 'Paprika & ail'],
+      steps: [
+        'Préchauffe le four à 200 °C. Coupe les pommes de terre en cubes, assaisonne-les et fais-les cuire 25 à 35 minutes en les retournant à mi-cuisson.',
+        'Coupe le poulet en morceaux et fais-le dorer à la poêle avec le paprika. Vérifie la cuisson à cœur.',
+        'Mélange le skyr avec la moutarde et l’ail pour préparer une sauce façon burger.',
+        'Répartis les pommes de terre et le poulet dans deux bols. Ajoute le cheddar, les tomates, la salade et la sauce.'
+      ],
+      tips: 'Un cornichon haché dans la sauce, et c’est encore plus « burger ».',
+      en: {
+        name: 'Chicken Burger Bowl', tags: ['chicken', 'potatoes', 'cheddar', 'skyr', 'oven'],
+        ingredients: ['300 g chicken breast', '500 g potatoes', '60 g grated cheddar', '200 g skyr', '2 tomatoes', 'Lettuce', '1 tsp mustard', 'Paprika & garlic'],
+        steps: [
+          'Preheat the oven to 200 °C. Cut the potatoes into cubes, season and roast for 25–35 minutes, turning halfway.',
+          'Cut the chicken into pieces and brown it in a pan with the paprika. Check it is cooked through.',
+          'Mix the skyr with the mustard and garlic for a burger-style sauce.',
+          'Share the potatoes and chicken between two bowls. Add the cheddar, tomatoes, lettuce and sauce.'
+        ],
+        tips: 'A chopped gherkin in the sauce makes it even more burger-like.'
+      }
+    },
+    {
+      id: 'm-chicken-lasagna', name: 'Lasagnes poulet, ricotta & mozzarella', category: 'main',
+      time: 50, servings: 2, protein: 45, kcal: 720, photo: 'img/recettes/m-chicken-lasagna.jpg',
+      tags: ['poulet', 'lasagnes', 'ricotta', 'mozzarella', 'four'], keywords: ['lasagna', 'lasagne', 'chicken', 'ricotta', 'mozzarella'],
+      ingredients: ['240 g de poulet haché', '6 feuilles de lasagnes (selon le plat)', '200 g de ricotta', '80 g de mozzarella', '400 g de coulis de tomate', 'Parmesan', '1 gousse d’ail', 'Basilic'],
+      steps: [
+        'Préchauffe le four à 180 °C. Fais revenir le poulet haché avec l’ail, puis ajoute le coulis de tomate et laisse mijoter 5 minutes.',
+        'Dans un plat, étale une fine couche de sauce. Ajoute des feuilles de lasagnes, une couche de poulet à la tomate et quelques cuillerées de ricotta.',
+        'Répète les couches jusqu’à épuisement des ingrédients. Termine par la mozzarella et un peu de parmesan.',
+        'Enfourne 25 à 35 minutes, selon les feuilles utilisées. Laisse reposer 5 minutes avant de servir.'
+      ],
+      tips: 'Le repos de 5 minutes permet de couper des parts nettes.',
+      en: {
+        name: 'Chicken, Ricotta & Mozzarella Lasagne', tags: ['chicken', 'lasagne', 'ricotta', 'mozzarella', 'oven'],
+        ingredients: ['240 g minced chicken', '6 lasagne sheets (depending on the dish)', '200 g ricotta', '80 g mozzarella', '400 g tomato passata', 'Parmesan', '1 garlic clove', 'Basil'],
+        steps: [
+          'Preheat the oven to 180 °C. Brown the minced chicken with the garlic, then add the passata and simmer for 5 minutes.',
+          'Spread a thin layer of sauce in a dish. Add lasagne sheets, a layer of chicken in tomato and a few spoonfuls of ricotta.',
+          'Repeat the layers until everything is used. Finish with the mozzarella and a little parmesan.',
+          'Bake for 25–35 minutes, depending on the sheets. Rest for 5 minutes before serving.'
+        ],
+        tips: 'Resting for 5 minutes gives clean slices.'
+      }
+    },
+    {
+      id: 'm-tuna-pasta-bake', name: 'Gratin de pâtes au thon & mozzarella', category: 'main',
+      time: 30, servings: 2, protein: 43, kcal: 690, photo: 'img/recettes/m-tuna-pasta-bake.jpg',
+      tags: ['thon', 'poisson', 'pâtes', 'mozzarella', 'four'], keywords: ['tuna', 'pasta bake', 'pasta', 'mozzarella', 'cottage cheese'],
+      ingredients: ['200 g de pâtes', '240 g de thon égoutté', '200 g de cottage cheese', '100 g de mozzarella', '300 g de coulis de tomate', '1 gousse d’ail', 'Parmesan'],
+      steps: [
+        'Préchauffe le four à 190 °C. Fais cuire les pâtes 1 à 2 minutes de moins que le temps indiqué sur le paquet.',
+        'Mélange le thon égoutté avec le cottage cheese, le coulis de tomate et l’ail.',
+        'Ajoute les pâtes égouttées et mélange. Verse le tout dans un plat à gratin.',
+        'Répartis la mozzarella et un peu de parmesan sur le dessus. Fais gratiner 10 à 15 minutes.'
+      ],
+      tips: 'Les pâtes finissent de cuire au four : c’est pour ça qu’on les égoutte un peu fermes.',
+      en: {
+        name: 'Tuna & Mozzarella Pasta Bake', tags: ['tuna', 'fish', 'pasta', 'mozzarella', 'oven'],
+        ingredients: ['200 g pasta', '240 g drained tuna', '200 g cottage cheese', '100 g mozzarella', '300 g tomato passata', '1 garlic clove', 'Parmesan'],
+        steps: [
+          'Preheat the oven to 190 °C. Cook the pasta 1–2 minutes less than the pack says.',
+          'Mix the drained tuna with the cottage cheese, passata and garlic.',
+          'Add the drained pasta and stir. Tip everything into a baking dish.',
+          'Top with the mozzarella and a little parmesan. Bake for 10–15 minutes until golden.'
+        ],
+        tips: 'The pasta finishes cooking in the oven, which is why you drain it slightly firm.'
+      }
+    },
+    {
+      id: 'm-crispy-chicken-cheddar', name: 'Poulet croustillant, pommes de terre & sauce cheddar', category: 'main',
+      time: 45, servings: 2, protein: 45, kcal: 700,
+      tags: ['poulet', 'pommes de terre', 'cheddar', 'skyr', 'four'], keywords: ['crispy chicken', 'chicken', 'potatoes', 'cheddar sauce', 'oven'],
+      ingredients: ['300 g de blanc de poulet', '500 g de pommes de terre', '60 g de cheddar râpé', '200 g de skyr', '40 g de chapelure', 'Paprika, ail & poivre'],
+      steps: [
+        'Préchauffe le four à 200 °C. Coupe les pommes de terre en quartiers, assaisonne-les et enfourne 25 à 35 minutes.',
+        'Coupe le poulet en morceaux. Passe-les dans un peu de skyr assaisonné, puis dans la chapelure.',
+        'Dépose le poulet sur une plaque et fais cuire environ 15 à 20 minutes, en vérifiant qu’il est bien cuit à cœur.',
+        'Fais fondre doucement le cheddar avec le reste du skyr et une ou deux cuillères d’eau chaude. Sers avec le poulet et les pommes de terre.'
+      ],
+      tips: 'Enfourne le poulet quand les pommes de terre ont déjà 10 à 15 minutes de cuisson : tout est prêt en même temps.',
+      en: {
+        name: 'Crispy Chicken, Potatoes & Cheddar Sauce', tags: ['chicken', 'potatoes', 'cheddar', 'skyr', 'oven'],
+        ingredients: ['300 g chicken breast', '500 g potatoes', '60 g grated cheddar', '200 g skyr', '40 g breadcrumbs', 'Paprika, garlic & pepper'],
+        steps: [
+          'Preheat the oven to 200 °C. Cut the potatoes into wedges, season and roast for 25–35 minutes.',
+          'Cut the chicken into pieces. Dip them in a little seasoned skyr, then in the breadcrumbs.',
+          'Lay the chicken on a tray and bake for about 15–20 minutes, checking it is cooked through.',
+          'Gently melt the cheddar with the rest of the skyr and a spoonful or two of hot water. Serve with the chicken and potatoes.'
+        ],
+        tips: 'Put the chicken in once the potatoes have had 10–15 minutes, so everything is ready together.'
+      }
+    },
+    {
+      id: 'm-shrimp-risotto', name: 'Risotto crémeux aux crevettes & parmesan', category: 'main',
+      time: 35, servings: 2, protein: 38, kcal: 640, photo: 'img/recettes/m-shrimp-risotto.jpg',
+      tags: ['crevettes', 'riz', 'risotto', 'parmesan'], keywords: ['risotto', 'shrimp', 'prawns', 'rice', 'parmesan'],
+      ingredients: ['200 g de riz à risotto', '300 g de crevettes décortiquées', '40 g de parmesan râpé', '100 g de cottage cheese', '700 ml de bouillon chaud (environ)', '1 gousse d’ail', '1 c. à café d’huile', '1/2 citron'],
+      steps: [
+        'Fais chauffer le bouillon dans une casserole. Dans une autre sauteuse, fais revenir l’ail avec un peu d’huile, puis ajoute le riz et mélange une minute.',
+        'Ajoute le bouillon chaud louche après louche, en remuant régulièrement. Attends que le liquide soit absorbé avant d’en rajouter.',
+        'Fais cuire les crevettes à part dans une poêle.',
+        'Quand le riz est tendre et crémeux, ajoute le cottage cheese et le parmesan. Incorpore les crevettes et termine avec un peu de citron.'
+      ],
+      tips: 'Compte environ 18 minutes de cuisson pour le riz, en remuant souvent.',
+      en: {
+        name: 'Creamy Shrimp & Parmesan Risotto', tags: ['shrimp', 'rice', 'risotto', 'parmesan'],
+        ingredients: ['200 g risotto rice', '300 g peeled prawns (shrimp)', '40 g grated parmesan', '100 g cottage cheese', '700 ml hot stock (about)', '1 garlic clove', '1 tsp oil', '1/2 lemon'],
+        steps: [
+          'Heat the stock in a pan. In another deep pan, fry the garlic in a little oil, then add the rice and stir for a minute.',
+          'Add the hot stock one ladle at a time, stirring often. Wait until it is absorbed before adding more.',
+          'Cook the prawns separately in a frying pan.',
+          'When the rice is tender and creamy, stir in the cottage cheese and parmesan. Fold in the prawns and finish with a little lemon.'
+        ],
+        tips: 'Allow about 18 minutes for the rice, stirring often.'
+      }
+    },
+    {
+      id: 'm-chicken-burger', name: 'Burger maison au poulet & sauce spéciale', category: 'main',
+      time: 20, servings: 2, protein: 45, kcal: 620, photo: 'img/recettes/m-chicken-burger.jpg',
+      tags: ['poulet', 'burger', 'cheddar', 'skyr'], keywords: ['burger', 'chicken burger', 'cheddar', 'skyr'],
+      ingredients: ['300 g de filets de poulet', '2 pains à burger', '2 tranches de cheddar', '160 g de skyr', 'Salade', '1 tomate', '1 c. à café de moutarde', '2 cornichons', 'Paprika'],
+      steps: [
+        'Fais cuire les filets de poulet à la poêle avec du paprika, jusqu’à ce qu’ils soient bien cuits à cœur.',
+        'Mélange le skyr avec la moutarde et les cornichons finement hachés.',
+        'Fais griller légèrement les pains burger. Garnis-les avec la sauce, le poulet, le cheddar, la salade et les rondelles de tomate.'
+      ],
+      tips: 'Aplatis un peu les filets de poulet : ils cuisent plus vite et plus régulièrement.',
+      en: {
+        name: 'Homemade Chicken Burger with Special Sauce', tags: ['chicken', 'burger', 'cheddar', 'skyr'],
+        ingredients: ['300 g chicken fillets', '2 burger buns', '2 slices cheddar', '160 g skyr', 'Lettuce', '1 tomato', '1 tsp mustard', '2 gherkins', 'Paprika'],
+        steps: [
+          'Pan-fry the chicken fillets with paprika until cooked through.',
+          'Mix the skyr with the mustard and finely chopped gherkins.',
+          'Lightly toast the buns. Fill them with the sauce, chicken, cheddar, lettuce and tomato slices.'
+        ],
+        tips: 'Flatten the chicken fillets a little: they cook faster and more evenly.'
       }
     }
   ];
