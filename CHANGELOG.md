@@ -1,5 +1,8 @@
 # Changelog — Sandeep 2.0
 
+## 0.21.0 — 2026-11-05
+- The separate Cuisine app is now called **SanEva Cooking** (home screen name, header and Settings); the full app's Settings card uses the new name.
+
 ## 0.20.0 — 2026-11-05
 - New separate **Cuisine app** at `/Sandeep-2.0/cuisine/`: only the Kitchen tab (plus a small Settings screen: theme, backup, updates), always in French, with its own name, icon and offline cache, so it can be installed on another phone (Maeva's). It uses the same recipes and code as the Kitchen tab, so improvements reach both apps.
 - Its export, import and “Erase everything” only touch its own data (recipes and settings), never the gym, wardrobe or habits data of the full app.
