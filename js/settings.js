@@ -4,7 +4,7 @@
   var S2 = window.S2;
   var ui = S2.ui, h = ui.h, L = S2.L;
   var NS = 'settings';
-  var VERSION = '0.20.0';
+  var VERSION = '0.21.0';
 
   function get() {
     var s = S2.storage.load(NS, null) || {};
@@ -170,13 +170,13 @@
     /* Lien vers l'app « Cuisine » seule (dossier cuisine/), à envoyer à quelqu'un d'autre. Pas dans l'app Cuisine elle-même. */
     if (!window.S2_APP) {
       var kitchenUrl = new URL('cuisine/', location.href.split('#')[0]).href;
-      c.appendChild(h('h2', { class: 'section-title' }, L('Kitchen app', 'App Cuisine')));
+      c.appendChild(h('h2', { class: 'section-title' }, 'SanEva Cooking'));
       c.appendChild(h('div', { class: 'card' },
         h('p', { class: 'sheet-text' }, L('A separate app with only the Kitchen tab, in French, for someone else’s phone. Their recipes stay on their phone.',
           'Une app à part avec seulement l’onglet Cuisine, en français, pour le téléphone de quelqu’un d’autre. Ses recettes restent sur son téléphone.')),
         h('p', { class: 'hint' }, kitchenUrl),
         h('div', { class: 'stack' }, h('button', { class: 'btn btn-secondary btn-block', onclick: function () {
-          if (navigator.share) navigator.share({ title: 'Cuisine', url: kitchenUrl }).catch(function () {});
+          if (navigator.share) navigator.share({ title: 'SanEva Cooking', url: kitchenUrl }).catch(function () {});
           else if (navigator.clipboard) navigator.clipboard.writeText(kitchenUrl).then(function () { ui.toast(L('Link copied', 'Lien copié')); });
         } }, L('Share the link', 'Partager le lien')))));
     }
@@ -194,7 +194,7 @@
       h('div', { class: 'stack' },
         h('button', { class: 'btn btn-secondary btn-block', onclick: checkUpdate }, L('Check now', 'Vérifier maintenant')))));
 
-    c.appendChild(h('p', { class: 'hint center' }, 'Sandeep 2.0 · version ' + VERSION));
+    c.appendChild(h('p', { class: 'hint center' }, (window.S2_APP && window.S2_APP.name || 'Sandeep 2.0') + ' · version ' + VERSION));
   }
 
   S2.settings = { applyTheme: applyTheme, get: get, VERSION: VERSION };
