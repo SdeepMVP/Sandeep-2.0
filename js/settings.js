@@ -4,7 +4,7 @@
   var S2 = window.S2;
   var ui = S2.ui, h = ui.h, L = S2.L;
   var NS = 'settings';
-  var VERSION = '0.19.0';
+  var VERSION = '0.20.0';
 
   function get() {
     var s = S2.storage.load(NS, null) || {};
@@ -79,11 +79,12 @@
       if (!obj || obj.app !== 'Sandeep 2.0' || !obj.data) { ui.toast(L('This is not a Sandeep 2.0 backup', 'Ce n’est pas une sauvegarde Sandeep 2.0')); return; }
       var muscu = obj.data.muscu;
       var n = muscu && muscu.sessions ? muscu.sessions.length : 0;
+      var hasGym = S2.app.tabs().some(function (t) { return t.id === 'muscu'; });
       ui.confirm({
         title: L('Import this backup?', 'Importer cette sauvegarde ?'),
-        message: L('Backup from ', 'Sauvegarde du ') + (obj.exportedAt ? ui.longDate(obj.exportedAt) : L('unknown date', 'date inconnue')) + ' (' + n +
-          L(' gym workout(s)). All current data will be replaced. Export first if needed.',
-            ' séance(s) de muscu). Toutes les données actuelles seront remplacées. Exporte d’abord si besoin.'),
+        message: L('Backup from ', 'Sauvegarde du ') + (obj.exportedAt ? ui.longDate(obj.exportedAt) : L('unknown date', 'date inconnue')) +
+          (hasGym ? ' (' + n + L(' gym workout(s))', ' séance(s) de muscu)') : '') +
+          L('. All current data will be replaced. Export first if needed.', '. Toutes les données actuelles seront remplacées. Exporte d’abord si besoin.'),
         okLabel: L('Replace my data', 'Remplacer mes données'), danger: true
       }).then(function (ok) {
         if (!ok) return;
@@ -101,7 +102,7 @@
       if (!ok) return;
       return ui.confirm({ title: L('Are you sure?', 'Vraiment ?'), message: L('This cannot be undone.', 'C’est irréversible.'),
         okLabel: L('Erase permanently', 'Effacer définitivement'), danger: true })
-        .then(function (ok2) { if (ok2) { S2.storage.clearAll(); location.hash = '#muscu'; location.reload(); } });
+        .then(function (ok2) { if (ok2) { S2.storage.clearAll(); location.hash = ''; location.reload(); } });
     });
   }
 
@@ -121,8 +122,8 @@
     var langs = [['en', 'English'], ['fr', 'Français']];
 
     /* Langue de toute l'app : enregistrée puis rechargement (les données ne changent pas). */
-    c.appendChild(h('h2', { class: 'section-title' }, L('Language', 'Langue')));
-    c.appendChild(h('div', { class: 'card' },
+    if (!S2.langForced) c.appendChild(h('h2', { class: 'section-title' }, L('Language', 'Langue')));
+    if (!S2.langForced) c.appendChild(h('div', { class: 'card' },
       h('div', { class: 'segmented' }, langs.map(function (l) {
         return h('button', { class: 'seg' + (S2.lang === l[0] ? ' is-active' : ''), lang: l[0], 'aria-pressed': S2.lang === l[0] ? 'true' : 'false',
           onclick: function () { if (S2.lang !== l[0]) S2.setLang(l[0]); } }, l[1]);
@@ -165,6 +166,20 @@
     c.appendChild(h('div', { class: 'card' },
       h('p', { class: 'sheet-text' }, L('Spaces: ', 'Espaces : ') + (keys.join(', ') || L('none', 'aucun')) + ' · ' + ui.num(bytes / 1024, 1) + L(' KB used.', ' Ko utilisés.')),
       h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: wipe }, L('Erase everything', 'Tout effacer'))));
+
+    /* Lien vers l'app « Cuisine » seule (dossier cuisine/), à envoyer à quelqu'un d'autre. Pas dans l'app Cuisine elle-même. */
+    if (!window.S2_APP) {
+      var kitchenUrl = new URL('cuisine/', location.href.split('#')[0]).href;
+      c.appendChild(h('h2', { class: 'section-title' }, L('Kitchen app', 'App Cuisine')));
+      c.appendChild(h('div', { class: 'card' },
+        h('p', { class: 'sheet-text' }, L('A separate app with only the Kitchen tab, in French, for someone else’s phone. Their recipes stay on their phone.',
+          'Une app à part avec seulement l’onglet Cuisine, en français, pour le téléphone de quelqu’un d’autre. Ses recettes restent sur son téléphone.')),
+        h('p', { class: 'hint' }, kitchenUrl),
+        h('div', { class: 'stack' }, h('button', { class: 'btn btn-secondary btn-block', onclick: function () {
+          if (navigator.share) navigator.share({ title: 'Cuisine', url: kitchenUrl }).catch(function () {});
+          else if (navigator.clipboard) navigator.clipboard.writeText(kitchenUrl).then(function () { ui.toast(L('Link copied', 'Lien copié')); });
+        } }, L('Share the link', 'Partager le lien')))));
+    }
 
     c.appendChild(h('h2', { class: 'section-title' }, L('Install on iPhone', 'Installer sur l’iPhone')));
     c.appendChild(h('div', { class: 'card' },

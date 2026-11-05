@@ -54,7 +54,9 @@ self.addEventListener('install', function (e) {
 
 self.addEventListener('activate', function (e) {
   e.waitUntil(caches.keys().then(function (keys) {
-    return Promise.all(keys.filter(function (k) { return k !== CACHE_VERSION; }).map(function (k) { return caches.delete(k); }));
+    /* Ne supprime que les anciennes versions de cette app : l'app Cuisine (cuisine/sw.js) a ses propres caches. */
+    return Promise.all(keys.filter(function (k) { return k !== CACHE_VERSION && k.indexOf('sandeep2-') === 0 && k.indexOf('sandeep2-cuisine-') !== 0; })
+      .map(function (k) { return caches.delete(k); }));
   }).then(function () { return self.clients.claim(); }));
 });
 
