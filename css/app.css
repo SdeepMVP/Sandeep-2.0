@@ -674,3 +674,43 @@ input[type="date"].input { display: block; line-height: 48px; }
 .ck-card.has-photo > :not(.ck-thumb) { grid-column: 1; }
 .ck-thumb { grid-column: 2; grid-row: 1 / span 3; align-self: center; width: 76px; height: 76px; object-fit: cover; border-radius: 12px; background: var(--surface-2); }
 .ck-hero { display: block; width: 100%; max-width: 260px; aspect-ratio: 164 / 150; object-fit: cover; border-radius: var(--radius); margin: 4px auto 10px; background: var(--surface-2); }
+
+/* Cuisine · menu, courses, filtres, minuteurs (v0.23) */
+.ck-sections { margin-top: 0; }
+.ck-chips { display: flex; gap: 8px; overflow-x: auto; padding: 8px 2px 4px; margin: 0 -2px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.ck-chips::-webkit-scrollbar { display: none; }
+.ck-chips-wrap { flex-wrap: wrap; overflow: visible; }
+.ck-chip { flex-shrink: 0; min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface);
+  color: var(--text); font: inherit; font-size: 14px; font-weight: 600; white-space: nowrap; }
+.ck-chip.is-on { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+.ck-fav { color: var(--danger); }
+.ck-missing { font-size: 13px; color: var(--keep); }
+.ck-missing.is-ok { color: var(--good); font-weight: 600; }
+.ck-titlerow { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.ck-titlerow .page-title { margin-bottom: 4px; }
+.ck-favbtn { flex-shrink: 0; min-width: 48px; min-height: 48px; font-size: 26px; color: var(--muted); }
+.ck-favbtn.is-on { color: var(--danger); }
+.ck-cooked { margin-top: -2px; }
+.ck-addmenu { margin: 10px 0 4px; }
+.ck-notes .card-title { margin-bottom: 8px; }
+.ck-note { min-height: 64px; }
+.ck-stepqty { display: block; margin-top: 4px; font-size: 13px; color: var(--text-2); font-weight: 600; }
+.ck-timers { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px 44px; }
+.ck-cook .ck-timers { margin: 4px 0 14px; }
+.ck-timerbtn { min-height: 40px; }
+.ck-cookqty { margin: 0 0 12px; padding: 10px 14px 10px 30px; background: var(--surface-2); border-radius: var(--radius-sm); font-size: 16px; font-weight: 600; }
+.ck-cookqty li + li { margin-top: 4px; }
+.ck-timerpill { position: fixed; left: 50%; transform: translateX(-50%); top: calc(env(safe-area-inset-top) + 8px);
+  z-index: 1000; min-height: 48px; padding: 0 18px; border-radius: 999px; border: 0; background: var(--accent); color: var(--accent-text);
+  font: inherit; font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; box-shadow: var(--shadow); white-space: nowrap; }
+.ck-timerpill.is-done { background: var(--danger); animation: ck-pulse 1s ease-in-out infinite; }
+@keyframes ck-pulse { 50% { transform: translateX(-50%) scale(1.06); } }
+.ck-menurow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 10px; align-items: center; }
+.ck-menuname { grid-column: 1 / -1; display: grid; gap: 2px; text-align: left; background: none; border: 0; padding: 0; color: inherit; font: inherit; min-height: 44px; }
+.ck-histrow { display: flex; align-items: center; gap: 10px; }
+.ck-histrow .ck-menuname { flex: 1; min-width: 0; }
+.ck-menustep .btn-step { min-width: 44px; min-height: 44px; }
+.ck-menuacts { display: flex; gap: 6px; justify-content: flex-end; }
+.ck-menuacts .btn { min-height: 44px; }
+.ck-aisle { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 18px 2px 6px; }
+.ck-from { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
