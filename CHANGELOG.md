@@ -1,5 +1,10 @@
 # Changelog — Sandeep 2.0
 
+## 0.22.0 — 2026-11-05
+- The **Kitchen tab is removed from Sandeep 2.0**: recipes now live only in **SanEva Cooking** (`/cuisine/`). The full app keeps Gym, Wardrobe, Habits and Settings.
+- Recipes saved in Sandeep 2.0 are kept in its data and backups, so they can be imported into SanEva Cooking (Settings › Import there only takes the recipes and settings).
+- Settings: the SanEva Cooking card explains this and gains an **Open SanEva Cooking** button.
+
 ## 0.21.0 — 2026-11-05
 - The separate Cuisine app is now called **SanEva Cooking** (home screen name, header and Settings); the full app's Settings card uses the new name.
 

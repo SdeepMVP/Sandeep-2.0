@@ -4,7 +4,7 @@
   var S2 = window.S2;
   var ui = S2.ui, h = ui.h, L = S2.L;
   var NS = 'settings';
-  var VERSION = '0.21.0';
+  var VERSION = '0.22.0';
 
   function get() {
     var s = S2.storage.load(NS, null) || {};
@@ -167,15 +167,17 @@
       h('p', { class: 'sheet-text' }, L('Spaces: ', 'Espaces : ') + (keys.join(', ') || L('none', 'aucun')) + ' · ' + ui.num(bytes / 1024, 1) + L(' KB used.', ' Ko utilisés.')),
       h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: wipe }, L('Erase everything', 'Tout effacer'))));
 
-    /* Lien vers l'app « Cuisine » seule (dossier cuisine/), à envoyer à quelqu'un d'autre. Pas dans l'app Cuisine elle-même. */
+    /* Lien vers SanEva Cooking (dossier cuisine/), seule app qui contient la Cuisine depuis la v0.22. Absent de SanEva Cooking elle-même. */
     if (!window.S2_APP) {
       var kitchenUrl = new URL('cuisine/', location.href.split('#')[0]).href;
       c.appendChild(h('h2', { class: 'section-title' }, 'SanEva Cooking'));
       c.appendChild(h('div', { class: 'card' },
-        h('p', { class: 'sheet-text' }, L('A separate app with only the Kitchen tab, in French, for someone else’s phone. Their recipes stay on their phone.',
-          'Une app à part avec seulement l’onglet Cuisine, en français, pour le téléphone de quelqu’un d’autre. Ses recettes restent sur son téléphone.')),
+        h('p', { class: 'sheet-text' }, L('Recipes now live in their own app, in French: install it on your phone and on Maeva’s. Each phone keeps its own recipes. To move recipes saved here before, export a backup below and import it in SanEva Cooking.',
+          'Les recettes ont maintenant leur propre app, en français : installe-la sur ton téléphone et sur celui de Maeva. Chaque téléphone garde ses recettes. Pour récupérer les recettes enregistrées ici avant, exporte une sauvegarde ci-dessous et importe-la dans SanEva Cooking.')),
         h('p', { class: 'hint' }, kitchenUrl),
-        h('div', { class: 'stack' }, h('button', { class: 'btn btn-secondary btn-block', onclick: function () {
+        h('div', { class: 'stack' },
+          h('a', { class: 'btn btn-primary btn-block', href: kitchenUrl }, L('Open SanEva Cooking', 'Ouvrir SanEva Cooking')),
+          h('button', { class: 'btn btn-secondary btn-block', onclick: function () {
           if (navigator.share) navigator.share({ title: 'SanEva Cooking', url: kitchenUrl }).catch(function () {});
           else if (navigator.clipboard) navigator.clipboard.writeText(kitchenUrl).then(function () { ui.toast(L('Link copied', 'Lien copié')); });
         } }, L('Share the link', 'Partager le lien')))));
