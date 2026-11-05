@@ -714,3 +714,6 @@ input[type="date"].input { display: block; line-height: 48px; }
 .ck-menuacts .btn { min-height: 44px; }
 .ck-aisle { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 18px 2px 6px; }
 .ck-from { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+/* Cuisine · valeurs par portion (v0.24) */
+.ck-perserv { color: var(--muted); }
