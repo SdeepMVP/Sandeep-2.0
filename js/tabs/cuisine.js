@@ -50,6 +50,10 @@
     if (!d || !Array.isArray(d.recipes)) d = { schema: SCHEMA, recipes: [], checks: {}, removedBuiltins: [] };
     d.checks = d.checks || {};
     d.removedBuiltins = d.removedBuiltins || [];
+    /* v0.23 : favoris, notes, menu de la semaine, historique, « avec ce que j'ai », ingrédients exclus (ajouts compatibles). */
+    d.favs = d.favs || {}; d.notes = d.notes || {};
+    d.plan = d.plan || {}; d.plan.items = d.plan.items || []; d.plan.checks = d.plan.checks || {};
+    d.history = d.history || []; d.have = d.have || []; d.exclude = d.exclude || [];
     /* Ajoute les recettes intégrées manquantes (sauf celles que l'utilisateur a supprimées). */
     var have = {};
     var added = false;
@@ -175,13 +179,210 @@
     return rest;
   }
 
+
+  /* ---------- Analyse d'une ligne d'ingrédient : quantité, unité, nom ----------
+     « 240 g de blanc de poulet » → { qty: 240, unit: 'g ', link: 'de ', name: 'blanc de poulet' }.
+     Sert à additionner les courses du menu et à retrouver les quantités citées dans une étape. */
+  var UNIT_RE = /^(kg|g|mg|ml|cl|dl|l|tbsp|tsp|c\. à soupe|c\. à café)(\s+|$)/i;
+  function parseLine(line) {
+    var m = String(line).match(/^(\d+\/\d+|\d+(?:[.,]\d+)?)(\s*)(.*)$/);
+    if (!m) return { qty: null, unit: '', link: '', name: String(line) };
+    var q = m[1].indexOf('/') > -1 ? Number(m[1].split('/')[0]) / Number(m[1].split('/')[1]) : Number(m[1].replace(',', '.'));
+    var rest = m[3], unit = '', link = '';
+    var u = rest.match(UNIT_RE);
+    if (u) { unit = u[0]; rest = rest.slice(u[0].length); }
+    var l = rest.match(/^(de |d’|d'|of )/i);
+    if (l) { link = l[0]; rest = rest.slice(l[0].length); }
+    return { qty: q, unit: unit, link: link, name: rest };
+  }
+  function singular(w) { return w.length > 3 ? w.replace(/(s|x)$/, '') : w; }
+  /* Clé de regroupement d'un nom : sans accents, sans parenthèses, au singulier. */
+  function nameKey(name) {
+    return norm(String(name).replace(/\([^)]*\)/g, ' ')).replace(/[^a-z0-9 ]+/g, ' ').split(/\s+/).filter(Boolean).map(singular).join(' ');
+  }
+  function roundQty(v) { return v >= 10 ? Math.round(v) : Math.round(v * 10) / 10; }
+
+  /* ---------- Rayons du magasin (mots-clés en français et en anglais) ---------- */
+  var AISLES = [
+    { id: 'grocery', label: L('Pantry', 'Épicerie') },
+    { id: 'meat', label: L('Meat & fish', 'Viandes & poissons') },
+    { id: 'dairy', label: L('Dairy & eggs', 'Crèmerie & œufs') },
+    { id: 'veg', label: L('Fruit & veg', 'Fruits & légumes') },
+    { id: 'bakery', label: L('Bakery', 'Boulangerie') }
+  ];
+  var AISLE_ORDER = ['veg', 'meat', 'dairy', 'bakery', 'grocery'];
+  /* Ordre important : les exceptions d'épicerie (« lait de coco », « beurre de cacahuète », « sel & poivre »…) d'abord. */
+  var AISLE_RULES = [
+    ['grocery', /coco|cacahuete|peanut|\bsel\b|\bsalt\b|poivre\b|paprika|curry|cumin|cannelle|cinnamon|epice|spice|origan|oregano|herbes de provence|bouillon|stock|vinaigre|vinegar|sauce|huile|\boil\b|haricot rouge|haricot noir|kidney|black bean|lentille|lentil|coulis|passata|concasse|chopped tomato|pesto|moutarde|mustard|cornichon|gherkin|chapelure|breadcrumb|levure|baking powder|farine|flour|cacao|cocoa|chocolat|chocolate|miel|honey|sirop|syrup|sucre|sugar|whey|protein powder|mais|sweetcorn|corn|maizena|cornflour/],
+    ['meat', /poulet|chicken|boeuf|beef|dinde|turkey|jambon|\bham\b|saumon|salmon|thon|tuna|crevette|prawn|shrimp|cabillaud|\bcod\b|poisson|fish|volaille/],
+    ['dairy', /oeuf|\begg|skyr|yaourt|yogurt|yoghurt|fromage|cheese|cottage|feta|mozzarella|parmesan|cheddar|ricotta|\blait\b|\bmilk\b|beurre|butter|creme|cream|quark/],
+    ['bakery', /\bpain\b|bread|tortilla|bagel|brioche|\bbun\b|burger/],
+    ['veg', /tomate|tomato|avocat|avocado|citron|lemon|lime|banane|banana|pomme|apple|poivron|\bpepper\b|oignon|onion|echalote|shallot|\bail\b|garlic|concombre|cucumber|carotte|carrot|courgette|brocoli|broccoli|epinard|spinach|salade|lettuce|roquette|rocket|champignon|mushroom|haricot vert|green bean|patate|potato|fraise|strawberr|fruit|berr|cebette|spring onion|ciboulette|chive|persil|parsley|basilic|basil|aneth|dill|coriandre|coriander|gingembre|ginger|edamame|bok choy|romaine|legume|vegetable|herbe|herb/]
+  ];
+  function aisleOf(key) {
+    for (var i = 0; i < AISLE_RULES.length; i++) if (AISLE_RULES[i][1].test(key)) return AISLE_RULES[i][0];
+    return 'grocery';
+  }
+
+  /* ---------- Critères de recherche ---------- */
+  var MEAT_RE = /poulet|chicken|boeuf|beef|dinde|turkey|jambon|\bham\b|saumon|salmon|thon|tuna|crevette|prawn|shrimp|cabillaud|\bcod\b|poisson|fish|volaille|viande|meat|lardon|bacon/;
+  var OVEN_RE = /\bfour\b|enfourne|oven|air fryer|gratin|\bbake\b|baking dish/;
+  function allText(v, part) { return norm([].concat(v[part] || [], v.alt ? v.alt[part] || [] : []).join(' | ')); }
+  function isQuick(r) { return !!r.time && r.time <= 15; }
+  function usesOven(v) { return OVEN_RE.test(allText(v, 'steps')); }
+  function isVeggie(v) { return !MEAT_RE.test(allText(v, 'ingredients')); }
+  function excluded(r, v) {
+    if (!data.exclude.length) return false;
+    var hs = haystack(r, v);
+    return data.exclude.some(function (t) { return hs.indexOf(singular(norm(t))) > -1; });
+  }
+  /* Ingrédients principaux d'une recette = ses mots-clés, sans les types de plat. */
+  var NOT_INGREDIENT = /^(en-cas|snack|four|oven|vegetarien|vegetarian|vegan|salade|salad|soupe|soup|wok|burger|pizza|risotto|wrap|bowl|curry|lasagne|lasagnes|crepes|meal prep|tortilla)$/;
+  function mainIngredients(v) {
+    return v.tags.filter(function (t) { return !NOT_INGREDIENT.test(norm(t)); });
+  }
+  function haveIt(tag) {
+    var k = nameKey(tag);
+    return data.have.some(function (h0) { var x = nameKey(h0); return x && (k.indexOf(x) > -1 || x.indexOf(k) > -1); });
+  }
+  function missingFor(v) { return mainIngredients(v).filter(function (t) { return !haveIt(t); }); }
+
+  /* ---------- Menu de la semaine et historique ---------- */
+  function planItems() { return data.plan.items.filter(function (it) { return recipe(it.recipeId); }); }
+  function addToPlan(r, servings) {
+    data.plan.items.push({ uid: ui.uid(), recipeId: r.id, servings: servings, added: new Date().toISOString() });
+    persist();
+  }
+  function logCooked(r, servings) {
+    data.history.unshift({ recipeId: r.id, servings: servings, date: new Date().toISOString() });
+    if (data.history.length > 200) data.history.length = 200;
+  }
+  function cookedStats(id) {
+    var list = data.history.filter(function (x) { return x.recipeId === id; });
+    return { n: list.length, last: list[0] ? list[0].date : null };
+  }
+
+  /* Liste de courses commune : additionne les quantités de même unité et même nom, puis range par rayon. */
+  function shoppingList() {
+    var groups = {}, order = [];
+    planItems().forEach(function (it) {
+      var r = recipe(it.recipeId), v = view(r), factor = (it.servings || 1) / (r.servings || 1);
+      v.ingredients.forEach(function (line) {
+        var p = parseLine(line), nk = nameKey(p.name);
+        var key = (p.qty === null ? 'x' : norm(p.unit).trim() || '#') + '|' + nk;
+        var g = groups[key];
+        if (!g) { g = groups[key] = { key: key, qty: p.qty === null ? null : 0, first: p, recipes: [], aisle: aisleOf(nk) }; order.push(key); }
+        if (p.qty !== null) g.qty += p.qty * factor;
+        if (g.recipes.indexOf(v.name) < 0) g.recipes.push(v.name);
+      });
+    });
+    return order.map(function (k) {
+      var g = groups[k], f = g.first;
+      if (g.qty === null) { g.text = f.name; return g; }
+      var total = roundQty(g.qty), name = f.name;
+      if (!f.unit && f.qty < 2 && total >= 2) name = FR ? pluralize(name) : pluralizeEn(name);
+      g.text = num(total) + ' ' + f.unit + f.link + name;
+      return g;
+    });
+  }
+
+  /* ---------- Guide de cuisson : quantités citées dans une étape, minuteurs ---------- */
+  var WEAK_WORDS = /^(blanc|filet|pave|dos|tranche|boite|gousse|poignee|pincee|feuille|grande|grand|petite|petit|gros|grosse|frais|fraiche|cuit|cru|nature|complet|complete|surgele|sachet|boule|coeur|paquet|haute|cuisse|egoutte|rape|leger|light|slice|clove|handful|pinch|fillet|large|small|fresh|plain|breast|thigh|drained|grated|cooked|uncooked|frozen|pouch|ball|heart|whole|wholegrain|wholewheat|seeded|lean|minced|peeled|chopped|tinned|can|piece|cereale|aux|des|les|the|and|avec|pour|bien|mur|mure)$/;
+  function stepIngredients(stepText, v, factor) {
+    var s = ' ' + norm(stepText).replace(/[^a-z0-9]+/g, ' ') + ' ';
+    var out = [];
+    v.ingredients.forEach(function (line) {
+      var p = parseLine(line);
+      if (p.qty === null) return;
+      var words = nameKey(p.name).split(' ').filter(function (w) { return w.length >= 3 && !WEAK_WORDS.test(w) && !/^\d/.test(w); });
+      if (!words.length) return;
+      var hit = words.some(function (w) { return new RegExp(' ' + w + '(s|x|es)? ').test(s); });
+      if (hit) out.push(scaleLine(line, factor));
+    });
+    return out;
+  }
+  /* Durées citées : « 5 à 6 minutes », « 30 secondes », « 1 heure » → secondes (borne basse : on vérifie tôt). */
+  var DURATION_RE = /(\d+(?:[.,]\d+)?)(?:\s*(?:à|a|-|–|to|or|ou)\s*(\d+(?:[.,]\d+)?))?\s*(minutes?|min\b|secondes?|seconds?|sec\b|heures?|hours?)/gi;
+  function durations(text) {
+    var out = [], m, seen = {};
+    DURATION_RE.lastIndex = 0;
+    while ((m = DURATION_RE.exec(text))) {
+      var a = Number(m[1].replace(',', '.')), b = m[2] ? Number(m[2].replace(',', '.')) : null, u = m[3].toLowerCase();
+      var mult = /^s/.test(u) ? 1 : /^h/.test(u) ? 3600 : 60;
+      var secs = Math.round(a * mult);
+      if (!secs || seen[secs]) continue;
+      seen[secs] = true;
+      var unitShort = mult === 1 ? ' s' : mult === 3600 ? ' h' : ' min';
+      out.push({ secs: secs, label: num(a) + (b ? '–' + num(b) : '') + unitShort });
+    }
+    return out;
+  }
+
+  /* Minuteur unique, visible partout (pastille en haut de l'écran, au-dessus des feuilles). Le bip est programmé à l'avance via
+     Web Audio, démarré par le toucher (exigence d'iOS) ; l'écran reste allumé pendant le guide. */
+  var timer = null;
+  function fmtClock(s) { s = Math.max(0, Math.ceil(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+  function startTimer(secs, label) {
+    stopTimer(true);
+    var ctx = null;
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) {
+        ctx = new AC();
+        [0, 0.45, 0.9, 1.6, 2.05, 2.5].forEach(function (d) {
+          var o = ctx.createOscillator(), g = ctx.createGain();
+          o.frequency.value = 880; g.gain.value = 0.25;
+          o.connect(g); g.connect(ctx.destination);
+          o.start(ctx.currentTime + secs + d); o.stop(ctx.currentTime + secs + d + 0.3);
+        });
+      }
+    } catch (e) { ctx = null; }
+    var pill = h('button', { class: 'ck-timerpill', 'aria-live': 'polite',
+      onclick: function () { if (!timer) return; if (timer.done) stopTimer(); else ui.confirm({ title: L('Stop the timer?', 'Arrêter le minuteur ?'), okLabel: L('Stop', 'Arrêter') }).then(function (ok) { if (ok) stopTimer(); }); } });
+    document.body.appendChild(pill);
+    timer = { end: Date.now() + secs * 1000, label: label, ctx: ctx, pill: pill, done: false };
+    function tick() {
+      if (!timer) return;
+      var left = (timer.end - Date.now()) / 1000;
+      if (left <= 0 && !timer.done) {
+        timer.done = true;
+        pill.classList.add('is-done');
+        if (navigator.vibrate) navigator.vibrate([300, 150, 300]);
+        ui.toast(L('Time’s up! ', 'C’est l’heure ! ') + timer.label);
+      }
+      pill.textContent = timer.done ? L('⏰ Time’s up · tap to close', '⏰ Terminé · touche pour fermer') : '⏱ ' + fmtClock(left) + ' · ' + timer.label;
+    }
+    tick();
+    timer.iv = setInterval(tick, 500);
+  }
+  function stopTimer(silent) {
+    if (!timer) return;
+    clearInterval(timer.iv);
+    if (timer.ctx) { try { timer.ctx.close(); } catch (e) { /* déjà fermé */ } }
+    timer.pill.remove();
+    timer = null;
+    if (!silent) ui.toast(L('Timer stopped', 'Minuteur arrêté'));
+  }
+  function timerButtons(text) {
+    var d = durations(text);
+    if (!d.length) return null;
+    return h('div', { class: 'ck-timers' }, d.map(function (x) {
+      return h('button', { class: 'btn btn-secondary btn-sm ck-timerbtn', type: 'button',
+        'aria-label': L('Start a timer for ', 'Lancer un minuteur de ') + x.label,
+        onclick: function (e) { e.stopPropagation(); startTimer(x.secs, x.label); } }, '⏱ ' + x.label);
+    }));
+  }
+
   /* ---------- État d'interface ---------- */
   var page = 'list';       // list | detail
+  var section = 'recipes'; // recipes | menu | shop (onglets en haut de la liste)
+  var flags = { fav: false, quick: false, noOven: false, veggie: false, have: false };
   var currentId = null;
   var mode = 'groceries';  // groceries | cook
   var query = '', filter = 'all';
   var servingsView = {};   // portions affichées par recette (non enregistré)
 
+  function meals(n) { return n + (FR ? ' repas' : n === 1 ? ' meal' : ' meals'); } /* « repas » est invariable */
   function plural(n, en, fr) { return n + ' ' + (FR ? fr + (n > 1 ? 's' : '') : en + (n === 1 ? '' : 's')); }
 
   function mount(container) {
@@ -201,6 +402,14 @@
 
   /* ---------- Liste + recherche ---------- */
   function renderList() {
+    var nMenu = planItems().length;
+    root.appendChild(h('div', { class: 'segmented ck-sections' },
+      [['recipes', L('Recipes', 'Recettes')], ['menu', L('Menu', 'Menu') + (nMenu ? ' · ' + nMenu : '')], ['shop', L('Groceries', 'Courses')]].map(function (x) {
+        return h('button', { class: 'seg' + (section === x[0] ? ' is-active' : ''), 'aria-pressed': section === x[0] ? 'true' : 'false',
+          onclick: function () { section = x[0]; render(); window.scrollTo(0, 0); } }, x[1]);
+      })));
+    if (section === 'menu') { renderMenu(); return; }
+    if (section === 'shop') { renderShop(); return; }
     var search = h('input', { class: 'input ck-search', type: 'search', value: query, autocomplete: 'off', enterkeyhint: 'search',
       placeholder: L('Recipe or ingredient, e.g. chicken', 'Recette ou ingrédient, ex. poulet'),
       'aria-label': L('Search recipes', 'Rechercher une recette') });
@@ -214,6 +423,7 @@
         return h('button', { class: 'seg' + (filter === f[0] ? ' is-active' : ''),
           onclick: function () { filter = f[0]; render(); } }, f[1]);
       })));
+    root.appendChild(filterChips());
     root.appendChild(results);
     renderResults(results);
     root.appendChild(h('div', { class: 'bottom-actions' },
@@ -222,9 +432,24 @@
 
   function renderResults(box) {
     box.innerHTML = '';
+    var useHave = flags.have && data.have.length > 0;
     var list = data.recipes.map(function (r) { return { r: r, v: view(r) }; })
-      .filter(function (x) { return (filter === 'all' || x.r.category === filter) && matches(x.r, x.v, query); })
+      .filter(function (x) {
+        if (!(filter === 'all' || x.r.category === filter) || !matches(x.r, x.v, query)) return false;
+        if (flags.fav && !data.favs[x.r.id]) return false;
+        if (flags.quick && !isQuick(x.r)) return false;
+        if (flags.noOven && usesOven(x.v)) return false;
+        if (flags.veggie && !isVeggie(x.v)) return false;
+        if (excluded(x.r, x.v)) return false;
+        if (useHave) {
+          var main = mainIngredients(x.v);
+          x.missing = missingFor(x.v);
+          if (!main.length || x.missing.length === main.length) return false; /* aucun ingrédient principal en stock */
+        }
+        return true;
+      })
       .sort(function (a, b) {
+        if (useHave && a.missing.length !== b.missing.length) return a.missing.length - b.missing.length;
         if (a.r.category !== b.r.category) return a.r.category === 'breakfast' ? -1 : 1;
         return a.v.name.localeCompare(b.v.name, S2.lang);
       });
@@ -237,8 +462,10 @@
         h('button', { class: 'btn btn-secondary', onclick: function () { editRecipe(null); } }, L('Add a recipe', 'Ajouter une recette'))));
       return;
     }
+    if (useHave) box.appendChild(h('p', { class: 'hint' }, L('Sorted by what you are missing (main ingredients).', 'Classées selon ce qu’il te manque (ingrédients principaux).')));
     var lastCat = null;
     list.forEach(function (x) {
+      if (useHave) { box.appendChild(card(x.r, x.v, x.missing)); return; }
       if (filter === 'all' && x.r.category !== lastCat) {
         lastCat = x.r.category;
         box.appendChild(h('h2', { class: 'section-title' }, CATS[x.r.category] || OTHER));
@@ -247,11 +474,13 @@
     });
   }
 
-  function card(r, v) {
+  function card(r, v, missing) {
     var photo = photoOf(r);
     return h('button', { class: 'card ck-card' + (photo ? ' has-photo' : ''), onclick: function () { open(r.id); } },
       photo ? h('img', { class: 'ck-thumb', src: photo, alt: '', loading: 'lazy', decoding: 'async' }) : null,
-      h('div', { class: 'ck-cardname' }, v.name),
+      h('div', { class: 'ck-cardname' }, data.favs[r.id] ? h('span', { class: 'ck-fav', 'aria-label': L('Favourite', 'Favori') }, '♥ ') : null, v.name),
+      missing ? h('div', { class: 'ck-missing' + (missing.length ? '' : ' is-ok') },
+        missing.length ? L('Missing: ', 'Il te manque : ') + missing.join(', ') : L('✓ You have the main ingredients', '✓ Tu as les ingrédients principaux')) : null,
       h('div', { class: 'ck-meta' },
         r.time ? h('span', null, '⏱ ' + r.time + ' min') : null,
         r.protein ? h('span', { class: 'ck-protein' }, r.protein + L(' g protein', ' g de protéines')) : null,
@@ -271,7 +500,15 @@
     root.appendChild(h('button', { class: 'btn btn-ghost btn-sm back', onclick: back }, L('‹ Recipes', '‹ Recettes')));
     var photo = photoOf(r);
     if (photo) root.appendChild(h('img', { class: 'ck-hero', src: photo, alt: v.name, decoding: 'async' }));
-    root.appendChild(h('h2', { class: 'page-title' }, v.name));
+    var fav = !!data.favs[r.id];
+    root.appendChild(h('div', { class: 'ck-titlerow' },
+      h('h2', { class: 'page-title' }, v.name),
+      h('button', { class: 'btn btn-icon ck-favbtn' + (fav ? ' is-on' : ''), 'aria-pressed': fav ? 'true' : 'false',
+        'aria-label': fav ? L('Remove from favourites', 'Retirer des favoris') : L('Add to favourites', 'Ajouter aux favoris'),
+        onclick: function () { if (fav) delete data.favs[r.id]; else data.favs[r.id] = true; persist(); render(); } }, fav ? '♥' : '♡')));
+    var stats = cookedStats(r.id);
+    if (stats.n) root.appendChild(h('p', { class: 'hint ck-cooked' },
+      L('Cooked ' + stats.n + (stats.n === 1 ? ' time' : ' times') + ' · last on ', 'Cuisinée ' + stats.n + ' fois · la dernière le ') + ui.date(stats.last)));
     root.appendChild(h('div', { class: 'ck-meta ck-meta-lg' },
       h('span', { class: 'badge' }, CATS[r.category] || OTHER),
       r.time ? h('span', null, '⏱ ' + r.time + ' min') : null,
@@ -288,6 +525,12 @@
         h('span', { class: 'stepper-num' }, serv),
         h('button', { class: 'btn btn-step', 'aria-label': L('One serving more', 'Une portion de plus'), disabled: serv >= 12,
           onclick: function () { servingsView[r.id] = Math.min(12, serv + 1); render(); } }, '+'))));
+    var inMenu = planItems().filter(function (it) { return it.recipeId === r.id; }).length;
+    root.appendChild(h('button', { class: 'btn btn-secondary btn-block ck-addmenu', onclick: function () {
+      addToPlan(r, serv); render();
+      ui.toast(L('Added to the menu · ', 'Ajoutée au menu · ') + plural(serv, 'serving', 'portion'));
+    } }, L('+ Add to the menu', '+ Ajouter au menu') + ' (' + plural(serv, 'serving', 'portion') + ')' +
+      (inMenu ? L(' · already ' + inMenu + '×', ' · déjà ' + inMenu + '×') : '')));
 
     root.appendChild(h('div', { class: 'segmented ck-mode' },
       h('button', { class: 'seg' + (mode === 'groceries' ? ' is-active' : ''), onclick: function () { mode = 'groceries'; render(); } }, L('🛒 Groceries', '🛒 Courses')),
@@ -321,7 +564,9 @@
         return h('li', null, h('button', { class: 'ck-step' + (ch.steps[i] ? ' is-done' : ''), 'aria-pressed': ch.steps[i] ? 'true' : 'false',
           onclick: function () { if (ch.steps[i]) delete ch.steps[i]; else ch.steps[i] = true; persist(); render(); } },
           h('span', { class: 'ck-stepnum' }, ch.steps[i] ? '✓' : i + 1),
-          h('span', { class: 'ck-steptext' }, s)));
+          h('span', { class: 'ck-steptext' }, s,
+            (function () { var q = stepIngredients(s, v, factor); return q.length ? h('span', { class: 'ck-stepqty' }, q.join(' · ')) : null; })())),
+          timerButtons(s));
       })));
       if (done) root.appendChild(h('button', { class: 'btn btn-ghost btn-block', onclick: function () { ch.steps = {}; persist(); render(); } }, L('Reset the steps', 'Remettre les étapes à zéro')));
       root.appendChild(h('details', { class: 'card ck-inglist' },
@@ -331,9 +576,214 @@
 
     if (v.tips) root.appendChild(h('div', { class: 'note' }, h('strong', null, tipLabel), v.tips));
 
+    /* Note perso (« Maeva : moins de piment »), enregistrée quand on quitte le champ. */
+    var noteTa = h('textarea', { class: 'input ck-textarea ck-note', rows: 2, 'aria-label': L('My notes', 'Mes notes'),
+      placeholder: L('e.g. less chilli, double the sauce…', 'ex. moins de piment, double dose de sauce…') });
+    noteTa.value = data.notes[r.id] || '';
+    noteTa.addEventListener('change', function () {
+      var t = noteTa.value.trim();
+      if (t) data.notes[r.id] = t; else delete data.notes[r.id];
+      persist(); ui.toast(L('Note saved', 'Note enregistrée'));
+    });
+    root.appendChild(h('div', { class: 'card ck-notes' }, h('div', { class: 'card-title' }, L('My notes', 'Mes notes')), noteTa));
+
     root.appendChild(h('div', { class: 'bottom-actions' },
       h('button', { class: 'btn btn-ghost btn-block', onclick: function () { editRecipe(r); } }, L('Edit this recipe', 'Modifier cette recette')),
       h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: function () { removeRecipe(r); } }, L('Delete this recipe', 'Supprimer cette recette'))));
+  }
+
+  /* ---------- Filtres (rangée de puces sous les catégories) ---------- */
+  function filterChips() {
+    function chip(key, label) {
+      var on = flags[key];
+      return h('button', { class: 'ck-chip' + (on ? ' is-on' : ''), 'aria-pressed': on ? 'true' : 'false',
+        onclick: function () { flags[key] = !on; render(); } }, label);
+    }
+    var haveOn = flags.have && data.have.length;
+    return h('div', { class: 'ck-chips', role: 'group', 'aria-label': L('Filters', 'Filtres') },
+      chip('fav', L('♥ Favourites', '♥ Favoris')),
+      h('button', { class: 'ck-chip' + (haveOn ? ' is-on' : ''), 'aria-pressed': haveOn ? 'true' : 'false', onclick: editHave },
+        L('🧺 What I have', '🧺 Avec ce que j’ai') + (data.have.length ? ' (' + data.have.length + ')' : '')),
+      chip('quick', L('⏱ 15 min max', '⏱ 15 min max')),
+      chip('noOven', L('No oven', 'Sans four')),
+      chip('veggie', L('Vegetarian', 'Végétarien')),
+      h('button', { class: 'ck-chip' + (data.exclude.length ? ' is-on' : ''), onclick: editExclude },
+        L('🚫 Without…', '🚫 Sans…') + (data.exclude.length ? ' (' + data.exclude.length + ')' : '')));
+  }
+
+  /* « Avec ce que j'ai » : ingrédients principaux les plus fréquents, à cocher, + saisie libre. Enregistré. */
+  function editHave() {
+    var counts = {}, labels = {};
+    data.recipes.forEach(function (r) {
+      mainIngredients(view(r)).forEach(function (t) { var k = nameKey(t); counts[k] = (counts[k] || 0) + 1; if (!labels[k]) labels[k] = t; });
+    });
+    var keys = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a] || labels[a].localeCompare(labels[b], S2.lang); }).slice(0, 40);
+    var picked = data.have.slice();
+    function isPicked(t) { return picked.some(function (x) { return nameKey(x) === nameKey(t); }); }
+    ui.sheet(function (close) {
+      var box = h('div', { class: 'ck-chips ck-chips-wrap' });
+      var extra = h('div', { class: 'ck-chips ck-chips-wrap' });
+      function paint() {
+        box.innerHTML = ''; extra.innerHTML = '';
+        keys.forEach(function (k) {
+          var t = labels[k], on = isPicked(t);
+          box.appendChild(h('button', { class: 'ck-chip' + (on ? ' is-on' : ''), type: 'button', 'aria-pressed': on ? 'true' : 'false',
+            onclick: function () { if (on) picked = picked.filter(function (x) { return nameKey(x) !== k; }); else picked.push(t); paint(); } }, t));
+        });
+        picked.filter(function (x) { return keys.indexOf(nameKey(x)) < 0; }).forEach(function (t) {
+          extra.appendChild(h('button', { class: 'ck-chip is-on', type: 'button', onclick: function () { picked = picked.filter(function (x) { return x !== t; }); paint(); } }, t + ' ✕'));
+        });
+      }
+      paint();
+      var inp = h('input', { class: 'input', type: 'text', autocomplete: 'off', enterkeyhint: 'done', autocapitalize: 'none',
+        placeholder: L('Another ingredient, e.g. tofu', 'Autre ingrédient, ex. tofu'), 'aria-label': L('Add an ingredient', 'Ajouter un ingrédient') });
+      inp.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter') return;
+        var t = inp.value.trim().toLowerCase();
+        if (t && !isPicked(t)) picked.push(t);
+        inp.value = ''; paint();
+      });
+      return [
+        h('h2', { class: 'sheet-title' }, L('What do you have?', 'Qu’est-ce que tu as ?')),
+        h('p', { class: 'sheet-text' }, L('Tick your main ingredients: recipes are sorted by what is missing.', 'Coche tes ingrédients principaux : les recettes sont classées selon ce qu’il manque.')),
+        box, extra, h('label', { class: 'field' }, inp),
+        h('div', { class: 'sheet-actions' },
+          h('button', { class: 'btn btn-primary btn-block', onclick: function () {
+            var t = inp.value.trim().toLowerCase(); if (t && !isPicked(t)) picked.push(t);
+            data.have = picked; flags.have = picked.length > 0; persist(); close(); render();
+          } }, L('Show the recipes', 'Voir les recettes')),
+          picked.length || data.have.length ? h('button', { class: 'btn btn-ghost btn-block', onclick: function () {
+            data.have = []; flags.have = false; persist(); close(); render();
+          } }, L('Clear', 'Tout effacer')) : null,
+          h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, L('Cancel', 'Annuler')))
+      ];
+    }, { modal: true });
+  }
+
+  /* « Sans… » : ingrédients à éviter (ex. crevettes). Enregistré, appliqué à toutes les listes. */
+  function editExclude() {
+    ui.sheet(function (close) {
+      var ta = h('input', { class: 'input', type: 'text', autocomplete: 'off', autocapitalize: 'none',
+        value: data.exclude.join(', '), placeholder: L('e.g. shrimp, feta', 'ex. crevettes, feta'), 'aria-label': L('Ingredients to avoid', 'Ingrédients à éviter') });
+      function save() {
+        data.exclude = ta.value.split(',').map(function (x) { return x.trim().toLowerCase(); }).filter(Boolean);
+        persist(); close(); render();
+        ui.toast(data.exclude.length ? L('Recipes with these ingredients are hidden', 'Les recettes avec ces ingrédients sont masquées') : L('No ingredient excluded', 'Aucun ingrédient exclu'));
+      }
+      ta.addEventListener('keydown', function (e) { if (e.key === 'Enter') save(); });
+      return [
+        h('h2', { class: 'sheet-title' }, L('Without…', 'Sans…')),
+        h('p', { class: 'sheet-text' }, L('Recipes containing these ingredients are hidden. Separate them with commas.', 'Les recettes qui contiennent ces ingrédients sont masquées. Sépare-les par des virgules.')),
+        h('label', { class: 'field' }, ta),
+        h('div', { class: 'sheet-actions' },
+          h('button', { class: 'btn btn-primary btn-block', onclick: save }, L('Save', 'Enregistrer')),
+          data.exclude.length ? h('button', { class: 'btn btn-ghost btn-block', onclick: function () { ta.value = ''; save(); } }, L('Show everything again', 'Tout réafficher')) : null,
+          h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, L('Cancel', 'Annuler')))
+      ];
+    }, { modal: true });
+  }
+
+  /* ---------- Menu de la semaine ---------- */
+  function renderMenu() {
+    var items = planItems();
+    root.appendChild(h('h2', { class: 'section-title' }, L('This week’s menu', 'Menu de la semaine')));
+    if (!items.length) {
+      root.appendChild(h('div', { class: 'empty-state small' },
+        h('p', null, L('No meal planned yet. Open a recipe and tap “+ Add to the menu”.', 'Aucun repas prévu. Ouvre une recette et touche « + Ajouter au menu ».')),
+        h('button', { class: 'btn btn-secondary', onclick: function () { section = 'recipes'; render(); } }, L('Choose recipes', 'Choisir des recettes'))));
+    } else {
+      var totalServ = items.reduce(function (n, it) { return n + (it.servings || 1); }, 0);
+      root.appendChild(h('p', { class: 'hint' }, meals(items.length) + ' · ' + plural(totalServ, 'serving', 'portion')));
+      root.appendChild(h('div', { class: 'list' }, items.map(function (it) {
+        var r = recipe(it.recipeId), v = view(r);
+        return h('div', { class: 'list-row ck-menurow' },
+          h('button', { class: 'ck-menuname', onclick: function () { servingsView[r.id] = it.servings; open(r.id); } },
+            h('span', { class: 'list-title' }, v.name),
+            h('span', { class: 'list-sub' }, (CATS[r.category] || OTHER) + (r.time ? ' · ⏱ ' + r.time + ' min' : ''))),
+          h('div', { class: 'stepper ck-menustep' },
+            h('button', { class: 'btn btn-step', 'aria-label': L('One serving less', 'Une portion de moins'), disabled: it.servings <= 1,
+              onclick: function () { it.servings = Math.max(1, it.servings - 1); persist(); render(); } }, '−'),
+            h('span', { class: 'stepper-num', 'aria-label': plural(it.servings, 'serving', 'portion') }, it.servings),
+            h('button', { class: 'btn btn-step', 'aria-label': L('One serving more', 'Une portion de plus'), disabled: it.servings >= 12,
+              onclick: function () { it.servings = Math.min(12, it.servings + 1); persist(); render(); } }, '+')),
+          h('div', { class: 'ck-menuacts' },
+            h('button', { class: 'btn btn-secondary btn-sm', onclick: function () {
+              logCooked(r, it.servings); data.plan.items.splice(data.plan.items.indexOf(it), 1); persist(); render();
+              ui.toast(L('Marked as cooked', 'Marquée comme cuisinée'));
+            } }, L('✓ Cooked', '✓ Faite')),
+            h('button', { class: 'btn btn-ghost btn-sm', 'aria-label': L('Remove from the menu', 'Retirer du menu'), onclick: function () {
+              data.plan.items.splice(data.plan.items.indexOf(it), 1); persist(); render();
+            } }, '✕')));
+      })));
+      root.appendChild(h('div', { class: 'bottom-actions' },
+        h('button', { class: 'btn btn-primary btn-block btn-lg', onclick: function () { section = 'shop'; render(); window.scrollTo(0, 0); } }, L('🛒 Groceries for the menu ›', '🛒 Courses du menu ›')),
+        h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: function () {
+          ui.confirm({ title: L('Clear the menu?', 'Vider le menu ?'), message: L('All planned meals and grocery ticks will be removed.', 'Tous les repas prévus et les cases cochées des courses seront retirés.'),
+            okLabel: L('Clear', 'Vider'), cancelLabel: L('Cancel', 'Annuler'), danger: true }).then(function (ok) {
+            if (!ok) return; data.plan.items = []; data.plan.checks = {}; persist(); render();
+          });
+        } }, L('Clear the menu', 'Vider le menu'))));
+    }
+    /* Déjà cuisiné : les 10 derniers repas, à remettre au menu en un geste. */
+    var hist = data.history.filter(function (x) { return recipe(x.recipeId); }).slice(0, 10);
+    if (hist.length) {
+      root.appendChild(h('h2', { class: 'section-title' }, L('Recently cooked', 'Déjà cuisiné')));
+      root.appendChild(h('div', { class: 'list' }, hist.map(function (x) {
+        var r = recipe(x.recipeId);
+        return h('div', { class: 'list-row ck-histrow' },
+          h('button', { class: 'ck-menuname', onclick: function () { open(r.id); } },
+            h('span', { class: 'list-title' }, view(r).name),
+            h('span', { class: 'list-sub' }, ui.date(x.date) + ' · ' + plural(x.servings || 1, 'serving', 'portion'))),
+          h('button', { class: 'btn btn-secondary btn-sm', onclick: function () {
+            addToPlan(r, x.servings || r.servings || 1); render(); ui.toast(L('Added to the menu', 'Ajoutée au menu'));
+          } }, L('+ Menu', '+ Menu')));
+      })));
+    }
+  }
+
+  /* ---------- Courses du menu : une seule liste, quantités additionnées, par rayon ---------- */
+  function renderShop() {
+    var list = shoppingList(), checks = data.plan.checks;
+    root.appendChild(h('h2', { class: 'section-title' }, L('Groceries for the menu', 'Courses du menu')));
+    if (!list.length) {
+      root.appendChild(h('div', { class: 'empty-state small' },
+        h('p', null, L('Add meals to the menu: their ingredients are combined here.', 'Ajoute des repas au menu : leurs ingrédients sont regroupés ici.')),
+        h('button', { class: 'btn btn-secondary', onclick: function () { section = 'recipes'; render(); } }, L('Choose recipes', 'Choisir des recettes'))));
+      return;
+    }
+    var got = list.filter(function (g) { return checks[g.key]; }).length;
+    root.appendChild(h('div', { class: 'ck-listhead' },
+      h('span', { class: 'muted' }, meals(planItems().length)),
+      h('span', { class: 'muted' }, got + ' / ' + list.length + L(' ticked', ' cochés'))));
+    AISLE_ORDER.forEach(function (aid) {
+      var rows = list.filter(function (g) { return g.aisle === aid; });
+      if (!rows.length) return;
+      var label = AISLES.filter(function (a) { return a.id === aid; })[0].label;
+      root.appendChild(h('h3', { class: 'ck-aisle' }, label));
+      root.appendChild(h('div', { class: 'list ck-checklist' }, rows.map(function (g) {
+        var on = !!checks[g.key];
+        return h('button', { class: 'list-row ck-check' + (on ? ' is-on' : ''), role: 'checkbox', 'aria-checked': on ? 'true' : 'false',
+          onclick: function () { if (on) delete checks[g.key]; else checks[g.key] = true; persist(); render(); } },
+          h('span', { class: 'ck-box', 'aria-hidden': 'true' }, on ? '✓' : ''),
+          h('span', { class: 'ck-checktext' }, g.text,
+            g.recipes.length > 1 || planItems().length > 1 ? h('span', { class: 'ck-from' }, g.recipes.join(' · ')) : null));
+      })));
+    });
+    root.appendChild(h('p', { class: 'hint' }, L('Same ingredients are added up (same unit). Tick what you have or put in the basket.',
+      'Les mêmes ingrédients sont additionnés (même unité). Coche ce que tu as ou ce que tu mets dans le panier.')));
+    root.appendChild(h('div', { class: 'bottom-actions' },
+      h('button', { class: 'btn btn-primary btn-block', onclick: function () {
+        var missing = list.filter(function (g) { return !checks[g.key]; });
+        if (!missing.length) { ui.toast(L('You have everything!', 'Tu as tout !')); return; }
+        var text = L('Groceries', 'Courses') + '\n' + AISLE_ORDER.map(function (aid) {
+          var rows = missing.filter(function (g) { return g.aisle === aid; });
+          if (!rows.length) return '';
+          return '\n' + AISLES.filter(function (a) { return a.id === aid; })[0].label + '\n' + rows.map(function (g) { return '• ' + g.text; }).join('\n');
+        }).join('');
+        if (navigator.share) navigator.share({ title: L('Groceries', 'Courses'), text: text }).catch(function () {});
+        else if (navigator.clipboard) navigator.clipboard.writeText(text).then(function () { ui.toast(L('List copied', 'Liste copiée')); });
+      } }, L('Share the missing items', 'Partager ce qui manque')),
+      got ? h('button', { class: 'btn btn-ghost btn-block', onclick: function () { data.plan.checks = {}; persist(); render(); } }, L('Untick everything', 'Tout décocher')) : null));
   }
 
   function checkRow(text, on, toggle) {
@@ -357,6 +807,7 @@
   /* Guide plein écran : une étape à la fois, gros texte, écran maintenu allumé si possible. */
   function cookMode(r, v, start) {
     var i = start, lock = null, n = v.steps.length;
+    var serv = servingsView[r.id] || r.servings || 1, factor = serv / (r.servings || 1);
     try {
       if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (l) { lock = l; }).catch(function () {});
     } catch (e) { /* pas de wake lock : sans importance */ }
@@ -370,13 +821,24 @@
           h('button', { class: 'btn btn-ghost btn-sm', onclick: function () { closeSheet(); } }, L('Close', 'Fermer'))));
         wrap.appendChild(h('div', { class: 'ck-progress' }, h('span', { style: { width: ((i + 1) / n * 100) + '%' } })));
         wrap.appendChild(h('p', { class: 'ck-cooktext' }, v.steps[i]));
+        var qty = stepIngredients(v.steps[i], v, factor);
+        if (qty.length) wrap.appendChild(h('ul', { class: 'ck-cookqty', 'aria-label': L('For this step', 'Pour cette étape') },
+          qty.map(function (q) { return h('li', null, q); })));
+        var tb = timerButtons(v.steps[i]);
+        if (tb) wrap.appendChild(tb);
         if (i === n - 1 && v.tips) wrap.appendChild(h('div', { class: 'note' }, h('strong', null, L('Tip: ', 'Astuce : ')), v.tips));
         var last = i === n - 1;
         wrap.appendChild(h('div', { class: 'ck-cooknav' },
           h('button', { class: 'btn btn-secondary btn-lg', disabled: i === 0, onclick: function () { i--; paint(); } }, L('‹ Back', '‹ Retour')),
           h('button', { class: 'btn btn-primary btn-lg', onclick: function () {
             ch.steps[i] = true; persist();
-            if (last) { closeSheet(); ui.toast(L('Enjoy your meal!', 'Bon appétit !')); } else { i++; paint(); }
+            if (last) {
+              /* Recette terminée : historique, et la recette quitte le menu si elle y était. */
+              logCooked(r, serv);
+              var it = planItems().filter(function (x) { return x.recipeId === r.id; })[0];
+              if (it) data.plan.items.splice(data.plan.items.indexOf(it), 1);
+              persist(); closeSheet(); ui.toast(L('Enjoy your meal!', 'Bon appétit !'));
+            } else { i++; paint(); }
           } }, last ? L('Done ✓', 'Terminé ✓') : L('Next ›', 'Suivant ›'))));
       }
       paint();
@@ -486,7 +948,8 @@
       okLabel: L('Delete', 'Supprimer'), cancelLabel: L('Cancel', 'Annuler'), danger: true }).then(function (ok) {
       if (!ok) return;
       data.recipes = data.recipes.filter(function (x) { return x.id !== r.id; });
-      delete data.checks[r.id];
+      delete data.checks[r.id]; delete data.favs[r.id]; delete data.notes[r.id];
+      data.plan.items = data.plan.items.filter(function (it) { return it.recipeId !== r.id; });
       if (r.builtin && data.removedBuiltins.indexOf(r.id) < 0) data.removedBuiltins.push(r.id);
       persist(); back(); ui.toast(L('Recipe deleted', 'Recette supprimée'));
     });

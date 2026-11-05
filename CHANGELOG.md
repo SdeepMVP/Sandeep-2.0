@@ -1,5 +1,12 @@
 # Changelog — Sandeep 2.0
 
+## 0.23.0 — 2026-11-05
+- SanEva Cooking: **Recipes · Menu · Groceries** at the top of the Kitchen tab.
+- **Weekly menu**: “+ Add to the menu” on any recipe (with its number of servings, changeable in the menu), “✓ Cooked” or ✕ per meal, **Recently cooked** history (one tap to plan it again); a recipe shows how many times it was cooked and when.
+- **One grocery list for the whole menu**: same ingredients added up (e.g. 240 g + 240 g of chicken = 480 g), sorted by aisle (fruit & veg, meat & fish, dairy & eggs, bakery, pantry), tickable and shareable.
+- **Find the right recipe**: filters ♥ Favourites, ⏱ 15 min max, No oven, Vegetarian; **What I have** (tick your main ingredients, recipes sorted by what's missing); **Without…** (hide recipes with an ingredient); ♥ favourite and **personal notes** on each recipe.
+- **Cooking guide**: the quantities used in each step are shown under it, and durations in the text become **timers** (⏱ 3–4 min) with an on-screen countdown and a beep; finishing the guide logs the meal and removes it from the menu.
+
 ## 0.22.0 — 2026-11-05
 - The **Kitchen tab is removed from Sandeep 2.0**: recipes now live only in **SanEva Cooking** (`/cuisine/`). The full app keeps Gym, Wardrobe, Habits and Settings.
 - Recipes saved in Sandeep 2.0 are kept in its data and backups, so they can be imported into SanEva Cooking (Settings › Import there only takes the recipes and settings).
