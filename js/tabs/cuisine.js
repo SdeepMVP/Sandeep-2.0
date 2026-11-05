@@ -38,7 +38,8 @@
   /* Copie d'une recette intégrée pour les données de l'utilisateur : texte français seulement (la traduction reste dans la source). */
   function builtinCopy(src) { var c = clone(src); delete c.en; delete c.photo; c.builtin = true; return c; }
   /* Photo d'une recette intégrée (img/recettes/…), lue dans la source : jamais enregistrée dans les données. */
-  function photoOf(r) { var src = r.builtin && BUILTIN[r.id]; return src && src.photo || null; }
+  var ROOT = window.S2_APP && window.S2_APP.root || ''; /* app Cuisine seule (cuisine/) : fichiers un dossier plus haut */
+  function photoOf(r) { var src = r.builtin && BUILTIN[r.id]; return src && src.photo ? ROOT + src.photo : null; }
 
   var BUILTIN = {}, BUILTIN_FP = {};
   (S2.cuisineRecipes || []).forEach(function (r) { BUILTIN[r.id] = r; BUILTIN_FP[r.id] = fingerprint(r); });

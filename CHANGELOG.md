@@ -1,5 +1,11 @@
 # Changelog — Sandeep 2.0
 
+## 0.20.0 — 2026-11-05
+- New separate **Cuisine app** at `/Sandeep-2.0/cuisine/`: only the Kitchen tab (plus a small Settings screen: theme, backup, updates), always in French, with its own name, icon and offline cache, so it can be installed on another phone (Maeva's). It uses the same recipes and code as the Kitchen tab, so improvements reach both apps.
+- Its export, import and “Erase everything” only touch its own data (recipes and settings), never the gym, wardrobe or habits data of the full app.
+- Full app Settings: new **Kitchen app** card with a button to share its link.
+- Both service workers now only clean up their own caches.
+
 ## 0.19.0 — 2026-11-04
 - Kitchen: the **28 recipes from the “Recettes protéinées” booklet** (17 savoury dishes, 11 breakfasts & brunches, all for 2 people), in French and English, with their photo when the booklet's photo matches the recipe (20 of them, shown on the card and at the top of the recipe).
 - **11 similar recipes removed** (banana pancakes, overnight oats, ham omelette, egg muffins, avocado toast with soft eggs, fajita wraps, tuna pasta, coconut curry, lean burgers, chicken & black bean quesadillas, gnocchi with pesto). Copies you never edited are removed from your data with their ticks; a recipe you edited is kept.

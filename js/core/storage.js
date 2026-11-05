@@ -4,6 +4,11 @@
   'use strict';
   var S2 = (window.S2 = window.S2 || {});
   var PREFIX = 'sandeep2:';
+  /* App dérivée (ex. cuisine/) : window.S2_APP.storage = liste des espaces qu'elle possède. Export, import et
+     effacement se limitent alors à ces espaces, pour ne jamais toucher aux données de l'app complète
+     si les deux partagent le stockage sur le même iPhone. */
+  var SCOPE = window.S2_APP && window.S2_APP.storage || null;
+  function inScope(ns) { return !SCOPE || SCOPE.indexOf(ns) > -1; }
   var listeners = [];
 
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
@@ -34,7 +39,7 @@
     var out = [];
     for (var i = 0; i < localStorage.length; i++) {
       var k = localStorage.key(i);
-      if (k && k.indexOf(PREFIX) === 0) out.push(k.slice(PREFIX.length));
+      if (k && k.indexOf(PREFIX) === 0 && inScope(k.slice(PREFIX.length))) out.push(k.slice(PREFIX.length));
     }
     return out.sort();
   }
@@ -59,7 +64,7 @@
     var backup = exportAll();
     try {
       clearAll();
-      Object.keys(obj.data).forEach(function (ns) {
+      Object.keys(obj.data).filter(inScope).forEach(function (ns) {
         localStorage.setItem(PREFIX + ns, JSON.stringify(obj.data[ns]));
       });
     } catch (e) {
