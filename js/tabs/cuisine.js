@@ -11,7 +11,7 @@
   var FR = S2.lang === 'fr';
   var ui = S2.ui, h = ui.h, num = ui.num;
   var NS = 'cuisine';
-  var SCHEMA = 4;
+  var SCHEMA = 5;
 
   var ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11h16v2a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6v-2zM2 11h2M20 11h2M9 7c0-1 1-1.5 1-2.5M13 7c0-1 1-1.5 1-2.5"/></svg>';
   var CATS = { breakfast: L('Breakfast & snack', 'Petit-déjeuner & en-cas'), main: L('Lunch & dinner', 'Déjeuner & dîner') };
@@ -30,6 +30,8 @@
   /* v0.24 : protéines par portion recalculées à partir des ingrédients (valeurs nutritionnelles standard, crus/secs).
      [ancienne valeur, nouvelle] : une copie qui a encore l'ancienne valeur est corrigée ; une valeur modifiée à la main est gardée. */
   var PROTEIN_FIX = { 'm-tuna-pasta-bake': [43, 65], 'b-cottage-egg-muffins': [25, 36], 'm-crispy-chicken-cheddar': [45, 60], 'm-chicken-burger-bowl': [45, 60], 'b-tomato-mozza-egg-toast': [27, 34], 'm-tortilla-pizza': [42, 53], 'm-chicken-caesar': [52, 65], 'm-paprika-chicken-tray': [46, 57], 'b-breakfast-burrito': [38, 32], 'm-chicken-cheddar-wraps': [45, 55], 'm-chicken-mozza-quesadillas': [45, 55], 'm-tuna-baked-potatoes': [42, 51], 'm-shrimp-risotto': [38, 46], 'b-tuna-toast': [33, 39], 'b-protein-french-toast': [32, 38], 'm-mozza-cottage-omelette': [38, 45], 'b-fromage-blanc-apple': [26, 23], 'm-chicken-lasagna': [45, 53], 'm-chicken-burger': [45, 53], 'm-turkey-meatballs': [52, 61], 'm-chicken-coconut-curry': [45, 53], 'm-creamy-pesto-chicken-pasta': [50, 58], 'm-creamy-chicken-pasta': [50, 58], 'b-pb-smoothie': [35, 40], 'b-cheesecake-oats': [30, 27], 'm-lentil-dahl': [32, 36], 'm-creamy-chicken-gnocchi': [48, 54] };
+  /* v0.25 : calories par portion recalculées de la même façon (huile, avocat, fromages comptés). Même règle que PROTEIN_FIX. */
+  var KCAL_FIX = { 'b-choco-porridge': [470, 540], 'b-fromage-blanc-apple': [360, 320], 'b-protein-bars': [230, 270], 'b-choco-protein-crepes': [520, 460], 'b-avocado-egg-toasts': [560, 750], 'b-avocado-scrambled-feta': [520, 600], 'b-cottage-egg-muffins': [380, 430], 'b-tomato-mozza-egg-toast': [520, 620], 'm-lemon-salmon': [680, 770], 'm-chili': [640, 710], 'm-turkey-meatballs': [650, 810], 'm-peanut-tofu': [640, 860], 'm-paprika-chicken-tray': [560, 700], 'm-teriyaki-salmon': [690, 850], 'm-shrimp-poke': [600, 720], 'm-chicken-ramen': [580, 500], 'm-lentil-feta-salad': [560, 660], 'm-tortilla-pizza': [560, 700], 'm-creamy-chicken-gnocchi': [700, 610], 'm-chicken-mozza-quesadillas': [620, 690], 'm-chicken-coconut-curry': [690, 770], 'm-mozza-cottage-omelette': [520, 620], 'm-chicken-burger-bowl': [650, 570], 'm-tuna-pasta-bake': [690, 760], 'm-crispy-chicken-cheddar': [700, 620], 'm-chicken-burger': [620, 510] };
   function fingerprint(r) {
     var str = JSON.stringify([r.name, r.ingredients, r.steps, r.tips || '']), x = 5381;
     for (var i = 0; i < str.length; i++) x = ((x * 33) ^ str.charCodeAt(i)) >>> 0;
@@ -80,6 +82,12 @@
       d.recipes.forEach(function (r) {
         var f = r.builtin && PROTEIN_FIX[r.id];
         if (f && r.protein === f[0]) { r.protein = f[1]; added = true; }
+      });
+    }
+    if ((d.schema || 1) < 5) {
+      d.recipes.forEach(function (r) {
+        var f = r.builtin && KCAL_FIX[r.id];
+        if (f && r.kcal === f[0]) { r.kcal = f[1]; added = true; }
       });
     }
     d.recipes.forEach(function (r) { have[r.id] = true; });
