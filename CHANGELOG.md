@@ -1,5 +1,9 @@
 # Changelog — Sandeep 2.0
 
+## 0.24.0 — 2026-11-05
+- SanEva Cooking: **protein per serving fixed**. Recipe pages showed the per-person value as if it were the total for all servings (e.g. 50 g “for 2 servings” instead of 50 g per person); values are now always shown **per serving (one person)**, with the total for the chosen servings in the hint. Cards say “per serving”.
+- **Protein values checked against the ingredients** (standard nutrition values, raw/dry weights): 30 recipes were within ±10 %, **27 were corrected** (mostly booklet recipes that underestimated chicken, tuna and cheese), e.g. tuna & mozzarella pasta bake 43 → 65 g, chicken Caesar 52 → 65 g, crispy chicken 45 → 60 g. Saved copies are updated unless you changed the value yourself.
+
 ## 0.23.0 — 2026-11-05
 - SanEva Cooking: **Recipes · Menu · Groceries** at the top of the Kitchen tab.
 - **Weekly menu**: “+ Add to the menu” on any recipe (with its number of servings, changeable in the menu), “✓ Cooked” or ✕ per meal, **Recently cooked** history (one tap to plan it again); a recipe shows how many times it was cooked and when.

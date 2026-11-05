@@ -11,7 +11,7 @@
   var FR = S2.lang === 'fr';
   var ui = S2.ui, h = ui.h, num = ui.num;
   var NS = 'cuisine';
-  var SCHEMA = 3;
+  var SCHEMA = 4;
 
   var ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11h16v2a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6v-2zM2 11h2M20 11h2M9 7c0-1 1-1.5 1-2.5M13 7c0-1 1-1.5 1-2.5"/></svg>';
   var CATS = { breakfast: L('Breakfast & snack', 'Petit-déjeuner & en-cas'), main: L('Lunch & dinner', 'Déjeuner & dîner') };
@@ -27,6 +27,9 @@
   var REMOVED = { 'b-banana-pancakes': ['13r3ea0', '1vz9snt'], 'b-overnight-oats': ['ogq3qs'], 'b-ham-omelette': ['1qy4sr0'],
     'b-egg-muffins': ['nwprkb'], 'b-avocado-toast': ['5brupa'], 'm-chicken-fajitas': ['16duqai', 'qphei0'], 'm-tuna-pasta': ['cswgtt', '12umfqs'],
     'm-coconut-curry': ['ibwd26'], 'm-lean-burgers': ['z26ts9'], 'm-chicken-quesadillas': ['79kia7'], 'm-pesto-gnocchi': ['mlg1gd'] };
+  /* v0.24 : protéines par portion recalculées à partir des ingrédients (valeurs nutritionnelles standard, crus/secs).
+     [ancienne valeur, nouvelle] : une copie qui a encore l'ancienne valeur est corrigée ; une valeur modifiée à la main est gardée. */
+  var PROTEIN_FIX = { 'm-tuna-pasta-bake': [43, 65], 'b-cottage-egg-muffins': [25, 36], 'm-crispy-chicken-cheddar': [45, 60], 'm-chicken-burger-bowl': [45, 60], 'b-tomato-mozza-egg-toast': [27, 34], 'm-tortilla-pizza': [42, 53], 'm-chicken-caesar': [52, 65], 'm-paprika-chicken-tray': [46, 57], 'b-breakfast-burrito': [38, 32], 'm-chicken-cheddar-wraps': [45, 55], 'm-chicken-mozza-quesadillas': [45, 55], 'm-tuna-baked-potatoes': [42, 51], 'm-shrimp-risotto': [38, 46], 'b-tuna-toast': [33, 39], 'b-protein-french-toast': [32, 38], 'm-mozza-cottage-omelette': [38, 45], 'b-fromage-blanc-apple': [26, 23], 'm-chicken-lasagna': [45, 53], 'm-chicken-burger': [45, 53], 'm-turkey-meatballs': [52, 61], 'm-chicken-coconut-curry': [45, 53], 'm-creamy-pesto-chicken-pasta': [50, 58], 'm-creamy-chicken-pasta': [50, 58], 'b-pb-smoothie': [35, 40], 'b-cheesecake-oats': [30, 27], 'm-lentil-dahl': [32, 36], 'm-creamy-chicken-gnocchi': [48, 54] };
   function fingerprint(r) {
     var str = JSON.stringify([r.name, r.ingredients, r.steps, r.tips || '']), x = 5381;
     for (var i = 0; i < str.length; i++) x = ((x * 33) ^ str.charCodeAt(i)) >>> 0;
@@ -71,6 +74,12 @@
         var gone = r.builtin && REMOVED[r.id] && REMOVED[r.id].indexOf(fingerprint(r)) > -1;
         if (gone) { delete d.checks[r.id]; added = true; }
         return !gone;
+      });
+    }
+    if ((d.schema || 1) < 4) {
+      d.recipes.forEach(function (r) {
+        var f = r.builtin && PROTEIN_FIX[r.id];
+        if (f && r.protein === f[0]) { r.protein = f[1]; added = true; }
       });
     }
     d.recipes.forEach(function (r) { have[r.id] = true; });
@@ -484,7 +493,8 @@
       h('div', { class: 'ck-meta' },
         r.time ? h('span', null, '⏱ ' + r.time + ' min') : null,
         r.protein ? h('span', { class: 'ck-protein' }, r.protein + L(' g protein', ' g de protéines')) : null,
-        r.kcal ? h('span', null, r.kcal + ' kcal') : null),
+        r.kcal ? h('span', null, r.kcal + ' kcal') : null,
+        r.protein || r.kcal ? h('span', { class: 'ck-perserv' }, L('per serving', 'par portion')) : null),
       v.tags.length ? h('div', { class: 'ck-tags' }, v.tags.slice(0, 4).join(' · ')) : null);
   }
 
@@ -512,10 +522,12 @@
     root.appendChild(h('div', { class: 'ck-meta ck-meta-lg' },
       h('span', { class: 'badge' }, CATS[r.category] || OTHER),
       r.time ? h('span', null, '⏱ ' + r.time + ' min') : null,
-      r.protein ? h('span', { class: 'ck-protein' }, '≈ ' + Math.round(r.protein * factor) + L(' g protein', ' g de protéines')) : null,
-      r.kcal ? h('span', null, '≈ ' + Math.round(r.kcal * factor) + ' kcal') : null));
+      r.protein ? h('span', { class: 'ck-protein' }, '≈ ' + r.protein + L(' g protein', ' g de protéines')) : null,
+      r.kcal ? h('span', null, '≈ ' + r.kcal + ' kcal') : null));
+    /* Les valeurs enregistrées sont PAR PORTION (une personne) : elles ne changent pas avec le nombre de portions. */
     if (r.protein || r.kcal) root.appendChild(h('p', { class: 'hint' },
-      L('Approximate values for ', 'Valeurs approximatives pour ') + plural(serv, 'serving', 'portion') + '.'));
+      L('Approximate values per serving (one person)', 'Valeurs approximatives par portion (une personne)') +
+      (serv > 1 && r.protein ? L(' · ≈ ' + Math.round(r.protein * serv) + ' g protein in total for ' + serv, ' · ≈ ' + Math.round(r.protein * serv) + ' g de protéines au total pour ' + serv) : '') + '.'));
 
     root.appendChild(h('div', { class: 'card ck-servings' },
       h('span', { class: 'field-label' }, L('Servings', 'Portions')),
@@ -922,8 +934,8 @@
         text(L('Name', 'Nom'), 'name', L('e.g. Chicken curry', 'ex. Curry de poulet')),
         h('div', { class: 'field' }, h('span', { class: 'field-label' }, L('Category', 'Catégorie')), catSeg),
         h('div', { class: 'form-grid' }, numf(L('Time (min)', 'Temps (min)'), 'time', '15'), numf(L('Servings', 'Portions'), 'servings', '1'),
-          numf(L('Protein (g)', 'Protéines (g)'), 'protein', '40')),
-        h('div', { class: 'form-grid ck-grid1' }, numf(L('Calories (kcal, optional)', 'Calories (kcal, facultatif)'), 'kcal', '600')),
+          numf(L('Protein per serving (g)', 'Protéines par portion (g)'), 'protein', '40')),
+        h('div', { class: 'form-grid ck-grid1' }, numf(L('Calories per serving (kcal, optional)', 'Calories par portion (kcal, facultatif)'), 'kcal', '600')),
         h('label', { class: 'field' }, h('span', { class: 'field-label' },
           L('Main ingredients (for search, comma-separated)', 'Ingrédients principaux (pour la recherche, séparés par des virgules)')), tagsInp),
         lines(L('Ingredients (one per line)', 'Ingrédients (un par ligne)'), 'ingredients',

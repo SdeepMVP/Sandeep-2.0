@@ -139,7 +139,7 @@
     },
     {
       id: 'b-pb-smoothie', name: 'Smoothie banane & cacahuète', category: 'breakfast',
-      time: 5, servings: 1, protein: 35, kcal: 470,
+      time: 5, servings: 1, protein: 40, kcal: 470,
       tags: ['banane', 'beurre de cacahuète', 'whey', 'lait'], keywords: ['smoothie', 'shake', 'banana', 'peanut butter', 'protein powder'],
       ingredients: [
         '1 banane (idéalement congelée en morceaux)',
@@ -215,7 +215,7 @@
     },
     {
       id: 'b-fromage-blanc-apple', name: 'Fromage blanc, pomme & noix', category: 'breakfast',
-      time: 5, servings: 1, protein: 26, kcal: 360,
+      time: 5, servings: 1, protein: 23, kcal: 360,
       tags: ['fromage blanc', 'pomme', 'noix', 'en-cas'], keywords: ['cottage', 'quark', 'yogurt', 'apple', 'walnuts', 'snack'],
       ingredients: [
         '250 g de fromage blanc 0 %',
@@ -250,7 +250,7 @@
     },
     {
       id: 'b-tuna-toast', name: 'Tartines thon, skyr & concombre', category: 'breakfast',
-      time: 5, servings: 1, protein: 33, kcal: 380,
+      time: 5, servings: 1, protein: 39, kcal: 380,
       tags: ['thon', 'skyr', 'pain', 'en-cas'], keywords: ['tuna', 'toast', 'yogurt', 'cucumber', 'snack'],
       ingredients: [
         '1 boîte de thon au naturel (environ 110 g égoutté)',
@@ -289,7 +289,7 @@
     },
     {
       id: 'b-breakfast-burrito', name: 'Burrito petit-déj œufs & dinde', category: 'breakfast',
-      time: 10, servings: 1, protein: 38, kcal: 520,
+      time: 10, servings: 1, protein: 32, kcal: 520,
       tags: ['œufs', 'dinde', 'wrap', 'fromage'], keywords: ['breakfast burrito', 'eggs', 'turkey', 'tortilla', 'cheese'],
       ingredients: [
         '2 œufs',
@@ -468,7 +468,7 @@
     },
     {
       id: 'b-cheesecake-oats', name: 'Overnight oats façon cheesecake', category: 'breakfast',
-      time: 5, servings: 2, protein: 30, kcal: 420, photo: 'img/recettes/b-cheesecake-oats.jpg',
+      time: 5, servings: 2, protein: 27, kcal: 420, photo: 'img/recettes/b-cheesecake-oats.jpg',
       tags: ['flocons d’avoine', 'skyr', 'fromage frais', 'fruits rouges'], keywords: ['overnight oats', 'cheesecake', 'oats', 'skyr', 'berries'],
       ingredients: ['80 g de flocons d’avoine', '300 g de skyr', '100 ml de lait', '100 g de fromage frais', '100 g de fraises ou de fruits rouges', 'Miel'],
       steps: [
@@ -512,7 +512,7 @@
     },
     {
       id: 'b-protein-french-toast', name: 'French toast brioché protéiné', category: 'breakfast',
-      time: 15, servings: 2, protein: 32, kcal: 560, photo: 'img/recettes/b-protein-french-toast.jpg',
+      time: 15, servings: 2, protein: 38, kcal: 560, photo: 'img/recettes/b-protein-french-toast.jpg',
       tags: ['brioche', 'œufs', 'skyr', 'fruits'], keywords: ['french toast', 'pain perdu', 'brioche', 'eggs', 'skyr'],
       ingredients: ['4 tranches de brioche', '4 œufs', '200 ml de lait', '300 g de skyr', '1 pincée de cannelle', 'Fruits & miel'],
       steps: [
@@ -606,7 +606,7 @@
     },
     {
       id: 'b-cottage-egg-muffins', name: 'Muffins salés aux œufs, cottage cheese & légumes', category: 'breakfast',
-      time: 30, servings: 2, protein: 25, kcal: 380,
+      time: 30, servings: 2, protein: 36, kcal: 380,
       tags: ['œufs', 'cottage cheese', 'poivron', 'fromage'], keywords: ['egg muffins', 'eggs', 'cottage cheese', 'peppers', 'meal prep'],
       ingredients: ['6 œufs', '150 g de cottage cheese', '60 g de fromage râpé', '1 poivron', '1 poignée de tomates cerises', 'Sel, poivre & herbes'],
       steps: [
@@ -654,7 +654,7 @@
     },
     {
       id: 'b-tomato-mozza-egg-toast', name: 'Toast chaud tomate, mozzarella & œuf', category: 'breakfast',
-      time: 15, servings: 2, protein: 27, kcal: 520,
+      time: 15, servings: 2, protein: 34, kcal: 520,
       tags: ['œufs', 'mozzarella', 'tomates', 'pain'], keywords: ['toast', 'mozzarella', 'tomato', 'egg', 'oven'],
       ingredients: ['4 grandes tranches de pain aux céréales', '4 œufs', '125 g de mozzarella', '2 tomates', '60 g de fromage frais', 'Basilic, sel & poivre'],
       steps: [
@@ -931,7 +931,7 @@
     },
     {
       id: 'm-turkey-meatballs', name: 'Boulettes de dinde, sauce tomate & pâtes', category: 'main',
-      time: 25, servings: 2, protein: 52, kcal: 650,
+      time: 25, servings: 2, protein: 61, kcal: 650,
       tags: ['dinde', 'pâtes', 'tomates', 'parmesan'], keywords: ['turkey', 'meatballs', 'pasta', 'tomato', 'parmesan'],
       ingredients: [
         '400 g de dinde hachée',
@@ -1021,7 +1021,7 @@
     },
     {
       id: 'm-chicken-caesar', name: 'Salade César au poulet (version légère)', category: 'main',
-      time: 20, servings: 1, protein: 52, kcal: 520,
+      time: 20, servings: 1, protein: 65, kcal: 520,
       tags: ['poulet', 'salade', 'parmesan', 'œuf'], keywords: ['chicken', 'caesar', 'salad', 'lettuce', 'parmesan'],
       ingredients: [
         '180 g de blanc de poulet',
@@ -1121,7 +1121,7 @@
     },
     {
       id: 'm-paprika-chicken-tray', name: 'Poulet au paprika & patates douces sur plaque', category: 'main',
-      time: 30, servings: 2, protein: 46, kcal: 560,
+      time: 30, servings: 2, protein: 57, kcal: 560,
       tags: ['poulet', 'patate douce', 'poivron', 'four'], keywords: ['chicken', 'sweet potato', 'tray bake', 'sheet pan', 'peppers'],
       ingredients: [
         '400 g de hauts de cuisse ou de blancs de poulet',
@@ -1258,7 +1258,7 @@
     },
     {
       id: 'm-lentil-dahl', name: 'Dahl de lentilles corail & œufs', category: 'main',
-      time: 25, servings: 2, protein: 32, kcal: 560,
+      time: 25, servings: 2, protein: 36, kcal: 560,
       tags: ['lentilles', 'végétarien', 'œufs', 'épinards'], keywords: ['dahl', 'dal', 'lentils', 'vegetarian', 'eggs', 'spinach'],
       ingredients: [
         '160 g de lentilles corail',
@@ -1540,7 +1540,7 @@
     },
     {
       id: 'm-tortilla-pizza', name: 'Pizza tortilla protéinée', category: 'main',
-      time: 15, servings: 1, protein: 42, kcal: 560,
+      time: 15, servings: 1, protein: 53, kcal: 560,
       tags: ['pizza', 'jambon', 'mozzarella', 'wrap'], keywords: ['pizza', 'tortilla', 'ham', 'mozzarella', 'cheese'],
       ingredients: [
         '2 tortillas complètes',
@@ -1584,7 +1584,7 @@
     /* ---------- Livret « Recettes protéinées » (PDF, 4 nov. 2026) : plats salés, pour 2 personnes ---------- */
     {
       id: 'm-creamy-chicken-pasta', name: 'Pâtes crémeuses au poulet, parmesan & tomates', category: 'main',
-      time: 25, servings: 2, protein: 50, kcal: 680, photo: 'img/recettes/m-creamy-chicken-pasta.jpg',
+      time: 25, servings: 2, protein: 58, kcal: 680, photo: 'img/recettes/m-creamy-chicken-pasta.jpg',
       tags: ['poulet', 'pâtes', 'cottage cheese', 'parmesan', 'tomates'], keywords: ['chicken', 'pasta', 'creamy', 'cottage cheese', 'parmesan', 'tomatoes'],
       ingredients: ['200 g de pâtes', '240 g de blanc de poulet', '200 g de tomates cerises', '200 g de cottage cheese', '30 g de parmesan râpé', '2 gousses d’ail', '1 filet d’huile d’olive', 'Basilic, sel & poivre'],
       steps: [
@@ -1634,7 +1634,7 @@
     },
     {
       id: 'm-chicken-cheddar-wraps', name: 'Wraps poulet, cheddar & sauce crémeuse', category: 'main',
-      time: 20, servings: 2, protein: 45, kcal: 620, photo: 'img/recettes/m-chicken-cheddar-wraps.jpg',
+      time: 20, servings: 2, protein: 55, kcal: 620, photo: 'img/recettes/m-chicken-cheddar-wraps.jpg',
       tags: ['poulet', 'wrap', 'cheddar', 'skyr'], keywords: ['chicken', 'wrap', 'tortilla', 'cheddar', 'cheese'],
       ingredients: ['4 tortillas', '240 g de blanc de poulet', '60 g de cheddar', '160 g de skyr nature', '2 tomates', 'Quelques feuilles de salade', 'Ail, paprika & citron'],
       steps: [
@@ -1658,7 +1658,7 @@
     },
     {
       id: 'm-creamy-chicken-gnocchi', name: 'Gnocchis crémeux au poulet & parmesan', category: 'main',
-      time: 20, servings: 2, protein: 48, kcal: 700, photo: 'img/recettes/m-creamy-chicken-gnocchi.jpg',
+      time: 20, servings: 2, protein: 54, kcal: 700, photo: 'img/recettes/m-creamy-chicken-gnocchi.jpg',
       tags: ['poulet', 'gnocchis', 'cottage cheese', 'parmesan'], keywords: ['chicken', 'gnocchi', 'creamy', 'cottage cheese', 'parmesan'],
       ingredients: ['400 g de gnocchis', '240 g de blanc de poulet', '200 g de cottage cheese', '40 g de parmesan râpé', '1 poignée de tomates cerises', '2 gousses d’ail'],
       steps: [
@@ -1706,7 +1706,7 @@
     },
     {
       id: 'm-chicken-mozza-quesadillas', name: 'Quesadillas au poulet & mozzarella', category: 'main',
-      time: 20, servings: 2, protein: 45, kcal: 620, photo: 'img/recettes/m-chicken-mozza-quesadillas.jpg',
+      time: 20, servings: 2, protein: 55, kcal: 620, photo: 'img/recettes/m-chicken-mozza-quesadillas.jpg',
       tags: ['poulet', 'mozzarella', 'wrap', 'skyr'], keywords: ['quesadilla', 'chicken', 'mozzarella', 'cheese', 'tortilla'],
       ingredients: ['4 tortillas', '240 g de blanc de poulet', '120 g de mozzarella', '100 g de skyr', '2 tomates', 'Paprika, ail & poivre'],
       steps: [
@@ -1754,7 +1754,7 @@
     },
     {
       id: 'm-chicken-coconut-curry', name: 'Poulet façon curry coco', category: 'main',
-      time: 25, servings: 2, protein: 45, kcal: 690, photo: 'img/recettes/m-chicken-coconut-curry.jpg',
+      time: 25, servings: 2, protein: 53, kcal: 690, photo: 'img/recettes/m-chicken-coconut-curry.jpg',
       tags: ['poulet', 'curry', 'riz', 'lait de coco'], keywords: ['chicken', 'curry', 'coconut', 'rice'],
       ingredients: ['300 g de blanc de poulet', '200 g de riz (cru)', '200 ml de lait de coco', '160 g de skyr', '1 oignon', '2 gousses d’ail', '2 c. à café de curry'],
       steps: [
@@ -1778,7 +1778,7 @@
     },
     {
       id: 'm-tuna-baked-potatoes', name: 'Pommes de terre gratinées au thon & cottage cheese', category: 'main',
-      time: 55, servings: 2, protein: 42, kcal: 560, photo: 'img/recettes/m-tuna-baked-potatoes.jpg',
+      time: 55, servings: 2, protein: 51, kcal: 560, photo: 'img/recettes/m-tuna-baked-potatoes.jpg',
       tags: ['thon', 'poisson', 'pommes de terre', 'cottage cheese', 'four'], keywords: ['tuna', 'fish', 'baked potatoes', 'jacket potatoes', 'cottage cheese', 'cheddar'],
       ingredients: ['500 g de pommes de terre', '240 g de thon égoutté', '200 g de cottage cheese', '40 g de cheddar râpé', '1 gousse d’ail', 'Ciboulette'],
       steps: [
@@ -1802,7 +1802,7 @@
     },
     {
       id: 'm-mozza-cottage-omelette', name: 'Omelette mozzarella & cottage cheese', category: 'main',
-      time: 15, servings: 2, protein: 38, kcal: 520,
+      time: 15, servings: 2, protein: 45, kcal: 520,
       tags: ['œufs', 'mozzarella', 'cottage cheese', 'tomates'], keywords: ['omelette', 'eggs', 'mozzarella', 'cottage cheese'],
       ingredients: ['6 œufs', '200 g de cottage cheese', '80 g de mozzarella', '1 poignée de tomates cerises', '4 tranches de pain complet', 'Sel & poivre'],
       steps: [
@@ -1826,7 +1826,7 @@
     },
     {
       id: 'm-creamy-pesto-chicken-pasta', name: 'Pâtes au poulet façon pesto crémeux', category: 'main',
-      time: 20, servings: 2, protein: 50, kcal: 690, photo: 'img/recettes/m-creamy-pesto-chicken-pasta.jpg',
+      time: 20, servings: 2, protein: 58, kcal: 690, photo: 'img/recettes/m-creamy-pesto-chicken-pasta.jpg',
       tags: ['poulet', 'pâtes', 'pesto', 'skyr'], keywords: ['chicken', 'pasta', 'pesto', 'creamy'],
       ingredients: ['200 g de pâtes', '240 g de blanc de poulet', '200 g de skyr', '40 g de pesto', '30 g de parmesan râpé', '1 poignée de tomates cerises'],
       steps: [
@@ -1850,7 +1850,7 @@
     },
     {
       id: 'm-chicken-burger-bowl', name: 'Bowl façon burger au poulet', category: 'main',
-      time: 40, servings: 2, protein: 45, kcal: 650,
+      time: 40, servings: 2, protein: 60, kcal: 650,
       tags: ['poulet', 'pommes de terre', 'cheddar', 'skyr', 'four'], keywords: ['chicken', 'burger bowl', 'potatoes', 'cheddar'],
       ingredients: ['300 g de blanc de poulet', '500 g de pommes de terre', '60 g de cheddar râpé', '200 g de skyr', '2 tomates', 'Salade', '1 c. à café de moutarde', 'Paprika & ail'],
       steps: [
@@ -1874,7 +1874,7 @@
     },
     {
       id: 'm-chicken-lasagna', name: 'Lasagnes poulet, ricotta & mozzarella', category: 'main',
-      time: 50, servings: 2, protein: 45, kcal: 720, photo: 'img/recettes/m-chicken-lasagna.jpg',
+      time: 50, servings: 2, protein: 53, kcal: 720, photo: 'img/recettes/m-chicken-lasagna.jpg',
       tags: ['poulet', 'lasagnes', 'ricotta', 'mozzarella', 'four'], keywords: ['lasagna', 'lasagne', 'chicken', 'ricotta', 'mozzarella'],
       ingredients: ['240 g de poulet haché', '6 feuilles de lasagnes (selon le plat)', '200 g de ricotta', '80 g de mozzarella', '400 g de coulis de tomate', 'Parmesan', '1 gousse d’ail', 'Basilic'],
       steps: [
@@ -1898,7 +1898,7 @@
     },
     {
       id: 'm-tuna-pasta-bake', name: 'Gratin de pâtes au thon & mozzarella', category: 'main',
-      time: 30, servings: 2, protein: 43, kcal: 690, photo: 'img/recettes/m-tuna-pasta-bake.jpg',
+      time: 30, servings: 2, protein: 65, kcal: 690, photo: 'img/recettes/m-tuna-pasta-bake.jpg',
       tags: ['thon', 'poisson', 'pâtes', 'mozzarella', 'four'], keywords: ['tuna', 'pasta bake', 'pasta', 'mozzarella', 'cottage cheese'],
       ingredients: ['200 g de pâtes', '240 g de thon égoutté', '200 g de cottage cheese', '100 g de mozzarella', '300 g de coulis de tomate', '1 gousse d’ail', 'Parmesan'],
       steps: [
@@ -1922,7 +1922,7 @@
     },
     {
       id: 'm-crispy-chicken-cheddar', name: 'Poulet croustillant, pommes de terre & sauce cheddar', category: 'main',
-      time: 45, servings: 2, protein: 45, kcal: 700,
+      time: 45, servings: 2, protein: 60, kcal: 700,
       tags: ['poulet', 'pommes de terre', 'cheddar', 'skyr', 'four'], keywords: ['crispy chicken', 'chicken', 'potatoes', 'cheddar sauce', 'oven'],
       ingredients: ['300 g de blanc de poulet', '500 g de pommes de terre', '60 g de cheddar râpé', '200 g de skyr', '40 g de chapelure', 'Paprika, ail & poivre'],
       steps: [
@@ -1946,7 +1946,7 @@
     },
     {
       id: 'm-shrimp-risotto', name: 'Risotto crémeux aux crevettes & parmesan', category: 'main',
-      time: 35, servings: 2, protein: 38, kcal: 640, photo: 'img/recettes/m-shrimp-risotto.jpg',
+      time: 35, servings: 2, protein: 46, kcal: 640, photo: 'img/recettes/m-shrimp-risotto.jpg',
       tags: ['crevettes', 'riz', 'risotto', 'parmesan'], keywords: ['risotto', 'shrimp', 'prawns', 'rice', 'parmesan'],
       ingredients: ['200 g de riz à risotto', '300 g de crevettes décortiquées', '40 g de parmesan râpé', '100 g de cottage cheese', '700 ml de bouillon chaud (environ)', '1 gousse d’ail', '1 c. à café d’huile', '1/2 citron'],
       steps: [
@@ -1970,7 +1970,7 @@
     },
     {
       id: 'm-chicken-burger', name: 'Burger maison au poulet & sauce spéciale', category: 'main',
-      time: 20, servings: 2, protein: 45, kcal: 620, photo: 'img/recettes/m-chicken-burger.jpg',
+      time: 20, servings: 2, protein: 53, kcal: 620, photo: 'img/recettes/m-chicken-burger.jpg',
       tags: ['poulet', 'burger', 'cheddar', 'skyr'], keywords: ['burger', 'chicken burger', 'cheddar', 'skyr'],
       ingredients: ['300 g de filets de poulet', '2 pains à burger', '2 tranches de cheddar', '160 g de skyr', 'Salade', '1 tomate', '1 c. à café de moutarde', '2 cornichons', 'Paprika'],
       steps: [
