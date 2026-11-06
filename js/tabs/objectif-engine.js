@@ -107,17 +107,36 @@
   /* Journées types : une recette par repas (selon STRUCTURE), portion conseillée pour chacune.
      recipes = recettes déjà filtrées par l'appelant (exclusions, végétarien…). Renvoie jusqu'à `count`
      journées classées, assez différentes les unes des autres (au moins 2 recettes changent). */
-  function dayPlans(recipes, t, count) {
+  /* Petit bruit déterministe (0 à 1) par recette et par graine : varie les propositions sans hasard. */
+  function noise(id, seed) {
+    var x = 2166136261, str = String(id) + '#' + seed;
+    for (var i = 0; i < str.length; i++) { x ^= str.charCodeAt(i); x = Math.imul(x, 16777619); }
+    return ((x >>> 0) % 1000) / 1000;
+  }
+
+  /* opts (facultatif) : used = { id: nombre de fois déjà prévue } (pénalise les répétitions),
+     seed = graine de variation, pool = [nb petits-déj, nb repas] retenus avant la recherche. */
+  function dayPlans(recipes, t, count, opts) {
     if (!t) return [];
     count = count || 8;
+    opts = opts || {};
+    var used = opts.used || {};
+    var hasSeed = opts.seed !== undefined && opts.seed !== null;
+    /* Variété : chaque répétition coûte. Batch : une recette déjà prévue est favorisée (jusqu'à 3 jours). */
+    function extra(r) {
+      var c = used[r.id] || 0;
+      var rep = opts.batch ? (c >= 3 ? 1 : c > 0 ? -0.15 : 0) : c * 0.15;
+      return rep + (hasSeed ? noise(r.id, opts.seed) * 0.12 : 0);
+    }
     var slots = STRUCTURE[t.meals] || STRUCTURE[3];
     var usable = recipes.filter(function (r) { return r && r.kcal > 0 && r.protein > 0 && (r.category === 'breakfast' || r.category === 'main'); });
     function top(cat, n) {
       return usable.filter(function (r) { return r.category === cat; })
-        .map(function (r) { return { r: r, f: recipeFit(r, t) }; })
-        .sort(function (a, b) { return a.f.score - b.f.score; }).slice(0, n);
+        .map(function (r) { return { r: r, f: recipeFit(r, t), x: extra(r) }; })
+        .sort(function (a, b) { return (a.f.score + a.x) - (b.f.score + b.x); }).slice(0, n);
     }
-    var pools = { breakfast: top('breakfast', 10), main: top('main', 12) };
+    var sizes = opts.pool || [10, 12];
+    var pools = { breakfast: top('breakfast', sizes[0]), main: top('main', sizes[1]) };
     var need = { breakfast: 0, main: 0 };
     slots.forEach(function (c) { need[c]++; });
     if (pools.breakfast.length < need.breakfast || pools.main.length < need.main) return [];
@@ -134,9 +153,9 @@
     var all = [];
     bs.forEach(function (b) {
       ms.forEach(function (m) {
-        var items = b.concat(m), K = 0, P = 0;
-        items.forEach(function (x) { K += x.r.kcal * x.f.portion; P += x.r.protein * x.f.portion; });
-        all.push({ items: items, kcal: K, protein: P, score: comboScore(K, P, t) });
+        var items = b.concat(m), K = 0, P = 0, X = 0;
+        items.forEach(function (x) { K += x.r.kcal * x.f.portion; P += x.r.protein * x.f.portion; X += x.x; });
+        all.push({ items: items, kcal: K, protein: P, score: comboScore(K, P, t) + X / items.length });
       });
     });
     all.sort(function (a, b) { return a.score - b.score; });
@@ -165,9 +184,45 @@
     });
   }
 
+  /* Semaine : une journée par jour, enchaînées pour varier (une recette déjà prévue est pénalisée).
+     opts : days (7), seed (variation de toute la semaine), picks = [n° de proposition choisi pour chaque jour],
+     batch = true pour moins de recettes différentes (mêmes plats sur 2 à 3 jours : courses et cuisine simplifiées)
+     (« autre proposition » pour un seul jour). Chaque jour renvoie aussi `choices` = nombre de propositions. */
+  function weekPlan(recipes, t, opts) {
+    if (!t) return [];
+    opts = opts || {};
+    var n = opts.days || 7, seed = opts.seed || 0, picks = opts.picks || [];
+    var used = {}, out = [];
+    for (var d = 0; d < n; d++) {
+      var plans = dayPlans(recipes, t, 5, { used: used, seed: seed * 31 + d, pool: [8, 10], batch: !!opts.batch });
+      if (!plans.length) return [];
+      var k = (picks[d] || 0) % plans.length;
+      var day = plans[k];
+      day.choices = plans.length; day.pick = k;
+      day.meals.forEach(function (m) { used[m.recipe.id] = (used[m.recipe.id] || 0) + 1; });
+      out.push(day);
+    }
+    return out;
+  }
+
+  /* Regroupe la semaine par recette (pour le menu et les courses) : portions additionnées, jours concernés. */
+  function weekTotals(week) {
+    var by = {}, order = [];
+    week.forEach(function (day, d) {
+      day.meals.forEach(function (m) {
+        var id = m.recipe.id;
+        if (!by[id]) { by[id] = { recipe: m.recipe, portions: 0, days: [] }; order.push(id); }
+        by[id].portions += m.portion;
+        if (by[id].days.indexOf(d) < 0) by[id].days.push(d);
+      });
+    });
+    return order.map(function (id) { return by[id]; });
+  }
+
   S2.nutritionEngine = {
     ACTIVITY: ACTIVITY, GOALS: GOALS, PORTIONS: PORTIONS, STRUCTURE: STRUCTURE,
     isComplete: isComplete, bmr: bmr, targets: targets,
-    portionFor: portionFor, recipeFit: recipeFit, dayPlans: dayPlans
+    portionFor: portionFor, recipeFit: recipeFit, dayPlans: dayPlans,
+    weekPlan: weekPlan, weekTotals: weekTotals
   };
 })();

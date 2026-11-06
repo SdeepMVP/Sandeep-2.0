@@ -1,5 +1,11 @@
 # Changelog — Sandeep 2.0
 
+## 0.29.0 — 2026-11-06
+- SanEva Kitchen: **plan the whole week**. The “My day” section becomes **Planning** with **One day / The week**: 7 days of recipes from today, each close to your calories and protein, with day totals and weekly averages.
+- **Varied** (a different menu every day) or **Batch cooking** (the same dishes 2 to 3 days in a row: about half as many recipes to buy and cook); “↻ Change” replaces one day only, “↻ Another week” the whole week.
+- **Confirm the week**: each recipe goes once into the menu with all its servings for the week (rounded up) and the days it is planned (e.g. “Fri, Sat, Sun”), so the groceries add everything up; if the menu already has meals you choose to replace it or add to it. The confirmed week stays visible in Planning until you plan a new one or remove it.
+- Menu servings now go up to 24. Tests for the week planner.
+
 ## 0.28.0 — 2026-11-06
 - SanEva: new **Goal tab** (one profile per phone): height, weight, age, activity, meals per day and goal (**muscle gain, body recomposition, cut, maintenance**). It calculates **calories, protein, carbs and fat per day** (Mifflin-St Jeor × activity, then −20 % to +10 % by goal; protein 1.6 to 2.2 g/kg), shows how it is calculated, lets you **set targets by hand**, and keeps a **weight log** (targets follow your current weight).
 - SanEva Gym: **your own program**. Add, rename, reorder and delete days; **ready-made programs** (Full body A/B, Upper/Lower, Glutes & legs, Push/Pull/Legs, Sandeep's program, blank page) replace the days while keeping the history; exercise names are suggested as you type (about 50 common exercises). A new phone gets a “Is this your program?” card. Workouts remember their day's name even if the day is deleted later.

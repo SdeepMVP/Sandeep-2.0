@@ -787,3 +787,14 @@ input[type="date"].input { display: block; line-height: 48px; }
 .ck-dayslot { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--camel); }
 .ck-daytotal { display: grid; gap: 12px; }
 .ck-daytotal .ck-goalpct { font-size: 18px; }
+
+/* Cuisine · planning de la semaine (v0.29) */
+.ck-planmode { margin-top: 4px; }
+.ck-weekday { padding: 12px 14px; }
+.ck-weekhead { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.ck-weekname { font-weight: 700; font-size: 16px; }
+.ck-weekmeals { display: grid; margin-top: 6px; }
+.ck-weekmeal { display: grid; gap: 1px; width: 100%; text-align: left; min-height: 56px; padding: 8px 0; background: none; border: 0;
+  border-top: 1px solid var(--border); color: inherit; font: inherit; }
+.ck-weekmeal:active { background: var(--surface-2); }
+.ck-weekrecipe { font-weight: 600; }
