@@ -1,6 +1,6 @@
-/* Cache hors-ligne de l'app « Cuisine » (dossier cuisine/, portée limitée à ce dossier).
+/* Cache hors-ligne de l'app « SanEva » (dossier cuisine/, portée limitée à ce dossier).
    Même fonctionnement que ../sw.js : le workflow GitHub Pages remplace __BUILD__ par l'identifiant du commit,
-   ce qui installe la nouvelle version et recharge l'app. Ajouter ici tout nouveau fichier utilisé par la Cuisine
+   ce qui installe la nouvelle version et recharge l'app. Ajouter ici tout nouveau fichier utilisé par la Muscu ou la Cuisine
    (en particulier les photos de img/recettes/). */
 var CACHE_VERSION = 'sandeep2-cuisine-__BUILD__';
 var ASSETS = [
@@ -13,6 +13,7 @@ var ASSETS = [
   '../js/core/storage.js',
   '../js/core/ui.js',
   '../js/core/app.js',
+  '../js/tabs/muscu.js',
   '../js/tabs/cuisine-recipes.js',
   '../js/tabs/cuisine.js',
   '../js/settings.js',
