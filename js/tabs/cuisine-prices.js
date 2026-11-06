@@ -23,7 +23,9 @@
     [/^tranche de blanc de dinde/, { unit: 0.45, pack: 4 }],
     [/^tranche de jambon|^jambon|^ham/, { unit: 0.6, pack: 4 }],
     [/^boeuf hache|^steak hache|^beef mince/, { kg: 16, pack: 500 }],
+    [/^(steak|rumsteck|bavette)/, { kg: 22, pack: 300 }],
     [/^boeuf/, { kg: 22, pack: 300 }],
+    [/^(filet mignon|porc|pork)/, { kg: 15, pack: 400, w: 400 }],
     [/^pave de saumon/, { unit: 3.5, w: 125, pack: 2 }],
     [/^saumon fume|^smoked salmon/, { kg: 40, pack: 120 }],
     [/^saumon|^salmon/, { kg: 26, pack: 250 }],
@@ -82,7 +84,8 @@
     [/^(petite )?gousse d ail|^garlic clove/, { unit: 0.12, pack: 1 }],
     [/^carotte|^carrot/, { unit: 0.15, pack: 1 }],
     [/^courgette/, { unit: 0.8, pack: 1 }],
-    [/^champignon|^mushroom/, { unit: 0.2, pack: 1 }],
+    [/^champignon|^mushroom/, { unit: 0.2, w: 20, pack: 1 }],
+    [/^pousse de soja|^bean sprout/, { kg: 6, pack: 200 }],
     [/^brocoli|^broccoli/, { kg: 4, pack: 500 }],
     [/^haricot vert|^green bean/, { kg: 4, pack: 500 }],
     [/^coeur de romaine/, { unit: 0.8, pack: 2 }],
@@ -100,7 +103,12 @@
     [/^riz a risotto|^risotto rice/, { kg: 4, pack: 1000 }],
     [/^riz|^rice/, { kg: 2.5, pack: 1000 }],
     [/^quinoa/, { kg: 8, pack: 500 }],
-    [/^(pate|spaghetti|penne|pasta)/, { kg: 2, pack: 500 }],
+    [/^(pate|spaghetti|penne|tagliatelle|pasta)/, { kg: 2, pack: 500 }],
+    [/^(semoule|couscou)/, { kg: 2.5, pack: 500 }],
+    [/^(mai\b|mais\b|sweetcorn|corn)/, { kg: 4, pack: 285 }],
+    [/^(pain pita|pita)/, { unit: 0.4, pack: 6 }],
+    [/^(boite de poi chiche|poi chiche|chickpea)/, { unit: 1, pack: 1 }],
+    [/^(cacahuete|peanut)/, { kg: 8, pack: 200 }],
     [/^gnocchi/, { kg: 4, pack: 500 }],
     [/^nouille|^noodle/, { kg: 6, pack: 250 }],
     [/^flocon d avoine|^oat/, { kg: 2, pack: 500 }],
@@ -131,7 +139,7 @@
     [/^fecule|^maizena|^cornflour/, { kg: 5, pantry: true }],
     [/^levure|^baking powder/, { kg: 20, pantry: true }],
     [/^bouillon|^stock/, { l: 0.4, pantry: true }],
-    [/^(curry|paprika|cumin|epice|pincee|origan|herbe|cannelle|graine de sesame|sesame|spice|oregano|cinnamon)/, { kg: 40, pantry: true, w: 1 }]
+    [/^(curry|paprika|cumin|epice|pincee|origan|herbe|cannelle|graine de sesame|sesame|ras el hanout|thym|spice|oregano|cinnamon|thyme)/, { kg: 40, pantry: true, w: 1 }]
   ];
 
   /* Unité de la ligne → { kind: 'mass' | 'vol' | 'count' | 'none', factor vers g / ml / pièce }. */

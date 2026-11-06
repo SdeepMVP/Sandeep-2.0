@@ -1989,6 +1989,751 @@
         ],
         tips: 'Flatten the chicken fillets a little: they cook faster and more evenly.'
       }
+    },
+
+    /* ---------- v0.31 : 15 déjeuners & dîners de plus (valeurs par portion calculées à partir des ingrédients) ---------- */
+    {
+      id: 'm-chicken-tikka', name: 'Poulet tikka masala léger & riz basmati', category: 'main',
+      time: 30, servings: 2, protein: 61, kcal: 660,
+      tags: ['poulet', 'riz', 'yaourt grec', 'curry'], keywords: ['chicken', 'tikka', 'masala', 'curry', 'indian', 'indien', 'rice', 'basmati'],
+      ingredients: [
+        '400 g de blanc de poulet',
+        '150 g de yaourt grec 0 %',
+        '2 c. à café d’épices tikka masala (ou de curry)',
+        '1 oignon',
+        '2 gousses d’ail',
+        '1 c. à café de gingembre râpé',
+        '200 g de tomates concassées en boîte',
+        '100 ml de lait de coco allégé',
+        '1 c. à soupe d’huile',
+        '150 g de riz basmati (cru)',
+        'Coriandre fraîche (facultatif)'
+      ],
+      steps: [
+        'Coupe le poulet en cubes. Mélange-le avec la moitié du yaourt, les épices et une pincée de sel, puis laisse mariner pendant que tu prépares le reste.',
+        'Rince le riz, puis cuis-le 10 à 12 minutes dans une grande casserole d’eau bouillante salée et égoutte-le.',
+        'Dans une sauteuse, chauffe l’huile à feu moyen et fais revenir l’oignon émincé 4 minutes. Ajoute l’ail et le gingembre râpés, 1 minute.',
+        'Ajoute le poulet avec sa marinade et fais-le dorer 5 minutes en remuant.',
+        'Verse les tomates concassées et le lait de coco, puis laisse mijoter 8 à 10 minutes à feu doux, jusqu’à ce que le poulet soit cuit à cœur.',
+        'Hors du feu, ajoute le reste du yaourt. Sers sur le riz avec la coriandre.'
+      ],
+      tips: 'Le yaourt ajouté hors du feu garde la sauce crémeuse sans qu’elle tranche.',
+      en: {
+        name: 'Light Chicken Tikka Masala & Basmati Rice',
+        tags: ['chicken', 'rice', 'Greek yoghurt', 'curry'],
+        ingredients: [
+          '400 g chicken breast',
+          '150 g 0% Greek yoghurt',
+          '2 tsp tikka masala spices (or curry powder)',
+          '1 onion',
+          '2 garlic cloves',
+          '1 tsp grated ginger',
+          '200 g canned chopped tomatoes',
+          '100 ml light coconut milk',
+          '1 tbsp oil',
+          '150 g basmati rice (uncooked)',
+          'Fresh coriander (optional)'
+        ],
+        steps: [
+          'Cut the chicken into cubes. Mix with half the yoghurt, the spices and a pinch of salt, and leave to marinate while you prepare the rest.',
+          'Rinse the rice, then cook it for 10–12 minutes in a large pan of boiling salted water and drain.',
+          'In a large pan, heat the oil over medium heat and cook the sliced onion for 4 minutes. Add the grated garlic and ginger for 1 minute.',
+          'Add the chicken with its marinade and brown for 5 minutes, stirring.',
+          'Pour in the chopped tomatoes and coconut milk, then simmer gently for 8–10 minutes, until the chicken is cooked through.',
+          'Off the heat, stir in the rest of the yoghurt. Serve over the rice with the coriander.'
+        ],
+        tips: 'Adding the yoghurt off the heat keeps the sauce creamy instead of splitting.'
+      }
+    },
+    {
+      id: 'm-steak-sweet-potato', name: 'Steak, frites de patate douce & haricots verts', category: 'main',
+      time: 35, servings: 2, protein: 44, kcal: 530,
+      tags: ['bœuf', 'patate douce', 'haricots verts', 'skyr'], keywords: ['steak', 'beef', 'sweet potato', 'fries', 'green beans'],
+      ingredients: [
+        '300 g de steak de bœuf (rumsteck)',
+        '500 g de patates douces',
+        '300 g de haricots verts',
+        '1 c. à soupe d’huile d’olive',
+        '1 c. à café de paprika fumé',
+        '100 g de skyr',
+        '1 gousse d’ail',
+        '1 c. à soupe de ciboulette ciselée',
+        'Sel & poivre'
+      ],
+      steps: [
+        'Préchauffe le four à 210 °C. Coupe les patates douces en frites épaisses, mélange-les avec la moitié de l’huile, le paprika et du sel, puis étale-les sur une plaque.',
+        'Enfourne 25 à 30 minutes, en retournant les frites à mi-cuisson.',
+        'Cuis les haricots verts 8 minutes dans l’eau bouillante salée, puis égoutte-les.',
+        'Mélange le skyr avec l’ail râpé, la ciboulette, du sel et du poivre : c’est la sauce.',
+        'Chauffe le reste de l’huile dans une poêle très chaude et saisis les steaks 2 à 3 minutes par face selon leur épaisseur et la cuisson voulue.',
+        'Laisse reposer la viande 3 minutes, puis sers avec les frites, les haricots et la sauce.'
+      ],
+      tips: 'Sors la viande du frigo 10 minutes avant et laisse-la reposer après cuisson : elle reste juteuse.',
+      en: {
+        name: 'Steak, Sweet Potato Fries & Green Beans',
+        tags: ['beef', 'sweet potato', 'green beans', 'skyr'],
+        ingredients: [
+          '300 g beef steak (rump)',
+          '500 g sweet potatoes',
+          '300 g green beans',
+          '1 tbsp olive oil',
+          '1 tsp smoked paprika',
+          '100 g skyr',
+          '1 garlic clove',
+          '1 tbsp chopped chives',
+          'Salt & pepper'
+        ],
+        steps: [
+          'Preheat the oven to 210 °C. Cut the sweet potatoes into thick fries, toss with half the oil, the paprika and salt, then spread on a tray.',
+          'Roast for 25–30 minutes, turning the fries halfway.',
+          'Cook the green beans for 8 minutes in boiling salted water, then drain.',
+          'Mix the skyr with the grated garlic, chives, salt and pepper: this is the sauce.',
+          'Heat the rest of the oil in a very hot pan and sear the steaks for 2–3 minutes per side, depending on thickness and how you like them.',
+          'Rest the meat for 3 minutes, then serve with the fries, beans and sauce.'
+        ],
+        tips: 'Take the meat out of the fridge 10 minutes before and rest it after cooking: it stays juicy.'
+      }
+    },
+    {
+      id: 'm-tofu-chickpea-curry', name: 'Curry de tofu, pois chiches & épinards', category: 'main',
+      time: 25, servings: 2, protein: 43, kcal: 790,
+      tags: ['tofu', 'pois chiches', 'épinards', 'végétarien'], keywords: ['tofu', 'chickpeas', 'chickpea', 'spinach', 'curry', 'vegetarian', 'veggie', 'coconut'],
+      ingredients: [
+        '300 g de tofu ferme',
+        '1 boîte de pois chiches (environ 265 g égouttés)',
+        '1 oignon',
+        '2 gousses d’ail',
+        '2 c. à café de curry en poudre',
+        '200 g de tomates concassées en boîte',
+        '200 ml de lait de coco allégé',
+        '2 poignées d’épinards',
+        '1 c. à soupe d’huile',
+        '120 g de riz basmati (cru)',
+        '100 g de skyr'
+      ],
+      steps: [
+        'Cuis le riz 10 à 12 minutes dans l’eau bouillante salée, puis égoutte-le.',
+        'Coupe le tofu en cubes et sèche-le dans un torchon. Fais-le dorer 6 à 8 minutes dans l’huile bien chaude, sans trop remuer, puis réserve.',
+        'Dans la même poêle, fais revenir l’oignon émincé 4 minutes, puis ajoute l’ail râpé et le curry, 1 minute.',
+        'Ajoute les tomates, le lait de coco et les pois chiches égouttés. Laisse mijoter 8 minutes.',
+        'Ajoute les épinards et le tofu, puis mélange 2 minutes, jusqu’à ce que les épinards tombent.',
+        'Sers sur le riz avec une cuillère de skyr.'
+      ],
+      tips: 'Bien sécher le tofu, c’est le secret pour qu’il dore au lieu de bouillir.',
+      en: {
+        name: 'Tofu, Chickpea & Spinach Curry',
+        tags: ['tofu', 'chickpeas', 'spinach', 'vegetarian'],
+        ingredients: [
+          '300 g firm tofu',
+          '1 can chickpeas (about 265 g drained)',
+          '1 onion',
+          '2 garlic cloves',
+          '2 tsp curry powder',
+          '200 g canned chopped tomatoes',
+          '200 ml light coconut milk',
+          '2 handfuls spinach',
+          '1 tbsp oil',
+          '120 g basmati rice (uncooked)',
+          '100 g skyr'
+        ],
+        steps: [
+          'Cook the rice for 10–12 minutes in boiling salted water, then drain.',
+          'Cut the tofu into cubes and pat dry with a tea towel. Brown for 6–8 minutes in very hot oil without stirring too much, then set aside.',
+          'In the same pan, cook the sliced onion for 4 minutes, then add the grated garlic and curry powder for 1 minute.',
+          'Add the tomatoes, coconut milk and drained chickpeas. Simmer for 8 minutes.',
+          'Add the spinach and tofu and stir for 2 minutes, until the spinach wilts.',
+          'Serve over the rice with a spoonful of skyr.'
+        ],
+        tips: 'Drying the tofu well is the secret to browning it instead of boiling it.'
+      }
+    },
+    {
+      id: 'm-shepherds-pie', name: 'Hachis parmentier léger au bœuf', category: 'main',
+      time: 45, servings: 2, protein: 60, kcal: 740,
+      tags: ['bœuf', 'pommes de terre', 'carottes', 'parmesan'], keywords: ['shepherd’s pie', 'cottage pie', 'beef', 'mince', 'potato', 'mash', 'hachis'],
+      ingredients: [
+        '700 g de pommes de terre',
+        '400 g de bœuf haché maigre (5 %)',
+        '1 oignon',
+        '2 carottes',
+        '200 g de tomates concassées en boîte',
+        '1 c. à soupe d’huile d’olive',
+        '100 ml de lait demi-écrémé',
+        '40 g de parmesan râpé',
+        'Thym, sel & poivre'
+      ],
+      steps: [
+        'Épluche les pommes de terre, coupe-les en morceaux et cuis-les 20 minutes dans l’eau bouillante salée, jusqu’à ce qu’elles soient tendres.',
+        'Pendant ce temps, fais revenir l’oignon émincé et les carottes râpées dans l’huile 5 minutes. Ajoute le bœuf haché et fais-le dorer 5 minutes en l’émiettant.',
+        'Ajoute les tomates concassées, le thym, du sel et du poivre, puis laisse mijoter 5 minutes.',
+        'Préchauffe le four à 200 °C. Écrase les pommes de terre égouttées avec le lait chaud, du sel et du poivre.',
+        'Étale la viande dans un plat, couvre-la de purée et parsème de parmesan.',
+        'Enfourne 15 minutes, jusqu’à ce que le dessus soit doré.'
+      ],
+      tips: 'Se garde 3 jours au frigo : parfait en batch cooking.',
+      en: {
+        name: 'Light Beef Shepherd’s Pie',
+        tags: ['beef', 'potatoes', 'carrots', 'parmesan'],
+        ingredients: [
+          '700 g potatoes',
+          '400 g lean beef mince (5%)',
+          '1 onion',
+          '2 carrots',
+          '200 g canned chopped tomatoes',
+          '1 tbsp olive oil',
+          '100 ml semi-skimmed milk',
+          '40 g grated parmesan',
+          'Thyme, salt & pepper'
+        ],
+        steps: [
+          'Peel the potatoes, cut into chunks and cook for 20 minutes in boiling salted water, until tender.',
+          'Meanwhile, cook the sliced onion and grated carrots in the oil for 5 minutes. Add the mince and brown for 5 minutes, breaking it up.',
+          'Add the chopped tomatoes, thyme, salt and pepper, then simmer for 5 minutes.',
+          'Preheat the oven to 200 °C. Mash the drained potatoes with the hot milk, salt and pepper.',
+          'Spread the meat in a baking dish, cover with the mash and sprinkle with parmesan.',
+          'Bake for 15 minutes, until golden on top.'
+        ],
+        tips: 'Keeps 3 days in the fridge: perfect for batch cooking.'
+      }
+    },
+    {
+      id: 'm-turkey-mushroom-cream', name: 'Dinde à la crème de champignons & riz', category: 'main',
+      time: 25, servings: 2, protein: 47, kcal: 610,
+      tags: ['dinde', 'champignons', 'riz', 'crème'], keywords: ['turkey', 'mushroom', 'mushrooms', 'cream', 'creamy', 'rice'],
+      ingredients: [
+        '2 escalopes de dinde (environ 300 g)',
+        '250 g de champignons de Paris',
+        '1 échalote',
+        '150 g de crème légère',
+        '1 c. à café de moutarde',
+        '1 c. à soupe d’huile',
+        '140 g de riz (cru)',
+        'Persil, sel & poivre'
+      ],
+      steps: [
+        'Cuis le riz 10 à 12 minutes dans l’eau bouillante salée, puis égoutte-le.',
+        'Coupe les escalopes en lanières. Chauffe l’huile dans une poêle et fais-les dorer 4 à 5 minutes, puis réserve-les sur une assiette.',
+        'Dans la même poêle, fais revenir l’échalote émincée et les champignons en lamelles 6 minutes, jusqu’à ce qu’ils aient rendu leur eau.',
+        'Ajoute la crème et la moutarde, puis remets la dinde. Laisse mijoter 3 minutes, jusqu’à ce qu’elle soit cuite à cœur.',
+        'Sale, poivre, parsème de persil et sers avec le riz.'
+      ],
+      tips: 'Ne sale les champignons qu’en fin de cuisson : ils dorent mieux.',
+      en: {
+        name: 'Turkey in Creamy Mushroom Sauce & Rice',
+        tags: ['turkey', 'mushrooms', 'rice', 'cream'],
+        ingredients: [
+          '2 turkey escalopes (about 300 g)',
+          '250 g button mushrooms',
+          '1 shallot',
+          '150 g light cream',
+          '1 tsp mustard',
+          '1 tbsp oil',
+          '140 g rice (uncooked)',
+          'Parsley, salt & pepper'
+        ],
+        steps: [
+          'Cook the rice for 10–12 minutes in boiling salted water, then drain.',
+          'Cut the escalopes into strips. Heat the oil in a pan and brown them for 4–5 minutes, then set aside on a plate.',
+          'In the same pan, cook the sliced shallot and mushrooms for 6 minutes, until they have released their water.',
+          'Add the cream and mustard, then return the turkey. Simmer for 3 minutes, until cooked through.',
+          'Season, sprinkle with parsley and serve with the rice.'
+        ],
+        tips: 'Only salt the mushrooms at the end: they brown better.'
+      }
+    },
+    {
+      id: 'm-pork-tenderloin', name: 'Filet mignon moutarde-miel, purée & carottes', category: 'main',
+      time: 40, servings: 2, protein: 51, kcal: 680,
+      tags: ['porc', 'pommes de terre', 'carottes', 'moutarde'], keywords: ['pork', 'pork tenderloin', 'honey mustard', 'mash', 'mashed potatoes', 'carrots'],
+      ingredients: [
+        '1 filet mignon de porc (environ 400 g)',
+        '1 c. à soupe de moutarde à l’ancienne',
+        '1 c. à soupe de miel',
+        '4 carottes',
+        '1 c. à soupe d’huile d’olive',
+        '600 g de pommes de terre',
+        '100 ml de lait demi-écrémé',
+        '10 g de beurre',
+        'Thym, sel & poivre'
+      ],
+      steps: [
+        'Préchauffe le four à 200 °C. Mélange la moutarde et le miel avec du sel et du poivre.',
+        'Fais dorer le filet mignon 4 minutes de tous côtés dans l’huile chaude, puis pose-le dans un plat et badigeonne-le du mélange moutarde-miel.',
+        'Ajoute autour les carottes coupées en bâtonnets et le thym. Enfourne 20 à 25 minutes : la viande doit rester légèrement rosée au centre.',
+        'Pendant ce temps, cuis les pommes de terre en morceaux 20 minutes dans l’eau bouillante salée, puis écrase-les avec le lait chaud et le beurre.',
+        'Laisse reposer la viande 5 minutes avant de la trancher, puis sers avec la purée et les carottes.'
+      ],
+      tips: 'Le filet mignon est très maigre : ne le cuis pas trop, sinon il devient sec.',
+      en: {
+        name: 'Honey Mustard Pork Tenderloin, Mash & Carrots',
+        tags: ['pork', 'potatoes', 'carrots', 'mustard'],
+        ingredients: [
+          '1 pork tenderloin (about 400 g)',
+          '1 tbsp wholegrain mustard',
+          '1 tbsp honey',
+          '4 carrots',
+          '1 tbsp olive oil',
+          '600 g potatoes',
+          '100 ml semi-skimmed milk',
+          '10 g butter',
+          'Thyme, salt & pepper'
+        ],
+        steps: [
+          'Preheat the oven to 200 °C. Mix the mustard and honey with salt and pepper.',
+          'Brown the tenderloin on all sides in the hot oil for 4 minutes, then put it in a dish and brush with the honey mustard.',
+          'Add the carrots cut into sticks and the thyme around it. Roast for 20–25 minutes: the meat should stay slightly pink in the centre.',
+          'Meanwhile, cook the potatoes in chunks for 20 minutes in boiling salted water, then mash with the hot milk and butter.',
+          'Rest the meat for 5 minutes before slicing, then serve with the mash and carrots.'
+        ],
+        tips: 'Pork tenderloin is very lean: don’t overcook it or it gets dry.'
+      }
+    },
+    {
+      id: 'm-chicken-couscous', name: 'Couscous express au poulet & pois chiches', category: 'main',
+      time: 30, servings: 2, protein: 61, kcal: 710,
+      tags: ['poulet', 'semoule', 'pois chiches', 'légumes'], keywords: ['couscous', 'chicken', 'chickpeas', 'chickpea', 'ras el hanout', 'vegetables'],
+      ingredients: [
+        '350 g de blanc de poulet',
+        '1 boîte de pois chiches (environ 265 g égouttés)',
+        '1 courgette',
+        '1 poivron',
+        '1 oignon',
+        '2 c. à café de ras el hanout (ou cumin + paprika)',
+        '200 g de tomates concassées en boîte',
+        '300 ml de bouillon de volaille',
+        '1 c. à soupe d’huile d’olive',
+        '120 g de semoule de couscous (crue)'
+      ],
+      steps: [
+        'Coupe le poulet en cubes, la courgette et le poivron en dés, l’oignon en lamelles.',
+        'Dans une grande sauteuse, chauffe l’huile et fais dorer le poulet 5 minutes avec les épices. Réserve.',
+        'Fais revenir l’oignon, la courgette et le poivron 5 minutes dans la même sauteuse.',
+        'Ajoute les tomates, les pois chiches égouttés, le bouillon et le poulet. Laisse mijoter 10 minutes.',
+        'Pendant ce temps, verse 150 ml d’eau bouillante salée sur la semoule, couvre 5 minutes, puis égrène-la à la fourchette.',
+        'Sers le poulet et ses légumes sur la semoule, avec un peu de bouillon.'
+      ],
+      tips: 'Ajoute une cuillère de harissa ou quelques raisins secs selon les goûts.',
+      en: {
+        name: 'Quick Chicken & Chickpea Couscous',
+        tags: ['chicken', 'couscous', 'chickpeas', 'vegetables'],
+        ingredients: [
+          '350 g chicken breast',
+          '1 can chickpeas (about 265 g drained)',
+          '1 courgette',
+          '1 pepper',
+          '1 onion',
+          '2 tsp ras el hanout (or cumin + paprika)',
+          '200 g canned chopped tomatoes',
+          '300 ml chicken stock',
+          '1 tbsp olive oil',
+          '120 g couscous (uncooked)'
+        ],
+        steps: [
+          'Cut the chicken into cubes, the courgette and pepper into dice and the onion into slices.',
+          'In a large pan, heat the oil and brown the chicken with the spices for 5 minutes. Set aside.',
+          'Cook the onion, courgette and pepper in the same pan for 5 minutes.',
+          'Add the tomatoes, drained chickpeas, stock and chicken. Simmer for 10 minutes.',
+          'Meanwhile, pour 150 ml boiling salted water over the couscous, cover for 5 minutes, then fluff with a fork.',
+          'Serve the chicken and vegetables over the couscous with a little of the broth.'
+        ],
+        tips: 'Add a spoonful of harissa or a few raisins if you like.'
+      }
+    },
+    {
+      id: 'm-burrito-bowl', name: 'Burrito bowl au bœuf & haricots noirs', category: 'main',
+      time: 25, servings: 2, protein: 55, kcal: 780,
+      tags: ['bœuf', 'haricots noirs', 'riz', 'avocat'], keywords: ['burrito', 'bowl', 'beef', 'mince', 'black beans', 'rice', 'avocado', 'mexican', 'mexicain'],
+      ingredients: [
+        '120 g de riz (cru)',
+        '1 citron vert',
+        '300 g de bœuf haché maigre (5 %)',
+        '2 c. à café d’épices chili (ou paprika fumé + cumin)',
+        '1 boîte de haricots noirs (environ 250 g égouttés)',
+        '1 poivron',
+        '1 avocat',
+        '150 g de maïs doux en boîte',
+        '100 g de skyr',
+        'Coriandre, sel & poivre'
+      ],
+      steps: [
+        'Cuis le riz 10 à 12 minutes dans l’eau bouillante salée, puis égoutte-le et arrose-le du jus d’un demi-citron vert.',
+        'Fais dorer le bœuf haché 5 minutes dans une poêle chaude en l’émiettant, avec les épices, du sel et du poivre.',
+        'Ajoute les haricots noirs rincés et 3 c. à soupe d’eau, puis réchauffe 3 minutes.',
+        'Coupe le poivron et l’avocat en dés ; égoutte le maïs.',
+        'Mélange le skyr avec le jus du reste du citron vert et une pincée de sel.',
+        'Compose les bols : riz, bœuf aux haricots, poivron, avocat, maïs, sauce au skyr et coriandre.'
+      ],
+      tips: 'Les bols se préparent à l’avance : garde l’avocat et la sauce à part.',
+      en: {
+        name: 'Beef & Black Bean Burrito Bowl',
+        tags: ['beef', 'black beans', 'rice', 'avocado'],
+        ingredients: [
+          '120 g rice (uncooked)',
+          '1 lime',
+          '300 g lean beef mince (5%)',
+          '2 tsp chilli spices (or smoked paprika + cumin)',
+          '1 can black beans (about 250 g drained)',
+          '1 pepper',
+          '1 avocado',
+          '150 g canned sweetcorn',
+          '100 g skyr',
+          'Coriander, salt & pepper'
+        ],
+        steps: [
+          'Cook the rice for 10–12 minutes in boiling salted water, then drain and squeeze over the juice of half the lime.',
+          'Brown the mince in a hot pan for 5 minutes, breaking it up, with the spices, salt and pepper.',
+          'Add the rinsed black beans and 3 tbsp water, then heat through for 3 minutes.',
+          'Dice the pepper and avocado; drain the sweetcorn.',
+          'Mix the skyr with the juice of the rest of the lime and a pinch of salt.',
+          'Build the bowls: rice, beef and beans, pepper, avocado, sweetcorn, skyr sauce and coriander.'
+        ],
+        tips: 'The bowls can be made ahead: keep the avocado and sauce separate.'
+      }
+    },
+    {
+      id: 'm-chicken-souvlaki', name: 'Souvlaki de poulet, pita & tzatziki', category: 'main',
+      time: 25, servings: 2, protein: 64, kcal: 550,
+      tags: ['poulet', 'pita', 'yaourt grec', 'concombre'], keywords: ['souvlaki', 'gyros', 'chicken', 'pita', 'tzatziki', 'greek', 'grec', 'kebab'],
+      ingredients: [
+        '400 g de blanc de poulet',
+        '1 citron',
+        '1 c. à soupe d’huile d’olive',
+        '1 c. à café d’origan',
+        '2 gousses d’ail',
+        '1/2 concombre',
+        '200 g de yaourt grec 0 %',
+        '2 pains pita',
+        '2 tomates',
+        '1/2 oignon rouge'
+      ],
+      steps: [
+        'Coupe le poulet en gros cubes. Mélange-les avec le jus du citron, l’huile, l’origan, une gousse d’ail râpée, du sel et du poivre, puis laisse mariner 10 minutes.',
+        'Râpe le concombre, presse-le dans tes mains pour retirer l’eau, puis mélange-le au yaourt avec l’autre gousse d’ail râpée et du sel : c’est le tzatziki.',
+        'Enfile le poulet sur des brochettes (ou garde les cubes) et fais-le cuire 8 à 10 minutes dans une poêle ou un gril bien chaud, en le retournant, jusqu’à ce qu’il soit cuit à cœur.',
+        'Réchauffe les pitas 1 minute à la poêle.',
+        'Garnis les pitas de tzatziki, de poulet, de tomates en dés et d’oignon rouge émincé.'
+      ],
+      tips: 'Le tzatziki est meilleur préparé une heure avant ; il se garde 2 jours au frigo.',
+      en: {
+        name: 'Chicken Souvlaki, Pita & Tzatziki',
+        tags: ['chicken', 'pita', 'Greek yoghurt', 'cucumber'],
+        ingredients: [
+          '400 g chicken breast',
+          '1 lemon',
+          '1 tbsp olive oil',
+          '1 tsp oregano',
+          '2 garlic cloves',
+          '1/2 cucumber',
+          '200 g 0% Greek yoghurt',
+          '2 pita breads',
+          '2 tomatoes',
+          '1/2 red onion'
+        ],
+        steps: [
+          'Cut the chicken into large cubes. Mix with the lemon juice, oil, oregano, one grated garlic clove, salt and pepper, and leave to marinate for 10 minutes.',
+          'Grate the cucumber, squeeze out the water with your hands, then mix with the yoghurt, the other grated garlic clove and salt: this is the tzatziki.',
+          'Thread the chicken onto skewers (or keep the cubes) and cook for 8–10 minutes in a very hot pan or grill, turning, until cooked through.',
+          'Warm the pitas in a pan for 1 minute.',
+          'Fill the pitas with tzatziki, chicken, diced tomatoes and sliced red onion.'
+        ],
+        tips: 'Tzatziki is better made an hour ahead; it keeps 2 days in the fridge.'
+      }
+    },
+    {
+      id: 'm-chicken-pad-thai', name: 'Pad thaï au poulet', category: 'main',
+      time: 25, servings: 2, protein: 53, kcal: 700,
+      tags: ['poulet', 'nouilles de riz', 'œufs', 'cacahuètes'], keywords: ['pad thai', 'thai', 'thaï', 'chicken', 'rice noodles', 'noodles', 'peanuts', 'wok'],
+      ingredients: [
+        '140 g de nouilles de riz (sèches)',
+        '2 c. à soupe de sauce soja',
+        '1 c. à soupe de sauce d’huître',
+        '1 c. à soupe de miel',
+        '1 citron vert',
+        '300 g de blanc de poulet',
+        '1 c. à soupe d’huile',
+        '2 œufs',
+        '150 g de pousses de soja (ou de carottes râpées)',
+        '2 cébettes',
+        '30 g de cacahuètes'
+      ],
+      steps: [
+        'Fais tremper les nouilles de riz 8 à 10 minutes dans de l’eau très chaude, puis égoutte-les.',
+        'Mélange la sauce soja, la sauce d’huître, le miel et le jus du citron vert : c’est la sauce.',
+        'Coupe le poulet en fines lanières et fais-le sauter 5 minutes dans l’huile bien chaude, jusqu’à ce qu’il soit cuit.',
+        'Pousse le poulet sur le côté, casse les œufs dans la poêle et brouille-les 1 minute.',
+        'Ajoute les nouilles, la sauce et les pousses de soja, puis mélange 2 minutes à feu vif.',
+        'Sers avec les cébettes émincées et les cacahuètes concassées.'
+      ],
+      tips: 'Prépare tout avant d’allumer le feu : la cuisson au wok va très vite.',
+      en: {
+        name: 'Chicken Pad Thai',
+        tags: ['chicken', 'rice noodles', 'eggs', 'peanuts'],
+        ingredients: [
+          '140 g rice noodles (dry)',
+          '2 tbsp soy sauce',
+          '1 tbsp oyster sauce',
+          '1 tbsp honey',
+          '1 lime',
+          '300 g chicken breast',
+          '1 tbsp oil',
+          '2 eggs',
+          '150 g bean sprouts (or grated carrots)',
+          '2 spring onions',
+          '30 g peanuts'
+        ],
+        steps: [
+          'Soak the rice noodles for 8–10 minutes in very hot water, then drain.',
+          'Mix the soy sauce, oyster sauce, honey and lime juice: this is the sauce.',
+          'Cut the chicken into thin strips and stir-fry for 5 minutes in very hot oil, until cooked.',
+          'Push the chicken to the side, crack the eggs into the pan and scramble for 1 minute.',
+          'Add the noodles, sauce and bean sprouts, then toss for 2 minutes over high heat.',
+          'Serve with the sliced spring onions and crushed peanuts.'
+        ],
+        tips: 'Get everything ready before turning on the heat: wok cooking goes very fast.'
+      }
+    },
+    {
+      id: 'm-beef-stroganoff', name: 'Bœuf stroganoff léger & tagliatelles', category: 'main',
+      time: 25, servings: 2, protein: 59, kcal: 720,
+      tags: ['bœuf', 'champignons', 'tagliatelles', 'skyr'], keywords: ['stroganoff', 'beef', 'mushrooms', 'pasta', 'tagliatelle', 'creamy'],
+      ingredients: [
+        '160 g de tagliatelles (crues)',
+        '1 c. à soupe d’huile',
+        '350 g de bœuf en lanières (rumsteck ou bavette)',
+        '1 oignon',
+        '250 g de champignons de Paris',
+        '1 c. à café de paprika',
+        '1 c. à café de moutarde',
+        '100 g de crème légère',
+        '100 g de skyr',
+        'Persil, sel & poivre'
+      ],
+      steps: [
+        'Cuis les tagliatelles dans une grande casserole d’eau bouillante salée selon le paquet, puis égoutte-les.',
+        'Chauffe l’huile dans une grande poêle à feu vif et saisis le bœuf 2 minutes, en deux fois pour qu’il dore. Réserve.',
+        'Baisse le feu et fais revenir l’oignon émincé et les champignons en lamelles 6 minutes.',
+        'Ajoute le paprika, la moutarde et la crème, puis laisse épaissir 2 minutes.',
+        'Hors du feu, ajoute le skyr et le bœuf, sale et poivre.',
+        'Sers sur les tagliatelles avec du persil.'
+      ],
+      tips: 'Le bœuf se saisit très vite : remets-le seulement à la fin pour qu’il reste tendre.',
+      en: {
+        name: 'Light Beef Stroganoff & Tagliatelle',
+        tags: ['beef', 'mushrooms', 'tagliatelle', 'skyr'],
+        ingredients: [
+          '160 g tagliatelle (uncooked)',
+          '1 tbsp oil',
+          '350 g beef strips (rump or flank)',
+          '1 onion',
+          '250 g button mushrooms',
+          '1 tsp paprika',
+          '1 tsp mustard',
+          '100 g light cream',
+          '100 g skyr',
+          'Parsley, salt & pepper'
+        ],
+        steps: [
+          'Cook the tagliatelle in a large pan of boiling salted water following the packet, then drain.',
+          'Heat the oil in a large pan over high heat and sear the beef for 2 minutes, in two batches so it browns. Set aside.',
+          'Lower the heat and cook the sliced onion and mushrooms for 6 minutes.',
+          'Add the paprika, mustard and cream, and let it thicken for 2 minutes.',
+          'Off the heat, stir in the skyr and the beef, then season.',
+          'Serve over the tagliatelle with parsley.'
+        ],
+        tips: 'The beef sears very fast: put it back only at the end so it stays tender.'
+      }
+    },
+    {
+      id: 'm-pesto-salmon-potatoes', name: 'Saumon en croûte de pesto, pommes de terre & haricots verts', category: 'main',
+      time: 30, servings: 2, protein: 42, kcal: 720,
+      tags: ['saumon', 'pesto', 'pommes de terre', 'haricots verts'], keywords: ['salmon', 'pesto', 'potatoes', 'green beans', 'fish', 'poisson', 'traybake'],
+      ingredients: [
+        '500 g de petites pommes de terre',
+        '1 c. à soupe d’huile d’olive',
+        '30 g de pesto',
+        '20 g de chapelure',
+        '15 g de parmesan râpé',
+        '2 pavés de saumon (environ 300 g)',
+        '250 g de haricots verts',
+        '1/2 citron',
+        'Sel & poivre'
+      ],
+      steps: [
+        'Préchauffe le four à 200 °C. Coupe les petites pommes de terre en deux, mélange-les avec l’huile, du sel et du poivre, puis enfourne-les 15 minutes sur une plaque.',
+        'Mélange le pesto, la chapelure et le parmesan.',
+        'Pose les pavés de saumon sur la plaque, à côté des pommes de terre, et étale le mélange au pesto sur le dessus.',
+        'Ajoute les haricots verts autour et enfourne encore 12 à 15 minutes, jusqu’à ce que le saumon se détache en lamelles.',
+        'Sers avec un filet de citron.'
+      ],
+      tips: 'Pour une croûte bien dorée, passe en mode gril les 2 dernières minutes.',
+      en: {
+        name: 'Pesto-Crusted Salmon, Potatoes & Green Beans',
+        tags: ['salmon', 'pesto', 'potatoes', 'green beans'],
+        ingredients: [
+          '500 g baby potatoes',
+          '1 tbsp olive oil',
+          '30 g pesto',
+          '20 g breadcrumbs',
+          '15 g grated parmesan',
+          '2 salmon fillets (about 300 g)',
+          '250 g green beans',
+          '1/2 lemon',
+          'Salt & pepper'
+        ],
+        steps: [
+          'Preheat the oven to 200 °C. Halve the baby potatoes, toss with the oil, salt and pepper, and roast on a tray for 15 minutes.',
+          'Mix the pesto, breadcrumbs and parmesan.',
+          'Put the salmon fillets on the tray next to the potatoes and spread the pesto mix on top.',
+          'Add the green beans around and roast for another 12–15 minutes, until the salmon flakes.',
+          'Serve with a squeeze of lemon.'
+        ],
+        tips: 'For a golden crust, switch to the grill for the last 2 minutes.'
+      }
+    },
+    {
+      id: 'm-oven-chicken-nuggets', name: 'Nuggets de poulet au four & frites maison', category: 'main',
+      time: 35, servings: 2, protein: 66, kcal: 710,
+      tags: ['poulet', 'pommes de terre', 'parmesan', 'skyr'], keywords: ['nuggets', 'chicken', 'fries', 'chips', 'crispy', 'oven', 'air fryer'],
+      ingredients: [
+        '600 g de pommes de terre',
+        '1 c. à soupe d’huile d’olive',
+        '400 g de blanc de poulet',
+        '1 œuf',
+        '50 g de chapelure',
+        '20 g de parmesan râpé',
+        '1 c. à café de paprika',
+        '100 g de skyr',
+        '1 c. à café de moutarde',
+        '1 c. à café de miel'
+      ],
+      steps: [
+        'Préchauffe le four à 210 °C. Coupe les pommes de terre en frites, sèche-les dans un torchon, mélange-les avec l’huile et du sel, puis étale-les sur une plaque. Enfourne 15 minutes.',
+        'Coupe le poulet en morceaux de la taille d’une bouchée. Bats l’œuf dans une assiette creuse ; mélange la chapelure, le parmesan et le paprika dans une autre.',
+        'Passe chaque morceau dans l’œuf puis dans la chapelure, et pose-les sur une seconde plaque recouverte de papier cuisson.',
+        'Retourne les frites et enfourne les nuggets avec elles 15 à 18 minutes, jusqu’à ce qu’ils soient dorés et cuits à cœur.',
+        'Mélange le skyr, la moutarde et le miel pour la sauce, puis sers.'
+      ],
+      tips: 'Au air fryer : 10 à 12 minutes à 200 °C pour les nuggets.',
+      en: {
+        name: 'Oven-Baked Chicken Nuggets & Homemade Fries',
+        tags: ['chicken', 'potatoes', 'parmesan', 'skyr'],
+        ingredients: [
+          '600 g potatoes',
+          '1 tbsp olive oil',
+          '400 g chicken breast',
+          '1 egg',
+          '50 g breadcrumbs',
+          '20 g grated parmesan',
+          '1 tsp paprika',
+          '100 g skyr',
+          '1 tsp mustard',
+          '1 tsp honey'
+        ],
+        steps: [
+          'Preheat the oven to 210 °C. Cut the potatoes into fries, dry them in a tea towel, toss with the oil and salt, and spread on a tray. Bake for 15 minutes.',
+          'Cut the chicken into bite-sized pieces. Beat the egg in a shallow bowl; mix the breadcrumbs, parmesan and paprika in another.',
+          'Dip each piece in the egg, then in the breadcrumbs, and lay them on a second tray lined with baking paper.',
+          'Turn the fries and bake the nuggets alongside for 15–18 minutes, until golden and cooked through.',
+          'Mix the skyr, mustard and honey for the dip, then serve.'
+        ],
+        tips: 'In an air fryer: 10–12 minutes at 200 °C for the nuggets.'
+      }
+    },
+    {
+      id: 'm-courgette-feta-quiche', name: 'Quiche sans pâte courgette, feta & cottage cheese', category: 'main',
+      time: 45, servings: 2, protein: 47, kcal: 650,
+      tags: ['œufs', 'courgette', 'feta', 'cottage cheese', 'végétarien'], keywords: ['quiche', 'crustless', 'frittata', 'eggs', 'courgette', 'zucchini', 'feta', 'cottage cheese', 'vegetarian', 'veggie'],
+      ingredients: [
+        '2 courgettes',
+        '1 oignon',
+        '1 c. à café d’huile d’olive',
+        '6 œufs',
+        '250 g de cottage cheese',
+        '100 g de feta',
+        'Herbes de Provence, sel & poivre',
+        '2 tranches de pain complet',
+        'Quelques feuilles de salade'
+      ],
+      steps: [
+        'Préchauffe le four à 180 °C. Râpe les courgettes, sale-les légèrement et laisse-les dégorger 10 minutes, puis presse-les bien pour retirer l’eau.',
+        'Fais revenir l’oignon émincé 4 minutes dans l’huile, puis ajoute les courgettes et cuis 3 minutes.',
+        'Dans un saladier, bats les œufs avec le cottage cheese, les herbes, du poivre et peu de sel (la feta est salée).',
+        'Ajoute les légumes et la feta émiettée, puis verse dans un plat à gratin huilé ou recouvert de papier cuisson.',
+        'Enfourne 30 à 35 minutes, jusqu’à ce que le centre soit pris et le dessus doré.',
+        'Laisse tiédir 5 minutes, puis sers avec la salade et le pain grillé.'
+      ],
+      tips: 'Se mange chaude ou froide : idéale en boîte pour le déjeuner du lendemain.',
+      en: {
+        name: 'Crustless Courgette, Feta & Cottage Cheese Quiche',
+        tags: ['eggs', 'courgette', 'feta', 'cottage cheese', 'vegetarian'],
+        ingredients: [
+          '2 courgettes',
+          '1 onion',
+          '1 tsp olive oil',
+          '6 eggs',
+          '250 g cottage cheese',
+          '100 g feta',
+          'Dried herbs, salt & pepper',
+          '2 slices wholegrain bread',
+          'A few lettuce leaves'
+        ],
+        steps: [
+          'Preheat the oven to 180 °C. Grate the courgettes, salt lightly and leave for 10 minutes, then squeeze out the water well.',
+          'Cook the sliced onion in the oil for 4 minutes, then add the courgettes and cook for 3 minutes.',
+          'In a bowl, beat the eggs with the cottage cheese, herbs, pepper and very little salt (the feta is salty).',
+          'Add the vegetables and crumbled feta, then pour into an oiled baking dish or one lined with baking paper.',
+          'Bake for 30–35 minutes, until the centre is set and the top golden.',
+          'Leave to cool for 5 minutes, then serve with the salad and toasted bread.'
+        ],
+        tips: 'Good hot or cold: ideal in a lunchbox the next day.'
+      }
+    },
+    {
+      id: 'm-chicken-basquaise', name: 'Poulet basquaise & riz', category: 'main',
+      time: 45, servings: 2, protein: 58, kcal: 710,
+      tags: ['poulet', 'poivrons', 'tomates', 'riz'], keywords: ['basque chicken', 'chicken', 'peppers', 'tomato', 'rice', 'stew', 'one pot'],
+      ingredients: [
+        '500 g de hauts de cuisse de poulet sans peau',
+        '1 c. à soupe d’huile d’olive',
+        '1 oignon',
+        '2 poivrons (rouge et vert)',
+        '2 gousses d’ail',
+        '1 c. à café de paprika (ou de piment d’Espelette)',
+        '400 g de tomates concassées en boîte',
+        'Thym, sel & poivre',
+        '140 g de riz (cru)'
+      ],
+      steps: [
+        'Dans une cocotte, chauffe l’huile et fais dorer les hauts de cuisse 3 minutes par face. Réserve.',
+        'Fais revenir l’oignon et les poivrons émincés 6 minutes, puis ajoute l’ail et le paprika, 1 minute.',
+        'Ajoute les tomates, le thym, du sel et du poivre, remets le poulet et couvre. Laisse mijoter 25 minutes à feu doux.',
+        'Pendant ce temps, cuis le riz 10 à 12 minutes dans l’eau bouillante salée, puis égoutte-le.',
+        'Vérifie que le poulet est cuit à cœur (plus de jus rosé), puis sers la basquaise sur le riz.'
+      ],
+      tips: 'Encore meilleur réchauffé le lendemain : parfait pour le batch cooking.',
+      en: {
+        name: 'Basque-Style Chicken & Rice',
+        tags: ['chicken', 'peppers', 'tomatoes', 'rice'],
+        ingredients: [
+          '500 g skinless chicken thighs',
+          '1 tbsp olive oil',
+          '1 onion',
+          '2 peppers (red and green)',
+          '2 garlic cloves',
+          '1 tsp paprika (or Espelette pepper)',
+          '400 g canned chopped tomatoes',
+          'Thyme, salt & pepper',
+          '140 g rice (uncooked)'
+        ],
+        steps: [
+          'In a casserole, heat the oil and brown the chicken thighs for 3 minutes per side. Set aside.',
+          'Cook the sliced onion and peppers for 6 minutes, then add the garlic and paprika for 1 minute.',
+          'Add the tomatoes, thyme, salt and pepper, return the chicken and cover. Simmer gently for 25 minutes.',
+          'Meanwhile, cook the rice for 10–12 minutes in boiling salted water, then drain.',
+          'Check the chicken is cooked through (no pink juices), then serve over the rice.'
+        ],
+        tips: 'Even better reheated the next day: perfect for batch cooking.'
+      }
     }
   ];
 })();
