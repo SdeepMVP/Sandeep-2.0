@@ -236,6 +236,41 @@ test('day plans from the built-in recipes land near the targets', function () {
     ok(ids.length === new Set(ids).size, 'same recipe twice');
   });
 });
+test('week plan: 7 varied days near the targets, quickly', function () {
+  [prof({ goal: 'bulk' }), prof({ sex: 'f', weight: 58, height: 165, goal: 'cut', meals: 4 }), prof({ goal: 'recomp', meals: 5 })].forEach(function (p) {
+    var t = N.targets(p), t0 = Date.now(), week = N.weekPlan(RECIPES, t), ms = Date.now() - t0;
+    ok(week.length === 7, 'days ' + week.length);
+    ok(ms < 300, p.goal + ' ' + ms + ' ms');
+    week.forEach(function (d, i) {
+      ok(Math.abs(d.kcal - t.kcal) / t.kcal < 0.15, p.goal + ' day ' + i + ' kcal ' + d.kcal + ' vs ' + t.kcal);
+      ok(d.protein >= 0.8 * t.protein, p.goal + ' day ' + i + ' protein ' + d.protein);
+    });
+    var tot = N.weekTotals(week);
+    ok(tot.length >= 10, p.goal + ' only ' + tot.length + ' different recipes');
+    tot.forEach(function (x) { ok(x.days.length <= 4, x.recipe.id + ' on ' + x.days.length + ' days'); });
+    var meals = week.reduce(function (n, d) { return n + d.meals.length; }, 0);
+    var portions = tot.reduce(function (n, x) { return n + x.portions; }, 0);
+    ok(Math.abs(portions - week.reduce(function (n, d) { return n + d.meals.reduce(function (a, m) { return a + m.portion; }, 0); }, 0)) < 1e-9 && meals === 7 * t.meals, 'totals');
+  });
+});
+test('week plan: batch cooking uses far fewer recipes, each at most 3 days', function () {
+  [prof({ goal: 'bulk' }), prof({ sex: 'f', weight: 58, height: 165, goal: 'cut', meals: 4 })].forEach(function (p) {
+    var t = N.targets(p);
+    var varied = N.weekTotals(N.weekPlan(RECIPES, t)), week = N.weekPlan(RECIPES, t, { batch: true }), batch = N.weekTotals(week);
+    ok(batch.length <= varied.length * 0.6, p.goal + ' batch ' + batch.length + ' vs varied ' + varied.length);
+    batch.forEach(function (x) { ok(x.days.length <= 3, x.recipe.id + ' on ' + x.days.length + ' days'); });
+    week.forEach(function (d, i) { ok(Math.abs(d.kcal - t.kcal) / t.kcal < 0.15 && d.protein >= 0.8 * t.protein, p.goal + ' day ' + i); });
+  });
+});
+test('week plan: another week and another day change the suggestion, deterministically', function () {
+  var t = N.targets(prof({ goal: 'cut' }));
+  var a = N.weekPlan(RECIPES, t, { seed: 0 }), a2 = N.weekPlan(RECIPES, t, { seed: 0 }), b = N.weekPlan(RECIPES, t, { seed: 1 });
+  function ids(w) { return w.map(function (d) { return d.meals.map(function (m) { return m.recipe.id; }).join(','); }).join('|'); }
+  ok(ids(a) === ids(a2), 'not deterministic');
+  ok(ids(a) !== ids(b), 'seed has no effect');
+  var c = N.weekPlan(RECIPES, t, { seed: 0, picks: [0, 0, 1] });
+  ok(c[2].pick === 1 && ids([a[0], a[1]]) === ids([c[0], c[1]]) && ids([a[2]]) !== ids([c[2]]), 'day 3 not changed alone');
+});
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed\n');
 process.exit(failed ? 1 : 0);
