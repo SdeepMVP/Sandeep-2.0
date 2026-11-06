@@ -1,0 +1,173 @@
+/* Moteur PUR de l'onglet Objectif (SanEva) : besoins caloriques et macros, adéquation des recettes, journée type.
+   Aucun DOM ni stockage : testable sous Node (tests/run.js). Utilisé par js/tabs/objectif.js et js/tabs/cuisine.js.
+   Formule : Mifflin-St Jeor (métabolisme de base) × niveau d'activité = dépense du jour, puis ajustement selon l'objectif.
+   Protéines et lipides en g par kg de poids de corps, glucides = le reste des calories. Valeurs indicatives. */
+(function () {
+  'use strict';
+  var S2 = (window.S2 = window.S2 || {});
+
+  var ACTIVITY = {
+    sedentary: 1.2,   /* peu ou pas de sport */
+    light: 1.375,     /* 1 à 3 séances par semaine */
+    moderate: 1.55,   /* 3 à 5 séances */
+    high: 1.725,      /* 6 à 7 séances */
+    very: 1.9         /* sport intense tous les jours ou métier physique */
+  };
+  /* kcal = ajustement de la dépense du jour ; protein / fat = g par kg de poids de corps. */
+  var GOALS = {
+    bulk:     { kcal: 0.10,  protein: 1.8, fat: 1.0 },  /* prise de masse */
+    recomp:   { kcal: -0.05, protein: 2.0, fat: 0.9 },  /* transformation / recomposition */
+    cut:      { kcal: -0.20, protein: 2.2, fat: 0.8 },  /* sèche */
+    maintain: { kcal: 0,     protein: 1.6, fat: 1.0 }   /* maintien */
+  };
+  var MIN_KCAL = { f: 1200, m: 1500 };
+  var PORTIONS = [0.5, 1, 1.5, 2];
+  /* Organisation des repas selon leur nombre : petit-déj / en-cas (breakfast) et repas (main). */
+  var STRUCTURE = {
+    2: ['main', 'main'],
+    3: ['breakfast', 'main', 'main'],
+    4: ['breakfast', 'main', 'breakfast', 'main'],
+    5: ['breakfast', 'breakfast', 'main', 'breakfast', 'main']
+  };
+
+  function num(x) { return typeof x === 'number' && isFinite(x) ? x : null; }
+  function round(x, step) { return Math.round(x / step) * step; }
+
+  /* Profil complet et plausible ? */
+  function isComplete(p) {
+    if (!p) return false;
+    var age = num(p.age), hgt = num(p.height), w = num(p.weight);
+    return (p.sex === 'm' || p.sex === 'f') && age !== null && age >= 14 && age <= 90 &&
+      hgt !== null && hgt >= 120 && hgt <= 230 && w !== null && w >= 30 && w <= 250 &&
+      !!ACTIVITY[p.activity] && !!GOALS[p.goal];
+  }
+
+  function bmr(p) {
+    return 10 * p.weight + 6.25 * p.height - 5 * p.age + (p.sex === 'm' ? 5 : -161);
+  }
+
+  /* Objectifs du jour. p.custom = { kcal, protein } : valeurs fixées à la main (remplacent le calcul). */
+  function targets(p) {
+    if (!isComplete(p)) return null;
+    var g = GOALS[p.goal];
+    var base = bmr(p);
+    var tdee = base * ACTIVITY[p.activity];
+    var kcal = Math.max(MIN_KCAL[p.sex], round(tdee * (1 + g.kcal), 10));
+    var protein = Math.round(p.weight * g.protein);
+    var auto = { kcal: kcal, protein: protein };
+    var c = p.custom || {};
+    var custom = false;
+    if (num(c.kcal) !== null && c.kcal >= 800 && c.kcal <= 6000) { kcal = Math.round(c.kcal); custom = true; }
+    if (num(c.protein) !== null && c.protein >= 20 && c.protein <= 400) { protein = Math.round(c.protein); custom = true; }
+    var fat = Math.round(p.weight * g.fat);
+    /* Les lipides ne descendent pas sous 20 % des calories ; les glucides prennent le reste. */
+    fat = Math.max(fat, Math.round(kcal * 0.2 / 9));
+    var carbs = Math.max(0, Math.round((kcal - protein * 4 - fat * 9) / 4));
+    var meals = STRUCTURE[p.meals] ? p.meals : 3;
+    return {
+      bmr: Math.round(base), tdee: round(tdee, 10), kcal: kcal, protein: protein, fat: fat, carbs: carbs,
+      auto: auto, custom: custom, goal: p.goal, meals: meals,
+      perMeal: { kcal: Math.round(kcal / meals), protein: Math.round(protein / meals) }
+    };
+  }
+
+  /* ---------- Recettes ---------- */
+
+  /* Portion conseillée (0,5 / 1 / 1,5 / 2) pour qu'une portion de recette fasse environ un repas. */
+  function portionFor(recipe, t) {
+    if (!recipe || !recipe.kcal || !t) return 1;
+    var want = t.perMeal.kcal / recipe.kcal;
+    var best = 1, bd = Infinity;
+    PORTIONS.forEach(function (x) { var d = Math.abs(Math.log(x / want)); if (d < bd) { bd = d; best = x; } });
+    return best;
+  }
+
+  /* Adéquation d'une recette à l'objectif : densité en protéines (g / kcal) comparée à celle de l'objectif,
+     portion conseillée et part de la journée. level : good | ok | low. */
+  function recipeFit(recipe, t) {
+    if (!recipe || !t || !recipe.kcal || !recipe.protein) return null;
+    var density = (recipe.protein / recipe.kcal) / (t.protein / t.kcal);
+    var portion = portionFor(recipe, t);
+    var kcal = Math.round(recipe.kcal * portion), protein = Math.round(recipe.protein * portion);
+    var level = density >= 0.95 ? 'good' : density >= 0.75 ? 'ok' : 'low';
+    var score = Math.max(0, 1 - density) * 2 + Math.abs(Math.log(recipe.kcal / t.perMeal.kcal)) * 0.25;
+    return {
+      density: density, level: level, portion: portion, kcal: kcal, protein: protein, score: score,
+      dayKcal: kcal / t.kcal, dayProtein: protein / t.protein
+    };
+  }
+
+  function comboScore(totK, totP, t) {
+    var kErr = Math.abs(totK - t.kcal) / t.kcal;
+    var pShort = Math.max(0, (t.protein - totP) / t.protein);
+    var pOver = Math.max(0, (totP - 1.4 * t.protein) / t.protein);
+    return kErr + 1.5 * pShort + 0.3 * pOver;
+  }
+
+  /* Journées types : une recette par repas (selon STRUCTURE), portion conseillée pour chacune.
+     recipes = recettes déjà filtrées par l'appelant (exclusions, végétarien…). Renvoie jusqu'à `count`
+     journées classées, assez différentes les unes des autres (au moins 2 recettes changent). */
+  function dayPlans(recipes, t, count) {
+    if (!t) return [];
+    count = count || 8;
+    var slots = STRUCTURE[t.meals] || STRUCTURE[3];
+    var usable = recipes.filter(function (r) { return r && r.kcal > 0 && r.protein > 0 && (r.category === 'breakfast' || r.category === 'main'); });
+    function top(cat, n) {
+      return usable.filter(function (r) { return r.category === cat; })
+        .map(function (r) { return { r: r, f: recipeFit(r, t) }; })
+        .sort(function (a, b) { return a.f.score - b.f.score; }).slice(0, n);
+    }
+    var pools = { breakfast: top('breakfast', 10), main: top('main', 12) };
+    var need = { breakfast: 0, main: 0 };
+    slots.forEach(function (c) { need[c]++; });
+    if (pools.breakfast.length < need.breakfast || pools.main.length < need.main) return [];
+
+    function choose(list, k) {
+      var out = [];
+      (function rec(start, acc) {
+        if (acc.length === k) { out.push(acc.slice()); return; }
+        for (var i = start; i < list.length; i++) { acc.push(list[i]); rec(i + 1, acc); acc.pop(); }
+      })(0, []);
+      return out;
+    }
+    var bs = choose(pools.breakfast, need.breakfast), ms = choose(pools.main, need.main);
+    var all = [];
+    bs.forEach(function (b) {
+      ms.forEach(function (m) {
+        var items = b.concat(m), K = 0, P = 0;
+        items.forEach(function (x) { K += x.r.kcal * x.f.portion; P += x.r.protein * x.f.portion; });
+        all.push({ items: items, kcal: K, protein: P, score: comboScore(K, P, t) });
+      });
+    });
+    all.sort(function (a, b) { return a.score - b.score; });
+
+    var picked = [];
+    for (var i = 0; i < all.length && picked.length < count; i++) {
+      var ids = all[i].items.map(function (x) { return x.r.id; });
+      var distinct = picked.every(function (p) {
+        var same = p.items.filter(function (x) { return ids.indexOf(x.r.id) > -1; }).length;
+        return ids.length - same >= Math.min(2, ids.length);
+      });
+      if (distinct) picked.push(all[i]);
+    }
+    /* Remet les recettes dans l'ordre de la journée (petit-déj, repas, en-cas…). */
+    return picked.map(function (p) {
+      var b = p.items.filter(function (x) { return x.r.category === 'breakfast'; });
+      var m = p.items.filter(function (x) { return x.r.category === 'main'; });
+      var ordered = slots.map(function (c) { return (c === 'breakfast' ? b : m).shift(); });
+      return {
+        meals: ordered.map(function (x, k) {
+          return { recipe: x.r, slot: slots[k], portion: x.f.portion,
+            kcal: Math.round(x.r.kcal * x.f.portion), protein: Math.round(x.r.protein * x.f.portion) };
+        }),
+        kcal: Math.round(p.kcal), protein: Math.round(p.protein), score: p.score
+      };
+    });
+  }
+
+  S2.nutritionEngine = {
+    ACTIVITY: ACTIVITY, GOALS: GOALS, PORTIONS: PORTIONS, STRUCTURE: STRUCTURE,
+    isComplete: isComplete, bmr: bmr, targets: targets,
+    portionFor: portionFor, recipeFit: recipeFit, dayPlans: dayPlans
+  };
+})();

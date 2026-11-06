@@ -174,5 +174,68 @@ test('105-piece closet: full shopping analysis in under 2 s', function () {
   console.log('      (' + ms + ' ms, ' + res.length + ' suggestions)');
 });
 
+/* ---------- Objectif (SanEva) : besoins et recettes ---------- */
+require(path.join(__dirname, '..', 'js', 'tabs', 'objectif-engine.js'));
+require(path.join(__dirname, '..', 'js', 'tabs', 'cuisine-recipes.js'));
+var N = window.S2.nutritionEngine, RECIPES = window.S2.cuisineRecipes;
+console.log('\nNutrition');
+function prof(extra) { return Object.assign({ sex: 'm', age: 30, height: 180, weight: 80, activity: 'moderate', goal: 'maintain', meals: 3 }, extra || {}); }
+test('Mifflin-St Jeor base metabolism (man and woman)', function () {
+  ok(N.bmr(prof()) === 1780, 'man ' + N.bmr(prof()));
+  ok(Math.abs(N.bmr(prof({ sex: 'f', weight: 60, height: 165 })) - 1320.25) < 0.01, 'woman');
+});
+test('incomplete or implausible profile gives no targets', function () {
+  ok(N.targets(prof({ height: null })) === null, 'no height');
+  ok(N.targets(prof({ weight: 500 })) === null, 'weight 500');
+  ok(N.targets(prof({ goal: 'x' })) === null, 'unknown goal');
+});
+test('goals order the calories: bulk > maintain > recomp > cut', function () {
+  var k = {}; ['bulk', 'maintain', 'recomp', 'cut'].forEach(function (g) { k[g] = N.targets(prof({ goal: g })).kcal; });
+  ok(k.bulk > k.maintain && k.maintain > k.recomp && k.recomp > k.cut, JSON.stringify(k));
+  ok(N.targets(prof()).kcal === 2760, 'maintain ' + N.targets(prof()).kcal);
+});
+test('macros add up to the calories and protein follows bodyweight', function () {
+  ['bulk', 'maintain', 'recomp', 'cut'].forEach(function (g) {
+    var t = N.targets(prof({ goal: g }));
+    var sum = t.protein * 4 + t.carbs * 4 + t.fat * 9;
+    ok(Math.abs(sum - t.kcal) <= 6, g + ' ' + sum + ' vs ' + t.kcal);
+    ok(t.protein === Math.round(80 * N.GOALS[g].protein), g + ' protein');
+  });
+});
+test('calories never go below the safety floor', function () {
+  var t = N.targets(prof({ sex: 'f', age: 60, height: 150, weight: 42, activity: 'sedentary', goal: 'cut' }));
+  ok(t.kcal === 1200, 'floor ' + t.kcal);
+});
+test('values set by hand replace the calculation', function () {
+  var t = N.targets(prof({ custom: { kcal: 2500, protein: 180 } }));
+  ok(t.kcal === 2500 && t.protein === 180 && t.custom && t.auto.kcal === 2760, JSON.stringify(t));
+  ok(N.targets(prof({ custom: { kcal: 50 } })).kcal === 2760, 'absurd value ignored');
+});
+test('recipe fit: lean protein recipe beats a light one for a cut', function () {
+  var t = N.targets(prof({ goal: 'cut' }));
+  var lean = N.recipeFit({ kcal: 500, protein: 55 }, t), poor = N.recipeFit({ kcal: 700, protein: 20 }, t);
+  ok(lean.level === 'good' && poor.level === 'low' && lean.score < poor.score, JSON.stringify([lean, poor]));
+  ok(N.recipeFit({ kcal: 0, protein: 10 }, t) === null, 'no kcal');
+});
+test('suggested portion brings a recipe close to one meal', function () {
+  var bulk = N.targets(prof({ goal: 'bulk', weight: 90, activity: 'high' }));
+  ok(N.portionFor({ kcal: 450 }, bulk) === 2, 'bulk 450 kcal → ' + N.portionFor({ kcal: 450 }, bulk));
+  var small = N.targets(prof({ sex: 'f', weight: 55, height: 160, goal: 'cut', activity: 'light' }));
+  ok(N.portionFor({ kcal: 900 }, small) === 0.5, 'cut 900 kcal → ' + N.portionFor({ kcal: 900 }, small));
+});
+test('day plans from the built-in recipes land near the targets', function () {
+  [prof({ goal: 'bulk' }), prof({ sex: 'f', weight: 58, height: 165, goal: 'cut', meals: 4 }), prof({ goal: 'recomp', meals: 5 })].forEach(function (p) {
+    var t = N.targets(p), t0 = Date.now(), plans = N.dayPlans(RECIPES, t, 6), ms = Date.now() - t0;
+    ok(plans.length >= 3, 'plans ' + plans.length);
+    var best = plans[0];
+    ok(best.meals.length === t.meals, 'meals');
+    ok(Math.abs(best.kcal - t.kcal) / t.kcal < 0.12, p.goal + ' kcal ' + best.kcal + ' vs ' + t.kcal);
+    ok(best.protein >= 0.85 * t.protein, p.goal + ' protein ' + best.protein + ' vs ' + t.protein);
+    ok(ms < 300, ms + ' ms');
+    var ids = best.meals.map(function (m) { return m.recipe.id; });
+    ok(ids.length === new Set(ids).size, 'same recipe twice');
+  });
+});
+
 console.log('\n' + passed + ' passed, ' + failed + ' failed\n');
 process.exit(failed ? 1 : 0);

@@ -393,7 +393,27 @@
   /* ---------- État d'interface ---------- */
   var page = 'list';       // list | detail
   var section = 'recipes'; // recipes | menu | shop (onglets en haut de la liste)
-  var flags = { fav: false, quick: false, noOven: false, veggie: false, have: false };
+  var flags = { fav: false, quick: false, noOven: false, veggie: false, have: false, goal: false };
+  var dayIdx = 0;          // journée type affichée (section Journée)
+
+  /* ---------- Objectif (SanEva) : lu via S2.objectif, jamais dans les données d'un autre onglet ---------- */
+  var NE = S2.nutritionEngine;
+  function goalTargets() {
+    try { return NE && S2.objectif ? S2.objectif.targets() : null; } catch (e) { return null; }
+  }
+  function hasGoalTab() { return !!(NE && S2.objectif); }
+  var FIT_LABEL = {
+    good: L('🎯 Great for your goal', '🎯 Idéale pour ton objectif'),
+    ok: L('Fine for your goal', 'Correcte pour ton objectif'),
+    low: L('Low in protein for your goal', 'Peu protéinée pour ton objectif')
+  };
+  function portionText(x) { return x === 1 ? L('1 serving', '1 portion') : '×' + num(x) + L(' serving', ' portion'); }
+  var SLOT_LABELS = {
+    2: [L('Lunch', 'Déjeuner'), L('Dinner', 'Dîner')],
+    3: [L('Breakfast', 'Petit-déjeuner'), L('Lunch', 'Déjeuner'), L('Dinner', 'Dîner')],
+    4: [L('Breakfast', 'Petit-déjeuner'), L('Lunch', 'Déjeuner'), L('Snack', 'En-cas'), L('Dinner', 'Dîner')],
+    5: [L('Breakfast', 'Petit-déjeuner'), L('Morning snack', 'En-cas du matin'), L('Lunch', 'Déjeuner'), L('Afternoon snack', 'Goûter'), L('Dinner', 'Dîner')]
+  };
   var currentId = null;
   var mode = 'groceries';  // groceries | cook
   var query = '', filter = 'all';
@@ -402,8 +422,11 @@
   function meals(n) { return n + (FR ? ' repas' : n === 1 ? ' meal' : ' meals'); } /* « repas » est invariable */
   function plural(n, en, fr) { return n + ' ' + (FR ? fr + (n > 1 ? 's' : '') : en + (n === 1 ? '' : 's')); }
 
+  var goalDefaultSet = false;
   function mount(container) {
     data = loadData();
+    /* Profil rempli dans Objectif : les recettes sont classées selon l'objectif dès l'ouverture (puce désactivable). */
+    if (!goalDefaultSet) { goalDefaultSet = true; if (goalTargets()) flags.goal = true; }
     root = container;
     root.setAttribute('lang', S2.lang);
     if (page === 'detail' && !recipe(currentId)) page = 'list';
@@ -420,12 +443,16 @@
   /* ---------- Liste + recherche ---------- */
   function renderList() {
     var nMenu = planItems().length;
+    var secs = [['recipes', L('Recipes', 'Recettes')]];
+    if (hasGoalTab()) secs.push(['day', L('My day', 'Ma journée')]);
+    secs.push(['menu', L('Menu', 'Menu') + (nMenu ? ' · ' + nMenu : '')], ['shop', L('Groceries', 'Courses')]);
     root.appendChild(h('div', { class: 'segmented ck-sections' },
-      [['recipes', L('Recipes', 'Recettes')], ['menu', L('Menu', 'Menu') + (nMenu ? ' · ' + nMenu : '')], ['shop', L('Groceries', 'Courses')]].map(function (x) {
+      secs.map(function (x) {
         return h('button', { class: 'seg' + (section === x[0] ? ' is-active' : ''), 'aria-pressed': section === x[0] ? 'true' : 'false',
           onclick: function () { section = x[0]; render(); window.scrollTo(0, 0); } }, x[1]);
       })));
     if (section === 'menu') { renderMenu(); return; }
+    if (section === 'day' && hasGoalTab()) { renderDay(); return; }
     if (section === 'shop') { renderShop(); return; }
     var search = h('input', { class: 'input ck-search', type: 'search', value: query, autocomplete: 'off', enterkeyhint: 'search',
       placeholder: L('Recipe or ingredient, e.g. chicken', 'Recette ou ingrédient, ex. poulet'),
@@ -450,6 +477,7 @@
   function renderResults(box) {
     box.innerHTML = '';
     var useHave = flags.have && data.have.length > 0;
+    var T = flags.goal ? goalTargets() : null;
     var list = data.recipes.map(function (r) { return { r: r, v: view(r) }; })
       .filter(function (x) {
         if (!(filter === 'all' || x.r.category === filter) || !matches(x.r, x.v, query)) return false;
@@ -463,10 +491,12 @@
           x.missing = missingFor(x.v);
           if (!main.length || x.missing.length === main.length) return false; /* aucun ingrédient principal en stock */
         }
+        if (T) x.fit = NE.recipeFit(x.r, T);
         return true;
       })
       .sort(function (a, b) {
         if (useHave && a.missing.length !== b.missing.length) return a.missing.length - b.missing.length;
+        if (T) { var sa = a.fit ? a.fit.score : 99, sb = b.fit ? b.fit.score : 99; if (sa !== sb) return sa - sb; }
         if (a.r.category !== b.r.category) return a.r.category === 'breakfast' ? -1 : 1;
         return a.v.name.localeCompare(b.v.name, S2.lang);
       });
@@ -480,18 +510,20 @@
       return;
     }
     if (useHave) box.appendChild(h('p', { class: 'hint' }, L('Sorted by what you are missing (main ingredients).', 'Classées selon ce qu’il te manque (ingrédients principaux).')));
+    else if (T) box.appendChild(h('p', { class: 'hint' }, L('Sorted by fit with your goal (', 'Classées selon ton objectif (') + T.kcal + ' kcal · ' + T.protein +
+      L(' g protein a day): richest in protein per calorie first. Your serving is adjusted to about one meal (≈ ', ' g de protéines par jour) : les plus riches en protéines par calorie d’abord. Ta portion est ajustée pour faire environ un repas (≈ ') + T.perMeal.kcal + ' kcal).'));
     var lastCat = null;
     list.forEach(function (x) {
-      if (useHave) { box.appendChild(card(x.r, x.v, x.missing)); return; }
+      if (useHave) { box.appendChild(card(x.r, x.v, x.missing, x.fit)); return; }
       if (filter === 'all' && x.r.category !== lastCat) {
         lastCat = x.r.category;
         box.appendChild(h('h2', { class: 'section-title' }, CATS[x.r.category] || OTHER));
       }
-      box.appendChild(card(x.r, x.v));
+      box.appendChild(card(x.r, x.v, null, x.fit));
     });
   }
 
-  function card(r, v, missing) {
+  function card(r, v, missing, fit) {
     var photo = photoOf(r);
     return h('button', { class: 'card ck-card' + (photo ? ' has-photo' : ''), onclick: function () { open(r.id); } },
       photo ? h('img', { class: 'ck-thumb', src: photo, alt: '', loading: 'lazy', decoding: 'async' }) : null,
@@ -503,6 +535,8 @@
         r.protein ? h('span', { class: 'ck-protein' }, r.protein + L(' g protein', ' g de protéines')) : null,
         r.kcal ? h('span', null, r.kcal + ' kcal') : null,
         r.protein || r.kcal ? h('span', { class: 'ck-perserv' }, L('per serving', 'par portion')) : null),
+      fit ? h('div', { class: 'ck-fit ck-fit-' + fit.level }, FIT_LABEL[fit.level] +
+        ' · ' + L('your serving ', 'ta portion ') + (fit.portion === 1 ? '×1' : '×' + num(fit.portion)) + ' ≈ ' + fit.kcal + ' kcal, ' + fit.protein + ' g') : null,
       v.tags.length ? h('div', { class: 'ck-tags' }, v.tags.slice(0, 4).join(' · ')) : null);
   }
 
@@ -536,6 +570,16 @@
     if (r.protein || r.kcal) root.appendChild(h('p', { class: 'hint' },
       L('Approximate values per serving (one person)', 'Valeurs approximatives par portion (une personne)') +
       (serv > 1 && r.protein ? L(' · ≈ ' + Math.round(r.protein * serv) + ' g protein in total for ' + serv, ' · ≈ ' + Math.round(r.protein * serv) + ' g de protéines au total pour ' + serv) : '') + '.'));
+    var T = goalTargets(), fit = T && NE.recipeFit(r, T);
+    if (fit) root.appendChild(h('div', { class: 'card ck-goalcard ck-fit-' + fit.level },
+      h('div', { class: 'ck-fit ck-fit-' + fit.level }, FIT_LABEL[fit.level]),
+      h('p', { class: 'sheet-text' }, L('Your serving: ', 'Ta portion : '), h('b', null, portionText(fit.portion)), ' ≈ ' + fit.kcal + ' kcal · ' + fit.protein + L(' g protein', ' g de protéines')),
+      h('div', { class: 'ck-goalbars' },
+        goalBar(L('of your calories', 'de tes calories'), fit.dayKcal),
+        goalBar(L('of your protein', 'de tes protéines'), fit.dayProtein)),
+      h('p', { class: 'hint' }, fit.level === 'low'
+        ? L('Pair it with a protein side (skyr, eggs, chicken…) or choose another recipe.', 'Ajoute un accompagnement protéiné (skyr, œufs, poulet…) ou choisis une autre recette.')
+        : L('Based on ' + T.meals + ' meals a day (≈ ' + T.perMeal.kcal + ' kcal each).', 'Calculé pour ' + T.meals + ' repas par jour (≈ ' + T.perMeal.kcal + ' kcal chacun).'))));
 
     root.appendChild(h('div', { class: 'card ck-servings' },
       h('span', { class: 'field-label' }, L('Servings', 'Portions')),
@@ -620,7 +664,16 @@
         onclick: function () { flags[key] = !on; render(); } }, label);
     }
     var haveOn = flags.have && data.have.length;
+    var goalChip = null;
+    if (hasGoalTab()) {
+      var gOn = flags.goal && !!goalTargets();
+      goalChip = h('button', { class: 'ck-chip' + (gOn ? ' is-on' : ''), 'aria-pressed': gOn ? 'true' : 'false', onclick: function () {
+        if (!goalTargets()) { askProfile(); return; }
+        flags.goal = !flags.goal; render();
+      } }, L('🎯 My goal', '🎯 Mon objectif'));
+    }
     return h('div', { class: 'ck-chips', role: 'group', 'aria-label': L('Filters', 'Filtres') },
+      goalChip,
       chip('fav', L('♥ Favourites', '♥ Favoris')),
       h('button', { class: 'ck-chip' + (haveOn ? ' is-on' : ''), 'aria-pressed': haveOn ? 'true' : 'false', onclick: editHave },
         L('🧺 What I have', '🧺 Avec ce que j’ai') + (data.have.length ? ' (' + data.have.length + ')' : '')),
@@ -701,6 +754,80 @@
           h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, L('Cancel', 'Annuler')))
       ];
     }, { modal: true });
+  }
+
+  function goalBar(label, share) {
+    var pct = Math.round(share * 100);
+    return h('div', { class: 'ck-goalbar' },
+      h('span', { class: 'ck-goalpct' }, pct + ' %'), h('span', { class: 'list-sub' }, label),
+      h('span', { class: 'ck-bar', 'aria-hidden': 'true' }, h('span', { style: 'width:' + Math.min(100, pct) + '%' })));
+  }
+  function askProfile() {
+    ui.confirm({ title: L('Fill in your profile first', 'Remplis d’abord ton profil'),
+      message: L('In the Goal tab, enter your height, weight and goal: recipes are then matched to your daily needs.',
+        'Dans l’onglet Objectif, entre ta taille, ton poids et ton objectif : les recettes sont ensuite choisies selon tes besoins du jour.'),
+      okLabel: L('Go to Goal', 'Aller à Objectif') }).then(function (ok) { if (ok) location.hash = '#objectif'; });
+  }
+
+  /* ---------- Ma journée : une journée type qui colle aux besoins (suggestion, rien n'est ajouté sans toi) ---------- */
+  function renderDay() {
+    var T = goalTargets();
+    if (!T) {
+      root.appendChild(h('div', { class: 'empty-state small' },
+        h('p', null, L('Fill in your height, weight and goal in the Goal tab: the app then suggests a day of recipes that matches your needs.',
+          'Remplis ta taille, ton poids et ton objectif dans l’onglet Objectif : l’app te propose ensuite une journée de recettes qui colle à tes besoins.')),
+        h('a', { class: 'btn btn-primary', href: '#objectif' }, L('Fill in my profile', 'Remplir mon profil'))));
+      return;
+    }
+    root.appendChild(h('div', { class: 'card ck-daytarget' },
+      h('div', { class: 'list-sub' }, (S2.objectif.goalLabel(T.goal) || '') + L(' · my day', ' · ma journée')),
+      h('div', { class: 'ck-daytargetnum' }, T.kcal + ' kcal · ' + T.protein + L(' g protein', ' g de protéines')),
+      h('div', { class: 'list-sub' }, T.meals + L(' meals', ' repas') + ' · ' + L('carbs ', 'glucides ') + T.carbs + ' g · ' + L('fat ', 'lipides ') + T.fat + ' g')));
+
+    var pool = data.recipes.filter(function (r) {
+      var v = view(r);
+      if (excluded(r, v)) return false;
+      if (flags.veggie && !isVeggie(v)) return false;
+      if (flags.noOven && usesOven(v)) return false;
+      if (flags.quick && !isQuick(r)) return false;
+      return true;
+    });
+    var plans = NE.dayPlans(pool, T, 8);
+    var active = [flags.veggie && L('vegetarian', 'végétarien'), flags.noOven && L('no oven', 'sans four'), flags.quick && L('15 min max', '15 min max'),
+      data.exclude.length && L('without ', 'sans ') + data.exclude.join(', ')].filter(Boolean);
+    if (active.length) root.appendChild(h('p', { class: 'hint' }, L('Filters applied: ', 'Filtres appliqués : ') + active.join(' · ')));
+    if (!plans.length) {
+      root.appendChild(h('div', { class: 'empty-state small' }, h('p', null, L('Not enough recipes with calories and protein for a full day. Remove a filter or add recipes.',
+        'Pas assez de recettes avec calories et protéines pour une journée. Retire un filtre ou ajoute des recettes.'))));
+      return;
+    }
+    if (dayIdx >= plans.length) dayIdx = 0;
+    var plan = plans[dayIdx];
+    var labels = SLOT_LABELS[plan.meals.length] || [];
+    root.appendChild(h('h2', { class: 'section-title' }, L('Suggested day ', 'Journée proposée ') + (dayIdx + 1) + ' / ' + plans.length));
+    root.appendChild(h('div', { class: 'list' }, plan.meals.map(function (m, i) {
+      var v = view(m.recipe);
+      return h('button', { class: 'list-row list-row-btn ck-dayrow', onclick: function () {
+        servingsView[m.recipe.id] = Math.max(1, Math.ceil(m.portion)); open(m.recipe.id); } },
+        h('div', { class: 'ck-daymain' },
+          h('span', { class: 'ck-dayslot' }, labels[i] || ''),
+          h('span', { class: 'list-title' }, v.name),
+          h('span', { class: 'list-sub' }, portionText(m.portion) + ' · ' + m.kcal + ' kcal · ' + m.protein + ' g' + (m.recipe.time ? ' · ⏱ ' + m.recipe.time + ' min' : ''))),
+        h('span', { class: 'chev', 'aria-hidden': 'true' }, '›'));
+    })));
+    root.appendChild(h('div', { class: 'card ck-daytotal' },
+      goalBar(L('calories: ', 'calories : ') + plan.kcal + ' / ' + T.kcal + ' kcal', plan.kcal / T.kcal),
+      goalBar(L('protein: ', 'protéines : ') + plan.protein + ' / ' + T.protein + ' g', plan.protein / T.protein)));
+    root.appendChild(h('div', { class: 'bottom-actions' },
+      plans.length > 1 ? h('button', { class: 'btn btn-secondary btn-block btn-lg', onclick: function () { dayIdx = (dayIdx + 1) % plans.length; render(); } },
+        L('↻ Another suggestion', '↻ Autre proposition')) : null,
+      h('button', { class: 'btn btn-primary btn-block btn-lg', onclick: function () {
+        plan.meals.forEach(function (m) { addToPlan(m.recipe, Math.max(1, Math.ceil(m.portion))); });
+        render();
+        ui.toast(L('Day added to the menu', 'Journée ajoutée au menu') + ' · ' + plan.meals.length + L(' meals', ' repas'));
+      } }, L('+ Add this day to the menu', '+ Ajouter cette journée au menu'))));
+    root.appendChild(h('p', { class: 'hint' }, L('Half servings are rounded up in the menu and groceries (cook a whole one, keep the rest). Values are estimates per serving.',
+      'Les demi-portions sont arrondies au-dessus dans le menu et les courses (cuisine une portion entière, garde le reste). Valeurs estimées par portion.')));
   }
 
   /* ---------- Menu de la semaine ---------- */

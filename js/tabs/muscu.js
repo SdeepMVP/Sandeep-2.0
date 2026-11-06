@@ -79,6 +79,72 @@
     };
   }
 
+  /* ---------- Modèles de programme (v0.28) ----------
+     Noms écrits dans la langue de l'app au moment du choix (ce sont ensuite des données de l'utilisateur,
+     modifiables comme celles qu'il saisit). x(en, fr, catégorie, séries, rép. min, rép. max). */
+  function x(en, fr, cat, sets, a, b) { return { n: L(en, fr), c: cat, s: sets, a: a, b: b }; }
+  var TEMPLATES = [
+    { id: 'fullbody', name: L('Full body A / B', 'Full body A / B'), sub: L('2 to 3 workouts a week, the whole body each time.', '2 à 3 séances par semaine, tout le corps à chaque fois.'),
+      days: [
+        [L('Full body A', 'Full body A'), [x('Back Squat', 'Squat', 'main', 4, 6, 8), x('DB Bench Press', 'Développé couché haltères', 'secondary', 3, 8, 10),
+          x('One-Arm DB Row', 'Rowing haltère un bras', 'secondary', 3, 8, 12), x('Hip Thrust', 'Hip thrust', 'secondary', 3, 8, 12), x('Lateral Raise', 'Élévations latérales', 'isolation', 3, 12, 15)]],
+        [L('Full body B', 'Full body B'), [x('Romanian Deadlift', 'Soulevé de terre jambes tendues', 'main', 4, 6, 8), x('DB Shoulder Press', 'Développé militaire haltères', 'secondary', 3, 8, 10),
+          x('Lat Pulldown', 'Tirage vertical', 'secondary', 3, 8, 12), x('Bulgarian Split Squat', 'Fentes bulgares', 'secondary', 3, 8, 12),
+          x('Biceps Curl', 'Curl biceps', 'isolation', 3, 10, 15), x('Cable Triceps Extension', 'Extension triceps poulie', 'isolation', 3, 10, 15)]]
+      ] },
+    { id: 'upperlower', name: L('Upper / Lower', 'Haut / Bas'), sub: L('4 workouts a week: 2 lower body, 2 upper body.', '4 séances par semaine : 2 bas du corps, 2 haut du corps.'),
+      days: [
+        [L('Lower A', 'Bas A'), [x('Back Squat', 'Squat', 'main', 4, 6, 8), x('Hip Thrust', 'Hip thrust', 'secondary', 3, 8, 12),
+          x('Leg Curl', 'Leg curl', 'isolation', 3, 10, 15), x('Standing Calf Raise', 'Mollets debout', 'isolation', 3, 12, 15)]],
+        [L('Upper A', 'Haut A'), [x('Barbell Bench Press', 'Développé couché barre', 'main', 4, 6, 8), x('Barbell Row', 'Rowing barre', 'secondary', 3, 8, 10),
+          x('DB Shoulder Press', 'Développé militaire haltères', 'secondary', 3, 8, 10), x('Lateral Raise', 'Élévations latérales', 'isolation', 3, 12, 15), x('Biceps Curl', 'Curl biceps', 'isolation', 3, 10, 15)]],
+        [L('Lower B', 'Bas B'), [x('Romanian Deadlift', 'Soulevé de terre jambes tendues', 'main', 4, 6, 8), x('Leg Press', 'Presse à cuisses', 'secondary', 3, 10, 12),
+          x('Walking Lunge', 'Fentes marchées', 'secondary', 3, 10, 12), x('Leg Extension', 'Leg extension', 'isolation', 3, 12, 15), x('Hip Abduction Machine', 'Abduction machine', 'isolation', 3, 12, 20)]],
+        [L('Upper B', 'Haut B'), [x('Lat Pulldown', 'Tirage vertical', 'main', 4, 6, 10), x('Incline DB Press', 'Développé incliné haltères', 'secondary', 3, 8, 10),
+          x('Seated Cable Row', 'Rowing poulie basse', 'secondary', 3, 8, 12), x('Cable Face Pull', 'Face pull poulie', 'isolation', 3, 12, 15), x('Cable Triceps Extension', 'Extension triceps poulie', 'isolation', 3, 10, 15)]]
+      ] },
+    { id: 'glutes', name: L('Glutes & legs focus', 'Fessiers & jambes'), sub: L('3 workouts a week, priority on glutes and legs, one upper body day.', '3 séances par semaine, priorité fessiers et jambes, un jour haut du corps.'),
+      days: [
+        [L('Glutes', 'Fessiers'), [x('Hip Thrust', 'Hip thrust', 'main', 4, 6, 10), x('Romanian Deadlift', 'Soulevé de terre jambes tendues', 'secondary', 3, 8, 10),
+          x('Bulgarian Split Squat', 'Fentes bulgares', 'secondary', 3, 8, 12), x('Hip Abduction Machine', 'Abduction machine', 'isolation', 3, 12, 20), x('Cable Glute Kickback', 'Kickback poulie', 'isolation', 3, 12, 15)]],
+        [L('Upper body', 'Haut du corps'), [x('Lat Pulldown', 'Tirage vertical', 'secondary', 3, 8, 12), x('DB Bench Press', 'Développé couché haltères', 'secondary', 3, 8, 10),
+          x('Seated Cable Row', 'Rowing poulie basse', 'secondary', 3, 10, 12), x('Lateral Raise', 'Élévations latérales', 'isolation', 3, 12, 15), x('Cable Triceps Extension', 'Extension triceps poulie', 'isolation', 3, 10, 15)]],
+        [L('Legs', 'Jambes'), [x('Back Squat', 'Squat', 'main', 4, 6, 8), x('Leg Press', 'Presse à cuisses', 'secondary', 3, 10, 12),
+          x('Leg Curl', 'Leg curl', 'isolation', 3, 10, 15), x('Leg Extension', 'Leg extension', 'isolation', 3, 12, 15), x('Standing Calf Raise', 'Mollets debout', 'isolation', 3, 12, 15)]]
+      ] },
+    { id: 'ppl', name: L('Push / Pull / Legs', 'Poussée / Tirage / Jambes'), sub: L('3 (or 6) workouts a week, one muscle group pattern per day.', '3 (ou 6) séances par semaine, un type de mouvement par jour.'),
+      days: [
+        [L('Push', 'Poussée'), [x('Barbell Bench Press', 'Développé couché barre', 'main', 4, 6, 8), x('Overhead Press', 'Développé militaire', 'secondary', 3, 8, 10),
+          x('Incline DB Press', 'Développé incliné haltères', 'secondary', 3, 8, 10), x('Lateral Raise', 'Élévations latérales', 'isolation', 3, 12, 15), x('Cable Triceps Extension', 'Extension triceps poulie', 'isolation', 3, 10, 15)]],
+        [L('Pull', 'Tirage'), [x('Barbell Row', 'Rowing barre', 'main', 4, 6, 8), x('Lat Pulldown', 'Tirage vertical', 'secondary', 3, 8, 12),
+          x('Seated Cable Row', 'Rowing poulie basse', 'secondary', 3, 10, 12), x('Cable Face Pull', 'Face pull poulie', 'isolation', 3, 12, 15), x('Biceps Curl', 'Curl biceps', 'isolation', 3, 10, 15)]],
+        [L('Legs', 'Jambes'), [x('Back Squat', 'Squat', 'main', 4, 6, 8), x('Romanian Deadlift', 'Soulevé de terre jambes tendues', 'secondary', 3, 8, 10),
+          x('Leg Press', 'Presse à cuisses', 'secondary', 3, 10, 12), x('Leg Curl', 'Leg curl', 'isolation', 3, 10, 15), x('Standing Calf Raise', 'Mollets debout', 'isolation', 3, 12, 15)]]
+      ] },
+    { id: 'sandeep', name: L('Sandeep’s program', 'Programme de Sandeep'), sub: L('Legs / Push / Pull / Shoulders, 12 weeks.', 'Jambes / Poussée / Tirage / Épaules, 12 semaines.'), builtin: true },
+    { id: 'blank', name: L('Blank page', 'Page blanche'), sub: L('One empty day: create your own days and exercises.', 'Un jour vide : crée toi-même tes jours et tes exercices.'),
+      days: [[L('Day 1', 'Jour 1'), []]] }
+  ];
+  function templateDays(t) {
+    if (t.builtin) return defaults().days;
+    return t.days.map(function (dd) {
+      return { id: 'd' + ui.uid(), name: dd[0], slots: dd[1].map(function (e) { return slot(e.n, e.c, e.s, e.a, e.b); }) };
+    });
+  }
+  /* Suggestions pour le nom d'un exercice (liste déroulante du clavier). */
+  var LIBRARY = [L('Back Squat', 'Squat'), L('Front Squat', 'Squat avant'), L('Goblet Squat', 'Goblet squat'), L('Hack Squat', 'Hack squat'),
+    L('Leg Press', 'Presse à cuisses'), L('Bulgarian Split Squat', 'Fentes bulgares'), L('Walking Lunge', 'Fentes marchées'), L('Reverse Lunge', 'Fentes arrière'),
+    L('Step-up', 'Step-up'), L('Romanian Deadlift', 'Soulevé de terre jambes tendues'), L('Deadlift', 'Soulevé de terre'), L('Sumo Deadlift', 'Soulevé de terre sumo'),
+    L('Hip Thrust', 'Hip thrust'), L('Glute Bridge', 'Pont fessier'), L('Cable Glute Kickback', 'Kickback poulie'), L('Hip Abduction Machine', 'Abduction machine'),
+    L('Hip Adduction Machine', 'Adduction machine'), L('Leg Curl', 'Leg curl'), L('Leg Extension', 'Leg extension'), L('Standing Calf Raise', 'Mollets debout'),
+    L('Seated Calf Raise', 'Mollets assis'), L('Barbell Bench Press', 'Développé couché barre'), L('DB Bench Press', 'Développé couché haltères'),
+    L('Incline DB Press', 'Développé incliné haltères'), L('Chest Press Machine', 'Développé machine'), L('Push-up', 'Pompes'), L('Cable Crossover', 'Écarté poulie vis-à-vis'),
+    L('Pec Deck', 'Pec deck'), L('Overhead Press', 'Développé militaire'), L('DB Shoulder Press', 'Développé militaire haltères'), L('Lateral Raise', 'Élévations latérales'),
+    L('Rear Delt Fly', 'Oiseau'), L('Cable Face Pull', 'Face pull poulie'), L('Pull-up', 'Tractions'), L('Assisted Pull-up', 'Tractions assistées'),
+    L('Lat Pulldown', 'Tirage vertical'), L('Barbell Row', 'Rowing barre'), L('One-Arm DB Row', 'Rowing haltère un bras'), L('Seated Cable Row', 'Rowing poulie basse'),
+    L('Biceps Curl', 'Curl biceps'), L('Hammer Curl', 'Curl marteau'), L('Cable Triceps Extension', 'Extension triceps poulie'), L('Skull Crusher', 'Barre au front'),
+    L('Dips', 'Dips'), L('Plank', 'Gainage'), L('Cable Crunch', 'Crunch poulie'), L('Hanging Leg Raise', 'Relevés de jambes suspendu')];
+
   var data = null;
   function loadData() {
     var d = S2.storage.load(NS, null);
@@ -94,6 +160,12 @@
   function persist() { S2.storage.save(NS, data); }
 
   function day(id) { return data.days.filter(function (d) { return d.id === id; })[0]; }
+  /* Nom du jour d'une séance, même si ce jour a été retiré du programme depuis (nom gardé dans la séance). */
+  function sessionDay(s) {
+    var d = day(s.dayId);
+    if (d) return dayName(d);
+    return s.dayName ? (S2.lang === 'fr' && FR_DAY[s.dayName] || s.dayName) : L('Deleted day', 'Jour supprimé');
+  }
   function active() {
     if (!data.activeId) return null;
     var s = data.sessions.filter(function (x) { return x.id === data.activeId; })[0];
@@ -267,6 +339,15 @@
     var last = done[done.length - 1];
     if (pickWeek === null) pickWeek = last ? last.week : 1;
 
+    if (!done.length) {
+      body.appendChild(h('div', { class: 'card mu-firstrun' },
+        h('div', { class: 'card-title' }, L('Is this your program?', 'C’est bien ton programme ?')),
+        h('p', { class: 'sheet-text' }, L('Pick a ready-made program (full body, upper / lower, glutes & legs…) or create your own days, then adjust the exercises.',
+          'Choisis un programme tout prêt (full body, haut / bas, fessiers & jambes…) ou crée tes propres jours, puis ajuste les exercices.')),
+        h('div', { class: 'stack' },
+          h('button', { class: 'btn btn-secondary btn-block', onclick: pickTemplate }, L('Choose a program', 'Choisir un programme')),
+          h('button', { class: 'btn btn-ghost btn-block', onclick: function () { go('program'); } }, L('Edit my days and exercises', 'Modifier mes jours et exercices')))));
+    }
     body.appendChild(h('h2', { class: 'section-title' }, L('New workout', 'Nouvelle séance')));
 
     var grid = h('div', { class: 'mu-daygrid' });
@@ -313,13 +394,13 @@
     var nSets = Object.keys(s.entries).reduce(function (n, k) { return n + s.entries[k].sets.length; }, 0);
     return h('div', { class: 'list-row' },
       h('div', null,
-        h('div', { class: 'list-title' }, (d ? dayName(d) : s.dayId) + L(' · Week ', ' · Semaine ') + s.week),
+        h('div', { class: 'list-title' }, sessionDay(s) + L(' · Week ', ' · Semaine ') + s.week),
         h('div', { class: 'list-sub' }, ui.longDate(s.startedAt) + ' · ' + nSets + L(' sets', nSets > 1 ? ' séries' : ' série'))));
   }
 
   function startSession() {
     var d = day(pickDay);
-    var s = { id: ui.uid(), dayId: d.id, week: pickWeek, startedAt: new Date().toISOString(),
+    var s = { id: ui.uid(), dayId: d.id, dayName: d.name, week: pickWeek, startedAt: new Date().toISOString(),
       finishedAt: null, choices: {}, entries: {} };
     /* Pour les exercices à variantes, présélectionner celle de la dernière fois (modifiable). */
     var done = finished();
@@ -359,7 +440,7 @@
     var d = day(s.dayId);
     body.appendChild(h('div', { class: 'card mu-sessionhead' },
       h('div', null,
-        h('div', { class: 'mu-sessiontitle' }, (d ? dayName(d) : s.dayId) + L(' · Week ', ' · Semaine ') + s.week),
+        h('div', { class: 'mu-sessiontitle' }, sessionDay(s) + L(' · Week ', ' · Semaine ') + s.week),
         h('div', { class: 'list-sub' }, L('Started ', 'Commencée le ') + ui.longDate(s.startedAt) + L(' at ', ' à ') +
           new Date(s.startedAt).toLocaleTimeString(S2.locale, { hour: '2-digit', minute: '2-digit' }))),
       h('div', { class: 'autosave', id: 'mu-autosave' }, L('Auto-save on', 'Sauvegarde auto'))));
@@ -781,7 +862,7 @@
       var d = day(s.dayId);
       var card = h('details', { class: 'card mu-sesscard' },
         h('summary', null,
-          h('span', { class: 'list-title' }, (d ? dayName(d) : s.dayId) + ' · ' + L('W', 'S') + s.week),
+          h('span', { class: 'list-title' }, sessionDay(s) + ' · ' + L('W', 'S') + s.week),
           h('span', { class: 'list-sub' }, ui.longDate(s.startedAt))));
       Object.keys(s.entries).forEach(function (exId) {
         var e = s.entries[exId];
@@ -806,11 +887,24 @@
   /* ---------- Programme (édition) ---------- */
 
   function renderProgram(body) {
-    body.appendChild(h('div', { class: 'segmented small' }, data.days.map(function (d) {
-      return h('button', { class: 'seg' + (programDay === d.id ? ' is-active' : ''),
-        onclick: function () { programDay = d.id; render(); } }, dayName(d));
-    })));
+    if (!data.days.length) {
+      body.appendChild(h('div', { class: 'empty-state small' },
+        h('p', null, L('Your program has no days yet.', 'Ton programme n’a encore aucun jour.')),
+        h('button', { class: 'btn btn-primary', onclick: function () { editDay(null); } }, L('+ Add a day', '+ Ajouter un jour')),
+        h('button', { class: 'btn btn-secondary', onclick: pickTemplate }, L('Choose a ready-made program', 'Choisir un programme tout prêt'))));
+      return;
+    }
     var d = day(programDay) || data.days[0];
+    programDay = d.id;
+    body.appendChild(h('div', { class: 'mu-daytabs' },
+      h('div', { class: 'segmented small' }, data.days.map(function (dd) {
+        return h('button', { class: 'seg' + (d.id === dd.id ? ' is-active' : ''),
+          onclick: function () { programDay = dd.id; render(); } }, dayName(dd));
+      })),
+      h('button', { class: 'btn btn-secondary mu-adddaybtn', 'aria-label': L('Add a day', 'Ajouter un jour'), onclick: function () { editDay(null); } }, '+')));
+    body.appendChild(h('div', { class: 'mu-dayhead' },
+      h('h2', { class: 'mu-dayheadname' }, dayName(d)),
+      h('button', { class: 'btn btn-ghost btn-sm', onclick: function () { editDay(d); } }, L('✎ Day', '✎ Jour'))));
     if (active() && active().dayId === d.id) {
       body.appendChild(h('p', { class: 'note' }, L('Workout in progress on this day: changes apply right away.', 'Séance en cours sur ce jour : les changements s’appliquent tout de suite.')));
     }
@@ -836,6 +930,97 @@
       h('button', { class: 'btn btn-secondary btn-block btn-lg', onclick: function () { editSlot(d, null); } }, L('+ Add an exercise', '+ Ajouter un exercice'))));
     body.appendChild(h('p', { class: 'hint' }, L('Target RPE by category: main 7.5–8 · secondary 8–8.5 · isolation 8.5–9. An exercise with several variants lets you pick one each workout.',
       'RPE cible par catégorie : principal 7,5–8 · secondaire 8–8,5 · isolation 8,5–9. Un exercice à plusieurs variantes te laisse en choisir une à chaque séance.')));
+    body.appendChild(h('h2', { class: 'section-title' }, L('Whole program', 'Programme entier')));
+    body.appendChild(h('div', { class: 'stack' },
+      h('button', { class: 'btn btn-secondary btn-block', onclick: pickTemplate }, L('Change program (ready-made)', 'Changer de programme (modèles)'))));
+  }
+
+  /* ---------- Jours du programme ---------- */
+  function editDay(d) {
+    var isNew = !d;
+    var idx = isNew ? -1 : data.days.indexOf(d);
+    ui.sheet(function (close) {
+      var err = h('p', { class: 'form-error', hidden: true });
+      var inp = h('input', { class: 'input', type: 'text', value: isNew ? '' : dayName(d), autocapitalize: 'sentences', autocomplete: 'off',
+        placeholder: L('e.g. Glutes, Upper body, Full body A', 'ex. Fessiers, Haut du corps, Full body A'), 'aria-label': L('Day name', 'Nom du jour') });
+      function save() {
+        var name = inp.value.trim();
+        if (!name) { err.textContent = L('Give the day a name.', 'Donne un nom au jour.'); err.hidden = false; return; }
+        if (isNew) {
+          var nd = { id: 'd' + ui.uid(), name: name, slots: [] };
+          data.days.push(nd); programDay = nd.id;
+        } else if (name !== dayName(d)) d.name = name;
+        persist(); close(); view = 'program'; render();
+        ui.toast(isNew ? L('Day added: now add its exercises', 'Jour ajouté : ajoute maintenant ses exercices') : L('Day renamed', 'Jour renommé'));
+      }
+      function moveDay(dir) {
+        var j = idx + dir;
+        if (j < 0 || j >= data.days.length) return;
+        var t = data.days[idx]; data.days[idx] = data.days[j]; data.days[j] = t;
+        persist(); close(); render();
+      }
+      function remove() {
+        if (active() && active().dayId === d.id) { ui.toast(L('Finish or discard the workout in progress first', 'Termine ou abandonne d’abord la séance en cours')); return; }
+        ui.confirm({ title: L('Delete this day?', 'Supprimer ce jour ?'),
+          message: L('“' + dayName(d) + '” and its ' + d.slots.length + ' exercise(s) will be removed from the program. Workouts already done stay in the history.',
+            '« ' + dayName(d) + ' » et ses ' + d.slots.length + ' exercice(s) seront retirés du programme. Les séances déjà faites restent dans l’historique.'),
+          okLabel: L('Delete the day', 'Supprimer le jour'), danger: true }).then(function (ok) {
+          if (!ok) return;
+          data.days.splice(data.days.indexOf(d), 1);
+          if (pickDay === d.id) pickDay = null;
+          programDay = data.days[0] ? data.days[0].id : null;
+          persist(); close(); render();
+        });
+      }
+      inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') save(); });
+      if (isNew) setTimeout(function () { inp.focus(); }, 250);
+      return [
+        h('h2', { class: 'sheet-title' }, isNew ? L('New day', 'Nouveau jour') : L('Edit the day', 'Modifier le jour')),
+        h('label', { class: 'field' }, h('span', { class: 'field-label' }, L('Name', 'Nom')), inp),
+        isNew ? null : h('div', { class: 'field' }, h('span', { class: 'field-label' }, L('Order in the program', 'Place dans le programme')),
+          h('div', { class: 'mu-moveday' },
+            h('button', { class: 'btn btn-secondary', type: 'button', disabled: idx <= 0, onclick: function () { moveDay(-1); } }, L('‹ Earlier', '‹ Avant')),
+            h('span', { class: 'muted' }, (idx + 1) + ' / ' + data.days.length),
+            h('button', { class: 'btn btn-secondary', type: 'button', disabled: idx >= data.days.length - 1, onclick: function () { moveDay(1); } }, L('Later ›', 'Après ›')))),
+        err,
+        h('div', { class: 'sheet-actions' },
+          h('button', { class: 'btn btn-primary btn-block', onclick: save }, isNew ? L('Add the day', 'Ajouter le jour') : L('Save', 'Enregistrer')),
+          h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, L('Cancel', 'Annuler')),
+          isNew ? null : h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: remove }, L('Delete this day', 'Supprimer ce jour')))
+      ];
+    }, { modal: true });
+  }
+
+  /* ---------- Modèles : remplace les jours du programme (l'historique est gardé) ---------- */
+  function pickTemplate() {
+    ui.sheet(function (close) {
+      return [
+        h('h2', { class: 'sheet-title' }, L('Choose a program', 'Choisir un programme')),
+        h('p', { class: 'sheet-text' }, L('It replaces your current days and exercises. Your workout history is kept. You can then change everything.',
+          'Il remplace tes jours et exercices actuels. L’historique de tes séances est gardé. Tu pourras ensuite tout modifier.')),
+        h('div', { class: 'mu-templates' }, TEMPLATES.map(function (t) {
+          var days = templateDays(t);
+          return h('button', { class: 'mu-template', type: 'button', onclick: function () { close(); applyTemplate(t); } },
+            h('span', { class: 'list-title' }, t.name),
+            h('span', { class: 'list-sub' }, t.sub),
+            h('span', { class: 'mu-templatedays' }, days.map(function (dd) { return dayName(dd) + (dd.slots.length ? ' (' + dd.slots.length + ')' : ''); }).join(' · ')));
+        })),
+        h('div', { class: 'sheet-actions' }, h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, L('Cancel', 'Annuler')))
+      ];
+    });
+  }
+  function applyTemplate(t) {
+    if (active()) { ui.toast(L('Finish or discard the workout in progress first', 'Termine ou abandonne d’abord la séance en cours')); return; }
+    ui.confirm({ title: L('Use “' + t.name + '”?', 'Utiliser « ' + t.name + ' » ?'),
+      message: L('Your current days and exercises will be replaced. Workouts already done stay in the history.',
+        'Tes jours et exercices actuels seront remplacés. Les séances déjà faites restent dans l’historique.'),
+      okLabel: L('Use this program', 'Utiliser ce programme') }).then(function (ok) {
+      if (!ok) return;
+      data.days = templateDays(t);
+      programDay = data.days[0].id; pickDay = null;
+      persist(); view = 'program'; render(); window.scrollTo(0, 0);
+      ui.toast(L('Program ready: adjust it as you like', 'Programme prêt : ajuste-le comme tu veux'));
+    });
   }
 
   function move(d, i, dir) {
@@ -843,6 +1028,15 @@
     if (j < 0 || j >= d.slots.length) return;
     var t = d.slots[i]; d.slots[i] = d.slots[j]; d.slots[j] = t;
     persist(); render();
+  }
+
+  /* Noms proposés : la bibliothèque + les exercices déjà dans le programme. */
+  function libraryNames() {
+    var seen = {}, out = [];
+    LIBRARY.concat([].concat.apply([], data.days.map(function (dd) {
+      return [].concat.apply([], dd.slots.map(function (sl) { return sl.options.map(function (o) { return trEx(o.name); }); }));
+    }))).forEach(function (n) { var k = n.toLowerCase(); if (!seen[k]) { seen[k] = true; out.push(n); } });
+    return out.sort(function (a, b) { return a.localeCompare(b, S2.lang); });
   }
 
   function editSlot(d, sl) {
@@ -859,7 +1053,7 @@
       function renderOpts() {
         optWrap.innerHTML = '';
         draft.options.forEach(function (o, i) {
-          var inp = h('input', { class: 'input', type: 'text', value: o.name, autocomplete: 'off', autocapitalize: 'words',
+          var inp = h('input', { class: 'input', type: 'text', value: o.name, autocomplete: 'off', autocapitalize: 'words', list: 'mu-library',
             placeholder: i === 0 ? L('Exercise name', 'Nom de l’exercice') : L('Variant', 'Variante'),
             'aria-label': i === 0 ? L('Name', 'Nom') : L('Variant ', 'Variante ') + i });
           inp.addEventListener('input', function () { o.name = inp.value; });
@@ -920,7 +1114,9 @@
         });
       }
 
+      var library = h('datalist', { id: 'mu-library' }, libraryNames().map(function (n) { return h('option', { value: n }); }));
       return [
+        library,
         h('h2', { class: 'sheet-title' }, isNew ? L('New exercise · ', 'Nouvel exercice · ') + dayName(d) : L('Edit exercise', 'Modifier l’exercice')),
         h('div', { class: 'field' }, h('span', { class: 'field-label' }, L('Name (and optional variants)', 'Nom (et variantes éventuelles)')), optWrap,
           h('button', { class: 'btn btn-ghost btn-sm', type: 'button', onclick: function () {
