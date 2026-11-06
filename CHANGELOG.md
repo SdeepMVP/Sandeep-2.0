@@ -1,5 +1,12 @@
 # Changelog — Sandeep 2.0
 
+## 0.28.0 — 2026-11-06
+- SanEva: new **Goal tab** (one profile per phone): height, weight, age, activity, meals per day and goal (**muscle gain, body recomposition, cut, maintenance**). It calculates **calories, protein, carbs and fat per day** (Mifflin-St Jeor × activity, then −20 % to +10 % by goal; protein 1.6 to 2.2 g/kg), shows how it is calculated, lets you **set targets by hand**, and keeps a **weight log** (targets follow your current weight).
+- SanEva Gym: **your own program**. Add, rename, reorder and delete days; **ready-made programs** (Full body A/B, Upper/Lower, Glutes & legs, Push/Pull/Legs, Sandeep's program, blank page) replace the days while keeping the history; exercise names are suggested as you type (about 50 common exercises). A new phone gets a “Is this your program?” card. Workouts remember their day's name even if the day is deleted later.
+- SanEva Kitchen: **🎯 My goal** filter (on by default once the profile is filled in) sorts recipes by protein per calorie compared with your targets, with **your serving** (×0.5 to ×2, about one meal) and its share of your day on each recipe. New **My day** section suggests a full day of recipes (one per meal) close to your calories and protein, with **Another suggestion** and **Add this day to the menu**; it follows the vegetarian, no-oven, 15-min and “Without…” filters.
+- Recipes only have calories and protein, so matching uses those two; carbs and fat are shown as targets in the Goal tab.
+- Tests for the nutrition engine (`node tests/run.js`).
+
 ## 0.27.0 — 2026-11-06
 - The **Gym tab is removed from Sandeep 2.0**: workouts now live only in **SanEva** (`/cuisine/`), with the Kitchen. The full app keeps Wardrobe, Habits and Settings, and opens on Wardrobe.
 - Workouts saved in Sandeep 2.0 are kept in its data and backups: export a backup and import it in SanEva to get them there.
