@@ -61,6 +61,8 @@
     d.history = d.history || []; d.have = d.have || []; d.exclude = d.exclude || [];
     /* v0.29 : planning de la semaine validé (ajout compatible). week = { start, batch, days: [{ meals: [{ recipeId, portion }] }] } */
     d.week = d.week || null; d.weekBatch = !!d.weekBatch;
+    /* v0.30 : prix saisis par l'utilisateur (€ par kg, litre ou pièce selon l'ingrédient), clé = nom normalisé. */
+    d.prices = d.prices || {};
     /* Ajoute les recettes intégrées manquantes (sauf celles que l'utilisateur a supprimées). */
     var have = {};
     var added = false;
@@ -1018,6 +1020,66 @@
     }
   }
 
+  /* ---------- Prix estimé du panier (js/tabs/cuisine-prices.js : prix moyens intégrés, aucun accès réseau) ---------- */
+  var PRICES = S2.cuisinePrices;
+  function money(x, round) {
+    return Number(x).toLocaleString(S2.locale, { style: 'currency', currency: 'EUR', minimumFractionDigits: round ? 0 : 2, maximumFractionDigits: round ? 0 : 2 });
+  }
+  function priceItems(list) {
+    return list.map(function (g) {
+      var nk = g.key.split('|').slice(1).join('|');
+      return { g: g, key: nk, unit: norm(g.first.unit).trim(), qty: g.qty, own: data.prices[nk], done: !!data.plan.checks[g.key] };
+    });
+  }
+  var BASIS = { kg: L('€ / kg', '€ / kg'), l: L('€ / litre', '€ / litre'), unit: L('€ each', '€ / pièce'), flat: L('€', '€') };
+  function editPrices(items) {
+    var rows = items.filter(function (it) { return it.estimate && it.estimate.known && !it.estimate.none; });
+    var unknown = items.filter(function (it) { return it.estimate && !it.estimate.known; });
+    ui.sheet(function (close) {
+      var inputs = [];
+      function line(it, basis) {
+        var e = it.estimate;
+        var inp = h('input', { class: 'input ck-priceinp', type: 'text', inputmode: 'decimal', value: it.own !== undefined ? num(it.own) : '',
+          placeholder: e && e.ref !== undefined ? num(e.ref) : '', 'aria-label': L('Price for ', 'Prix pour ') + it.g.first.name });
+        inputs.push({ it: it, inp: inp });
+        return h('label', { class: 'ck-pricerow' },
+          h('span', { class: 'ck-pricename' }, it.g.text, h('span', { class: 'ck-from' }, e && e.known ? L('Estimate: ', 'Estimation : ') + money(e.pantry ? e.used : e.price) + (e.pantry ? L(' (pantry)', ' (placard)') : '') : L('No price yet', 'Pas encore de prix'))),
+          h('span', { class: 'ck-priceunit' }, inp, h('span', { class: 'list-sub' }, BASIS[basis || (e && e.basis) || 'unit'])));
+      }
+      function save() {
+        var bad = false;
+        inputs.forEach(function (x) {
+          var v = ui.parseNum(x.inp.value);
+          if (x.inp.value.trim() === '') { delete data.prices[x.it.key]; return; }
+          if (v === null || v < 0 || v > 500) { bad = true; x.inp.classList.add('is-bad'); return; }
+          data.prices[x.it.key] = Math.round(v * 100) / 100;
+        });
+        if (bad) { ui.toast(L('Check the prices in red', 'Vérifie les prix en rouge')); return; }
+        persist(); close(); render();
+        ui.toast(L('Prices saved', 'Prix enregistrés'));
+      }
+      var uBasis = function (it) { var k = PRICES.measure(it.unit).kind; return k === 'vol' ? 'l' : k === 'count' ? 'unit' : 'kg'; };
+      return [
+        h('h2', { class: 'sheet-title' }, L('My prices', 'Mes prix')),
+        h('p', { class: 'sheet-text' }, L('Grey = average supermarket price used by the app. Type the price you pay (e.g. at your shop) to replace it; leave empty to keep the average.',
+          'En gris = prix moyen en supermarché utilisé par l’app. Tape le prix que tu paies (dans ton magasin par exemple) pour le remplacer ; laisse vide pour garder la moyenne.')),
+        unknown.length ? h('h3', { class: 'ck-aisle' }, L('Without a price', 'Sans prix')) : null,
+        unknown.length ? h('div', { class: 'ck-prices' }, unknown.map(function (it) { return line(it, uBasis(it)); })) : null,
+        h('h3', { class: 'ck-aisle' }, L('Estimated', 'Estimés')),
+        h('div', { class: 'ck-prices' }, rows.map(function (it) { return line(it); })),
+        h('div', { class: 'sheet-actions' },
+          h('button', { class: 'btn btn-primary btn-block', onclick: save }, L('Save', 'Enregistrer')),
+          Object.keys(data.prices).length ? h('button', { class: 'btn btn-ghost btn-block', onclick: function () {
+            ui.confirm({ title: L('Back to average prices?', 'Revenir aux prix moyens ?'), message: L('All the prices you typed are removed.', 'Tous les prix que tu as saisis sont effacés.'),
+              okLabel: L('Use average prices', 'Utiliser les prix moyens'), danger: true }).then(function (ok) {
+              if (!ok) return; data.prices = {}; persist(); close(); render();
+            });
+          } }, L('Back to average prices', 'Revenir aux prix moyens')) : null,
+          h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, L('Cancel', 'Annuler')))
+      ];
+    }, { modal: true });
+  }
+
   /* ---------- Courses du menu : une seule liste, quantités additionnées, par rayon ---------- */
   function renderShop() {
     var list = shoppingList(), checks = data.plan.checks;
@@ -1029,6 +1091,24 @@
       return;
     }
     var got = list.filter(function (g) { return checks[g.key]; }).length;
+    var items = PRICES ? priceItems(list) : [], cost = PRICES ? PRICES.basket(items) : null, priceOf = {};
+    items.forEach(function (it) { priceOf[it.g.key] = it.estimate; });
+    if (cost && cost.count) {
+      var servings = planItems().reduce(function (n, it) { return n + (it.servings || 1); }, 0);
+      root.appendChild(h('div', { class: 'card ck-basket' },
+        h('div', { class: 'list-sub' }, L('Estimated basket', 'Panier estimé')),
+        h('div', { class: 'ck-basketnum' }, '≈ ' + money(cost.basket, true)),
+        h('div', { class: 'list-sub' }, L('between ', 'entre ') + money(cost.low, true) + L(' and ', ' et ') + money(cost.high, true) + L(' depending on the shop', ' selon le magasin')),
+        h('div', { class: 'ck-basketstats' },
+          got && cost.left !== cost.basket ? h('div', null, h('span', { class: 'ck-basketval' }, money(cost.left, true)), h('span', { class: 'list-sub' }, L('left to buy', 'reste à acheter'))) : null,
+          cost.used < cost.basket * 0.9 ? h('div', null, h('span', { class: 'ck-basketval' }, money(cost.used - cost.pantry, true)), h('span', { class: 'list-sub' }, L('eaten from it', 'consommé'))) : null,
+          servings ? h('div', null, h('span', { class: 'ck-basketval' }, money(cost.used / servings)), h('span', { class: 'list-sub' }, L('per serving', 'par portion'))) : null,
+          cost.pantry >= 0.5 ? h('div', null, h('span', { class: 'ck-basketval' }, '+ ' + money(cost.pantry, true)), h('span', { class: 'list-sub' }, L('pantry, pro rata', 'placard, au prorata'))) : null),
+        h('p', { class: 'hint' }, L('Average supermarket prices, whole packs (6 eggs, 500 g of chicken…). “Eaten” = what the menu really uses (opened packs serve later). Oil, spices and sauces from the pantry are counted apart, only for what is used.',
+          'Prix moyens en supermarché, paquets entiers (6 œufs, 500 g de poulet…). « Consommé » = ce que le menu utilise vraiment (les paquets entamés servent ensuite). Huile, épices et sauces du placard sont comptées à part, seulement pour ce qui est utilisé.') +
+          (cost.unknown ? L(' ' + cost.unknown + ' item(s) without a price.', ' ' + cost.unknown + ' article(s) sans prix.') : '')),
+        h('button', { class: 'btn btn-ghost btn-sm', onclick: function () { editPrices(items); } }, L('✎ Adjust my prices', '✎ Ajuster mes prix'))));
+    }
     root.appendChild(h('div', { class: 'ck-listhead' },
       h('span', { class: 'muted' }, meals(planItems().length)),
       h('span', { class: 'muted' }, got + ' / ' + list.length + L(' ticked', ' cochés'))));
@@ -1036,14 +1116,16 @@
       var rows = list.filter(function (g) { return g.aisle === aid; });
       if (!rows.length) return;
       var label = AISLES.filter(function (a) { return a.id === aid; })[0].label;
-      root.appendChild(h('h3', { class: 'ck-aisle' }, label));
+      var sub = rows.reduce(function (n, g) { var e = priceOf[g.key]; return n + (e && e.known && !e.none && !e.pantry ? e.price : 0); }, 0);
+      root.appendChild(h('h3', { class: 'ck-aisle ck-aislerow' }, h('span', null, label), sub > 0 ? h('span', { class: 'ck-aisleprice' }, '≈ ' + money(sub, true)) : null));
       root.appendChild(h('div', { class: 'list ck-checklist' }, rows.map(function (g) {
-        var on = !!checks[g.key];
+        var on = !!checks[g.key], e = priceOf[g.key];
         return h('button', { class: 'list-row ck-check' + (on ? ' is-on' : ''), role: 'checkbox', 'aria-checked': on ? 'true' : 'false',
           onclick: function () { if (on) delete checks[g.key]; else checks[g.key] = true; persist(); render(); } },
           h('span', { class: 'ck-box', 'aria-hidden': 'true' }, on ? '✓' : ''),
           h('span', { class: 'ck-checktext' }, g.text,
-            g.recipes.length > 1 || planItems().length > 1 ? h('span', { class: 'ck-from' }, g.recipes.join(' · ')) : null));
+            g.recipes.length > 1 || planItems().length > 1 ? h('span', { class: 'ck-from' }, g.recipes.join(' · ')) : null),
+          e && e.known && !e.none ? h('span', { class: 'ck-itemprice' + (e.pantry ? ' is-pantry' : '') }, e.pantry ? money(e.used) : money(e.price)) : null);
       })));
     });
     root.appendChild(h('p', { class: 'hint' }, L('Same ingredients are added up (same unit). Tick what you have or put in the basket.',

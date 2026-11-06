@@ -42,6 +42,7 @@ js/tabs/*.js          un fichier par onglet (muscu.js, garde-robe.js, …)
 js/tabs/cuisine-recipes.js  recettes intégrées de Kitchen/Cuisine, en français + `en` (mêmes nombres de lignes ; nouvel id = ajoutée aux données existantes ; recette retirée = empreinte dans REMOVED de cuisine.js)
 cuisine/              app « SanEva » : Muscu + Cuisine (index.html, config.js, manifest, sw.js, icônes)
 img/recettes/         photos des recettes intégrées (champ `photo`, lu depuis la source, ajoutées à cuisine/sw.js)
+js/tabs/cuisine-prices.js   moteur PUR des prix moyens (panier estimé des Courses, paquets entiers, placard au prorata) ; prix saisis par l'utilisateur dans `sandeep2:cuisine` (prices)
 js/tabs/garde-robe-combos.js  combinaisons de couleurs (paires, trios, chaussures) utilisées par Wardrobe
 js/tabs/objectif.js         onglet Objectif de SanEva (profil, besoins du jour, poids) ; expose S2.objectif.targets()
 js/tabs/objectif-engine.js  moteur PUR nutrition : besoins (Mifflin-St Jeor), adéquation des recettes, journées types

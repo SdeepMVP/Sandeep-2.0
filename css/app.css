@@ -798,3 +798,23 @@ input[type="date"].input { display: block; line-height: 48px; }
   border-top: 1px solid var(--border); color: inherit; font: inherit; }
 .ck-weekmeal:active { background: var(--surface-2); }
 .ck-weekrecipe { font-weight: 600; }
+
+/* Cuisine · prix du panier (v0.30) */
+.ck-basket { display: grid; gap: 4px; }
+.ck-basketnum { font-size: 34px; font-weight: 750; font-family: Georgia, serif; font-variant-numeric: tabular-nums; }
+.ck-basketstats { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 8px; margin-top: 8px; }
+.ck-basketstats > div { display: grid; gap: 2px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; }
+.ck-basketval { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.ck-basket .btn-sm { justify-self: start; margin-left: -12px; }
+.ck-aislerow { display: flex; justify-content: space-between; align-items: baseline; }
+.ck-aisleprice { font-variant-numeric: tabular-nums; letter-spacing: 0; }
+.ck-check .ck-checktext { flex: 1; min-width: 0; }
+.ck-itemprice { flex-shrink: 0; font-size: 14px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.ck-itemprice.is-pantry { color: var(--muted); font-style: italic; }
+.ck-check.is-on .ck-itemprice { color: var(--muted); text-decoration: line-through; }
+.ck-prices { display: grid; gap: 0; border-top: 1px solid var(--border); }
+.ck-pricerow { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.ck-pricename { flex: 1; min-width: 0; font-size: 15px; }
+.ck-priceunit { display: grid; justify-items: end; gap: 2px; width: 96px; flex-shrink: 0; }
+.ck-priceinp { text-align: right; min-height: 44px; font-size: 16px; }
+.ck-priceinp.is-bad { border-color: var(--danger); }

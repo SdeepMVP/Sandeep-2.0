@@ -1,5 +1,10 @@
 # Changelog — Sandeep 2.0
 
+## 0.30.0 — 2026-11-06
+- SanEva Kitchen: **estimated basket price** at the top of Groceries as soon as the list has items: total in euros with a range (±15 % depending on the shop), what the menu actually uses, price per serving, pantry items (oil, spices, sauces) counted apart pro rata, and **left to buy** once items are ticked. Subtotal per aisle and a price on each line.
+- Prices are built-in averages for French supermarkets (about 100 ingredient rules, whole packs: 6 eggs, 500 g of chicken…); nothing is fetched online. **Adjust my prices** lets you type what you pay (per kg, litre or piece), saved on the phone, or go back to the averages.
+- Tests for the price estimates (every built-in ingredient priced, packs, pantry, own prices, plausible weekly basket).
+
 ## 0.29.0 — 2026-11-06
 - SanEva Kitchen: **plan the whole week**. The “My day” section becomes **Planning** with **One day / The week**: 7 days of recipes from today, each close to your calories and protein, with day totals and weekly averages.
 - **Varied** (a different menu every day) or **Batch cooking** (the same dishes 2 to 3 days in a row: about half as many recipes to buy and cook); “↻ Change” replaces one day only, “↻ Another week” the whole week.
