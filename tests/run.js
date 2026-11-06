@@ -272,5 +272,57 @@ test('week plan: another week and another day change the suggestion, determinist
   ok(c[2].pick === 1 && ids([a[0], a[1]]) === ids([c[0], c[1]]) && ids([a[2]]) !== ids([c[2]]), 'day 3 not changed alone');
 });
 
+/* ---------- Cuisine (SanEva) : prix du panier ---------- */
+require(path.join(__dirname, '..', 'js', 'tabs', 'cuisine-prices.js'));
+var PR = window.S2.cuisinePrices;
+console.log('\nGrocery prices');
+/* Même analyse de ligne que cuisine.js (parseLine + nameKey). */
+function pNorm(s) { return String(s || '').toLowerCase().replace(/œ/g, 'oe').replace(/æ/g, 'ae').normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+function pLine(line) {
+  var m = String(line).match(/^(\d+\/\d+|\d+(?:[.,]\d+)?)(\s*)(.*)$/);
+  if (!m) return { qty: null, unit: '', name: line };
+  var q = m[1].indexOf('/') > -1 ? Number(m[1].split('/')[0]) / Number(m[1].split('/')[1]) : Number(m[1].replace(',', '.'));
+  var rest = m[3], unit = '', u = rest.match(/^(kg|g|mg|ml|cl|dl|l|tbsp|tsp|c\. à soupe|c\. à café)(\s+|$)/i);
+  if (u) { unit = u[0]; rest = rest.slice(u[0].length); }
+  var l = rest.match(/^(de |d’|d'|of )/i); if (l) rest = rest.slice(l[0].length);
+  return { qty: q, unit: pNorm(unit).trim(), name: rest };
+}
+function pKey(n) { return pNorm(String(n).replace(/\([^)]*\)/g, ' ')).replace(/[^a-z0-9 ]+/g, ' ').split(/\s+/).filter(Boolean).map(function (w) { return w.length > 3 ? w.replace(/(s|x)$/, '') : w; }).join(' '); }
+function itemsOf(recipe, factor) { return recipe.ingredients.map(function (line) { var p = pLine(line); return { key: pKey(p.name), unit: p.unit, qty: p.qty === null ? null : p.qty * (factor || 1) }; }); }
+test('every built-in ingredient has a price (or is seasoning)', function () {
+  var missing = [];
+  RECIPES.forEach(function (r) { itemsOf(r).forEach(function (it) { if (!PR.estimate(it.key, it.unit, it.qty).known) missing.push(it.key); }); });
+  ok(!missing.length, missing.join(', '));
+});
+test('whole packs are bought: 3 eggs → a box of 6, 7 eggs → 2 boxes', function () {
+  ok(PR.estimate('oeuf', '', 3).price === 1.98, '3 eggs ' + PR.estimate('oeuf', '', 3).price);
+  ok(PR.estimate('oeuf', '', 7).price === 3.96, '7 eggs');
+  var chicken = PR.estimate('blanc de poulet', 'g', 240);
+  ok(chicken.price === 6 && chicken.used === 2.88, JSON.stringify(chicken));
+});
+test('pantry items are pro rata and outside the basket; own prices replace the average', function () {
+  var b = PR.basket([{ key: 'huile d olive', unit: 'c. a soupe', qty: 1 }, { key: 'oeuf', unit: '', qty: 2 }]);
+  ok(b.basket === 1.98 && b.pantry === 0.15, JSON.stringify(b));
+  ok(PR.estimate('oeuf', '', 6, 0.5).price === 3, 'own price');
+  ok(PR.estimate('produit inconnu', 'g', 100).known === false && PR.estimate('produit inconnu', 'g', 100, 10).price === 1, 'unknown + own');
+  var done = PR.basket([{ key: 'oeuf', unit: '', qty: 6, done: true }, { key: 'skyr', unit: 'g', qty: 450 }]);
+  ok(done.left === 2.03 && done.basket === 4.01, JSON.stringify(done));
+});
+test('a weekly basket for one person costs a plausible amount', function () {
+  var t = N.targets(prof({ goal: 'bulk' }));
+  [false, true].forEach(function (batch) {
+    var items = [];
+    N.weekTotals(N.weekPlan(RECIPES, t, { batch: batch })).forEach(function (x) {
+      items = items.concat(itemsOf(x.recipe, Math.ceil(x.portions) / (x.recipe.servings || 1)));
+    });
+    /* Additionne comme la liste de courses (même nom, même unité). */
+    var g = {};
+    items.forEach(function (it) { var k = it.unit + '|' + it.key; if (!g[k]) g[k] = { key: it.key, unit: it.unit, qty: it.qty === null ? null : 0 }; if (it.qty !== null && g[k].qty !== null) g[k].qty += it.qty; });
+    var b = PR.basket(Object.keys(g).map(function (k) { return g[k]; }));
+    ok(b.basket > 60 && b.basket < 260 && b.unknown === 0, (batch ? 'batch ' : 'varied ') + JSON.stringify(b));
+    console.log('      (' + (batch ? 'batch' : 'varied') + ' week, bulk 3000 kcal: ≈ ' + Math.round(b.basket) + ' € + ' + Math.round(b.pantry) + ' € pantry)');
+  });
+});
+
 console.log('\n' + passed + ' passed, ' + failed + ' failed\n');
 process.exit(failed ? 1 : 0);

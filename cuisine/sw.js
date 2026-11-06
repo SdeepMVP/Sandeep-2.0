@@ -17,6 +17,7 @@ var ASSETS = [
   '../js/tabs/objectif-engine.js',
   '../js/tabs/objectif.js',
   '../js/tabs/cuisine-recipes.js',
+  '../js/tabs/cuisine-prices.js',
   '../js/tabs/cuisine.js',
   '../js/settings.js',
   '../js/main.js',
