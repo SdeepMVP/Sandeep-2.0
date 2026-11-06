@@ -4,7 +4,7 @@
   var S2 = window.S2;
   var ui = S2.ui, h = ui.h, L = S2.L;
   var NS = 'settings';
-  var VERSION = '0.26.0';
+  var VERSION = '0.27.0';
 
   function get() {
     var s = S2.storage.load(NS, null) || {};
@@ -167,13 +167,13 @@
       h('p', { class: 'sheet-text' }, L('Spaces: ', 'Espaces : ') + (keys.join(', ') || L('none', 'aucun')) + ' · ' + ui.num(bytes / 1024, 1) + L(' KB used.', ' Ko utilisés.')),
       h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: wipe }, L('Erase everything', 'Tout effacer'))));
 
-    /* Lien vers SanEva (dossier cuisine/) : Muscu + Cuisine, seule app qui contient la Cuisine depuis la v0.22. Absent de SanEva elle-même. */
+    /* Lien vers SanEva (dossier cuisine/) : seule app qui contient la Cuisine (depuis la v0.22) et la Muscu (depuis la v0.27). Absent de SanEva elle-même. */
     if (!window.S2_APP) {
       var sanevaUrl = new URL('cuisine/', location.href.split('#')[0]).href;
       c.appendChild(h('h2', { class: 'section-title' }, 'SanEva'));
       c.appendChild(h('div', { class: 'card' },
-        h('p', { class: 'sheet-text' }, L('SanEva brings together Gym and Kitchen in their own app, in French: install it on your phone and on Maeva’s. Each phone keeps its own data. To move your workouts or recipes saved here, export a backup below and import it in SanEva (it only takes Gym, Kitchen and settings).',
-          'SanEva réunit la Muscu et la Cuisine dans leur propre app, en français : installe-la sur ton téléphone et sur celui de Maeva. Chaque téléphone garde ses données. Pour récupérer tes séances ou recettes enregistrées ici, exporte une sauvegarde ci-dessous et importe-la dans SanEva (elle ne prend que la Muscu, la Cuisine et les réglages).')),
+        h('p', { class: 'sheet-text' }, L('Gym and Kitchen now live only in SanEva, their own app in French: install it on your phone and on Maeva’s. Each phone keeps its own data. Your workouts and recipes saved here stay in this app’s backups: export a backup below and import it in SanEva to get them there (it only takes Gym, Kitchen and settings).',
+          'La Muscu et la Cuisine sont maintenant seulement dans SanEva, leur propre app en français : installe-la sur ton téléphone et sur celui de Maeva. Chaque téléphone garde ses données. Tes séances et recettes enregistrées ici restent dans les sauvegardes de cette app : exporte une sauvegarde ci-dessous et importe-la dans SanEva pour les y retrouver (elle ne prend que la Muscu, la Cuisine et les réglages).')),
         h('p', { class: 'hint' }, sanevaUrl),
         h('div', { class: 'stack' },
           h('a', { class: 'btn btn-primary btn-block', href: sanevaUrl }, L('Open SanEva', 'Ouvrir SanEva')),

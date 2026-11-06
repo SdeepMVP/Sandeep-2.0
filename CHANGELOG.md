@@ -1,5 +1,10 @@
 # Changelog — Sandeep 2.0
 
+## 0.27.0 — 2026-11-06
+- The **Gym tab is removed from Sandeep 2.0**: workouts now live only in **SanEva** (`/cuisine/`), with the Kitchen. The full app keeps Wardrobe, Habits and Settings, and opens on Wardrobe.
+- Workouts saved in Sandeep 2.0 are kept in its data and backups: export a backup and import it in SanEva to get them there.
+- Settings: the SanEva card explains this.
+
 ## 0.26.0 — 2026-11-06
 - **SanEva Cooking becomes SanEva**: the separate app (`/Sandeep-2.0/cuisine/`, same address so installed copies keep working) now has **Gym + Kitchen + Settings**, still in French. Gym is the same tab as in Sandeep 2.0 (program, sessions, history), with its own data on each phone.
 - SanEva's export, import and “Erase everything” now cover Gym, Kitchen and settings; importing a Sandeep 2.0 backup brings its workouts and recipes, never wardrobe or habits.

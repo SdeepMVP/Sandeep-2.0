@@ -3,7 +3,7 @@
   "short_name": "Sandeep 2.0",
   "description": "My personal life hub.",
   "lang": "en",
-  "start_url": "./#muscu",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
