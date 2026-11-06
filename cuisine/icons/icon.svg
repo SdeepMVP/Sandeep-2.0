@@ -3,6 +3,7 @@
   <g fill="none" stroke-linecap="round" stroke-linejoin="round">
     <path d="M104 262h304v20a112 112 0 0 1-112 112h-80a112 112 0 0 1-112-112z" stroke="#F5EFE6" stroke-width="20"/>
     <path d="M196 414h120" stroke="#F5EFE6" stroke-width="20"/>
-    <path d="M196 214c-14-16 14-30 0-46s14-30 0-46M256 214c-14-16 14-30 0-46s14-30 0-46M316 214c-14-16 14-30 0-46s14-30 0-46" stroke="#C19A6B" stroke-width="16"/>
+    <path d="M178 170h156" stroke="#C19A6B" stroke-width="18"/>
+    <path d="M154 130v80M190 142v56M322 142v56M358 130v80" stroke="#C19A6B" stroke-width="26"/>
   </g>
 </svg>

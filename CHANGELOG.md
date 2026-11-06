@@ -1,5 +1,10 @@
 # Changelog — Sandeep 2.0
 
+## 0.26.0 — 2026-11-06
+- **SanEva Cooking becomes SanEva**: the separate app (`/Sandeep-2.0/cuisine/`, same address so installed copies keep working) now has **Gym + Kitchen + Settings**, still in French. Gym is the same tab as in Sandeep 2.0 (program, sessions, history), with its own data on each phone.
+- SanEva's export, import and “Erase everything” now cover Gym, Kitchen and settings; importing a Sandeep 2.0 backup brings its workouts and recipes, never wardrobe or habits.
+- New SanEva icon (bowl + dumbbell). Sandeep 2.0 keeps its Gym tab; its Settings card now points to SanEva.
+
 ## 0.25.0 — 2026-11-05
 - SanEva Cooking: **calories per serving checked** against the ingredients (standard values, raw/dry; oil, butter, honey, avocado and cheese counted; optional toppings not counted): 31 recipes were within ±10 %, **26 corrected**, mostly upwards (e.g. avocado, egg & cream cheese toasts 560 → 750 kcal, crispy tofu 640 → 860 kcal), a few downwards (homemade chicken burger 620 → 510 kcal). Saved copies are updated unless you changed the value yourself.
 

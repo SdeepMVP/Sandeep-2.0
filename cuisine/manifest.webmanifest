@@ -1,9 +1,9 @@
 {
-  "name": "SanEva Cooking",
-  "short_name": "SanEva Cooking",
-  "description": "Nos recettes protéinées : courses et guide de cuisson.",
+  "name": "SanEva",
+  "short_name": "SanEva",
+  "description": "Muscu et recettes protéinées : séances, courses et guide de cuisson.",
   "lang": "fr",
-  "start_url": "./#cuisine",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
