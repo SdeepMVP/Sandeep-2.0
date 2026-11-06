@@ -235,10 +235,10 @@
   /* Ordre important : les exceptions d'épicerie (« lait de coco », « beurre de cacahuète », « sel & poivre »…) d'abord. */
   var AISLE_RULES = [
     ['grocery', /coco|cacahuete|peanut|\bsel\b|\bsalt\b|poivre\b|paprika|curry|cumin|cannelle|cinnamon|epice|spice|origan|oregano|herbes de provence|bouillon|stock|vinaigre|vinegar|sauce|huile|\boil\b|haricot rouge|haricot noir|kidney|black bean|lentille|lentil|coulis|passata|concasse|chopped tomato|pesto|moutarde|mustard|cornichon|gherkin|chapelure|breadcrumb|levure|baking powder|farine|flour|cacao|cocoa|chocolat|chocolate|miel|honey|sirop|syrup|sucre|sugar|whey|protein powder|mais|sweetcorn|corn|maizena|cornflour/],
-    ['meat', /poulet|chicken|boeuf|beef|dinde|turkey|jambon|\bham\b|saumon|salmon|thon|tuna|crevette|prawn|shrimp|cabillaud|\bcod\b|poisson|fish|volaille/],
+    ['meat', /poulet|chicken|boeuf|beef|steak|rumsteck|porc|pork|filet mignon|dinde|turkey|jambon|\bham\b|saumon|salmon|thon|tuna|crevette|prawn|shrimp|cabillaud|\bcod\b|poisson|fish|volaille/],
     ['dairy', /oeuf|\begg|skyr|yaourt|yogurt|yoghurt|fromage|cheese|cottage|feta|mozzarella|parmesan|cheddar|ricotta|\blait\b|\bmilk\b|beurre|butter|creme|cream|quark/],
-    ['bakery', /\bpain\b|bread|tortilla|bagel|brioche|\bbun\b|burger/],
-    ['veg', /tomate|tomato|avocat|avocado|citron|lemon|lime|banane|banana|pomme|apple|poivron|\bpepper\b|oignon|onion|echalote|shallot|\bail\b|garlic|concombre|cucumber|carotte|carrot|courgette|brocoli|broccoli|epinard|spinach|salade|lettuce|roquette|rocket|champignon|mushroom|haricot vert|green bean|patate|potato|fraise|strawberr|fruit|berr|cebette|spring onion|ciboulette|chive|persil|parsley|basilic|basil|aneth|dill|coriandre|coriander|gingembre|ginger|edamame|bok choy|romaine|legume|vegetable|herbe|herb/]
+    ['bakery', /\bpain\b|bread|tortilla|bagel|brioche|\bbun\b|burger|pita/],
+    ['veg', /tomate|tomato|avocat|avocado|citron|lemon|lime|banane|banana|pomme|apple|poivron|\bpepper\b|oignon|onion|echalote|shallot|\bail\b|garlic|concombre|cucumber|carotte|carrot|courgette|brocoli|broccoli|epinard|spinach|salade|lettuce|roquette|rocket|champignon|mushroom|haricot vert|green bean|patate|potato|fraise|strawberr|fruit|berr|cebette|spring onion|pousse de soja|bean sprout|ciboulette|chive|persil|parsley|basilic|basil|aneth|dill|coriandre|coriander|gingembre|ginger|edamame|bok choy|romaine|legume|vegetable|herbe|herb/]
   ];
   function aisleOf(key) {
     for (var i = 0; i < AISLE_RULES.length; i++) if (AISLE_RULES[i][1].test(key)) return AISLE_RULES[i][0];
@@ -246,7 +246,7 @@
   }
 
   /* ---------- Critères de recherche ---------- */
-  var MEAT_RE = /poulet|chicken|boeuf|beef|dinde|turkey|jambon|\bham\b|saumon|salmon|thon|tuna|crevette|prawn|shrimp|cabillaud|\bcod\b|poisson|fish|volaille|viande|meat|lardon|bacon/;
+  var MEAT_RE = /poulet|chicken|boeuf|beef|steak|dinde|turkey|porc|pork|jambon|\bham\b|saumon|salmon|thon|tuna|crevette|prawn|shrimp|cabillaud|\bcod\b|poisson|fish|volaille|viande|meat|lardon|bacon/;
   var OVEN_RE = /\bfour\b|enfourne|oven|air fryer|gratin|\bbake\b|baking dish/;
   function allText(v, part) { return norm([].concat(v[part] || [], v.alt ? v.alt[part] || [] : []).join(' | ')); }
   function isQuick(r) { return !!r.time && r.time <= 15; }
