@@ -123,6 +123,99 @@
     return scored.slice(0, limit || 50).map(function (x) { return x.it; });
   }
 
+  /* ---------- Check-list du jour (v0.40) ----------
+     o = { tot, t (cibles), water, waterGoal, training: 'done' | 'rest' | 'planned' | 'missed' | 'none' }.
+     Une journée est « réussie » quand chaque point applicable est coché : calories (±10 %), protéines (≥ 90 %),
+     séance faite (ou jour de repos / pas de programme), eau à l'objectif. */
+  function checklist(o) {
+    var it = inTarget(o.tot, o.t);
+    var tr = o.training || 'none';
+    var items = [
+      { id: 'kcal', ok: it.kcal },
+      { id: 'protein', ok: it.protein },
+      { id: 'training', ok: tr === 'done' || tr === 'rest' || tr === 'none', state: tr },
+      { id: 'water', ok: (o.water || 0) >= (o.waterGoal || 8) }
+    ];
+    var n = items.filter(function (x) { return x.ok; }).length;
+    var logged = o.tot && o.tot.kcal > 0;
+    return { items: items, done: n, total: items.length, success: !!logged && n === items.length };
+  }
+
+  /* ---------- « Ce qu'il te manque » (v0.40) ----------
+     Propose 1 ou 2 aliments (1 portion chacun) pour combler les protéines qui manquent sans dépasser les calories restantes.
+     foods = [{ key, name, kcal, protein }] (aliments habituels de l'utilisateur d'abord). Renvoie { kind, gap, left, options }.
+     kind : 'none' (rien à suggérer), 'protein' (options proposées), 'kcal' (protéines OK, il reste des calories), 'over' (au-dessus). */
+  function missing(tot, t, foods, maxOptions) {
+    if (!t || !tot) return { kind: 'none', options: [] };
+    var gap = Math.round(t.protein - tot.protein), left = Math.round(t.kcal - tot.kcal);
+    if (left < -t.kcal * 0.1) return { kind: 'over', gap: gap, left: left, options: [] };
+    if (gap < 10) return { kind: left > 250 ? 'kcal' : 'none', gap: gap, left: left, options: [] };
+    var budget = Math.max(left, 0) * 1.1 + 50; /* petite marge : quelques kcal de plus valent mieux qu'il manque des protéines */
+    var cands = (foods || []).filter(function (f) { return f.protein >= 5 && f.kcal > 0 && f.kcal <= budget; })
+      .sort(function (a, b) { return b.protein / b.kcal - a.protein / a.kcal; }).slice(0, 14);
+    var combos = [];
+    function add(list) {
+      var k = 0, p = 0; list.forEach(function (f) { k += f.kcal; p += f.protein; });
+      if (k > budget) return;
+      var cover = Math.min(p, gap) / gap;              /* part du manque comblée */
+      var over = Math.max(0, p - gap * 1.4) / gap;      /* bien trop de protéines : moins utile */
+      combos.push({ items: list, kcal: Math.round(k), protein: Math.round(p), score: cover * 10 - over * 3 - k / 400 - (list.length - 1) * 0.6 });
+    }
+    for (var i = 0; i < cands.length; i++) {
+      add([cands[i]]);
+      for (var j = i + 1; j < cands.length; j++) add([cands[i], cands[j]]);
+    }
+    combos.sort(function (a, b) { return b.score - a.score; });
+    var out = [], used = {};
+    combos.forEach(function (c) {
+      if (out.length >= (maxOptions || 3)) return;
+      var sig = c.items.map(function (f) { return f.key; });
+      if (sig.some(function (k) { return used[k]; })) return; /* options variées : un aliment n'apparaît qu'une fois */
+      sig.forEach(function (k) { used[k] = true; });
+      out.push({ items: c.items, kcal: c.kcal, protein: c.protein });
+    });
+    return { kind: out.length ? 'protein' : 'none', gap: gap, left: left, options: out };
+  }
+
+  /* ---------- Restes (v0.40) ----------
+     cooked = [{ recipeId, servings, date }] (Cuisine › « J'ai cuisiné ») ; entries = entrées du journal depuis (type, ref, qty, at).
+     Une portion notée comme mangée après la cuisson est retirée des restes ; les restes de plus de `maxDays` jours ne sont plus proposés
+     (3 jours au frigo). Le repas du jour de la cuisson compte : il en reste servings − portions mangées. */
+  function leftovers(cooked, entries, now, maxDays) {
+    var end = new Date(now).getTime(), lim = (maxDays || 3) * 86400000;
+    var seen = {};
+    return (cooked || []).slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; })
+      .filter(function (c) {
+        var age = end - new Date(c.date).getTime();
+        if (age < 0 || age > lim || seen[c.recipeId]) return false;
+        seen[c.recipeId] = true; /* dernière cuisson seulement */
+        return true;
+      })
+      .map(function (c) {
+        var from = new Date(c.date).getTime();
+        var eaten = (entries || []).filter(function (e) { return e.type === 'recipe' && e.ref === c.recipeId && new Date(e.at).getTime() >= from; })
+          .reduce(function (n, e) { return n + (e.qty || 1); }, 0);
+        return { recipeId: c.recipeId, date: c.date, cooked: c.servings || 1, left: Math.round(((c.servings || 1) - eaten) * 100) / 100 };
+      })
+      .filter(function (x) { return x.left >= 0.5; });
+  }
+
+  /* ---------- Bilan du mois (v0.40) ---------- */
+  function monthRange(d) {
+    var x = new Date(d), a = new Date(x.getFullYear(), x.getMonth(), 1), b = new Date(x.getFullYear(), x.getMonth() + 1, 0, 23, 59, 59, 999);
+    return { from: a, to: b, days: b.getDate() };
+  }
+  /* Évolution d'une mesure sur une période : première et dernière valeur dans [from, to]. pts = [{ date, v }]. */
+  function periodChange(pts, from, to) {
+    var a = new Date(from).getTime(), b = new Date(to).getTime();
+    var inP = (pts || []).filter(function (p) { var t = new Date(p.date).getTime(); return t >= a && t <= b && typeof p.v === 'number'; })
+      .sort(function (x, y) { return new Date(x.date) - new Date(y.date); });
+    if (!inP.length) return null;
+    var f = inP[0].v, l = inP[inP.length - 1].v;
+    return { first: f, last: l, delta: Math.round((l - f) * 10) / 10, n: inP.length };
+  }
+
   S2.todayEngine = { RATES: RATES, STEP: STEP, dayKey: dayKey, totals: totals, inTarget: inTarget, nutritionSummary: nutritionSummary,
-    weightTrend: weightTrend, suggestion: suggestion, monday: monday, searchFoods: searchFoods };
+    weightTrend: weightTrend, suggestion: suggestion, monday: monday, searchFoods: searchFoods,
+    checklist: checklist, missing: missing, leftovers: leftovers, monthRange: monthRange, periodChange: periodChange };
 })();

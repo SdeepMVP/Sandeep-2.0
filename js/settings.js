@@ -4,7 +4,7 @@
   var S2 = window.S2;
   var ui = S2.ui, h = ui.h, L = S2.L;
   var NS = 'settings';
-  var VERSION = '0.39.0';
+  var VERSION = '0.40.0';
 
   function get() {
     var s = S2.storage.load(NS, null) || {};
@@ -34,6 +34,25 @@
     var d = new Date();
     var p = function (n) { return String(n).padStart(2, '0'); };
     return 'sandeep2-backup-' + d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + '.json';
+  }
+
+  /* Rappel de sauvegarde (v0.40) : affiché en haut des onglets quand la dernière sauvegarde a 7 jours ou plus. */
+  function hasData() { return S2.storage.keys().some(function (k) { return k !== 'settings'; }); }
+  function backupBanner() {
+    var s = get();
+    var st = S2.storage.backupDue({ lastExport: s.lastExport, snoozeUntil: s.backupSnooze || null, hasData: hasData(), now: new Date() });
+    if (!st.due) return null;
+    var box = h('div', { class: 'card backup-banner', role: 'status' },
+      h('div', { class: 'card-title' }, L('🛟 Time to back up', '🛟 Pense à sauvegarder')),
+      h('p', { class: 'sheet-text' }, (st.days === null ? L('You have never saved a backup. ', 'Tu n’as encore jamais fait de sauvegarde. ')
+        : L('Last backup ' + st.days + ' days ago. ', 'Dernière sauvegarde il y a ' + st.days + ' jours. ')) +
+        L('Deleting the app icon erases all its data: keep a copy in Files or iCloud Drive.', 'Supprimer l’icône de l’app efface toutes ses données : garde une copie dans Fichiers ou iCloud Drive.')),
+      h('div', { class: 'backup-actions' },
+        h('button', { class: 'btn btn-primary', onclick: function () { doExport(); } }, L('Back up now', 'Sauvegarder maintenant')),
+        h('button', { class: 'btn btn-ghost', onclick: function () {
+          set({ backupSnooze: new Date(Date.now() + 3 * 86400000).toISOString() }); box.remove();
+        } }, L('Later', 'Plus tard'))));
+    return box;
   }
 
   function doExport() {
@@ -143,6 +162,8 @@
     c.appendChild(h('h2', { class: 'section-title' }, L('Backup', 'Sauvegarde')));
     c.appendChild(h('div', { class: 'card' },
       h('p', { class: 'sheet-text' }, L('Your data lives only on this iPhone. Export a JSON file regularly (e.g. to Files or iCloud Drive).', 'Tes données sont uniquement sur cet iPhone. Exporte régulièrement un fichier JSON (par ex. dans Fichiers ou iCloud Drive).')),
+      h('p', { class: 'note backup-warn' }, L('⚠️ Deleting the app icon from the Home Screen erases all its data. Back up before reinstalling the app. A reminder appears after 7 days without a backup.',
+        '⚠️ Supprimer l’icône de l’app de l’écran d’accueil efface toutes ses données. Sauvegarde avant de réinstaller l’app. Un rappel s’affiche après 7 jours sans sauvegarde.')),
       h('p', { class: 'hint' }, s.lastExport ? L('Last export: ', 'Dernier export : ') + ui.longDate(s.lastExport) : L('No export yet.', 'Aucun export pour l’instant.')),
       h('div', { class: 'stack' },
         h('button', { class: 'btn btn-primary btn-block btn-lg', onclick: doExport }, L('Export (JSON)', 'Exporter (JSON)')),
@@ -196,7 +217,7 @@
     c.appendChild(h('p', { class: 'hint center' }, (window.S2_APP && window.S2_APP.name || 'Habits') + ' · version ' + VERSION));
   }
 
-  S2.settings = { applyTheme: applyTheme, get: get, VERSION: VERSION };
+  S2.settings = { applyTheme: applyTheme, get: get, VERSION: VERSION, backupBanner: backupBanner };
 
   S2.app.registerTab({
     id: 'reglages', label: L('Settings', 'Réglages'), title: L('Settings', 'Réglages'), order: 90, mount: mount,

@@ -13,6 +13,7 @@ var ASSETS = [
   '../js/core/storage.js',
   '../js/core/ui.js',
   '../js/core/app.js',
+  '../js/tabs/muscu-engine.js',
   '../js/tabs/muscu.js',
   '../js/tabs/objectif-engine.js',
   '../js/tabs/objectif.js',

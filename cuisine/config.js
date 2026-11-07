@@ -6,5 +6,5 @@ window.S2_APP = {
   name: 'Gym Food',                              /* nom affiché (écran d'accueil, en-tête, Réglages) */
   root: '../',                                 /* chemin vers la racine de l'app complète (photos des recettes) */
   lang: 'fr',                                  /* langue imposée : pas de choix de langue dans Réglages */
-  storage: ['aujourdhui', 'muscu', 'objectif', 'cuisine', 'settings']    /* export, import et effacement limités à ces données */
+  storage: ['aujourdhui', 'aujourdhui-photos', 'muscu', 'objectif', 'cuisine', 'settings']    /* export, import et effacement limités à ces données */
 };
