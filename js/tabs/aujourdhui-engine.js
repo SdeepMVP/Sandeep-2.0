@@ -38,15 +38,54 @@
     return { kcal: k, protein: p, both: k && p };
   }
 
-  /* Bilan nutrition d'une période : days = [{ entries }] (jours sans entrée = non suivis, exclus des moyennes). */
+  /* ---------- v0.41 : calories des activités ----------
+     Dépense estimée (MET − 1, au-dessus du repos) × poids × durée. Les estimations surestiment souvent : l'app propose d'en ajouter
+     la moitié à la cible du jour, et l'utilisateur choisit (case à cocher en ajoutant l'activité). L'ajout choisi est enregistré dans a.bonus. */
+  var MET = { run: 9.8, bike: 7.5, walk: 3.5, swim: 8, team: 7, other: 5 };
+  function activityKcal(type, minutes, kg) {
+    var m = MET[type] || MET.other;
+    return Math.max(0, Math.round((m - 1) * (kg || 70) * (minutes || 0) / 60));
+  }
+  /* Cible du jour avec les calories d'activité ajoutées (glucides d'abord : c'est le carburant de l'effort). */
+  function dayTarget(t, activities) {
+    if (!t) return t;
+    var bonus = (activities || []).reduce(function (n, a) { return n + (a.bonus || 0); }, 0);
+    if (!bonus) return t;
+    var o = {}; Object.keys(t).forEach(function (k) { o[k] = t[k]; });
+    o.kcal = t.kcal + bonus; o.carbs = (t.carbs || 0) + Math.round(bonus / 4); o.bonus = bonus;
+    return o;
+  }
+
+  /* ---------- v0.41 : moments des repas ---------- */
+  var MEALS = ['breakfast', 'lunch', 'snack', 'dinner'];
+  /* Moment proposé d'après l'heure (modifiable au moment d'ajouter) : avant 10 h 30, avant 15 h, avant 18 h, puis dîner. */
+  function guessMeal(d) {
+    var x = new Date(d), hm = x.getHours() + x.getMinutes() / 60;
+    return hm < 10.5 ? 'breakfast' : hm < 15 ? 'lunch' : hm < 18 ? 'snack' : 'dinner';
+  }
+  /* Moment d'une entrée : choisi (e.meal), sinon déduit de l'heure d'ajout (entrées d'avant la v0.41). */
+  function mealOf(e) { return MEALS.indexOf(e && e.meal) > -1 ? e.meal : guessMeal(e && e.at || Date.now()); }
+
+  /* ---------- v0.41 : sommeil et pas ----------
+     days = [{ sleep (heures), steps }] ; les jours sans saisie ne comptent pas dans les moyennes. */
+  function wellbeing(days) {
+    var sl = (days || []).map(function (d) { return d && d.sleep; }).filter(function (v) { return typeof v === 'number' && v > 0; });
+    var st = (days || []).map(function (d) { return d && d.steps; }).filter(function (v) { return typeof v === 'number' && v > 0; });
+    function avg(a, dig) { return a.length ? Math.round(a.reduce(function (x, y) { return x + y; }, 0) / a.length * dig) / dig : null; }
+    return { sleepAvg: avg(sl, 10), sleepDays: sl.length, stepsAvg: st.length ? Math.round(avg(st, 1)) : null, stepsDays: st.length };
+  }
+
+  /* Bilan nutrition d'une période : days = [{ entries, activities? }] (jours sans entrée = non suivis, exclus des moyennes).
+     v0.41 : la cible de chaque jour inclut les calories d'activité ajoutées ce jour-là. */
   function nutritionSummary(days, t) {
     var logged = days.filter(function (d) { return d.entries && d.entries.length; });
     var tots = logged.map(function (d) { return totals(d.entries); });
+    var tgs = logged.map(function (d) { return dayTarget(t, d.activities); });
     var n = tots.length;
     function avg(k) { return n ? Math.round(tots.reduce(function (s, x) { return s + x[k]; }, 0) / n) : 0; }
-    var hit = tots.filter(function (x) { return inTarget(x, t).both; }).length;
-    var kOk = tots.filter(function (x) { return inTarget(x, t).kcal; }).length;
-    var pOk = tots.filter(function (x) { return inTarget(x, t).protein; }).length;
+    var hit = tots.filter(function (x, i) { return inTarget(x, tgs[i]).both; }).length;
+    var kOk = tots.filter(function (x, i) { return inTarget(x, tgs[i]).kcal; }).length;
+    var pOk = tots.filter(function (x, i) { return inTarget(x, tgs[i]).protein; }).length;
     return { days: days.length, logged: n, kcal: avg('kcal'), protein: avg('protein'), carbs: avg('carbs'), fat: avg('fat'), inTarget: hit, kcalOk: kOk, proteinOk: pOk };
   }
 
@@ -217,5 +256,6 @@
 
   S2.todayEngine = { RATES: RATES, STEP: STEP, dayKey: dayKey, totals: totals, inTarget: inTarget, nutritionSummary: nutritionSummary,
     weightTrend: weightTrend, suggestion: suggestion, monday: monday, searchFoods: searchFoods,
-    checklist: checklist, missing: missing, leftovers: leftovers, monthRange: monthRange, periodChange: periodChange };
+    checklist: checklist, missing: missing, leftovers: leftovers, monthRange: monthRange, periodChange: periodChange,
+    MET: MET, activityKcal: activityKcal, dayTarget: dayTarget, MEALS: MEALS, guessMeal: guessMeal, mealOf: mealOf, wellbeing: wellbeing };
 })();

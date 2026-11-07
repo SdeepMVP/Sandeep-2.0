@@ -1,5 +1,12 @@
 # Changelog — Habits (ex-Sandeep 2.0), Gym Food (ex-SanEva), Dressing
 
+## 0.41.0 — 2026-11-07
+- Gym: **bodyweight exercises** (push-ups, pull-ups, dips…) now have records, curves, end-of-workout comparison and stall detection: estimated 1RM with your bodyweight (Goal) + any extra weight, or best set in reps if your weight is unknown. Plank and other holds count in reps/seconds. Leave “kg” empty (shown as “BW”) or type the extra weight.
+- Gym: **after the 12 weeks**: a “cycle done” card suggests a **deload week** (−10 % weights, one set less, no suggestions, ignored for stalls), then a **new cycle** (same program from week 1, history kept) or another program. Deload can also be picked any week.
+- Today: **activity calories**: estimated burn for each activity (by type, duration, weight), and you choose to add half of it to the day's target (ticked by default when adding). The weekly review uses each day's target.
+- Today: foods logged outside the plan are grouped by **meal** (breakfast, lunch, snack, dinner), chosen when adding (suggested from the time), with a “+” per meal.
+- Today: adjustable **water goal** (4 to 16 glasses), **sleep and steps** typed by hand, with averages in the weekly and monthly reviews; the Gym stall tip shows your average sleep.
+
 ## 0.40.0 — 2026-11-07
 - **Never lose your data again** (all three apps): a reminder at the top of each tab after 7 days without a backup (“Back up now” / “Later”), a clear warning in Settings that deleting the app icon erases its data, and the app asks iOS to keep its storage.
 - Gym Food › Today:

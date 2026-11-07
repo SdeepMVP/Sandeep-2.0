@@ -1004,3 +1004,17 @@ input[type="date"].input { display: block; line-height: 48px; }
 .mu-stagrow { padding: 10px 0; border-top: 1px solid var(--border); }
 .mu-stagrow:first-of-type { border-top: 0; }
 .to-entry .btn { white-space: nowrap; }
+
+/* ---------- v0.41 : Aujourd'hui (activités, repas, eau, sommeil) et Muscu (cycles, décharge) ---------- */
+.to-waterinfo { background: none; border: 0; padding: 0; color: inherit; font: inherit; text-align: left; min-height: 48px; display: grid; align-content: center; }
+.to-acttick { display: flex; align-items: center; width: 100%; min-height: 48px; padding: 8px 12px; margin: 6px 0; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--text); font: inherit; text-align: left; }
+.to-acttick.is-on { border-color: var(--good); background: var(--good-bg); color: var(--good); font-weight: 600; }
+.to-actest { margin-top: 8px; }
+.to-mealhead { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 6px; }
+.to-mealhead .btn { min-width: 48px; min-height: 40px; font-size: 20px; }
+.to-mealpick { margin: 4px 0 8px; }
+.to-mealpick .seg { font-size: 13px; padding-left: 4px; padding-right: 4px; }
+.mu-cycledone { border: 1.5px solid var(--good); background: var(--good-bg); }
+.mu-deloadseg { margin: 6px 0; }
+.stepper.is-muted { opacity: .5; }

@@ -599,5 +599,65 @@ test('strength over a month vs the month before', function () {
   ok(b.best === 99.2 && b.prev === 93.3 && b.delta === 5.8 && sq.prev === null, JSON.stringify(r));
 });
 
+/* ---------- v0.41 ---------- */
+console.log('\nv0.41: bodyweight, cycles, activities, meals, sleep');
+test('bodyweight exercises: with bodyweight → kg (bodyweight + extra), without → reps; isometric → reps', function () {
+  ok(ME.isBodyweight('Pompes') && ME.isBodyweight('Tractions') && ME.isBodyweight('Dips sur chaise') && ME.isBodyweight('Pull-up') && !ME.isBodyweight('Squat'), 'detection');
+  var p1 = ME.perf([{ w: null, r: 10 }, { w: null, r: 8 }], 'Tractions', 80);
+  ok(p1.unit === 'kg' && p1.bw && Math.round(p1.v * 10) / 10 === 106.7, JSON.stringify(p1));
+  var p2 = ME.perf([{ w: 10, r: 6 }], 'Tractions', 80);
+  ok(Math.round(p2.v) === 108, 'extra weight counted: ' + p2.v);
+  ok(ME.perf([{ w: null, r: 12 }, { w: null, r: 15 }], 'Pompes', null).v === 15, 'reps without bodyweight');
+  ok(ME.perf([{ w: null, r: 60 }], 'Gainage', 80).unit === 'reps', 'plank stays in reps/seconds');
+  ok(ME.perf([{ w: 60, r: 8 }], 'Rowing barre', 80).unit === 'kg', 'normal exercise');
+});
+test('bodyweight exercises now get records, trends and stalls', function () {
+  var a = sess('1', 1, { p: ex('Pompes', [[null, 12]]) }), b = sess('2', 8, { p: ex('Pompes', [[null, 15]]) });
+  var sum = ME.sessionSummary(b, [a], {}, null);
+  ok(sum.exercises[0].unit === 'reps' && sum.exercises[0].record && sum.exercises[0].trend === 'up', JSON.stringify(sum.exercises[0]));
+  var flat = [sess('1', 1, { p: ex('Pompes', [[null, 20]]) }), sess('2', 5, { p: ex('Pompes', [[null, 18]]) }), sess('3', 9, { p: ex('Pompes', [[null, 19]]) }),
+    sess('4', 16, { p: ex('Pompes', [[null, 20]]) }), sess('5', 23, { p: ex('Pompes', [[null, 18]]) })];
+  var st = ME.stagnation(flat, {}, null);
+  ok(st.length === 1 && st[0].unit === 'reps' && st[0].best === 20, JSON.stringify(st));
+});
+test('deload weeks are ignored for stalls; cycles: done after week 12, deload, new cycle', function () {
+  var flat = [sess('1', 1, { b: ex('Bench', [[80, 6]]) }), sess('2', 5, { b: ex('Bench', [[85, 5]]) }), sess('3', 9, { b: ex('Bench', [[82.5, 5]]) }),
+    sess('4', 16, { b: ex('Bench', [[85, 4]]) }), sess('5', 23, { b: ex('Bench', [[82.5, 5]]) })];
+  flat[4].deload = true;
+  ok(ME.stagnation(flat, {}).length === 0, 'a deload week does not count as a stalled workout');
+  function w(id, week, day, extra) { var s0 = sess(id, day, {}); s0.week = week; Object.assign(s0, extra || {}); return s0; }
+  var list = [w('a', 1, 1), w('b', 6, 2), w('c', 11, 3)];
+  var c1 = ME.cycleStatus(list, 12);
+  ok(c1.cycle === 1 && c1.lastWeek === 11 && !c1.done, JSON.stringify(c1));
+  list.push(w('d', 12, 4));
+  ok(ME.cycleStatus(list, 12).done && !ME.cycleStatus(list, 12).deloadDone, 'done, no deload yet');
+  list.push(w('e', 12, 5, { deload: true }));
+  ok(ME.cycleStatus(list, 12).deloadDone, 'deload done');
+  list.push(w('f', 1, 6, { cycle: 2 }));
+  var c2 = ME.cycleStatus(list, 12);
+  ok(c2.cycle === 2 && c2.lastWeek === 1 && !c2.done, JSON.stringify(c2));
+});
+test('activity calories and the day target', function () {
+  ok(TE.activityKcal('run', 60, 80) === 704, 'run 1 h 80 kg: ' + TE.activityKcal('run', 60, 80));
+  ok(TE.activityKcal('walk', 30, 70) === 88, 'walk 30 min: ' + TE.activityKcal('walk', 30, 70));
+  var t = { kcal: 2000, protein: 140, carbs: 200, fat: 70 };
+  var d = TE.dayTarget(t, [{ bonus: 300 }, { bonus: 0 }]);
+  ok(d.kcal === 2300 && d.carbs === 275 && d.protein === 140 && d.bonus === 300 && t.kcal === 2000, JSON.stringify(d));
+  ok(TE.dayTarget(t, []) === t, 'no bonus: same target');
+  var s0 = TE.nutritionSummary([{ entries: [{ kcal: 2300, protein: 140 }], activities: [{ bonus: 300 }] }, { entries: [{ kcal: 2300, protein: 140 }] }], t);
+  ok(s0.inTarget === 1 && s0.kcalOk === 1, 'per-day target in the review: ' + JSON.stringify(s0));
+});
+test('meals: guessed from the time, chosen meal wins', function () {
+  ok(TE.guessMeal(new Date(2026, 10, 7, 8, 0)) === 'breakfast' && TE.guessMeal(new Date(2026, 10, 7, 12, 30)) === 'lunch', 'morning, noon');
+  ok(TE.guessMeal(new Date(2026, 10, 7, 16, 0)) === 'snack' && TE.guessMeal(new Date(2026, 10, 7, 20, 0)) === 'dinner', 'afternoon, evening');
+  ok(TE.mealOf({ meal: 'dinner', at: new Date(2026, 10, 7, 8).toISOString() }) === 'dinner', 'chosen');
+  ok(TE.mealOf({ at: new Date(2026, 10, 7, 13).toISOString() }) === 'lunch', 'old entry: from the time');
+});
+test('sleep and steps averages ignore days without entry', function () {
+  var wb = TE.wellbeing([{ sleep: 7 }, { sleep: 6.5, steps: 9000 }, {}, { steps: 5000 }, { sleep: 0 }]);
+  ok(wb.sleepAvg === 6.8 && wb.sleepDays === 2 && wb.stepsAvg === 7000 && wb.stepsDays === 2, JSON.stringify(wb));
+  ok(TE.wellbeing([]).sleepAvg === null, 'empty');
+});
+
 console.log('\n' + passed + ' passed, ' + failed + ' failed\n');
 process.exit(failed ? 1 : 0);
