@@ -13,9 +13,6 @@ var ASSETS = [
   './js/core/storage.js',
   './js/core/ui.js',
   './js/core/app.js',
-  './js/tabs/garde-robe-combos.js',
-  './js/tabs/garde-robe-engine.js',
-  './js/tabs/garde-robe.js',
   './js/tabs/habitudes.js',
   './js/settings.js',
   './js/main.js',
@@ -31,8 +28,8 @@ self.addEventListener('install', function (e) {
 
 self.addEventListener('activate', function (e) {
   e.waitUntil(caches.keys().then(function (keys) {
-    /* Ne supprime que les anciennes versions de cette app : l'app Cuisine (cuisine/sw.js) a ses propres caches. */
-    return Promise.all(keys.filter(function (k) { return k !== CACHE_VERSION && k.indexOf('sandeep2-') === 0 && k.indexOf('sandeep2-cuisine-') !== 0; })
+    /* Ne supprime que les anciennes versions de cette app : SanEva (cuisine/sw.js) et Dressing (dressing/sw.js) ont leurs propres caches. */
+    return Promise.all(keys.filter(function (k) { return k !== CACHE_VERSION && k.indexOf('sandeep2-') === 0 && k.indexOf('sandeep2-cuisine-') !== 0 && k.indexOf('sandeep2-dressing-') !== 0; })
       .map(function (k) { return caches.delete(k); }));
   }).then(function () { return self.clients.claim(); }));
 });

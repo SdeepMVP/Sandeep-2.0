@@ -1,4 +1,9 @@
-# Changelog — Sandeep 2.0
+# Changelog — Habit Tracker (ex-Sandeep 2.0), SanEva, Dressing
+
+## 0.37.0 — 2026-11-07
+- The main app is renamed **Habit Tracker** and now only has **Habits** (+ Settings). New icon.
+- **Wardrobe moves to Dressing**, its own app (`dressing/`, English or French, installable on the Home Screen, own icon): Wardrobe + Settings (with My Style). Its backups only take Wardrobe, its photos and settings.
+- Habit Tracker › Settings links to Dressing and SanEva. To bring your clothes over on iPhone: export a backup in Habit Tracker and import it in Dressing. Old backups still import everywhere.
 
 ## 0.37.0 — 2026-11-07
 - SanEva Kitchen › Groceries: **groceries for two, by message**. Each person plans in their own app, then:

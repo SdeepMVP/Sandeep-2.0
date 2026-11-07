@@ -1,7 +1,7 @@
 {
-  "name": "Sandeep 2.0",
-  "short_name": "Sandeep 2.0",
-  "description": "My personal life hub.",
+  "name": "Habit Tracker",
+  "short_name": "Habit Tracker",
+  "description": "My daily habits.",
   "lang": "en",
   "start_url": "./",
   "scope": "./",

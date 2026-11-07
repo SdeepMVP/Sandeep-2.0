@@ -1,8 +1,10 @@
-# Sandeep 2.0
+# Habit Tracker (repo Sandeep-2.0)
 
-My personal life hub — a mobile-first web app for iPhone (plain HTML/CSS/JS, no build step).
+Mobile-first web apps for iPhone (plain HTML/CSS/JS, no build step).
 
-- Live: https://sdeepmvp.github.io/Sandeep-2.0/
+- Habit Tracker: https://sdeepmvp.github.io/Sandeep-2.0/
+- Dressing (wardrobe): https://sdeepmvp.github.io/Sandeep-2.0/dressing/
+- SanEva (gym, kitchen, goals): https://sdeepmvp.github.io/Sandeep-2.0/cuisine/
 - Project rules: [CLAUDE.md](CLAUDE.md) · Changes: [CHANGELOG.md](CHANGELOG.md)
 
 ## Run locally
