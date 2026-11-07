@@ -43,12 +43,22 @@
     d.weights = Array.isArray(d.weights) ? d.weights : [];
     /* v0.32 : 2e personne pour cuisiner à 2 (même forme que le profil, sans suivi du poids). null = personne. */
     d.partner = d.partner && typeof d.partner === 'object' ? d.partner : null;
+    /* v0.33 : mensurations et poids de la 2e personne, réponses du questionnaire (level, place, sportGoal, perWeek, weekdays, job, targetWeight). */
+    d.measures = Array.isArray(d.measures) ? d.measures : [];
+    if (d.partner) {
+      d.partner.weights = Array.isArray(d.partner.weights) ? d.partner.weights : [];
+      d.partner.measures = Array.isArray(d.partner.measures) ? d.partner.measures : [];
+      d.partner.custom = d.partner.custom || { kcal: null, protein: null };
+    }
     /* Futures migrations : if (d.schema < 2) { ... } */
     d.schema = SCHEMA;
     return d;
   }
   var data = null, root = null;
   function persist() { S2.storage.save(NS, data); }
+  function refresh() { if (root && root.isConnected && location.hash.replace('#', '') === 'objectif') render(); }
+  function prof(who) { return who === 'partner' ? data.partner : data; }
+  function whoName(who) { return who === 'partner' ? partnerName() : (data.name || L('You', 'Toi')); }
 
   /* ---------- Affichage ---------- */
   function mount(container) {
@@ -86,6 +96,8 @@
     /* Poids. */
     root.appendChild(h('h2', { class: 'section-title' }, L('Weight', 'Poids')));
     root.appendChild(weightCard());
+    root.appendChild(h('h2', { class: 'section-title' }, L('Measurements', 'Mensurations')));
+    root.appendChild(measuresCard('me'));
 
     /* Profil. */
     root.appendChild(h('h2', { class: 'section-title' }, L('My profile', 'Mon profil')));
@@ -98,6 +110,7 @@
       row(L('Meals per day', 'Repas par jour'), String(t.meals))));
     root.appendChild(h('div', { class: 'stack' },
       h('button', { class: 'btn btn-secondary btn-block', onclick: function () { editProfile(); } }, L('Edit my profile', 'Modifier mon profil')),
+      h('button', { class: 'btn btn-secondary btn-block', onclick: function () { startWizard('me'); } }, L('Redo the questionnaire (sport & nutrition)', 'Refaire le questionnaire (sport & nutrition)')),
       h('button', { class: 'btn btn-ghost btn-block', onclick: editCustom }, t.custom ? L('Change the values set by hand', 'Changer les valeurs fixées à la main') : L('Set my targets by hand', 'Fixer mes objectifs à la main'))));
 
     /* Cuisiner à 2. */
@@ -144,15 +157,16 @@
   function renderWelcome() {
     root.appendChild(h('div', { class: 'empty-state small ob-welcome' },
       h('div', { class: 'empty-icon', html: ICON, 'aria-hidden': 'true' }),
-      h('h2', null, L('Your daily needs', 'Tes besoins du jour')),
-      h('p', null, L('Enter your height, weight and goal: the app calculates your calories and protein, then suggests recipes that match.',
-        'Entre ta taille, ton poids et ton objectif : l’app calcule tes calories et tes protéines, puis te propose les recettes qui collent.')),
-      h('button', { class: 'btn btn-primary btn-lg', onclick: function () { editProfile(); } }, L('Fill in my profile', 'Remplir mon profil'))));
+      h('h2', null, L('Let’s get to know you', 'Faisons connaissance')),
+      h('p', null, L('A few questions about you, your sport and your goals (2 minutes): the app then suggests your calories, your program and your training days. You confirm everything.',
+        'Quelques questions sur toi, ton sport et tes objectifs (2 minutes) : l’app te propose ensuite tes calories, ton programme et tes jours d’entraînement. Tu valides tout.')),
+      h('button', { class: 'btn btn-primary btn-lg', onclick: function () { startWizard('me'); } }, L('Start', 'Commencer'))));
   }
 
   /* ---------- Poids ---------- */
   function weightCard() {
     var list = data.weights.slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+    var tw = data.targetWeight, gap = tw ? Math.round((data.weight - tw) * 10) / 10 : null;
     var first = list[0], last = list[list.length - 1];
     var diff = first && last && list.length > 1 ? last.kg - first.kg : null;
     return h('div', { class: 'card' },
@@ -165,29 +179,87 @@
       list.length > 1 ? h('ol', { class: 'ob-weights' }, list.slice(-5).reverse().map(function (w) {
         return h('li', null, h('span', null, ui.date(w.date, true)), h('span', null, num(w.kg, 1) + ' kg'));
       })) : null,
-      h('div', { class: 'stack' }, h('button', { class: 'btn btn-secondary btn-block', onclick: addWeight }, L('Update my weight', 'Mettre à jour mon poids'))),
-      h('p', { class: 'hint' }, L('Your targets follow your current weight.', 'Tes objectifs suivent ton poids actuel.')));
+      tw ? h('p', { class: 'note' }, L('Target weight: ', 'Poids visé : ') + num(tw, 1) + ' kg' + (gap ? ' (' + (gap > 0 ? '−' : '+') + num(Math.abs(gap), 1) + L(' kg to go)', ' kg à faire)') : L(' — reached!', ' — atteint !'))) : null,
+      h('div', { class: 'stack' }, h('button', { class: 'btn btn-secondary btn-block', onclick: function () { addWeight('me'); } }, L('Update my weight', 'Mettre à jour mon poids'))),
+      h('p', { class: 'hint' }, L('Your targets follow your current weight. The curve is in Today › Review.', 'Tes objectifs suivent ton poids actuel. La courbe est dans Aujourd’hui › Bilan.')));
   }
 
-  function addWeight() {
+  /* ---------- Mensurations (cm) ---------- */
+  var MEASURES = [['waist', L('Waist', 'Tour de taille')], ['hips', L('Hips', 'Hanches')], ['chest', L('Chest', 'Poitrine')], ['arm', L('Arm', 'Bras')], ['thigh', L('Thigh', 'Cuisse')]];
+  function measuresCard(who) {
+    var p = prof(who), list = (p.measures || []).slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+    var last = list[list.length - 1], first = list[0];
+    var card = h('div', { class: 'card' });
+    if (!last) card.appendChild(h('p', { class: 'hint' }, L('Waist, hips, arms… measured once a month, they show progress the scale does not.', 'Tour de taille, hanches, bras… mesurés une fois par mois, ils montrent ce que la balance ne montre pas.')));
+    else {
+      card.appendChild(h('div', { class: 'list-sub' }, L('Last: ', 'Dernières : ') + ui.date(last.date, true)));
+      card.appendChild(h('div', { class: 'list ob-calc' }, MEASURES.filter(function (m) { return last[m[0]]; }).map(function (m) {
+        var d = first !== last && first[m[0]] ? last[m[0]] - first[m[0]] : null;
+        return row(m[1], num(last[m[0]], 1) + ' cm' + (d ? ' (' + (d > 0 ? '+' : '−') + num(Math.abs(d), 1) + ')' : ''));
+      })));
+    }
+    card.appendChild(h('div', { class: 'stack' }, h('button', { class: 'btn btn-secondary btn-block', onclick: function () { addMeasures(who); } }, L('Add measurements', 'Ajouter des mensurations'))));
+    return card;
+  }
+  function addMeasures(who, onDone) {
+    data = load();
+    var p = prof(who);
+    if (!p) return;
+    ui.sheet(function (close) {
+      var err = h('p', { class: 'form-error', hidden: true }), inputs = {};
+      var fields = MEASURES.map(function (m) {
+        var inp = h('input', { class: 'input', type: 'text', inputmode: 'decimal', placeholder: 'cm', 'aria-label': m[1] + L(' in cm', ' en cm') });
+        inputs[m[0]] = inp;
+        return h('label', { class: 'field' }, h('span', { class: 'field-label' }, m[1]), inp);
+      });
+      function save() {
+        var e = { date: new Date().toISOString() }, any = false, bad = false;
+        MEASURES.forEach(function (m) {
+          var v = ui.parseNum(inputs[m[0]].value);
+          if (inputs[m[0]].value.trim() === '') return;
+          if (v === null || v < 10 || v > 250) { bad = true; return; }
+          e[m[0]] = Math.round(v * 10) / 10; any = true;
+        });
+        if (bad || !any) { err.textContent = L('Fill in at least one measurement, in cm.', 'Renseigne au moins une mesure, en cm.'); err.hidden = false; return; }
+        var today = e.date.slice(0, 10);
+        p.measures = (p.measures || []).filter(function (x) { return x.date.slice(0, 10) !== today; });
+        p.measures.push(e);
+        persist(); close(); refresh(); if (onDone) onDone();
+        ui.toast(L('Measurements saved', 'Mensurations enregistrées'));
+      }
+      return [
+        h('h2', { class: 'sheet-title' }, L('Measurements · ', 'Mensurations · ') + whoName(who)),
+        h('p', { class: 'sheet-text' }, L('Measure in the morning, tape snug but not tight. Leave empty what you do not measure.', 'Mesure le matin, mètre ruban ajusté sans serrer. Laisse vide ce que tu ne mesures pas.')),
+        h('div', { class: 'form-grid ob-grid2' }, fields), err,
+        h('div', { class: 'sheet-actions' },
+          h('button', { class: 'btn btn-primary btn-block', onclick: save }, L('Save', 'Enregistrer')),
+          h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, L('Cancel', 'Annuler')))
+      ];
+    }, { modal: true });
+  }
+
+  function addWeight(who, onDone) {
+    data = load();
+    var p = prof(who);
+    if (!p) return;
     ui.sheet(function (close) {
       var err = h('p', { class: 'form-error', hidden: true });
-      var inp = h('input', { class: 'input', type: 'text', inputmode: 'decimal', value: num(data.weight, 1), 'aria-label': L('Weight in kg', 'Poids en kg') });
+      var inp = h('input', { class: 'input', type: 'text', inputmode: 'decimal', value: num(p.weight, 1), 'aria-label': L('Weight in kg', 'Poids en kg') });
       function save() {
         var v = ui.parseNum(inp.value);
         if (v === null || v < 30 || v > 250) { err.textContent = L('Weight between 30 and 250 kg.', 'Poids entre 30 et 250 kg.'); err.hidden = false; return; }
         v = Math.round(v * 10) / 10;
         var today = new Date().toISOString().slice(0, 10);
-        data.weights = data.weights.filter(function (w) { return w.date.slice(0, 10) !== today; });
-        data.weights.push({ date: new Date().toISOString(), kg: v });
-        data.weight = v;
-        persist(); close(); render();
+        p.weights = (p.weights || []).filter(function (w) { return w.date.slice(0, 10) !== today; });
+        p.weights.push({ date: new Date().toISOString(), kg: v });
+        p.weight = v;
+        persist(); close(); refresh(); if (onDone) onDone();
         ui.toast(L('Weight saved, targets updated', 'Poids enregistré, objectifs mis à jour'));
       }
       inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') save(); });
       setTimeout(function () { inp.focus(); inp.select(); }, 250);
       return [
-        h('h2', { class: 'sheet-title' }, L('My weight today', 'Mon poids aujourd’hui')),
+        h('h2', { class: 'sheet-title' }, who === 'partner' ? L('Weight today · ', 'Poids du jour · ') + whoName(who) : L('My weight today', 'Mon poids aujourd’hui')),
         h('label', { class: 'field' }, h('span', { class: 'field-label' }, L('Weight (kg)', 'Poids (kg)')), inp),
         err,
         h('div', { class: 'sheet-actions' },
@@ -205,15 +277,20 @@
       return h('div', { class: 'card' },
         h('p', { class: 'sheet-text' }, L('Shopping and cooking for two? Add the other person (height, weight, goal): the Planning in Kitchen then gives each of you the right serving, and the groceries cover both.',
           'Tu fais les courses et la cuisine à 2 ? Ajoute l’autre personne (taille, poids, objectif) : le Planning de la Cuisine donne alors à chacun la bonne portion, et les courses couvrent les deux.')),
-        h('div', { class: 'stack' }, h('button', { class: 'btn btn-secondary btn-block', onclick: function () { editProfile('partner'); } }, L('+ Add the other person', '+ Ajouter l’autre personne'))));
+        h('div', { class: 'stack' }, h('button', { class: 'btn btn-secondary btn-block', onclick: function () { startWizard('partner'); } }, L('+ Add the other person', '+ Ajouter l’autre personne'))));
     }
     return h('div', { class: 'card ob-partner' },
       h('div', { class: 'ob-who' }, partnerName() + ' · ' + goalOf(p.goal).label),
       h('div', { class: 'ob-partnernum' }, fmtInt(t2.kcal) + L(' kcal / day · ', ' kcal / jour · ') + t2.protein + L(' g protein', ' g de protéines')),
       h('div', { class: 'list-sub' }, p.height + ' cm · ' + num(p.weight, 1) + ' kg · ' + p.age + L(' years · ', ' ans · ') + activityOf(p.activity).label),
       h('p', { class: 'hint' }, L('Used by the Planning when you choose “For two”. Their own phone keeps their own profile.', 'Utilisé par le Planning quand tu choisis « À 2 ». Son téléphone garde son propre profil.')),
+      p.targetWeight ? h('div', { class: 'list-sub' }, L('Target weight: ', 'Poids visé : ') + num(p.targetWeight, 1) + ' kg') : null,
+      h('div', { class: 'ob-twobtns' },
+        h('button', { class: 'btn btn-secondary', onclick: function () { addWeight('partner'); } }, L('⚖️ Weight', '⚖️ Pesée')),
+        h('button', { class: 'btn btn-secondary', onclick: function () { addMeasures('partner'); } }, L('📏 Measures', '📏 Mensurations'))),
       h('div', { class: 'stack' },
         h('button', { class: 'btn btn-secondary btn-block', onclick: function () { editProfile('partner'); } }, L('Edit', 'Modifier')),
+        h('button', { class: 'btn btn-ghost btn-block', onclick: function () { startWizard('partner'); } }, L('Redo the questionnaire', 'Refaire le questionnaire')),
         h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: function () {
           ui.confirm({ title: L('Remove ' + partnerName() + '?', 'Retirer ' + partnerName() + ' ?'), message: L('Plans will be for you only again. Plans already confirmed are not changed.', 'Les plannings seront de nouveau pour toi uniquement. Les plannings déjà validés ne changent pas.'),
             okLabel: L('Remove', 'Retirer'), danger: true }).then(function (ok) { if (!ok) return; data.partner = null; persist(); render(); });
@@ -283,7 +360,14 @@
         if (problem) { err.textContent = problem; err.hidden = false; err.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
         d.age = Math.round(d.age); d.height = Math.round(d.height); d.weight = Math.round(d.weight * 10) / 10;
         if (isPartner) {
-          data.partner = { name: d.name || '', sex: d.sex, age: d.age, height: d.height, weight: d.weight, activity: d.activity, goal: d.goal, meals: d.meals || 3 };
+          var prev = data.partner || {};
+          data.partner = Object.assign({}, prev, { name: d.name || '', sex: d.sex, age: d.age, height: d.height, weight: d.weight, activity: d.activity, goal: d.goal, meals: d.meals || 3,
+            weights: prev.weights || [], measures: prev.measures || [], custom: prev.custom || { kcal: null, protein: null } });
+          if (d.weight !== prev.weight) {
+            var td = new Date().toISOString().slice(0, 10);
+            data.partner.weights = data.partner.weights.filter(function (w) { return w.date.slice(0, 10) !== td; });
+            data.partner.weights.push({ date: new Date().toISOString(), kg: d.weight });
+          }
           persist(); close(); render();
           ui.toast(L('Saved', 'Enregistré'));
           return;
@@ -345,15 +429,197 @@
     }, { modal: true });
   }
 
+  /* ---------- Questionnaire de démarrage : qui tu es, ton sport, tes objectifs → proposition (validée par toi) ---------- */
+  var SPORT_GOALS = [
+    { id: 'muscle', label: L('Build muscle', 'Prendre du muscle'), sub: L('Gain muscle and size.', 'Gagner en muscle et en volume.'), nutrition: 'bulk' },
+    { id: 'strength', label: L('Get stronger', 'Gagner en force'), sub: L('Lift heavier on the big lifts.', 'Soulever plus lourd sur les grands mouvements.'), nutrition: 'maintain' },
+    { id: 'fatloss', label: L('Lose fat, tone up', 'Perdre du gras, me tonifier'), sub: L('Get leaner while keeping your muscle.', 'Affiner la silhouette en gardant le muscle.'), nutrition: 'cut' },
+    { id: 'glutes', label: L('Glutes & legs', 'Fessiers & jambes'), sub: L('Priority on the lower body.', 'Priorité au bas du corps.'), nutrition: 'recomp' },
+    { id: 'endurance', label: L('Fitness & endurance', 'Forme & endurance'), sub: L('Feel fit, move better, more cardio.', 'Être en forme, mieux bouger, plus de cardio.'), nutrition: 'maintain' }
+  ];
+  var LEVELS = [['beginner', L('Just starting (under 1 year)', 'Je débute (moins d’1 an)')], ['intermediate', L('1 to 3 years of training', '1 à 3 ans d’entraînement')], ['advanced', L('Over 3 years', 'Plus de 3 ans')]];
+  var PLACES = [['gym', L('At the gym', 'En salle')], ['home', L('At home, with dumbbells', 'À la maison, avec des haltères')]];
+  var JOBS = [['sitting', L('Mostly sitting', 'Plutôt assis')], ['standing', L('On my feet, walking a lot', 'Debout, je marche beaucoup')], ['physical', L('Physical job', 'Travail physique')]];
+  var DEFAULT_DAYS = { 2: [1, 4], 3: [1, 3, 5], 4: [1, 2, 4, 5], 5: [1, 2, 3, 4, 5], 6: [1, 2, 3, 4, 5, 6] };
+  var ACT_ORDER = ['sedentary', 'light', 'moderate', 'high', 'very'];
+  function activityFrom(perWeek, job) {
+    var i = perWeek <= 2 ? 1 : perWeek <= 4 ? 2 : 3;
+    if (job === 'physical') i++;
+    if (job === 'sitting' && perWeek <= 2) i = 1;
+    return ACT_ORDER[Math.min(4, i)];
+  }
+  function wdName(n) { var s = new Date(2026, 10, 1 + n).toLocaleDateString(S2.locale, { weekday: 'short' }).replace('.', ''); return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  function startWizard(who, onDone) {
+    data = load();
+    var isPartner = who === 'partner', src = isPartner ? (data.partner || {}) : data;
+    var firstTime = !E.isComplete(src);
+    var w = {
+      name: src.name || '', sex: src.sex || null, age: src.age || null, height: src.height || null, weight: src.weight || null,
+      level: src.level || 'beginner', place: src.place || 'gym', perWeek: src.perWeek || 3, weekdays: (src.weekdays || DEFAULT_DAYS[src.perWeek || 3]).slice(),
+      job: src.job || 'sitting', sportGoal: src.sportGoal || null, goal: src.goal || null, targetWeight: src.targetWeight || null, meals: src.meals || 3,
+      applyProgram: firstTime || isPartner
+    };
+    var step = 0;
+    ui.sheet(function (close) {
+      var body = h('div', { class: 'ob-wiz' });
+      var err = h('p', { class: 'form-error', hidden: true });
+      var nav = h('div', { class: 'sheet-actions' });
+      function choice(list, cur, onPick, cls) {
+        return h('div', { class: 'ob-choices' + (cls ? ' ' + cls : '') }, list.map(function (x) {
+          var id = x.id || x[0], on = cur === id;
+          return h('button', { class: 'ob-choice' + (on ? ' is-on' : ''), type: 'button', 'aria-pressed': on ? 'true' : 'false', onclick: function () { onPick(id); paint(); } },
+            h('span', { class: 'ob-choicename' }, x.label || x[1]), x.sub ? h('span', { class: 'ob-choicesub' }, x.sub) : null);
+        }));
+      }
+      function seg(list, cur, onPick) {
+        return h('div', { class: 'segmented' }, list.map(function (x) {
+          return h('button', { class: 'seg' + (cur === x[0] ? ' is-active' : ''), type: 'button', 'aria-pressed': cur === x[0] ? 'true' : 'false', onclick: function () { onPick(x[0]); paint(); } }, x[1]);
+        }));
+      }
+      function numField(label, key, mode, ph) {
+        var inp = h('input', { class: 'input', type: 'text', inputmode: mode, value: w[key] === null || w[key] === undefined ? '' : (mode === 'decimal' ? num(w[key]) : String(w[key])), placeholder: ph || '', 'aria-label': label, autocomplete: 'off' });
+        inp.addEventListener('input', function () { w[key] = ui.parseNum(inp.value); });
+        return h('label', { class: 'field' }, h('span', { class: 'field-label' }, label), inp);
+      }
+      function draftProfile() {
+        return { name: w.name, sex: w.sex, age: w.age, height: w.height, weight: w.weight, activity: activityFrom(w.perWeek, w.job), goal: w.goal, meals: w.meals,
+          custom: { kcal: null, protein: null } };
+      }
+      function check() {
+        if (step === 0) {
+          if (w.sex !== 'm' && w.sex !== 'f') return L('Choose the formula (woman or man).', 'Choisis la formule (femme ou homme).');
+          if (w.age === null || w.age < 14 || w.age > 90) return L('Age between 14 and 90.', 'Âge entre 14 et 90 ans.');
+          if (w.height === null || w.height < 120 || w.height > 230) return L('Height in cm, between 120 and 230.', 'Taille en cm, entre 120 et 230.');
+          if (w.weight === null || w.weight < 30 || w.weight > 250) return L('Weight between 30 and 250 kg.', 'Poids entre 30 et 250 kg.');
+        }
+        if (step === 1 && w.weekdays.length !== w.perWeek) return L('Pick ' + w.perWeek + ' training days.', 'Choisis ' + w.perWeek + ' jours d’entraînement.');
+        if (step === 2) {
+          if (!w.sportGoal) return L('Choose a sport goal.', 'Choisis un objectif sportif.');
+          if (!w.goal) return L('Choose a nutrition goal.', 'Choisis un objectif nutrition.');
+          if (w.targetWeight !== null && (w.targetWeight < 30 || w.targetWeight > 250)) return L('Target weight between 30 and 250 kg.', 'Poids visé entre 30 et 250 kg.');
+        }
+        return null;
+      }
+      function paint() {
+        body.innerHTML = ''; err.hidden = true; nav.innerHTML = '';
+        var titles = [L('Who are you?', 'Qui es-tu ?'), L('Your sport', 'Ton sport'), L('Your goals', 'Tes objectifs'), L('My suggestion', 'Ma proposition')];
+        body.appendChild(h('div', { class: 'ob-wizstep' }, (step + 1) + ' / 4' + (isPartner ? ' · ' + (w.name || L('other person', 'l’autre personne')) : '')));
+        body.appendChild(h('h2', { class: 'sheet-title' }, titles[step]));
+        if (step === 0) {
+          var nm = h('input', { class: 'input', type: 'text', value: w.name, autocapitalize: 'words', autocomplete: 'off', placeholder: L('First name', 'Prénom'), 'aria-label': L('First name', 'Prénom') });
+          nm.addEventListener('input', function () { w.name = nm.value.trim(); });
+          body.appendChild(h('label', { class: 'field' }, h('span', { class: 'field-label' }, L('First name', 'Prénom')), nm));
+          body.appendChild(h('div', { class: 'field' }, h('span', { class: 'field-label' }, L('Formula (base metabolism)', 'Formule (métabolisme de base)')),
+            seg([['f', L('Woman', 'Femme')], ['m', L('Man', 'Homme')]], w.sex, function (v) { w.sex = v; })));
+          body.appendChild(h('div', { class: 'form-grid' }, numField(L('Age', 'Âge'), 'age', 'numeric'), numField(L('Height (cm)', 'Taille (cm)'), 'height', 'numeric'), numField(L('Weight (kg)', 'Poids (kg)'), 'weight', 'decimal')));
+          body.appendChild(h('div', { class: 'field' }, h('span', { class: 'field-label' }, L('Outside sport, your day is…', 'En dehors du sport, ta journée est…')),
+            choice(JOBS, w.job, function (v) { w.job = v; })));
+        } else if (step === 1) {
+          body.appendChild(h('div', { class: 'field' }, h('span', { class: 'field-label' }, L('Your level', 'Ton niveau')), choice(LEVELS, w.level, function (v) { w.level = v; })));
+          body.appendChild(h('div', { class: 'field' }, h('span', { class: 'field-label' }, L('Where you train', 'Où tu t’entraînes')), seg(PLACES, w.place, function (v) { w.place = v; })));
+          body.appendChild(h('div', { class: 'field' }, h('span', { class: 'field-label' }, L('Workouts per week', 'Séances par semaine')),
+            seg([[2, '2'], [3, '3'], [4, '4'], [5, '5'], [6, '6']], w.perWeek, function (v) { w.perWeek = v; w.weekdays = DEFAULT_DAYS[v].slice(); })));
+          body.appendChild(h('div', { class: 'field' }, h('span', { class: 'field-label' }, L('Which days? (' + w.weekdays.length + ' / ' + w.perWeek + ')', 'Quels jours ? (' + w.weekdays.length + ' / ' + w.perWeek + ')')),
+            h('div', { class: 'ob-days' }, [1, 2, 3, 4, 5, 6, 0].map(function (d) {
+              var on = w.weekdays.indexOf(d) > -1;
+              return h('button', { class: 'ob-day' + (on ? ' is-on' : ''), type: 'button', 'aria-pressed': on ? 'true' : 'false', onclick: function () {
+                if (on) w.weekdays = w.weekdays.filter(function (x) { return x !== d; }); else if (w.weekdays.length < w.perWeek) w.weekdays.push(d);
+                paint();
+              } }, wdName(d));
+            }))));
+        } else if (step === 2) {
+          body.appendChild(h('div', { class: 'field' }, h('span', { class: 'field-label' }, L('Sport goal', 'Objectif sportif')),
+            choice(SPORT_GOALS, w.sportGoal, function (v) { w.sportGoal = v; var sg = SPORT_GOALS.filter(function (x) { return x.id === v; })[0]; if (sg) w.goal = sg.nutrition; })));
+          body.appendChild(h('div', { class: 'field' }, h('span', { class: 'field-label' }, L('Nutrition goal (suggested, you can change it)', 'Objectif nutrition (proposé, modifiable)')),
+            goalPicker(function (id) { w.goal = id; paint(); }, w.goal)));
+          body.appendChild(h('div', { class: 'form-grid ob-grid2' }, numField(L('Target weight (optional)', 'Poids visé (facultatif)'), 'targetWeight', 'decimal', 'kg'),
+            h('div', { class: 'field' }, h('span', { class: 'field-label' }, L('Meals a day', 'Repas par jour')), seg([[2, '2'], [3, '3'], [4, '4'], [5, '5']], w.meals, function (v) { w.meals = v; }))));
+        } else {
+          var t = E.targets(draftProfile());
+          body.appendChild(h('div', { class: 'card ob-hero' },
+            h('div', { class: 'ob-who' }, L('Nutrition · ', 'Nutrition · ') + goalOf(w.goal).label),
+            h('div', { class: 'ob-kcal' }, h('span', { class: 'ob-kcalnum' }, fmtInt(t.kcal)), h('span', { class: 'ob-kcalunit' }, L(' kcal / day', ' kcal / jour'))),
+            h('div', { class: 'list-sub' }, L('Protein ', 'Protéines ') + t.protein + ' g · ' + L('carbs ', 'glucides ') + t.carbs + ' g · ' + L('fat ', 'lipides ') + t.fat + ' g'),
+            h('div', { class: 'list-sub' }, L('Activity: ', 'Activité : ') + activityOf(activityFrom(w.perWeek, w.job)).label + ' · ' + w.meals + L(' meals', ' repas'))));
+          var opts = { level: w.level, sportGoal: w.sportGoal, perWeek: w.perWeek, place: w.place, weekdays: w.weekdays };
+          if (S2.muscu && S2.muscu.preview) {
+            var pv = S2.muscu.preview(opts);
+            var sorted = w.weekdays.slice().sort(function (a, b) { return ((a + 6) % 7) - ((b + 6) % 7); });
+            body.appendChild(h('div', { class: 'card' },
+              h('div', { class: 'ob-who' }, L('Training · ', 'Entraînement · ') + pv.name),
+              h('div', { class: 'list ob-calc' }, sorted.map(function (d, i) { var x = pv.days[i % pv.days.length]; return row(wdName(d), x.name + ' (' + x.exercises + ')'); })),
+              h('p', { class: 'hint' }, L('Goal: ' + w.perWeek + ' workouts a week. You can change every exercise afterwards in Gym › Program.', 'Objectif : ' + w.perWeek + ' séances par semaine. Tu pourras changer chaque exercice ensuite dans Muscu › Programme.'))));
+            body.appendChild(h('div', { class: 'field' }, h('span', { class: 'field-label' }, L('Gym program', 'Programme Muscu')),
+              seg([[true, L('Use this program', 'Utiliser ce programme')], [false, L('Keep mine', 'Garder le mien')]], w.applyProgram, function (v) { w.applyProgram = v; })));
+            if (w.applyProgram && !firstTime) body.appendChild(h('p', { class: 'hint' }, L('Your current days and exercises are replaced; your workout history is kept.', 'Tes jours et exercices actuels sont remplacés ; l’historique de tes séances est gardé.')));
+          }
+        }
+        body.appendChild(err);
+        if (step < 3) nav.appendChild(h('button', { class: 'btn btn-primary btn-block btn-lg', onclick: function () {
+          var problem = check();
+          if (problem) { err.textContent = problem; err.hidden = false; err.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
+          step++; paint(); body.parentNode.scrollTop = 0;
+        } }, L('Next ›', 'Suivant ›')));
+        else nav.appendChild(h('button', { class: 'btn btn-primary btn-block btn-lg', onclick: apply }, L('✓ Confirm', '✓ Valider')));
+        nav.appendChild(step > 0 ? h('button', { class: 'btn btn-ghost btn-block', onclick: function () { step--; paint(); } }, L('‹ Back', '‹ Retour'))
+          : h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, L('Cancel', 'Annuler')));
+      }
+      function apply() {
+        data = load();
+        var fields = { name: w.name, sex: w.sex, age: Math.round(w.age), height: Math.round(w.height), weight: Math.round(w.weight * 10) / 10,
+          activity: activityFrom(w.perWeek, w.job), goal: w.goal, meals: w.meals, level: w.level, place: w.place, perWeek: w.perWeek,
+          weekdays: w.weekdays.slice(), job: w.job, sportGoal: w.sportGoal, targetWeight: w.targetWeight ? Math.round(w.targetWeight * 10) / 10 : null };
+        var p = isPartner ? (data.partner || { weights: [], measures: [], custom: { kcal: null, protein: null } }) : data;
+        var oldW = p.weight;
+        Object.keys(fields).forEach(function (k) { p[k] = fields[k]; });
+        p.weights = p.weights || []; p.measures = p.measures || [];
+        if (fields.weight !== oldW) {
+          var td = new Date().toISOString().slice(0, 10);
+          p.weights = p.weights.filter(function (x) { return x.date.slice(0, 10) !== td; });
+          p.weights.push({ date: new Date().toISOString(), kg: fields.weight });
+        }
+        if (isPartner) data.partner = p;
+        persist();
+        var msg = L('Profile saved', 'Profil enregistré');
+        if (w.applyProgram && S2.muscu && S2.muscu.apply) {
+          var ok = S2.muscu.apply(who, { level: w.level, sportGoal: w.sportGoal, perWeek: w.perWeek, place: w.place, weekdays: w.weekdays });
+          msg = ok ? L('Profile and program ready', 'Profil et programme prêts') : L('Profile saved (workout in progress: program not replaced)', 'Profil enregistré (séance en cours : programme non remplacé)');
+        }
+        close(); refresh(); if (onDone) onDone();
+        ui.toast(msg);
+      }
+      paint();
+      return [body, nav];
+    }, { modal: true });
+  }
+
   S2.app.registerTab({ id: 'objectif', label: L('Goal', 'Objectif'), icon: ICON, mount: mount, order: 20 });
 
-  /* Lecture seule pour les autres onglets (Cuisine) : objectifs du jour, ou null si le profil n'est pas rempli. */
+  /* Lecture (et quelques écritures déclenchées par l'utilisateur) pour les autres onglets. who = 'me' (défaut) ou 'partner'. */
+  function snapshot(who) {
+    var d = load(), p = who === 'partner' ? d.partner : d;
+    if (!p) return null;
+    return { name: p.name || '', goal: p.goal, weight: p.weight, targetWeight: p.targetWeight || null, sportGoal: p.sportGoal || null,
+      weights: (p.weights || []).slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; }),
+      measures: (p.measures || []).slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; }),
+      custom: p.custom || {}, complete: E.isComplete(p) };
+  }
   S2.objectif = {
-    targets: function () { return E.targets(load()); },
+    targets: function (who) { var d = load(); return who === 'partner' ? (d.partner ? E.targets(d.partner) : null) : E.targets(d); },
     goalLabel: function (id) { var g = goalOf(id); return g ? g.label : ''; },
-    /* Cuisiner à 2 : objectifs et prénom de la 2e personne (null si aucune), prénom de la personne du téléphone. */
     partnerTargets: function () { var d = load(); return d.partner ? E.targets(d.partner) : null; },
     partnerName: function () { var d = load(); return d.partner && d.partner.name || L('Other person', 'L’autre'); },
-    myName: function () { return load().name || L('You', 'Toi'); }
+    myName: function () { return load().name || L('You', 'Toi'); },
+    hasPartner: function () { var d = load(); return !!(d.partner && E.isComplete(d.partner)); },
+    profile: snapshot,
+    logWeight: function (who, onDone) { addWeight(who === 'partner' ? 'partner' : 'me', onDone); },
+    logMeasures: function (who, onDone) { addMeasures(who === 'partner' ? 'partner' : 'me', onDone); },
+    startWizard: function (who, onDone) { startWizard(who === 'partner' ? 'partner' : 'me', onDone); },
+    /* Ajustement proposé par le bilan et confirmé par l'utilisateur. */
+    setCustomKcal: function (who, kcal) {
+      data = load(); var p = prof(who === 'partner' ? 'partner' : 'me'); if (!p) return;
+      p.custom = p.custom || { kcal: null, protein: null }; p.custom.kcal = Math.round(kcal); persist(); refresh();
+    }
   };
 })();

@@ -11,7 +11,7 @@
   var FR = S2.lang === 'fr';
   var ui = S2.ui, h = ui.h, num = ui.num;
   var NS = 'cuisine';
-  var SCHEMA = 5;
+  var SCHEMA = 6;
 
   var ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11h16v2a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6v-2zM2 11h2M20 11h2M9 7c0-1 1-1.5 1-2.5M13 7c0-1 1-1.5 1-2.5"/></svg>';
   var CATS = { breakfast: L('Breakfast & snack', 'Petit-déjeuner & en-cas'), main: L('Lunch & dinner', 'Déjeuner & dîner') };
@@ -93,6 +93,12 @@
       d.recipes.forEach(function (r) {
         var f = r.builtin && KCAL_FIX[r.id];
         if (f && r.kcal === f[0]) { r.kcal = f[1]; added = true; }
+      });
+    }
+    /* v0.33 : protéines du poke bowl crevettes recalculées avec la table nutritionnelle (crevettes cuites ≈ 24 g / 100 g). */
+    if ((d.schema || 1) < 6) {
+      d.recipes.forEach(function (r) {
+        if (r.builtin && r.id === 'm-shrimp-poke' && r.protein === 42) { r.protein = 50; added = true; }
       });
     }
     d.recipes.forEach(function (r) { have[r.id] = true; });
@@ -575,6 +581,8 @@
       r.protein ? h('span', { class: 'ck-protein' }, '≈ ' + r.protein + L(' g protein', ' g de protéines')) : null,
       r.kcal ? h('span', null, '≈ ' + r.kcal + ' kcal') : null));
     /* Les valeurs enregistrées sont PAR PORTION (une personne) : elles ne changent pas avec le nombre de portions. */
+    var MX = NT && (r.kcal || r.protein) ? NT.macros(r) : null;
+    if (MX) root.appendChild(h('div', { class: 'ck-meta' }, h('span', null, L('Carbs ≈ ', 'Glucides ≈ ') + MX.carbs + ' g'), h('span', null, L('Fat ≈ ', 'Lipides ≈ ') + MX.fat + ' g')));
     if (r.protein || r.kcal) root.appendChild(h('p', { class: 'hint' },
       L('Approximate values per serving (one person)', 'Valeurs approximatives par portion (une personne)') +
       (serv > 1 && r.protein ? L(' · ≈ ' + Math.round(r.protein * serv) + ' g protein in total for ' + serv, ' · ≈ ' + Math.round(r.protein * serv) + ' g de protéines au total pour ' + serv) : '') + '.'));
@@ -1107,6 +1115,7 @@
 
   /* ---------- Prix estimé du panier (js/tabs/cuisine-prices.js : prix moyens intégrés, aucun accès réseau) ---------- */
   var PRICES = S2.cuisinePrices;
+  var NT = S2.nutritionTable;
   function money(x, round) {
     return Number(x).toLocaleString(S2.locale, { style: 'currency', currency: 'EUR', minimumFractionDigits: round ? 0 : 2, maximumFractionDigits: round ? 0 : 2 });
   }
@@ -1361,6 +1370,19 @@
         ui.toast(isNew ? L('Recipe added', 'Recette ajoutée') : L('Recipe updated', 'Recette modifiée'));
       }
 
+      /* Calcul depuis les ingrédients (table nutritionnelle intégrée) : remplit les champs, tu peux corriger avant d'enregistrer. */
+      var calcNote = h('p', { class: 'hint', hidden: true });
+      var calcBtn = NT ? h('button', { class: 'btn btn-secondary btn-block', type: 'button', onclick: function () {
+        var c = NT.recipe({ ingredients: draft.ingredients, servings: draft.servings || 1 });
+        if (!c.kcal) { calcNote.textContent = L('Add ingredients with quantities first (e.g. “200 g of chicken”).', 'Ajoute d’abord des ingrédients avec leur quantité (ex. « 200 g de poulet »).'); calcNote.hidden = false; return; }
+        draft.protein = c.protein; draft.kcal = c.kcal;
+        var sheetEl = calcBtn.closest('.sheet');
+        sheetEl.querySelector('input[aria-label="' + L('Protein per serving (g)', 'Protéines par portion (g)') + '"]').value = String(c.protein);
+        sheetEl.querySelector('input[aria-label="' + L('Calories per serving (kcal, optional)', 'Calories par portion (kcal, facultatif)') + '"]').value = String(c.kcal);
+        calcNote.textContent = L('Calculated per serving: ', 'Calculé par portion : ') + c.kcal + ' kcal · ' + c.protein + L(' g protein · ', ' g de protéines · ') + c.carbs + L(' g carbs · ', ' g de glucides · ') + c.fat + L(' g fat', ' g de lipides') +
+          (c.unknown.length ? L('. Not counted: ', '. Non comptés : ') + c.unknown.join(', ') : '') + L('. Check and adjust if needed.', '. Vérifie et corrige si besoin.');
+        calcNote.hidden = false;
+      } }, L('🧮 Calculate from the ingredients', '🧮 Calculer depuis les ingrédients')) : null;
       return [
         h('h2', { class: 'sheet-title' }, isNew ? L('New recipe', 'Nouvelle recette') : L('Edit recipe', 'Modifier la recette')),
         text(L('Name', 'Nom'), 'name', L('e.g. Chicken curry', 'ex. Curry de poulet')),
@@ -1374,6 +1396,7 @@
           L('200 g chicken breast\n1 tbsp honey\nSalt & pepper', '200 g de blanc de poulet\n1 c. à soupe de miel\nSel & poivre'),
           L('Start a line with the quantity (e.g. “200 g …”) so it adjusts with the number of servings.',
             'Commence la ligne par la quantité (ex. « 200 g … ») pour qu’elle s’adapte au nombre de portions.')),
+        calcBtn, calcNote,
         lines(L('Steps (one per line)', 'Étapes (une par ligne)'), 'steps',
           L('Cut the chicken into pieces.\nCook 6 minutes over medium-high heat.', 'Coupe le poulet en morceaux.\nCuis 6 minutes à feu moyen-vif.')),
         text(L('Tip (optional)', 'Astuce (facultatif)'), 'tips', ''),
@@ -1398,6 +1421,34 @@
       persist(); back(); ui.toast(L('Recipe deleted', 'Recette supprimée'));
     });
   }
+
+  /* API en lecture pour l'onglet Aujourd'hui : repas prévus par le planning validé, recettes et leurs valeurs par portion. */
+  function ensureData() { if (!data) data = loadData(); return data; }
+  function recipeInfo(r) {
+    var m = NT ? NT.macros(r) : { kcal: r.kcal || 0, protein: r.protein || 0, carbs: 0, fat: 0 };
+    return { id: r.id, name: view(r).name, category: r.category, kcal: m.kcal || 0, protein: m.protein || 0, carbs: m.carbs || 0, fat: m.fat || 0 };
+  }
+  S2.cuisine = {
+    plannedMeals: function (date) {
+      ensureData();
+      if (!data.week) return [];
+      var a = new Date(data.week.start); a.setHours(0, 0, 0, 0);
+      var b = new Date(date); b.setHours(0, 0, 0, 0);
+      var i = Math.round((b - a) / 86400000);
+      if (i < 0 || i >= data.week.days.length) return [];
+      var meals = data.week.days[i].meals, labels = SLOT_LABELS[meals.length] || [];
+      return meals.map(function (m, k) {
+        var r = recipe(m.recipeId);
+        if (!r) return null;
+        var info = recipeInfo(r);
+        info.slot = labels[k] || ''; info.slotIndex = k; info.portion = m.portion; info.portion2 = m.portion2 || null;
+        return info;
+      }).filter(Boolean);
+    },
+    recipes: function () { ensureData(); return data.recipes.filter(function (r) { return r.kcal || r.protein; }).map(recipeInfo); },
+    recipe: function (id) { ensureData(); var r = recipe(id); return r ? recipeInfo(r) : null; },
+    open: function (id) { ensureData(); if (!recipe(id)) return; currentId = id; page = 'detail'; mode = 'cook'; if (location.hash === '#cuisine' && root) render(); else location.hash = '#cuisine'; }
+  };
 
   S2.app.registerTab({ id: 'cuisine', label: L('Kitchen', 'Cuisine'), order: 30, icon: ICON, mount: mount });
 })();

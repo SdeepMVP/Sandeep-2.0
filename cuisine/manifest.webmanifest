@@ -1,7 +1,7 @@
 {
   "name": "SanEva",
   "short_name": "SanEva",
-  "description": "Muscu et recettes protéinées : séances, courses et guide de cuisson.",
+  "description": "Suivi du jour : repas, séances et objectifs, pour toi et à 2.",
   "lang": "fr",
   "start_url": "./",
   "scope": "./",

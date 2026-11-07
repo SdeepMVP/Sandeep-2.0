@@ -1,5 +1,23 @@
 # Changelog — Sandeep 2.0
 
+## 0.33.0 — 2026-11-07
+- SanEva: new **Today** tab, first in the bar, for daily tracking of you and the other person (switch at the top):
+  - calories, protein, carbs and fat eaten vs target;
+  - meals planned by Kitchen › Planning to tick (**✓ Eaten**, or another serving);
+  - **add food**: about 50 everyday foods (eggs, skyr, banana, coffee, pizza, kebab…), recipes, your own foods, or a **quick entry** with calories only; recent items first;
+  - the **planned workout** (start or resume it in one tap) and other **activities** (running, cycling, walking…);
+  - **water** and **weigh-in**.
+- **Review** of the week: workouts done vs planned and lift goals, days tracked and on target, average calories and protein, **weight curve** (12 weeks, with target weight), **waist curve**, 4-week weight trend. It then **suggests ±150 kcal** when the trend does not match the goal; you confirm it, and it asks for 2 weeks of tracking first.
+- **Getting-started questionnaire**, also in Goal for you and for the other person, in 4 steps:
+  1. who you are, and how active you are outside sport;
+  2. your sport: level, gym or home, workouts per week and which days;
+  3. your sport and nutrition goals, with an optional target weight;
+  4. a suggestion to confirm: calories and macros, plus a program and training days. The program is picked by sessions per week, place and goal: Full body, Upper/Lower, PPL, Glutes, or a new **home dumbbell** program.
+- Gym: tracks **both people** (each has their own program and history). **Training days** of the week (the planned workout is preselected and shown in Today), **sport goals** (workouts per week, weight to reach on a lift, with progress) and a **rest timer** after each confirmed set (2:30 / 2:00 / 1:15).
+- Goal: **measurements** (waist, hips, chest, arm, thigh), weight and measurements for the other person too, target weight.
+- Kitchen: **nutrition table** for ingredients. Recipes now show **carbs and fat**, and the recipe editor can **calculate calories and protein from the ingredients**. Shrimp poke bowl protein corrected (42 → 50 g).
+- The app opens on the first tab of the bar. Tests for the nutrition table, daily totals, weekly review, weight trend and suggestions.
+
 ## 0.32.0 — 2026-11-07
 - SanEva Kitchen Planning: **1 day · 3 days · 4 days · Week**, to shop twice a week. A new plan starts the day after the confirmed one (or today), with ‹ › to move the start, and **avoids the dishes of the previous plan**; “Plan the next days” on a confirmed plan. Any length can be confirmed into the menu and groceries.
 - **Cooking for two**: in Goal, add the other person (height, weight, age, activity, goal). Planning then offers **For me / For two**: recipes are chosen for you and the other person gets their own serving (×0.5 to ×2 in quarters, adjusted over the day to their calories), shown on every meal with both people's day totals; the menu and groceries cover both.
