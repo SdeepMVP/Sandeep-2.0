@@ -1,4 +1,4 @@
-/* Cache hors-ligne de l'app « SanEva » (dossier cuisine/, portée limitée à ce dossier).
+/* Cache hors-ligne de l'app « Gym Food » (dossier cuisine/, portée limitée à ce dossier).
    Même fonctionnement que ../sw.js : le workflow GitHub Pages remplace __BUILD__ par l'identifiant du commit,
    ce qui installe la nouvelle version et recharge l'app. Ajouter ici tout nouveau fichier utilisé par la Muscu ou la Cuisine
    (en particulier les photos de img/recettes/). */

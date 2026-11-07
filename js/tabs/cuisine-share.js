@@ -1,4 +1,4 @@
-/* Échange de listes de courses entre deux téléphones (SanEva est personnelle : chacun a son app).
+/* Échange de listes de courses entre deux téléphones (Gym Food est personnelle : chacun a son app).
    Module PUR (ni DOM ni stockage, testable sous Node) : rien ne passe par un serveur. La liste voyage dans un message
    (iMessage, WhatsApp, AirDrop…) : un texte lisible + une ligne « SANEVA1:… » que l'autre app sait relire.
    L'utilisateur colle le message et confirme avant que quoi que ce soit soit ajouté. */
@@ -29,7 +29,7 @@
     return title + '\n' + lines.map(function (l) { return '• ' + l; }).join('\n') + '\n\n' + TAG + b64encode(JSON.stringify(payload));
   }
 
-  /* Relit un message collé. Renvoie le contenu vérifié, ou null si le message n'est pas une liste SanEva valide. */
+  /* Relit un message collé. Renvoie le contenu vérifié, ou null si le message n'est pas une liste Gym Food valide. */
   function read(text) {
     var m = String(text || '').match(/SANEVA1:([A-Za-z0-9+/=]+)/);
     if (!m) return null;

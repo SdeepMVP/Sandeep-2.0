@@ -1,6 +1,6 @@
 {
-  "name": "Habit Tracker",
-  "short_name": "Habit Tracker",
+  "name": "Habits",
+  "short_name": "Habits",
   "description": "My daily habits.",
   "lang": "en",
   "start_url": "./",

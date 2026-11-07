@@ -1,4 +1,4 @@
-/* Onglet Objectif (SanEva) : profil (taille, poids, âge, activité), objectif sportif et besoins du jour
+/* Onglet Objectif (Gym Food) : profil (taille, poids, âge, activité), objectif sportif et besoins du jour
    (calories, protéines, glucides, lipides). Suivi du poids. Calculs : js/tabs/objectif-engine.js.
    Données : localStorage "sandeep2:objectif" (un profil par téléphone).
    Expose S2.objectif.targets() pour la Cuisine (qui ne lit jamais ces données directement). */

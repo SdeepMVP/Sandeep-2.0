@@ -1,10 +1,10 @@
-# Habit Tracker (repo Sandeep-2.0)
+# Habits (repo Sandeep-2.0)
 
 Mobile-first web apps for iPhone (plain HTML/CSS/JS, no build step).
 
-- Habit Tracker: https://sdeepmvp.github.io/Sandeep-2.0/
+- Habits: https://sdeepmvp.github.io/Sandeep-2.0/
 - Dressing (wardrobe): https://sdeepmvp.github.io/Sandeep-2.0/dressing/
-- SanEva (gym, kitchen, goals): https://sdeepmvp.github.io/Sandeep-2.0/cuisine/
+- Gym Food (gym, kitchen, goals): https://sdeepmvp.github.io/Sandeep-2.0/cuisine/
 - Project rules: [CLAUDE.md](CLAUDE.md) · Changes: [CHANGELOG.md](CHANGELOG.md)
 
 ## Run locally

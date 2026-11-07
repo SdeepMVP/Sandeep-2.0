@@ -1,9 +1,10 @@
-# Changelog — Habit Tracker (ex-Sandeep 2.0), SanEva, Dressing
+# Changelog — Habits (ex-Sandeep 2.0), Gym Food (ex-SanEva), Dressing
 
-## 0.37.0 — 2026-11-07
-- The main app is renamed **Habit Tracker** and now only has **Habits** (+ Settings). New icon.
+## 0.38.0 — 2026-11-07
+- The main app is renamed **Habits** (ex-Sandeep 2.0) and now only has the **Habits** tab (+ Settings). New icon.
+- **SanEva is renamed Gym Food** (same address `cuisine/`, same data). The groceries-for-two message format is unchanged, so messages from older versions still work.
 - **Wardrobe moves to Dressing**, its own app (`dressing/`, English or French, installable on the Home Screen, own icon): Wardrobe + Settings (with My Style). Its backups only take Wardrobe, its photos and settings.
-- Habit Tracker › Settings links to Dressing and SanEva. To bring your clothes over on iPhone: export a backup in Habit Tracker and import it in Dressing. Old backups still import everywhere.
+- Habits › Settings links to Dressing and Gym Food. To bring your clothes over on iPhone: export a backup in Habits and import it in Dressing. Old backups still import everywhere.
 
 ## 0.37.0 — 2026-11-07
 - SanEva Kitchen › Groceries: **groceries for two, by message**. Each person plans in their own app, then:

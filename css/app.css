@@ -718,7 +718,7 @@ input[type="date"].input { display: block; line-height: 48px; }
 /* Cuisine · valeurs par portion (v0.24) */
 .ck-perserv { color: var(--muted); }
 
-/* ---------- Onglet Objectif · SanEva (préfixe ob-) ---------- */
+/* ---------- Onglet Objectif · Gym Food (préfixe ob-) ---------- */
 .ob-hero { padding: 16px; }
 .ob-herohead { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .ob-who { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--camel); }
@@ -769,7 +769,7 @@ input[type="date"].input { display: block; line-height: 48px; }
 .mu-templatedays { font-size: 12px; color: var(--camel); font-weight: 600; }
 .mu-firstrun { border-color: var(--camel); }
 
-/* Cuisine · objectif (SanEva, v0.28) */
+/* Cuisine · objectif (Gym Food, v0.28) */
 .ck-fit { font-size: 13px; font-weight: 650; color: var(--text-2); }
 .ck-fit-good .ck-fit, .ck-fit.ck-fit-good { color: var(--good); }
 .ck-fit-low .ck-fit, .ck-fit.ck-fit-low { color: var(--danger); }
@@ -865,7 +865,7 @@ input[type="date"].input { display: block; line-height: 48px; }
 .ob-day.is-on { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
 .ob-twobtns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
 
-/* ---------- Onglet Aujourd'hui · SanEva (préfixe to-) ---------- */
+/* ---------- Onglet Aujourd'hui · Gym Food (préfixe to-) ---------- */
 .to-nav { margin-top: 0; }
 .to-daterow { display: grid; grid-template-columns: 48px 1fr 48px; align-items: center; gap: 8px; padding: 8px 10px; }
 .to-daterow .btn-icon { min-width: 48px; min-height: 48px; font-size: 22px; }

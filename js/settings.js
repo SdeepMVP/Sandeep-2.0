@@ -4,7 +4,7 @@
   var S2 = window.S2;
   var ui = S2.ui, h = ui.h, L = S2.L;
   var NS = 'settings';
-  var VERSION = '0.37.0';
+  var VERSION = '0.38.0';
 
   function get() {
     var s = S2.storage.load(NS, null) || {};
@@ -167,8 +167,8 @@
       h('p', { class: 'sheet-text' }, L('Spaces: ', 'Espaces : ') + (keys.join(', ') || L('none', 'aucun')) + ' · ' + ui.num(bytes / 1024, 1) + L(' KB used.', ' Ko utilisés.')),
       h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: wipe }, L('Erase everything', 'Tout effacer'))));
 
-    /* Liens vers les apps séparées, seulement dans l'app principale (Habit Tracker) :
-       Dressing (dossier dressing/) contient la Garde-robe depuis la v0.37 ; SanEva (dossier cuisine/) la Cuisine (v0.22) et la Muscu (v0.27). */
+    /* Liens vers les apps séparées, seulement dans l'app principale (Habits) :
+       Dressing (dossier dressing/) contient la Garde-robe depuis la v0.37 ; Gym Food (dossier cuisine/) la Cuisine (v0.22) et la Muscu (v0.27). */
     if (!window.S2_APP) {
       var base = location.href.split('#')[0];
       var linkCard = function (name, folder, text) {
@@ -186,8 +186,8 @@
       };
       linkCard('Dressing', 'dressing/', L('Wardrobe now lives in Dressing, its own app: install it on your Home Screen. Your clothes, photos and outfits saved here stay in this app’s backups: export a backup above and import it in Dressing to get them there (it only takes Wardrobe and settings).',
         'La Garde-robe est maintenant dans Dressing, son app à elle : installe-la sur l’écran d’accueil. Tes pièces, photos et tenues enregistrées ici restent dans les sauvegardes de cette app : exporte une sauvegarde ci-dessus et importe-la dans Dressing pour les y retrouver (elle ne prend que la Garde-robe et les réglages).'));
-      linkCard('SanEva', 'cuisine/', L('Gym and Kitchen now live only in SanEva, their own app in French: install it on your phone and on Maeva’s. Each phone keeps its own data. Your workouts and recipes saved here stay in this app’s backups: export a backup above and import it in SanEva to get them there (it only takes Gym, Kitchen and settings).',
-        'La Muscu et la Cuisine sont maintenant seulement dans SanEva, leur propre app en français : installe-la sur ton téléphone et sur celui de Maeva. Chaque téléphone garde ses données. Tes séances et recettes enregistrées ici restent dans les sauvegardes de cette app : exporte une sauvegarde ci-dessus et importe-la dans SanEva pour les y retrouver (elle ne prend que la Muscu, la Cuisine et les réglages).'));
+      linkCard('Gym Food', 'cuisine/', L('Gym and Kitchen now live only in Gym Food, their own app in French: install it on your phone and on Maeva’s. Each phone keeps its own data. Your workouts and recipes saved here stay in this app’s backups: export a backup above and import it in Gym Food to get them there (it only takes Gym, Kitchen and settings).',
+        'La Muscu et la Cuisine sont maintenant seulement dans Gym Food, leur propre app en français : installe-la sur ton téléphone et sur celui de Maeva. Chaque téléphone garde ses données. Tes séances et recettes enregistrées ici restent dans les sauvegardes de cette app : exporte une sauvegarde ci-dessus et importe-la dans Gym Food pour les y retrouver (elle ne prend que la Muscu, la Cuisine et les réglages).'));
     }
 
     c.appendChild(h('h2', { class: 'section-title' }, L('Install on iPhone', 'Installer sur l’iPhone')));
@@ -203,7 +203,7 @@
       h('div', { class: 'stack' },
         h('button', { class: 'btn btn-secondary btn-block', onclick: checkUpdate }, L('Check now', 'Vérifier maintenant')))));
 
-    c.appendChild(h('p', { class: 'hint center' }, (window.S2_APP && window.S2_APP.name || 'Habit Tracker') + ' · version ' + VERSION));
+    c.appendChild(h('p', { class: 'hint center' }, (window.S2_APP && window.S2_APP.name || 'Habits') + ' · version ' + VERSION));
   }
 
   S2.settings = { applyTheme: applyTheme, get: get, VERSION: VERSION };

@@ -1,5 +1,5 @@
 /* App « Dressing » (dossier dressing/) : onglet Garde-robe + Réglages, bilingue, installable à part.
-   Créée le 7 novembre 2026 (v0.37) quand la Garde-robe a quitté l'app principale (devenue Habit Tracker).
+   Créée le 7 novembre 2026 (v0.37) quand la Garde-robe a quitté l'app principale (devenue Habits).
    Réutilise les fichiers de l'app principale (../js, ../css). Chargé avant tout le reste. */
 window.S2_APP = {
   id: 'dressing',
