@@ -126,7 +126,9 @@
     function extra(r) {
       var c = used[r.id] || 0;
       var rep = opts.batch ? (c >= 3 ? 1 : c > 0 ? -0.15 : 0) : c * 0.15;
-      return rep + (hasSeed ? noise(r.id, opts.seed) * 0.12 : 0);
+      /* avoid = recettes du planning précédent : pénalisées pour ne pas manger la même chose à la période suivante. */
+      var av = opts.avoid && opts.avoid[r.id] ? 0.25 : 0;
+      return rep + av + (hasSeed ? noise(r.id, opts.seed) * 0.12 : 0);
     }
     var slots = STRUCTURE[t.meals] || STRUCTURE[3];
     var usable = recipes.filter(function (r) { return r && r.kcal > 0 && r.protein > 0 && (r.category === 'breakfast' || r.category === 'main'); });
@@ -194,7 +196,7 @@
     var n = opts.days || 7, seed = opts.seed || 0, picks = opts.picks || [];
     var used = {}, out = [];
     for (var d = 0; d < n; d++) {
-      var plans = dayPlans(recipes, t, 5, { used: used, seed: seed * 31 + d, pool: [8, 10], batch: !!opts.batch });
+      var plans = dayPlans(recipes, t, 5, { used: used, seed: seed * 31 + d, pool: [8, 10], batch: !!opts.batch, avoid: opts.avoid });
       if (!plans.length) return [];
       var k = (picks[d] || 0) % plans.length;
       var day = plans[k];
@@ -212,17 +214,68 @@
       day.meals.forEach(function (m) {
         var id = m.recipe.id;
         if (!by[id]) { by[id] = { recipe: m.recipe, portions: 0, days: [] }; order.push(id); }
-        by[id].portions += m.portion;
+        by[id].portions += m.portion + (m.portion2 || 0);
         if (by[id].days.indexOf(d) < 0) by[id].days.push(d);
       });
     });
     return order.map(function (id) { return by[id]; });
   }
 
+  /* Portion la plus proche (0,5 / 1 / 1,5 / 2) pour qu'une recette fasse `mealKcal`. */
+  function portionForKcal(recipe, mealKcal) {
+    if (!recipe || !recipe.kcal || !mealKcal) return 1;
+    var want = mealKcal / recipe.kcal, best = 1, bd = Infinity;
+    PORTIONS.forEach(function (x) { var d = Math.abs(Math.log(x / want)); if (d < bd) { bd = d; best = x; } });
+    return best;
+  }
+
+  /* Cuisiner à 2 : les recettes sont choisies pour la 1re personne ; on ajoute la portion de la 2e (t2 = ses objectifs).
+     Portions par quart (0,5 à 2), d'abord repas par repas, puis ajustées sur la journée pour coller à ses calories.
+     Renvoie des copies (portion2, kcal2, protein2 ; kcal2 / protein2 par jour). */
+  var PORTIONS2 = [0.5, 0.75, 1, 1.25, 1.5, 2];
+  function forTwo(days, t2) {
+    if (!t2) return days;
+    return days.map(function (day) {
+      var ms = day.meals, mealKcal = t2.kcal / Math.max(1, ms.length);
+      var idx = ms.map(function (m) {
+        var want = m.recipe.kcal ? mealKcal / m.recipe.kcal : 1, best = 2, bd = Infinity;
+        PORTIONS2.forEach(function (x, i) { var d = Math.abs(Math.log(x / want)); if (d < bd) { bd = d; best = i; } });
+        return best;
+      });
+      function total(ix) { return ms.reduce(function (n, m, k) { return n + (m.recipe.kcal || 0) * PORTIONS2[ix[k]]; }, 0); }
+      /* Ajustement : un quart de plus ou de moins sur le repas qui rapproche le plus du total visé. */
+      for (var it = 0; it < 8; it++) {
+        var cur = Math.abs(total(idx) - t2.kcal), bestGain = 0, bestK = -1, bestI = 0;
+        for (var k = 0; k < ms.length; k++) {
+          [-1, 1].forEach(function (dir) {
+            var j = idx[k] + dir;
+            if (j < 0 || j >= PORTIONS2.length) return;
+            var trial = idx.slice(); trial[k] = j;
+            var gain = cur - Math.abs(total(trial) - t2.kcal);
+            if (gain > bestGain + 1e-9) { bestGain = gain; bestK = k; bestI = j; }
+          });
+        }
+        if (bestK < 0) break;
+        idx[bestK] = bestI;
+      }
+      var meals = ms.map(function (m, k) {
+        var p2 = PORTIONS2[idx[k]];
+        var c = {}; Object.keys(m).forEach(function (key) { c[key] = m[key]; });
+        c.portion2 = p2; c.kcal2 = Math.round((m.recipe.kcal || 0) * p2); c.protein2 = Math.round((m.recipe.protein || 0) * p2);
+        return c;
+      });
+      var out = {}; Object.keys(day).forEach(function (key) { out[key] = day[key]; });
+      out.meals = meals;
+      out.kcal2 = meals.reduce(function (n, m) { return n + m.kcal2; }, 0);
+      out.protein2 = meals.reduce(function (n, m) { return n + m.protein2; }, 0);
+      return out;
+    });
+  }
+
   S2.nutritionEngine = {
     ACTIVITY: ACTIVITY, GOALS: GOALS, PORTIONS: PORTIONS, STRUCTURE: STRUCTURE,
     isComplete: isComplete, bmr: bmr, targets: targets,
     portionFor: portionFor, recipeFit: recipeFit, dayPlans: dayPlans,
-    weekPlan: weekPlan, weekTotals: weekTotals
+    weekPlan: weekPlan, weekTotals: weekTotals, forTwo: forTwo, portionForKcal: portionForKcal
   };
 })();

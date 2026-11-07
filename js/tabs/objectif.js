@@ -41,6 +41,8 @@
     Object.keys(def).forEach(function (k) { if (d[k] === undefined) d[k] = def[k]; });
     d.custom = d.custom || { kcal: null, protein: null };
     d.weights = Array.isArray(d.weights) ? d.weights : [];
+    /* v0.32 : 2e personne pour cuisiner à 2 (même forme que le profil, sans suivi du poids). null = personne. */
+    d.partner = d.partner && typeof d.partner === 'object' ? d.partner : null;
     /* Futures migrations : if (d.schema < 2) { ... } */
     d.schema = SCHEMA;
     return d;
@@ -95,8 +97,12 @@
       row(L('Activity', 'Activité'), act.label + ' · ' + act.sub),
       row(L('Meals per day', 'Repas par jour'), String(t.meals))));
     root.appendChild(h('div', { class: 'stack' },
-      h('button', { class: 'btn btn-secondary btn-block', onclick: editProfile }, L('Edit my profile', 'Modifier mon profil')),
+      h('button', { class: 'btn btn-secondary btn-block', onclick: function () { editProfile(); } }, L('Edit my profile', 'Modifier mon profil')),
       h('button', { class: 'btn btn-ghost btn-block', onclick: editCustom }, t.custom ? L('Change the values set by hand', 'Changer les valeurs fixées à la main') : L('Set my targets by hand', 'Fixer mes objectifs à la main'))));
+
+    /* Cuisiner à 2. */
+    root.appendChild(h('h2', { class: 'section-title' }, L('Cooking for two', 'Cuisiner à 2')));
+    root.appendChild(partnerCard());
 
     /* Explication du calcul. */
     root.appendChild(h('h2', { class: 'section-title' }, L('How it is calculated', 'Comment c’est calculé')));
@@ -141,7 +147,7 @@
       h('h2', null, L('Your daily needs', 'Tes besoins du jour')),
       h('p', null, L('Enter your height, weight and goal: the app calculates your calories and protein, then suggests recipes that match.',
         'Entre ta taille, ton poids et ton objectif : l’app calcule tes calories et tes protéines, puis te propose les recettes qui collent.')),
-      h('button', { class: 'btn btn-primary btn-lg', onclick: editProfile }, L('Fill in my profile', 'Remplir mon profil'))));
+      h('button', { class: 'btn btn-primary btn-lg', onclick: function () { editProfile(); } }, L('Fill in my profile', 'Remplir mon profil'))));
   }
 
   /* ---------- Poids ---------- */
@@ -191,9 +197,33 @@
     }, { modal: true });
   }
 
-  /* ---------- Profil (feuille) ---------- */
-  function editProfile() {
-    var d = JSON.parse(JSON.stringify(data));
+  /* ---------- 2e personne (cuisiner à 2) ---------- */
+  function partnerName() { return data.partner && data.partner.name || L('The other person', 'L’autre personne'); }
+  function partnerCard() {
+    var p = data.partner, t2 = p && E.targets(p);
+    if (!t2) {
+      return h('div', { class: 'card' },
+        h('p', { class: 'sheet-text' }, L('Shopping and cooking for two? Add the other person (height, weight, goal): the Planning in Kitchen then gives each of you the right serving, and the groceries cover both.',
+          'Tu fais les courses et la cuisine à 2 ? Ajoute l’autre personne (taille, poids, objectif) : le Planning de la Cuisine donne alors à chacun la bonne portion, et les courses couvrent les deux.')),
+        h('div', { class: 'stack' }, h('button', { class: 'btn btn-secondary btn-block', onclick: function () { editProfile('partner'); } }, L('+ Add the other person', '+ Ajouter l’autre personne'))));
+    }
+    return h('div', { class: 'card ob-partner' },
+      h('div', { class: 'ob-who' }, partnerName() + ' · ' + goalOf(p.goal).label),
+      h('div', { class: 'ob-partnernum' }, fmtInt(t2.kcal) + L(' kcal / day · ', ' kcal / jour · ') + t2.protein + L(' g protein', ' g de protéines')),
+      h('div', { class: 'list-sub' }, p.height + ' cm · ' + num(p.weight, 1) + ' kg · ' + p.age + L(' years · ', ' ans · ') + activityOf(p.activity).label),
+      h('p', { class: 'hint' }, L('Used by the Planning when you choose “For two”. Their own phone keeps their own profile.', 'Utilisé par le Planning quand tu choisis « À 2 ». Son téléphone garde son propre profil.')),
+      h('div', { class: 'stack' },
+        h('button', { class: 'btn btn-secondary btn-block', onclick: function () { editProfile('partner'); } }, L('Edit', 'Modifier')),
+        h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: function () {
+          ui.confirm({ title: L('Remove ' + partnerName() + '?', 'Retirer ' + partnerName() + ' ?'), message: L('Plans will be for you only again. Plans already confirmed are not changed.', 'Les plannings seront de nouveau pour toi uniquement. Les plannings déjà validés ne changent pas.'),
+            okLabel: L('Remove', 'Retirer'), danger: true }).then(function (ok) { if (!ok) return; data.partner = null; persist(); render(); });
+        } }, L('Remove', 'Retirer'))));
+  }
+
+  /* ---------- Profil (feuille) : le sien, ou celui de la 2e personne ---------- */
+  function editProfile(who) {
+    var isPartner = who === 'partner';
+    var d = JSON.parse(JSON.stringify(isPartner ? (data.partner || { name: '', sex: null, age: null, height: null, weight: null, activity: 'moderate', goal: null, meals: data.meals || 3 }) : data));
     if (!d.goal) d.goal = null;
     ui.sheet(function (close) {
       var err = h('p', { class: 'form-error', hidden: true });
@@ -252,6 +282,12 @@
         else if (!d.goal) problem = L('Choose a goal.', 'Choisis un objectif.');
         if (problem) { err.textContent = problem; err.hidden = false; err.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
         d.age = Math.round(d.age); d.height = Math.round(d.height); d.weight = Math.round(d.weight * 10) / 10;
+        if (isPartner) {
+          data.partner = { name: d.name || '', sex: d.sex, age: d.age, height: d.height, weight: d.weight, activity: d.activity, goal: d.goal, meals: d.meals || 3 };
+          persist(); close(); render();
+          ui.toast(L('Saved', 'Enregistré'));
+          return;
+        }
         if (d.weight !== data.weight) {
           var today = new Date().toISOString().slice(0, 10);
           d.weights = d.weights.filter(function (w) { return w.date.slice(0, 10) !== today; });
@@ -262,7 +298,7 @@
       }
 
       return [
-        h('h2', { class: 'sheet-title' }, L('My profile', 'Mon profil')),
+        h('h2', { class: 'sheet-title' }, isPartner ? L('The other person', 'L’autre personne') : L('My profile', 'Mon profil')),
         h('label', { class: 'field' }, h('span', { class: 'field-label' }, L('First name', 'Prénom')), nameInp),
         h('div', { class: 'field' }, h('span', { class: 'field-label' }, L('Formula (base metabolism)', 'Formule (métabolisme de base)')), sexSeg),
         h('div', { class: 'form-grid' },
@@ -314,6 +350,10 @@
   /* Lecture seule pour les autres onglets (Cuisine) : objectifs du jour, ou null si le profil n'est pas rempli. */
   S2.objectif = {
     targets: function () { return E.targets(load()); },
-    goalLabel: function (id) { var g = goalOf(id); return g ? g.label : ''; }
+    goalLabel: function (id) { var g = goalOf(id); return g ? g.label : ''; },
+    /* Cuisiner à 2 : objectifs et prénom de la 2e personne (null si aucune), prénom de la personne du téléphone. */
+    partnerTargets: function () { var d = load(); return d.partner ? E.targets(d.partner) : null; },
+    partnerName: function () { var d = load(); return d.partner && d.partner.name || L('Other person', 'L’autre'); },
+    myName: function () { return load().name || L('You', 'Toi'); }
   };
 })();
