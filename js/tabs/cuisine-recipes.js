@@ -1307,7 +1307,7 @@
     },
     {
       id: 'm-shrimp-poke', name: 'Poke bowl crevettes & edamame', category: 'main',
-      time: 15, servings: 1, protein: 42, kcal: 720,
+      time: 15, servings: 1, protein: 50, kcal: 720,
       tags: ['crevettes', 'riz', 'edamame', 'avocat'], keywords: ['poke', 'bowl', 'shrimp', 'prawns', 'rice', 'edamame', 'avocado'],
       ingredients: [
         '150 g de crevettes cuites décortiquées',

@@ -20,8 +20,10 @@
 
   function find(id) { return tabs.filter(function (t) { return t.id === id; })[0]; }
 
+  /* Premier onglet disponible dans l'ordre de la barre (champ order), pas dans l'ordre de chargement des scripts. */
   function defaultTab() {
-    return tabs.filter(function (t) { return !t.soon; })[0] || tabs[0];
+    var sorted = tabs.slice().sort(function (a, b) { return a.order - b.order; });
+    return sorted.filter(function (t) { return !t.soon; })[0] || sorted[0];
   }
 
   function renderTabbar() {

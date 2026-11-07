@@ -828,3 +828,105 @@ input[type="date"].input { display: block; line-height: 48px; }
 .ck-startrow .btn-icon { min-width: 48px; min-height: 48px; font-size: 22px; }
 .ck-startlabel { display: grid; gap: 2px; text-align: center; }
 .ck-partnerline { color: var(--camel); font-weight: 600; }
+
+/* Muscu · 2 personnes, jours d'entraînement, objectifs, repos (v0.33) */
+.mu-people { margin-top: 0; }
+.mu-todaytag { display: inline-block; margin-left: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--accent-text); background: var(--camel); border-radius: 999px; padding: 2px 7px; vertical-align: middle; }
+.mu-schedule { padding: 4px 14px 8px; }
+.mu-schedrow { display: grid; grid-template-columns: 1fr auto 20px; align-items: center; gap: 8px; width: 100%; min-height: 48px; text-align: left;
+  background: none; border: 0; border-bottom: 1px solid var(--border); color: inherit; font: inherit; }
+.mu-schedday { font-weight: 600; }
+.mu-schedval { color: var(--accent); font-weight: 600; }
+.mu-schedval.is-rest { color: var(--muted); font-weight: 400; }
+.mu-template.is-on { border-color: var(--accent); background: var(--camel-soft); }
+.mu-goals { display: grid; gap: 10px; }
+.mu-goalshead { display: flex; justify-content: space-between; align-items: center; }
+.mu-goalshead .card-title { margin: 0; }
+.mu-goalrow { display: grid; gap: 4px; }
+.mu-goalline { display: flex; justify-content: space-between; gap: 8px; font-size: 15px; }
+.mu-goalval { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mu-goalbar { display: block; height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; }
+.mu-goalbar span { display: block; height: 100%; background: var(--camel); }
+.mu-goalrow.is-done .mu-goalbar span { background: var(--good); }
+.mu-goalrow.is-done .mu-goalline { color: var(--good); }
+.mu-liftgoals { display: grid; gap: 8px; }
+.mu-liftrow { display: grid; grid-template-columns: 1fr 84px 44px; gap: 6px; align-items: center; }
+.mu-restpill { position: fixed; left: 50%; transform: translateX(-50%); top: calc(env(safe-area-inset-top) + 8px); z-index: 1000;
+  min-height: 48px; padding: 0 18px; border-radius: 999px; border: 0; background: var(--accent); color: var(--accent-text);
+  font: inherit; font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; box-shadow: var(--shadow); white-space: nowrap; }
+.mu-restpill.is-done { background: var(--good); }
+
+/* Objectif · questionnaire, mensurations (v0.33) */
+.ob-wiz { display: grid; gap: 4px; }
+.ob-wizstep { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--camel); }
+.ob-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.ob-day { min-height: 48px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text); font: inherit; font-size: 14px; font-weight: 600; padding: 0; }
+.ob-day.is-on { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+.ob-twobtns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+
+/* ---------- Onglet Aujourd'hui · SanEva (préfixe to-) ---------- */
+.to-nav { margin-top: 0; }
+.to-daterow { display: grid; grid-template-columns: 48px 1fr 48px; align-items: center; gap: 8px; padding: 8px 10px; }
+.to-daterow .btn-icon { min-width: 48px; min-height: 48px; font-size: 22px; }
+.to-datelabel { display: grid; gap: 2px; text-align: center; background: none; border: 0; color: inherit; font: inherit; min-height: 48px; }
+.to-today { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--camel); }
+.to-date { font-weight: 700; font-size: 16px; }
+.to-summary { display: grid; gap: 10px; }
+.to-kcalrow { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-variant-numeric: tabular-nums; }
+.to-kcalnum { font-size: 34px; font-weight: 750; font-family: Georgia, serif; }
+.to-kcalof { color: var(--text-2); font-weight: 600; }
+.to-left { font-weight: 700; color: var(--good); white-space: nowrap; }
+.to-left.is-over { color: var(--danger); }
+.to-bar { display: block; height: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+.to-bar span { display: block; height: 100%; background: var(--accent); transition: width .2s; }
+.to-bar-p span, .to-bar-ok span { background: var(--good); }
+.to-bar-c span { background: var(--camel); }
+.to-bar-f span { background: var(--chocolate); }
+.to-bar.is-over span { background: var(--danger); }
+.to-macros { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.to-macro { display: grid; gap: 4px; }
+.to-macroval { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.to-macroof { font-size: 12px; color: var(--muted); font-weight: 500; }
+.to-training, .to-meals { display: grid; gap: 8px; }
+.to-training .card-title, .to-meals .card-title { margin: 0; }
+.to-planned { font-weight: 600; }
+.to-planned.is-rest { color: var(--muted); font-weight: 500; }
+.to-done { color: var(--good); font-weight: 700; }
+.to-activity { display: flex; justify-content: space-between; align-items: center; gap: 8px; border-top: 1px solid var(--border); padding-top: 4px; }
+.to-addact { justify-self: start; margin-left: -12px; }
+.to-planrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; border-top: 1px solid var(--border); padding-top: 8px; }
+.to-planmain { display: grid; gap: 1px; text-align: left; background: none; border: 0; color: inherit; font: inherit; padding: 0; min-height: 48px; }
+.to-planname { font-weight: 600; }
+.to-planrow.is-done .to-planname { color: var(--good); }
+.to-planbtns { display: flex; gap: 6px; }
+.to-planbtns .btn { min-height: 44px; }
+.to-extrahead { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 8px 2px 2px; }
+.to-entry { display: flex; justify-content: space-between; align-items: center; gap: 8px; border-top: 1px solid var(--border); padding-top: 6px; }
+.to-entrymain { display: grid; gap: 1px; min-width: 0; }
+.to-entryname { font-weight: 600; }
+.to-water, .to-weigh { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.to-water .card-title, .to-weigh .card-title { margin: 0; }
+.to-waterstep { margin: 0; gap: 10px; }
+.to-waterstep .btn-step { min-width: 48px; min-height: 48px; font-size: 22px; }
+.to-waterstep .stepper-num { font-size: 24px; min-width: 24px; text-align: center; }
+.to-qtyval { font-size: 32px; font-weight: 750; font-variant-numeric: tabular-nums; }
+.to-foodlist { display: grid; max-height: 46vh; overflow-y: auto; margin: 8px 0; border-top: 1px solid var(--border); -webkit-overflow-scrolling: touch; }
+.to-food { display: flex; justify-content: space-between; align-items: center; gap: 10px; width: 100%; min-height: 56px; text-align: left; padding: 8px 2px;
+  background: none; border: 0; border-bottom: 1px solid var(--border); color: inherit; font: inherit; }
+.to-food:active { background: var(--surface-2); }
+.to-foodname { display: grid; gap: 1px; min-width: 0; font-weight: 600; }
+.to-foodkcal { display: grid; text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.to-review { display: grid; gap: 10px; }
+.to-review .card-title { margin: 0; }
+.to-stat { display: grid; gap: 4px; }
+.to-statline { display: flex; justify-content: space-between; gap: 8px; font-size: 15px; }
+.to-statval { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.to-chartwrap { display: grid; gap: 4px; }
+.to-chart { width: 100%; height: auto; }
+.to-target { stroke: var(--good); stroke-dasharray: 4 4; stroke-width: 1.5; }
+.to-suggest.is-up, .to-suggest.is-down { border-color: var(--camel); }
+.to-suggest.is-keep { border-color: var(--good); }
+.to-welcome p { max-width: 330px; }
+.to-acts { grid-template-columns: 1fr 1fr; }
+.to-meals a, .ck-results a, .hint a { color: var(--camel); font-weight: 600; }

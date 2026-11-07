@@ -348,5 +348,76 @@ test('a weekly basket for one person costs a plausible amount', function () {
   });
 });
 
+/* ---------- Table nutritionnelle des ingrédients ---------- */
+require(path.join(__dirname, '..', 'js', 'tabs', 'cuisine-nutrition.js'));
+var NT = window.S2.nutritionTable;
+console.log('\nNutrition table');
+test('every built-in ingredient has nutrition values (or is seasoning)', function () {
+  var missing = [];
+  RECIPES.forEach(function (r) { missing = missing.concat(NT.recipe(r).unknown); });
+  ok(!missing.length, missing.join(' | '));
+});
+test('calculated values match the checked ones: calories ±15 %, protein ±20 % for every recipe', function () {
+  RECIPES.forEach(function (r) {
+    var c = NT.recipe(r);
+    ok(Math.abs(c.kcal - r.kcal) / r.kcal <= 0.15, r.id + ' kcal ' + c.kcal + ' vs ' + r.kcal);
+    ok(Math.abs(c.protein - r.protein) / r.protein <= 0.2, r.id + ' protein ' + c.protein + ' vs ' + r.protein);
+  });
+});
+test('macros add up to the stored calories; weights in brackets are used', function () {
+  RECIPES.forEach(function (r) {
+    var m = NT.macros(r), sum = m.protein * 4 + m.carbs * 4 + m.fat * 9;
+    ok(Math.abs(sum - r.kcal) / r.kcal < 0.04, r.id + ' ' + sum + ' vs ' + r.kcal);
+  });
+  var a = NT.recipe({ ingredients: ['2 escalopes de dinde (environ 180 g)'], servings: 1 }), b = NT.recipe({ ingredients: ['2 escalopes de dinde'], servings: 1 });
+  ok(a.protein === 43 && b.protein === 72, a.protein + ' / ' + b.protein);
+});
+test('everyday foods for the journal are consistent (kcal ≈ P×4 + C×4 + F×9)', function () {
+  ok(NT.FOODS.length >= 40, 'count');
+  NT.FOODS.forEach(function (f) {
+    var sum = f.protein * 4 + f.carbs * 4 + f.fat * 9;
+    ok(f.kcal < 20 || Math.abs(sum - f.kcal) / f.kcal < 0.2 || /beer|wine/.test(f.id), f.id + ' ' + sum + ' vs ' + f.kcal);
+  });
+});
+
+/* ---------- Aujourd'hui : journal, bilan, tendance du poids ---------- */
+require(path.join(__dirname, '..', 'js', 'tabs', 'aujourdhui-engine.js'));
+var TE = window.S2.todayEngine;
+console.log('\nToday & review');
+test('day totals and target check', function () {
+  var tot = TE.totals([{ kcal: 500, protein: 40, carbs: 50, fat: 10 }, { kcal: 1300.4, protein: 80.2, carbs: 120, fat: 50 }]);
+  ok(tot.kcal === 1800 && tot.protein === 120, JSON.stringify(tot));
+  var t = { kcal: 2000, protein: 140 };
+  ok(TE.inTarget(tot, t).kcal && !TE.inTarget(tot, t).protein, 'in target');
+  ok(TE.inTarget({ kcal: 2150, protein: 130 }, t).both && !TE.inTarget({ kcal: 2300, protein: 150 }, t).kcal, 'both');
+});
+test('weekly nutrition summary ignores days without entries', function () {
+  var t = { kcal: 2000, protein: 130 };
+  var s = TE.nutritionSummary([{ entries: [{ kcal: 2000, protein: 140 }] }, { entries: [] }, { entries: [{ kcal: 1500, protein: 90 }] }], t);
+  ok(s.logged === 2 && s.kcal === 1750 && s.inTarget === 1, JSON.stringify(s));
+});
+function weighIns(start, perWeek, n, every) {
+  var out = []; for (var i = 0; i < n; i++) out.push({ date: new Date(2026, 9, 1 + i * every).toISOString(), kg: Math.round((start + perWeek / 7 * i * every) * 10) / 10 });
+  return out;
+}
+test('weight trend: kg and % per week; needs 3 weigh-ins over 10+ days', function () {
+  var w = weighIns(80, -0.6, 8, 3), now = new Date(2026, 9, 22);
+  var tr = TE.weightTrend(w, now, 28);
+  ok(tr && Math.abs(tr.perWeek + 0.6) < 0.08 && tr.pct < -0.6 && tr.pct > -0.9, JSON.stringify(tr));
+  ok(TE.weightTrend(w.slice(0, 2), now) === null, 'two weigh-ins');
+  ok(TE.weightTrend(weighIns(80, 0, 4, 2), new Date(2026, 9, 8)) === null, 'only 6 days');
+});
+test('suggestion follows the goal and asks for tracking first', function () {
+  var good = { days: 14, logged: 12, kcalOk: 10 };
+  var flat = { perWeek: 0, pct: 0 }, losing = { perWeek: -0.8, pct: -1 }, gaining = { perWeek: 0.8, pct: 1 };
+  ok(TE.suggestion('bulk', flat, good, 3000).kind === 'up' && TE.suggestion('bulk', flat, good, 3000).newKcal === 3150, 'bulk flat → up');
+  ok(TE.suggestion('cut', flat, good, 1800).kind === 'down', 'cut flat → down');
+  ok(TE.suggestion('cut', { pct: -1.5 }, good, 1800).kind === 'up', 'cut too fast → up');
+  ok(TE.suggestion('cut', losing, good, 1800).kind === 'keep', 'cut on track');
+  ok(TE.suggestion('maintain', gaining, good, 2500).kind === 'down', 'maintain gaining → down');
+  ok(TE.suggestion('bulk', null, good, 3000).kind === 'wait', 'no trend');
+  ok(TE.suggestion('bulk', flat, { days: 14, logged: 3, kcalOk: 3 }, 3000).kind === 'log', 'not enough tracking');
+});
+
 console.log('\n' + passed + ' passed, ' + failed + ' failed\n');
 process.exit(failed ? 1 : 0);
