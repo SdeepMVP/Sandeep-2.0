@@ -1,5 +1,8 @@
 # Changelog — Sandeep 2.0
 
+## 0.36.0 — 2026-11-07
+- SanEva is now **fully personal**: one phone, one person. The other person is removed everywhere: Goal (“Cooking for two”), Kitchen Planning (“For two”) and leftover data in Gym and Today. Their profile is deleted from the phone's data on first launch. Menus and groceries already confirmed are kept as they are.
+
 ## 0.35.0 — 2026-11-07
 - SanEva: **tracking is personal again**: Today (journal, workout of the day, review) and Gym (program, history, goals) are only for the person whose phone it is; each person uses SanEva on their own phone. The person switch is removed from Today and Gym.
 - The other person (Goal › Cooking for two) is now **only used by Kitchen**: servings for two in the Planning and one grocery list for both. Adding or updating them is a simple form (no questionnaire, no gym program, no weigh-in for them).
