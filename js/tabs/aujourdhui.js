@@ -12,7 +12,11 @@
   var TE = S2.todayEngine, NT = S2.nutritionTable;
   var NS = 'aujourdhui';
   var SCHEMA = 1;
-  var WATER_GOAL = 8;
+  var WATER_DEFAULT = 8;
+  /* v0.41 : objectif d'eau réglable (data.waterGoal, 4 à 16 verres de 25 cl). */
+  function waterGoal() { return data && data.waterGoal >= 4 && data.waterGoal <= 16 ? data.waterGoal : WATER_DEFAULT; }
+  var MEAL_LABEL = { breakfast: L('Breakfast', 'Petit-déjeuner'), lunch: L('Lunch', 'Déjeuner'), snack: L('Snack', 'En-cas'), dinner: L('Dinner', 'Dîner') };
+  var mealSel = null; /* moment choisi pour les prochains ajouts (Ajouter un aliment) */
 
   var ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M9 14.5l2 2 4-4"/></svg>';
 
@@ -43,6 +47,7 @@
     var day = data.days[k] || (data.days[k] = {});
     var s = day[who] || (day[who] = {});
     s.entries = s.entries || []; s.activities = s.activities || []; s.water = s.water || 0;
+    /* v0.41 (ajouts compatibles) : sleep (heures), steps (pas). */
     return s;
   }
   function peek(date, who) { var d = data.days[TE.dayKey(date)]; return d && d[who] || { entries: [], activities: [], water: 0 }; }
@@ -111,6 +116,8 @@
     }
     var day = peek(date, who);
     var tot = TE.totals(day.entries);
+    var t0 = t;
+    t = TE.dayTarget(t0, day.activities); /* v0.41 : + calories d'activité choisies */
 
     /* Date */
     var label = date.toLocaleDateString(S2.locale, { weekday: 'long', day: 'numeric', month: 'long' });
@@ -122,7 +129,7 @@
       h('button', { class: 'btn btn-secondary btn-icon', 'aria-label': L('Next day', 'Jour suivant'), disabled: TE.dayKey(date) >= TE.dayKey(addDays(new Date(), 7)),
         onclick: function () { date = addDays(date, 1); render(); } }, '›')));
 
-    renderChecklist(day, tot, t);
+    renderChecklist(day, tot, t0);
 
     /* Bilan du jour */
     var left = t.kcal - tot.kcal;
@@ -134,7 +141,8 @@
       h('div', { class: 'to-macros' },
         macro(L('Protein', 'Protéines'), tot.protein, t.protein, 'p'),
         macro(L('Carbs', 'Glucides'), tot.carbs, t.carbs, 'c'),
-        macro(L('Fat', 'Lipides'), tot.fat, t.fat, 'f'))));
+        macro(L('Fat', 'Lipides'), tot.fat, t.fat, 'f')),
+      t.bonus ? h('p', { class: 'hint' }, L('Target includes +' + fmt(t.bonus) + ' kcal from your activities.', 'Cible avec +' + fmt(t.bonus) + ' kcal pour tes activités.')) : null));
 
     if (isToday(date) && tot.kcal > 0) renderMissing(tot, t);
     renderTraining(day);
@@ -146,12 +154,19 @@
     /* Eau et pesée */
     var water = day.water || 0;
     root.appendChild(h('div', { class: 'card to-water' },
-      h('div', null, h('div', { class: 'card-title' }, L('💧 Water', '💧 Eau')),
-        h('div', { class: 'list-sub' }, water + ' / ' + WATER_GOAL + L(' glasses (25 cl)', ' verres (25 cl)'))),
+      h('button', { class: 'to-waterinfo', 'aria-label': L('Change the water goal', 'Changer l’objectif d’eau'), onclick: editWaterGoal },
+        h('div', { class: 'card-title' }, L('💧 Water', '💧 Eau')),
+        h('div', { class: 'list-sub' }, water + ' / ' + waterGoal() + L(' glasses (25 cl) · ✎ goal', ' verres (25 cl) · ✎ objectif'))),
       h('div', { class: 'stepper to-waterstep' },
         h('button', { class: 'btn btn-step', 'aria-label': L('One glass less', 'Un verre de moins'), disabled: water <= 0, onclick: function () { slot(date, who).water = Math.max(0, water - 1); persist(); render(); } }, '−'),
         h('span', { class: 'stepper-num' }, water),
         h('button', { class: 'btn btn-step', 'aria-label': L('One glass more', 'Un verre de plus'), onclick: function () { slot(date, who).water = water + 1; persist(); render(); } }, '+'))));
+    /* v0.41 : sommeil et pas (saisis à la main) */
+    var sleepTxt = typeof day.sleep === 'number' ? num(day.sleep, 1) + ' h' : '—', stepsTxt = typeof day.steps === 'number' ? fmt(day.steps) : '—';
+    root.appendChild(h('div', { class: 'card to-weigh to-rest' },
+      h('div', null, h('div', { class: 'card-title' }, L('😴 Sleep · 👣 Steps', '😴 Sommeil · 👣 Pas')),
+        h('div', { class: 'list-sub' }, sleepTxt + L(' of sleep · ', ' de sommeil · ') + stepsTxt + L(' steps', ' pas'))),
+      h('button', { class: 'btn btn-secondary', onclick: editRest }, typeof day.sleep === 'number' || typeof day.steps === 'number' ? L('Edit', 'Modifier') : L('Fill in', 'Saisir'))));
     var prof = S2.objectif.profile(who), lastW = prof && prof.weights[prof.weights.length - 1];
     root.appendChild(h('div', { class: 'card to-weigh' },
       h('div', null, h('div', { class: 'card-title' }, L('⚖️ Weight', '⚖️ Poids')),
@@ -179,7 +194,7 @@
     card.appendChild(h('div', { class: 'card-title' }, L('🏋️ Training', '🏋️ Entraînement')));
     if (st) {
       if (st.done.length) {
-        st.done.forEach(function (d) { card.appendChild(h('div', { class: 'to-done' }, '✓ ' + d.name + L(' · week ', ' · semaine ') + d.week + ' · ' + d.sets + L(' sets', ' séries'))); });
+        st.done.forEach(function (d) { card.appendChild(h('div', { class: 'to-done' }, '✓ ' + d.name + ' · ' + (d.label || L('week ', 'semaine ') + d.week) + ' · ' + d.sets + L(' sets', ' séries'))); });
       } else if (st.inProgress) {
         card.appendChild(h('div', { class: 'to-planned' }, L('In progress: ', 'En cours : ') + st.inProgress));
         card.appendChild(h('button', { class: 'btn btn-primary btn-block', onclick: function () { mu.open(who); } }, L('Resume the workout ›', 'Reprendre la séance ›')));
@@ -198,7 +213,8 @@
     day.activities.forEach(function (a) {
       var act = activityOf(a.type);
       card.appendChild(h('div', { class: 'to-activity' },
-        h('span', null, act[2] + ' ' + act[1] + ' · ' + a.minutes + ' min' + (a.note ? ' · ' + a.note : '')),
+        h('span', null, act[2] + ' ' + act[1] + ' · ' + a.minutes + ' min' + (a.note ? ' · ' + a.note : '') +
+          (a.kcal ? ' · ≈ ' + fmt(a.kcal) + ' kcal' : '') + (a.bonus ? L(' (+' + fmt(a.bonus) + ' to target)', ' (+' + fmt(a.bonus) + ' à la cible)') : '')),
         h('button', { class: 'btn btn-icon', 'aria-label': L('Remove', 'Retirer'), onclick: function () {
           ui.confirm({ title: L('Remove this activity?', 'Retirer cette activité ?'), okLabel: L('Remove', 'Retirer'), danger: true }).then(function (ok) {
             if (!ok) return; var s = slot(date, who); s.activities = s.activities.filter(function (x) { return x.id !== a.id; }); persist(); render();
@@ -224,15 +240,32 @@
       var inp = h('input', { class: 'input', type: 'text', inputmode: 'numeric', value: '30', 'aria-label': L('Minutes', 'Minutes') });
       var note = h('input', { class: 'input', type: 'text', placeholder: L('Optional (e.g. 5 km)', 'Facultatif (ex. 5 km)'), 'aria-label': L('Note', 'Note') });
       var err = h('p', { class: 'form-error', hidden: true });
+      /* v0.41 : dépense estimée, et choix d'en ajouter la moitié à la cible du jour. */
+      var prof = null; try { prof = S2.objectif.profile(who); } catch (e) { prof = null; }
+      var kg = prof && prof.weight || 70, addHalf = true;
+      var est = h('p', { class: 'sheet-text to-actest' });
+      var tick = h('button', { class: 'to-acttick is-on', type: 'button', 'aria-pressed': 'true', onclick: function () { addHalf = !addHalf; paintEst(); } });
+      function paintEst() {
+        var m = ui.parseNum(inp.value) || 0, k = TE.activityKcal(type, m, kg);
+        est.textContent = L('Estimated: about ' + fmt(k) + ' kcal burned (for ' + num(kg, 1) + ' kg).', 'Estimation : environ ' + fmt(k) + ' kcal dépensées (pour ' + num(kg, 1) + ' kg).');
+        tick.textContent = (addHalf ? '☑ ' : '☐ ') + L('Add half to today’s target (+' + fmt(Math.round(k / 2)) + ' kcal)', 'Ajouter la moitié à ma cible du jour (+' + fmt(Math.round(k / 2)) + ' kcal)');
+        tick.className = 'to-acttick' + (addHalf ? ' is-on' : ''); tick.setAttribute('aria-pressed', addHalf ? 'true' : 'false');
+      }
+      inp.addEventListener('input', paintEst);
+      var basePaint = paint; paint = function () { basePaint(); paintEst(); };
       function save() {
         minutes = ui.parseNum(inp.value);
         if (!minutes || minutes < 1 || minutes > 600) { err.textContent = L('Duration between 1 and 600 minutes.', 'Durée entre 1 et 600 minutes.'); err.hidden = false; return; }
-        slot(date, who).activities.push({ id: ui.uid(), type: type, minutes: Math.round(minutes), note: note.value.trim() });
+        var k = TE.activityKcal(type, Math.round(minutes), kg);
+        slot(date, who).activities.push({ id: ui.uid(), type: type, minutes: Math.round(minutes), note: note.value.trim(), kcal: k, bonus: addHalf ? Math.round(k / 2) : 0 });
         persist(); close(); render(); ui.toast(L('Activity added', 'Activité ajoutée'));
       }
+      paintEst();
       return [
         h('h2', { class: 'sheet-title' }, L('Activity', 'Activité')), box,
         h('div', { class: 'form-grid ob-grid2' }, h('label', { class: 'field' }, h('span', { class: 'field-label' }, L('Minutes', 'Minutes')), inp), h('label', { class: 'field' }, h('span', { class: 'field-label' }, L('Note', 'Note')), note)),
+        est, tick,
+        h('p', { class: 'hint' }, L('Estimates are often too high: adding half is a safe bet. Your choice is kept for this activity.', 'Les estimations sont souvent trop hautes : en ajouter la moitié est prudent. Ton choix est gardé pour cette activité.')),
         err,
         h('div', { class: 'sheet-actions' },
           h('button', { class: 'btn btn-primary btn-block', onclick: save }, L('Add', 'Ajouter')),
@@ -270,15 +303,21 @@
     }
     if (isToday(date)) renderLeftovers(card, cu, planned);
     var extra = day.entries.filter(function (e) { return e.planned === null || e.planned === undefined; });
-    if (extra.length) {
-      card.appendChild(h('div', { class: 'to-extrahead' }, L('Also eaten', 'Aussi mangé')));
-      extra.forEach(function (e) {
+    /* v0.41 : ce qui a été noté hors planning, rangé par moment (petit-déjeuner, déjeuner, en-cas, dîner). */
+    TE.MEALS.forEach(function (meal) {
+      var list = extra.filter(function (e) { return TE.mealOf(e) === meal; });
+      if (!list.length) return;
+      var k = list.reduce(function (n, e) { return n + e.kcal; }, 0);
+      card.appendChild(h('div', { class: 'to-mealhead' },
+        h('span', { class: 'to-extrahead' }, MEAL_LABEL[meal] + ' · ' + fmt(k) + ' kcal'),
+        h('button', { class: 'btn btn-ghost btn-sm', 'aria-label': L('Add to ', 'Ajouter au ') + MEAL_LABEL[meal], onclick: function () { addFood(meal); } }, '+')));
+      list.forEach(function (e) {
         card.appendChild(h('div', { class: 'to-entry' },
           h('div', { class: 'to-entrymain' }, h('span', { class: 'to-entryname' }, e.name),
             h('span', { class: 'list-sub' }, (e.portion ? e.portion + (e.qty !== 1 ? ' ×' + num(e.qty) : '') : qtyText(e.qty)) + ' · ' + Math.round(e.kcal) + ' kcal · ' + Math.round(e.protein) + L(' g protein', ' g prot.'))),
           h('button', { class: 'btn btn-icon', 'aria-label': L('Remove', 'Retirer'), onclick: function () { removeEntry(e); } }, '✕')));
       });
-    }
+    });
     var yest = peek(addDays(date, -1), who).entries;
     if (yest.length) card.appendChild(h('button', { class: 'btn btn-ghost btn-sm to-likeyest', onclick: function () { likeYesterday(yest); } },
       L('↺ Same as yesterday…', '↺ Comme hier…')));
@@ -298,7 +337,7 @@
   }
   function dayCheck(d, t) {
     var dd = peek(d, who);
-    return TE.checklist({ tot: TE.totals(dd.entries), t: t, water: dd.water, waterGoal: WATER_GOAL, training: trainingState(d) });
+    return TE.checklist({ tot: TE.totals(dd.entries), t: TE.dayTarget(t, dd.activities), water: dd.water, waterGoal: waterGoal(), training: trainingState(d) });
   }
   function renderChecklist(day, tot, t) {
     var c = dayCheck(date, t);
@@ -431,6 +470,77 @@
       ];
     }, { modal: true });
   }
+  /* ---------- v0.41 : moment du repas, objectif d'eau, sommeil et pas ---------- */
+  function mealPicker() {
+    var box = h('div', { class: 'segmented small to-mealpick', role: 'group', 'aria-label': L('Meal', 'Repas') });
+    function paint() {
+      box.innerHTML = '';
+      TE.MEALS.forEach(function (m) {
+        box.appendChild(h('button', { class: 'seg' + (mealSel === m ? ' is-active' : ''), type: 'button', 'aria-pressed': mealSel === m ? 'true' : 'false',
+          onclick: function () { mealSel = m; paint(); } }, MEAL_LABEL[m]));
+      });
+    }
+    paint();
+    return box;
+  }
+  function editWaterGoal() {
+    var g = waterGoal();
+    ui.sheet(function (close) {
+      var val = h('span', { class: 'stepper-num' }, g), info = h('p', { class: 'hint' });
+      function paint() { val.textContent = g; info.textContent = num(g * 0.25, 2) + L(' litres a day.', ' litre' + (g * 0.25 >= 2 ? 's' : '') + ' par jour.'); }
+      paint();
+      return [
+        h('h2', { class: 'sheet-title' }, L('Water goal', 'Objectif d’eau')),
+        h('p', { class: 'sheet-text' }, L('Glasses of 25 cl a day. About 30 to 35 ml per kg of bodyweight, more on training days or when it is hot.', 'Verres de 25 cl par jour. Environ 30 à 35 ml par kg de poids du corps, plus les jours d’entraînement ou quand il fait chaud.')),
+        h('div', { class: 'stepper' },
+          h('button', { class: 'btn btn-step', type: 'button', 'aria-label': L('One glass less', 'Un verre de moins'), onclick: function () { if (g > 4) { g--; paint(); } } }, '−'),
+          val,
+          h('button', { class: 'btn btn-step', type: 'button', 'aria-label': L('One glass more', 'Un verre de plus'), onclick: function () { if (g < 16) { g++; paint(); } } }, '+')),
+        info,
+        h('div', { class: 'sheet-actions' },
+          h('button', { class: 'btn btn-primary btn-block', onclick: function () { data.waterGoal = g; persist(); close(); render(); ui.toast(L('Water goal saved', 'Objectif d’eau enregistré')); } }, L('Save', 'Enregistrer')),
+          h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, L('Cancel', 'Annuler')))
+      ];
+    }, { modal: true });
+  }
+  function editRest() {
+    var cur = peek(date, who);
+    ui.sheet(function (close) {
+      var sl = h('input', { class: 'input', type: 'text', inputmode: 'decimal', autocomplete: 'off', placeholder: '7,5', 'aria-label': L('Hours of sleep', 'Heures de sommeil'),
+        value: typeof cur.sleep === 'number' ? num(cur.sleep, 1) : '' });
+      var st = h('input', { class: 'input', type: 'text', inputmode: 'numeric', pattern: '[0-9]*', autocomplete: 'off', placeholder: '8000', 'aria-label': L('Steps', 'Pas'),
+        value: typeof cur.steps === 'number' ? String(cur.steps) : '' });
+      var err = h('p', { class: 'form-error', hidden: true });
+      function save() {
+        var a = sl.value.trim() ? ui.parseNum(sl.value) : null, b = st.value.trim() ? ui.parseNum(st.value) : null;
+        if (a !== null && (isNaN(a) || a < 0 || a > 16)) { err.textContent = L('Sleep between 0 and 16 hours.', 'Sommeil entre 0 et 16 heures.'); err.hidden = false; return; }
+        if (b !== null && (isNaN(b) || b < 0 || b > 100000)) { err.textContent = L('Steps between 0 and 100,000.', 'Pas entre 0 et 100 000.'); err.hidden = false; return; }
+        var s0 = slot(date, who);
+        if (a === null) delete s0.sleep; else s0.sleep = Math.round(a * 10) / 10;
+        if (b === null) delete s0.steps; else s0.steps = Math.round(b);
+        persist(); close(); render();
+      }
+      return [
+        h('h2', { class: 'sheet-title' }, L('Sleep and steps', 'Sommeil et pas')),
+        h('p', { class: 'sheet-text' }, L('Sleep of last night, and today’s steps (read them in the Health app). Leave empty if you do not know.', 'Sommeil de la nuit dernière, et pas de la journée (lis-les dans l’app Santé). Laisse vide si tu ne sais pas.')),
+        h('div', { class: 'form-grid ob-grid2' }, field(L('Sleep (hours)', 'Sommeil (heures)'), sl), field(L('Steps', 'Pas'), st)),
+        err,
+        h('div', { class: 'sheet-actions' },
+          h('button', { class: 'btn btn-primary btn-block', onclick: save }, L('Save', 'Enregistrer')),
+          h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, L('Cancel', 'Annuler')))
+      ];
+    }, { modal: true });
+  }
+  function restCard(days) {
+    var wb = TE.wellbeing(days);
+    var c = h('div', { class: 'card to-review' }, h('div', { class: 'card-title' }, L('😴 Sleep and steps', '😴 Sommeil et pas')));
+    if (!wb.sleepDays && !wb.stepsDays) { c.appendChild(h('p', { class: 'hint' }, L('Fill in your sleep and steps in Today to see your averages here.', 'Saisis ton sommeil et tes pas dans Aujourd’hui pour voir tes moyennes ici.'))); return c; }
+    c.appendChild(statRow(L('Sleep per night (average)', 'Sommeil par nuit (moyenne)'), wb.sleepDays ? num(wb.sleepAvg, 1) + ' h · ' + wb.sleepDays + L(' night(s)', wb.sleepDays > 1 ? ' nuits' : ' nuit') : '—', wb.sleepDays ? Math.min(1, wb.sleepAvg / 8) : null));
+    c.appendChild(statRow(L('Steps per day (average)', 'Pas par jour (moyenne)'), wb.stepsDays ? fmt(wb.stepsAvg) + ' · ' + wb.stepsDays + L(' day(s)', wb.stepsDays > 1 ? ' jours' : ' jour') : '—', wb.stepsDays ? Math.min(1, wb.stepsAvg / 8000) : null));
+    if (wb.sleepDays && wb.sleepAvg < 7) c.appendChild(h('p', { class: 'hint' }, L('Under 7 h of sleep slows recovery and progress: aim for 7 to 9 h.', 'Moins de 7 h de sommeil freine la récupération et la progression : vise 7 à 9 h.')));
+    return c;
+  }
+
   function qtyText(q) { return q === 1 ? L('1 serving', '1 portion') : '×' + num(q) + L(' serving', ' portion'); }
 
   function logRecipe(m, qty, plannedIdx) {
@@ -440,6 +550,7 @@
   /* Ajoute une entrée au journal du jour affiché (sans enregistrer : persist() ensuite). */
   function pushEntry(e) {
     e.id = ui.uid(); e.at = new Date().toISOString();
+    if (TE.MEALS.indexOf(e.meal) < 0) e.meal = mealSel || TE.guessMeal(new Date()); /* v0.41 : moment du repas */
     ['kcal', 'protein', 'carbs', 'fat'].forEach(function (k) { e[k] = Math.round((e[k] || 0) * 10) / 10; });
     slot(date, who).entries.push(e);
     if (e.type !== 'quick' && e.ref) {
@@ -518,8 +629,9 @@
       kcal: it.kcal * qty, protein: it.protein * qty, carbs: it.carbs * qty, fat: it.fat * qty };
   }
 
-  function addFood() {
+  function addFood(meal) {
     var tab = 'foods', q = '';
+    mealSel = TE.MEALS.indexOf(meal) > -1 ? meal : TE.guessMeal(new Date());
     var cu = api('cuisine'), recipes = cu ? cu.recipes() : [];
     var CQ = cqFoods();
     var pool = null;
@@ -580,7 +692,8 @@
       paintTabs(); paint();
       setTimeout(function () { search.focus(); }, 250);
       return [
-        h('h2', { class: 'sheet-title' }, L('Add food · ', 'Ajouter · ') + nameOf(who)),
+        h('h2', { class: 'sheet-title' }, L('Add food', 'Ajouter un aliment')),
+        mealPicker(),
         search, tabs, list,
         h('div', { class: 'sheet-actions' },
           h('button', { class: 'btn btn-secondary btn-block', onclick: function () { close(); quickEntry(); } }, L('⚡ Quick entry (calories only)', '⚡ Saisie rapide (calories seulement)')),
@@ -733,6 +846,7 @@
       nc.appendChild(statRow(L('Days on target (kcal ±10 %, protein ≥ 90 %)', 'Jours dans la cible (kcal ±10 %, protéines ≥ 90 %)'), ns.inTarget + ' / ' + ns.logged, ns.inTarget / ns.logged));
     } else nc.appendChild(h('p', { class: 'hint' }, L('Log your meals in Today to see your averages here.', 'Note tes repas dans Aujourd’hui pour voir tes moyennes ici.')));
     root.appendChild(nc);
+    root.appendChild(restCard(days.filter(function (_, k) { return TE.dayKey(addDays(mon, k)) <= TE.dayKey(new Date()); })));
 
     /* Poids et tour de taille (12 dernières semaines) */
     var from = addDays(new Date(), -84);
@@ -810,6 +924,7 @@
     }
     rc.appendChild(statRow(L('Days achieved (all ticked)', 'Journées réussies (tout coché)'), achieved + ' / ' + ns.days, ns.days ? achieved / ns.days : 0));
     root.appendChild(rc);
+    root.appendChild(restCard(days));
 
     /* Corps : poids et tour de taille sur le mois */
     var bc = h('div', { class: 'card to-review' }, h('div', { class: 'card-title' }, L('⚖️ Body', '⚖️ Corps')));
@@ -834,9 +949,9 @@
     var str = mu && mu.strength ? mu.strength(from, to).slice(0, 5) : [];
     if (!str.length) fc.appendChild(h('p', { class: 'hint' }, L('No workout this month.', 'Aucune séance ce mois-ci.')));
     str.forEach(function (x) {
-      fc.appendChild(statRow(x.name, num(x.best, 1) + ' kg' + (x.delta === null ? '' : x.delta === 0 ? ' (=)' : ' (' + (x.delta > 0 ? '+' : '−') + num(Math.abs(x.delta), 1) + ')'), null));
+      fc.appendChild(statRow(x.name, (x.unit === 'reps' ? num(x.best, 0) + L(' reps', ' rép.') : num(x.best, 1) + ' kg') + (x.delta === null ? '' : x.delta === 0 ? ' (=)' : ' (' + (x.delta > 0 ? '+' : '−') + num(Math.abs(x.delta), 1) + ')'), null));
     });
-    if (str.length) fc.appendChild(h('p', { class: 'hint' }, L('Best estimated 1RM of the month; in brackets, the change vs the month before.', 'Meilleur 1RM estimé du mois ; entre parenthèses, l’écart avec le mois d’avant.')));
+    if (str.length) fc.appendChild(h('p', { class: 'hint' }, L('Best estimated 1RM of the month (bodyweight exercises: with your weight, or best set in reps); in brackets, the change vs the month before.', 'Meilleur 1RM estimé du mois (exercices au poids du corps : avec ton poids, ou meilleure série en répétitions) ; entre parenthèses, l’écart avec le mois d’avant.')));
     root.appendChild(fc);
 
     renderPhotos(from, to);
@@ -947,6 +1062,15 @@
       h('div', { class: 'list-sub' }, num(first, 1) + ' → ' + num(last, 1) + ' ' + unit + ' (' + (d > 0 ? '+' : d < 0 ? '−' : '') + num(Math.abs(d), 1) + ')' +
         (target ? L(' · target ', ' · objectif ') + num(target, 1) + ' ' + unit : '')));
   }
+
+  /* v0.41 : API lue par la Muscu (conseil en cas de stagnation) : sommeil moyen des `n` derniers jours. */
+  S2.today = {
+    wellbeing: function (n) {
+      if (!data) data = load();
+      var days = []; for (var i = 0; i < (n || 14); i++) days.push(peek(addDays(new Date(), -i), 'me'));
+      return TE.wellbeing(days);
+    }
+  };
 
   S2.app.registerTab({ id: 'aujourdhui', label: L('Today', 'Aujourd’hui'), title: L('Today', 'Aujourd’hui'), icon: ICON, mount: mount, order: 5 });
 })();

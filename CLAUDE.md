@@ -49,8 +49,8 @@ js/tabs/cuisine-share.js    module PUR des courses à 2 : liste envoyée par mes
 js/tabs/cuisine-prices.js   moteur PUR des prix moyens (panier estimé des Courses, paquets entiers, placard au prorata) ; prix saisis par l'utilisateur dans `sandeep2:cuisine` (prices)
 js/tabs/garde-robe-combos.js  combinaisons de couleurs (paires, trios, chaussures) utilisées par Wardrobe
 js/tabs/aujourdhui.js       onglet Aujourd'hui de Gym Food (journal du jour, séance du jour, eau, pesée, bilan de la semaine)
-js/tabs/aujourdhui-engine.js moteur PUR : totaux du journal, bilan, tendance du poids, ajustement proposé, check-list du jour, « ce qu'il te manque », restes, bilan du mois
-js/tabs/muscu-engine.js     moteur PUR de la Muscu : groupe musculaire d'un exercice, séries par muscle, résumé de fin de séance, stagnation, force du mois
+js/tabs/aujourdhui-engine.js moteur PUR : totaux du journal, bilan, tendance du poids, ajustement proposé, check-list du jour, « ce qu'il te manque », restes, bilan du mois, calories d'activité (cible du jour), moments des repas, sommeil et pas
+js/tabs/muscu-engine.js     moteur PUR de la Muscu : groupe musculaire d'un exercice, séries par muscle, résumé de fin de séance, stagnation, force du mois, exercices au poids du corps (perf : 1RM avec le poids du corps ou répétitions), cycles de 12 semaines (cycleStatus, décharge)
 (photos de progression d'Aujourd'hui : `sandeep2:aujourdhui-photos`, 480 px JPEG, incluses dans la sauvegarde)
 js/tabs/cuisine-nutrition.js table nutritionnelle PURE des ingrédients + aliments du quotidien (journal)
 js/tabs/ciqual-data.js      ~1 000 aliments de la table Ciqual 2025 (Anses, Licence Ouverte), valeurs pour 100 g + portion type ; fichier généré, citer la source
