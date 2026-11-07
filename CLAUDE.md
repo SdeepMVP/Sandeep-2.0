@@ -47,6 +47,7 @@ js/tabs/garde-robe-combos.js  combinaisons de couleurs (paires, trios, chaussure
 js/tabs/aujourdhui.js       onglet Aujourd'hui de SanEva (journal du jour, séance du jour, eau, pesée, bilan de la semaine)
 js/tabs/aujourdhui-engine.js moteur PUR : totaux du journal, bilan, tendance du poids, ajustement proposé
 js/tabs/cuisine-nutrition.js table nutritionnelle PURE des ingrédients + aliments du quotidien (journal)
+js/tabs/ciqual-data.js      ~1 000 aliments de la table Ciqual 2025 (Anses, Licence Ouverte), valeurs pour 100 g + portion type ; fichier généré, citer la source
 js/tabs/objectif.js         onglet Objectif de SanEva (questionnaire, profil, besoins du jour, poids, mensurations, 2e personne) ; expose S2.objectif
 js/tabs/objectif-engine.js  moteur PUR nutrition : besoins (Mifflin-St Jeor), adéquation des recettes, journées types
 js/tabs/garde-robe-engine.js  moteur PUR de Wardrobe (règles, notes, recherche, apprentissage) : pas de DOM ni de stockage

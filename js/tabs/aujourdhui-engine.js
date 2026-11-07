@@ -82,6 +82,47 @@
   /* Lundi de la semaine d'une date (minuit local). */
   function monday(d) { var x = new Date(d); x.setHours(0, 0, 0, 0); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; }
 
+  /* ---------- Recherche d'aliments (journal) ----------
+     items = [{ name, curated? }] ; chaque mot cherché doit commencer un mot du nom (sans accents, singulier/pluriel confondus).
+     Classement : nom qui commence par la recherche, puis premier mot, puis noms courts ; aliments « du quotidien » de l'app en premier. */
+  var SYNONYMS = { coca: 'cola', nutella: 'pate a tartiner', yogourt: 'yaourt', yogurt: 'yaourt', ketchup: 'ketchup', pates: 'pates', spaghettis: 'pates',
+    frite: 'frites', burger: 'burger', mcdo: 'hamburger', steak: 'steak', cafe: 'cafe', the: 'the', oeufs: 'oeuf', patate: 'pomme de terre', cereale: 'cereales' };
+  function fold(s) { return String(s || '').toLowerCase().replace(/œ/g, 'oe').replace(/æ/g, 'ae').normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+  function stem(w) { return w.length > 3 ? w.replace(/(s|x)$/, '') : w; }
+  function words(s) { return fold(s).split(/[^a-z0-9%]+/).filter(Boolean).map(stem); }
+  function searchFoods(items, query, limit) {
+    var q = fold(query).trim();
+    if (!q) return [];
+    var qw = [];
+    q.split(/\s+/).forEach(function (w) { (SYNONYMS[w] || w).split(' ').forEach(function (x) { if (x) qw.push(stem(x)); }); });
+    var scored = [];
+    items.forEach(function (it) {
+      var nw = it._w || (it._w = words(it.name));
+      var pos = [];
+      for (var i = 0; i < qw.length; i++) {
+        var k = -1;
+        for (var j = 0; j < nw.length; j++) if (nw[j].indexOf(qw[i]) === 0) { k = j; break; }
+        if (k < 0) return;
+        pos.push(k);
+      }
+      var name = fold(it.name), first = name.split(',')[0];
+      var score = 0;
+      if (pos[0] === 0) score += 6;
+      if (first.indexOf(qw.join(' ')) === 0) score += 3;
+      score -= pos.reduce(function (a, b) { return a + b; }, 0) * 0.5;
+      score -= name.length * 0.03;
+      if (it.curated) score += 2.5;
+      /* Le journal note surtout des aliments prêts à manger : cuit plutôt que cru, sauf si « cru » est cherché. */
+      if (qw.indexOf('cru') < 0 && qw.indexOf('crue') < 0) {
+        if (/\bcrue?s?\b/.test(name) && !/^(fruit|pomme|poire|banane|fraise|tomate|carotte|concombre|salade|avocat)/.test(name)) score -= 1;
+        if (/cuit|grill|roti|poele|vapeur/.test(name)) score += 0.5;
+      }
+      scored.push({ it: it, s: score });
+    });
+    scored.sort(function (a, b) { return b.s - a.s; });
+    return scored.slice(0, limit || 50).map(function (x) { return x.it; });
+  }
+
   S2.todayEngine = { RATES: RATES, STEP: STEP, dayKey: dayKey, totals: totals, inTarget: inTarget, nutritionSummary: nutritionSummary,
-    weightTrend: weightTrend, suggestion: suggestion, monday: monday };
+    weightTrend: weightTrend, suggestion: suggestion, monday: monday, searchFoods: searchFoods };
 })();

@@ -419,5 +419,37 @@ test('suggestion follows the goal and asks for tracking first', function () {
   ok(TE.suggestion('bulk', flat, { days: 14, logged: 3, kcalOk: 3 }, 3000).kind === 'log', 'not enough tracking');
 });
 
+/* ---------- Table Ciqual (journal) ---------- */
+require(path.join(__dirname, '..', 'js', 'tabs', 'ciqual-data.js'));
+var CQ = window.S2.ciqual;
+console.log('\nCiqual foods');
+test('about 1,000 Ciqual foods with valid values and a typical serving', function () {
+  ok(CQ.foods.length >= 950 && CQ.foods.length <= 1100, 'count ' + CQ.foods.length);
+  var ids = {};
+  CQ.foods.forEach(function (r) {
+    ok(!ids[r[0]], 'duplicate ' + r[0]); ids[r[0]] = true;
+    ok(typeof r[1] === 'string' && r[1].length > 2 && CQ.groups[r[2]], 'name/group ' + r[0]);
+    [3, 4, 5, 6].forEach(function (i) { ok(isFinite(r[i]) && r[i] >= 0 && r[i] <= 900, r[1] + ' value ' + i); });
+    ok(r[7] > 0 && r[7] <= 400, r[1] + ' serving ' + r[7]);
+  });
+  /* Calories cohérentes avec les macros pour la grande majorité (alcool et fibres expliquent les écarts restants). */
+  var off = CQ.foods.filter(function (r) { var s = r[4] * 4 + r[5] * 4 + r[6] * 9; return r[3] > 40 && Math.abs(s - r[3]) / r[3] > 0.2; });
+  ok(off.length < CQ.foods.length * 0.05, off.length + ' inconsistent: ' + off.slice(0, 5).map(function (r) { return r[1]; }).join(' | '));
+});
+test('search finds everyday foods first (eggs, cooked rice, cola, chicken…), quickly', function () {
+  var items = NT.FOODS.map(function (f) { return { name: f.name, curated: true }; }).concat(CQ.foods.map(function (r) { return { name: r[1] }; }));
+  function first(q) { var r = TE.searchFoods(items, q, 5); return r.length ? r[0].name : ''; }
+  var t0 = Date.now();
+  ok(/^(Œuf|Oeuf)/.test(first('oeuf')), first('oeuf'));
+  ok(/^Riz.*cuit/i.test(first('riz cuit')), first('riz cuit'));
+  ok(/^Cola/.test(first('coca')), first('coca'));
+  ok(/^Pâte à tartiner/.test(first('nutella')), first('nutella'));
+  ok(/^Poulet/.test(first('poulet')) && !/cru$/.test(first('poulet')), first('poulet'));
+  ok(/^Banane/.test(first('bananes')), first('bananes'));
+  ok(TE.searchFoods(items, 'xyzabc', 5).length === 0, 'nonsense');
+  ok(TE.searchFoods(items, 'fromage blanc', 5).every(function (x) { return /fromage blanc/i.test(x.name); }), 'all words required');
+  ok(Date.now() - t0 < 300, (Date.now() - t0) + ' ms');
+});
+
 console.log('\n' + passed + ' passed, ' + failed + ' failed\n');
 process.exit(failed ? 1 : 0);

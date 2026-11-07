@@ -326,11 +326,24 @@
     function foodItem(f) { return { kind: 'food', id: f.id, name: f.name, portion: f.portion, kcal: f.kcal, protein: f.protein, carbs: f.carbs, fat: f.fat }; }
     function customItem(f) { return { kind: 'custom', id: f.id, name: f.name, portion: f.portion, kcal: f.kcal, protein: f.protein, carbs: f.carbs || 0, fat: f.fat || 0 }; }
     function recipeItem(r) { return { kind: 'recipe', id: r.id, name: r.name, portion: L('1 serving', '1 portion'), kcal: r.kcal, protein: r.protein, carbs: r.carbs, fat: r.fat }; }
+    /* Table Ciqual : valeurs pour 100 g, portion type en grammes. */
+    var CQ = S2.ciqual ? S2.ciqual.foods : [];
+    function ciqualItem(r) {
+      var g = r[7];
+      return { kind: 'ciqual', id: r[0], name: r[1], grams: g, label: r[8] || null, per100: { kcal: r[3], protein: r[4], carbs: r[5], fat: r[6] },
+        portion: (r[8] ? r[8] + ' · ' : '') + g + ' g', kcal: r[3] * g / 100, protein: r[4] * g / 100, carbs: r[5] * g / 100, fat: r[6] * g / 100 };
+    }
+    var pool = null;
+    function searchPool() {
+      if (!pool) pool = NT.FOODS.map(function (f) { var it = foodItem(f); it.curated = true; return it; }).concat(CQ.map(ciqualItem));
+      return pool;
+    }
     function findRecent(key) {
       var p = key.split(':'), type = p[0], id = p.slice(1).join(':');
       if (type === 'food') { var f = NT.FOODS.filter(function (x) { return x.id === id; })[0]; return f && foodItem(f); }
       if (type === 'custom') { var c = data.custom.filter(function (x) { return x.id === id; })[0]; return c && customItem(c); }
       if (type === 'recipe') { var r = recipes.filter(function (x) { return x.id === id; })[0]; return r && recipeItem(r); }
+      if (type === 'ciqual') { var cq = CQ.filter(function (x) { return x[0] === id; })[0]; return cq && ciqualItem(cq); }
       return null;
     }
     ui.sheet(function (close) {
@@ -347,6 +360,14 @@
       function row(it) {
         return h('button', { class: 'to-food', type: 'button', onclick: function () {
           close();
+          if (it.kind === 'ciqual') {
+            pickGrams(it, function (g) {
+              var f = g / 100;
+              addEntry({ type: 'ciqual', ref: it.id, name: it.name, portion: g + ' g', qty: 1, grams: g, planned: null,
+                kcal: it.per100.kcal * f, protein: it.per100.protein * f, carbs: it.per100.carbs * f, fat: it.per100.fat * f });
+            });
+            return;
+          }
           pickQty(it, 1, it.kind === 'recipe', function (qty) {
             addEntry({ type: it.kind, ref: it.id, name: it.name, portion: it.kind === 'recipe' ? null : it.portion, qty: qty, planned: null,
               kcal: it.kcal * qty, protein: it.protein * qty, carbs: it.carbs * qty, fat: it.fat * qty });
@@ -363,8 +384,14 @@
           var rec = data.recent[who].map(findRecent).filter(Boolean);
           if (rec.length) { list.appendChild(h('div', { class: 'to-extrahead' }, L('Recent', 'Récents'))); rec.forEach(function (it) { list.appendChild(row(it)); }); list.appendChild(h('div', { class: 'to-extrahead' }, L('All foods', 'Tous les aliments'))); }
         }
-        var items = tab === 'foods' ? NT.FOODS.map(foodItem) : tab === 'recipes' ? recipes.map(recipeItem) : data.custom.map(customItem);
-        items = items.filter(match);
+        var items;
+        if (tab === 'foods') {
+          /* Sans recherche : les aliments du quotidien de l'app ; avec recherche : eux + la table Ciqual (classés). */
+          items = n ? TE.searchFoods(searchPool(), q, 60) : NT.FOODS.map(foodItem);
+          if (!n) list.appendChild(h('p', { class: 'hint to-cqhint' }, L('Type to search among ' + (NT.FOODS.length + CQ.length) + ' foods (Ciqual table).', 'Tape pour chercher parmi ' + (NT.FOODS.length + CQ.length) + ' aliments (table Ciqual).')));
+        } else {
+          items = (tab === 'recipes' ? recipes.map(recipeItem) : data.custom.map(customItem)).filter(match);
+        }
         items.forEach(function (it) { list.appendChild(row(it)); });
         if (tab === 'mine') list.appendChild(h('button', { class: 'btn btn-secondary btn-block', type: 'button', onclick: function () { close(); editCustom(null); } }, L('+ Create a food', '+ Créer un aliment')));
         if (!items.length && tab !== 'mine') list.appendChild(h('p', { class: 'hint' }, L('Nothing found. Try “Mine” or a quick entry.', 'Rien trouvé. Essaie « Les miens » ou une saisie rapide.')));
@@ -376,9 +403,47 @@
         search, tabs, list,
         h('div', { class: 'sheet-actions' },
           h('button', { class: 'btn btn-secondary btn-block', onclick: function () { close(); quickEntry(); } }, L('⚡ Quick entry (calories only)', '⚡ Saisie rapide (calories seulement)')),
-          h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, L('Close', 'Fermer')))
+          h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, L('Close', 'Fermer'))),
+        CQ.length ? h('p', { class: 'hint to-source' }, L('Food values: Anses, Ciqual 2025 table (Licence Ouverte).', 'Valeurs des aliments : Anses, table Ciqual 2025 (Licence Ouverte).')) : null
       ];
     });
+  }
+
+  /* Quantité en grammes (aliments Ciqual) : portion type, raccourcis, ou saisie libre. */
+  function pickGrams(item, done) {
+    var g = item.grams;
+    ui.sheet(function (close) {
+      var info = h('div', { class: 'list-sub' });
+      var inp = h('input', { class: 'input to-gramsinp', type: 'text', inputmode: 'numeric', value: String(g), 'aria-label': L('Quantity in grams', 'Quantité en grammes') });
+      var err = h('p', { class: 'form-error', hidden: true });
+      function paint() {
+        var f = (g || 0) / 100, p = item.per100;
+        info.textContent = Math.round(p.kcal * f) + ' kcal · ' + num(Math.round(p.protein * f * 10) / 10) + L(' g protein · ', ' g de protéines · ') +
+          Math.round(p.carbs * f) + L(' g carbs · ', ' g de glucides · ') + Math.round(p.fat * f) + L(' g fat', ' g de lipides');
+      }
+      inp.addEventListener('input', function () { g = ui.parseNum(inp.value); paint(); });
+      function set(v) { g = v; inp.value = String(v); paint(); }
+      var chips = [[item.grams, item.label ? item.label : L('portion', 'portion')], [Math.round(item.grams / 2), '½'], [item.grams * 2, '×2'], [100, '100 g']]
+        .filter(function (c, i, a) { return a.findIndex(function (x) { return x[0] === c[0]; }) === i; });
+      paint();
+      return [
+        h('h2', { class: 'sheet-title' }, item.name),
+        h('div', { class: 'to-gramsrow' },
+          h('button', { class: 'btn btn-step', type: 'button', 'aria-label': L('10 g less', '10 g de moins'), onclick: function () { set(Math.max(5, Math.round((g || 0) - 10))); } }, '−'),
+          h('label', { class: 'to-gramsfield' }, inp, h('span', null, 'g')),
+          h('button', { class: 'btn btn-step', type: 'button', 'aria-label': L('10 g more', '10 g de plus'), onclick: function () { set(Math.round((g || 0) + 10)); } }, '+')),
+        h('div', { class: 'ck-chips to-gramchips' }, chips.map(function (c) {
+          return h('button', { class: 'ck-chip', type: 'button', onclick: function () { set(c[0]); } }, c[1] + (c[1].indexOf(' g') > -1 ? '' : ' · ' + c[0] + ' g'));
+        })),
+        info, err,
+        h('div', { class: 'sheet-actions' },
+          h('button', { class: 'btn btn-primary btn-block', onclick: function () {
+            if (!g || g <= 0 || g > 3000) { err.textContent = L('Quantity between 1 and 3000 g.', 'Quantité entre 1 et 3000 g.'); err.hidden = false; return; }
+            close(); done(Math.round(g));
+          } }, L('Add', 'Ajouter')),
+          h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, L('Cancel', 'Annuler')))
+      ];
+    }, { modal: true });
   }
 
   function numInput(label, ph) { return h('input', { class: 'input', type: 'text', inputmode: 'decimal', placeholder: ph || '', 'aria-label': label, autocomplete: 'off' }); }

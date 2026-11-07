@@ -1,5 +1,11 @@
 # Changelog — Sandeep 2.0
 
+## 0.34.0 — 2026-11-07
+- SanEva Today: **about 1,080 foods** to log. 1,026 come from the official **Ciqual 2025 table (Anses, Licence Ouverte)**, picked from the 3,484 for everyday eating in France (fruit, vegetables, meat, fish, dairy, cheese, bread, pasta, ready meals, fast food, drinks, desserts…), plus the app's 52 everyday foods. Baby foods, mineral waters, rare offal and overseas-only items are left out. Data is built into the app; nothing is fetched online.
+- **Search** across all of them, accent and plural-insensitive, with synonyms (coca → cola, nutella → chocolate spread). Everyday and cooked foods come first, and results show in a few milliseconds.
+- Ciqual foods are logged **in grams**: typical serving (1 egg, 1 pot, 1 slice, 1/2 pizza…), ½, ×2, 100 g, ±10 g or any amount typed. Recent foods include them.
+- The app's cooked rice and pasta now use the Ciqual values. Tests for the Ciqual data and the search.
+
 ## 0.33.0 — 2026-11-07
 - SanEva: new **Today** tab, first in the bar, for daily tracking of you and the other person (switch at the top):
   - calories, protein, carbs and fat eaten vs target;
