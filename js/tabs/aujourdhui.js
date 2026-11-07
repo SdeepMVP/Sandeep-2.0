@@ -52,6 +52,8 @@
   var who = 'me';
   var date = midnight(new Date());
   var weekOffset = 0;   // bilan : 0 = semaine en cours
+  var reviewMode = 'week'; // bilan : week | month (v0.40)
+  var monthOffset = 0;  // bilan du mois : 0 = mois en cours
   function midnight(d) { var x = new Date(d); x.setHours(0, 0, 0, 0); return x; }
   function addDays(d, n) { var x = new Date(d); x.setDate(x.getDate() + n); return midnight(x); }
   function isToday(d) { return TE.dayKey(d) === TE.dayKey(new Date()); }
@@ -120,6 +122,8 @@
       h('button', { class: 'btn btn-secondary btn-icon', 'aria-label': L('Next day', 'Jour suivant'), disabled: TE.dayKey(date) >= TE.dayKey(addDays(new Date(), 7)),
         onclick: function () { date = addDays(date, 1); render(); } }, '›')));
 
+    renderChecklist(day, tot, t);
+
     /* Bilan du jour */
     var left = t.kcal - tot.kcal;
     root.appendChild(h('div', { class: 'card to-summary' },
@@ -132,6 +136,7 @@
         macro(L('Carbs', 'Glucides'), tot.carbs, t.carbs, 'c'),
         macro(L('Fat', 'Lipides'), tot.fat, t.fat, 'f'))));
 
+    if (isToday(date) && tot.kcal > 0) renderMissing(tot, t);
     renderTraining(day);
     renderMeals(day, t);
 
@@ -260,7 +265,10 @@
     } else {
       card.appendChild(h('p', { class: 'hint' }, L('No meal planned for this day. ', 'Aucun repas prévu ce jour-là. '),
         h('a', { href: '#cuisine' }, L('Plan in Kitchen › Planning', 'Prévoir dans Cuisine › Planning'))));
+      if (cu && cu.openHave) card.appendChild(h('button', { class: 'btn btn-ghost btn-sm', onclick: function () { cu.openHave(); } },
+        L('🧺 What can I cook with what I have? ›', '🧺 Que cuisiner avec ce que j’ai ? ›')));
     }
+    if (isToday(date)) renderLeftovers(card, cu, planned);
     var extra = day.entries.filter(function (e) { return e.planned === null || e.planned === undefined; });
     if (extra.length) {
       card.appendChild(h('div', { class: 'to-extrahead' }, L('Also eaten', 'Aussi mangé')));
@@ -271,7 +279,157 @@
           h('button', { class: 'btn btn-icon', 'aria-label': L('Remove', 'Retirer'), onclick: function () { removeEntry(e); } }, '✕')));
       });
     }
+    var yest = peek(addDays(date, -1), who).entries;
+    if (yest.length) card.appendChild(h('button', { class: 'btn btn-ghost btn-sm to-likeyest', onclick: function () { likeYesterday(yest); } },
+      L('↺ Same as yesterday…', '↺ Comme hier…')));
     root.appendChild(card);
+  }
+
+  /* ---------- Check-list du jour + semaine (v0.40) ---------- */
+  function trainingState(d) {
+    var mu = api('muscu');
+    if (!mu) return 'none';
+    var st;
+    try { st = mu.dayStatus(d, who); } catch (e) { return 'none'; }
+    if (st.done.length) return 'done';
+    if (!st.hasProgram) return 'none';
+    if (!st.planned) return 'rest';
+    return TE.dayKey(d) < TE.dayKey(new Date()) ? 'missed' : 'planned';
+  }
+  function dayCheck(d, t) {
+    var dd = peek(d, who);
+    return TE.checklist({ tot: TE.totals(dd.entries), t: t, water: dd.water, waterGoal: WATER_GOAL, training: trainingState(d) });
+  }
+  function renderChecklist(day, tot, t) {
+    var c = dayCheck(date, t);
+    var labels = { kcal: L('Calories', 'Calories'), protein: L('Protein', 'Protéines'), training: L('Workout', 'Séance'), water: L('Water', 'Eau') };
+    var card = h('div', { class: 'card to-check' + (c.success ? ' is-success' : '') },
+      h('div', { class: 'to-checkhead' },
+        h('div', { class: 'card-title' }, c.success ? L('🎉 Day achieved', '🎉 Journée réussie') : L('✅ My day', '✅ Ma journée')),
+        h('span', { class: 'to-checkcount' }, c.done + ' / ' + c.total)),
+      h('div', { class: 'to-chips' }, c.items.map(function (it) {
+        var extra = it.id === 'training' ? ({ rest: L(' · rest', ' · repos'), none: '', planned: L(' · to do', ' · à faire'), missed: L(' · missed', ' · pas faite'), done: '' })[it.state] : '';
+        return h('span', { class: 'to-chip' + (it.ok ? ' is-ok' : '') }, (it.ok ? '✓ ' : '○ ') + labels[it.id] + extra);
+      })));
+    /* Semaine en cours : un point par jour (réussi, raté, à venir). */
+    var mon = TE.monday(date), dots = h('div', { class: 'to-weekdots', 'aria-label': L('This week', 'Cette semaine') }), wins = 0, past = 0;
+    for (var i = 0; i < 7; i++) {
+      var d = addDays(mon, i), k = TE.dayKey(d), future = k > TE.dayKey(new Date());
+      var ok = !future && dayCheck(d, t).success;
+      if (!future) past++;
+      if (ok) wins++;
+      var wd = d.toLocaleDateString(S2.locale, { weekday: 'narrow' });
+      dots.appendChild(h('span', { class: 'to-dot' + (ok ? ' is-ok' : future ? ' is-future' : '') + (k === TE.dayKey(date) ? ' is-current' : ''),
+        title: d.toLocaleDateString(S2.locale, { weekday: 'long' }) }, h('span', { class: 'to-dotmark' }, ok ? '✓' : ''), h('span', { class: 'to-dotday' }, wd)));
+    }
+    card.appendChild(dots);
+    card.appendChild(h('p', { class: 'hint' }, L(wins + ' day(s) achieved this week out of ' + past + '.', wins + (wins > 1 ? ' journées réussies' : ' journée réussie') + ' cette semaine sur ' + past + '.') + ' ' +
+      L('Achieved = calories ±10 %, protein ≥ 90 %, workout done (or rest), water goal.', 'Réussie = calories ±10 %, protéines ≥ 90 %, séance faite (ou repos), objectif d’eau.')));
+    root.appendChild(card);
+  }
+
+  /* ---------- « Ce qu'il te manque » (v0.40) : 1 ou 2 aliments habituels pour finir la journée ---------- */
+  function habitualFoods() {
+    var cu = api('cuisine'), recipes = cu ? cu.recipes() : [];
+    var out = [], seen = {};
+    function push(it) {
+      if (!it) return;
+      var key = it.kind + ':' + it.id;
+      if (seen[key] || it.kind === 'recipe') return; /* une recette, c'est un repas : pas un complément */
+      seen[key] = true; it.key = key; out.push(it);
+    }
+    data.recent[who].forEach(function (k) { push(findRecent(k, recipes)); });
+    data.custom.forEach(function (f) { push(customItem(f)); });
+    NT.FOODS.forEach(function (f) { push(foodItem(f)); });
+    return out;
+  }
+  function renderMissing(tot, t) {
+    var m = TE.missing(tot, t, habitualFoods(), 3);
+    if (m.kind === 'none') return;
+    var card = h('div', { class: 'card to-missing' }, h('div', { class: 'card-title' }, L('🧩 What you are missing', '🧩 Ce qu’il te manque')));
+    if (m.kind === 'over') {
+      card.appendChild(h('p', { class: 'sheet-text' }, L('You are ' + fmt(-m.left) + ' kcal over today. No worries: one day does not change the trend; keep going tomorrow.',
+        'Tu es à ' + fmt(-m.left) + ' kcal au-dessus aujourd’hui. Pas grave : une journée ne change pas la tendance ; continue demain.')));
+    } else if (m.kind === 'kcal') {
+      card.appendChild(h('p', { class: 'sheet-text' }, L('Protein: done ✓. ' + fmt(m.left) + ' kcal left for your next meal.', 'Protéines : c’est bon ✓. Il te reste ' + fmt(m.left) + ' kcal pour ton prochain repas.')));
+    } else {
+      card.appendChild(h('p', { class: 'sheet-text' }, L(m.gap + ' g of protein missing, ' + fmt(Math.max(0, m.left)) + ' kcal left. Ideas from your usual foods:',
+        'Il te manque ' + m.gap + ' g de protéines, il reste ' + fmt(Math.max(0, m.left)) + ' kcal. Idées parmi tes aliments habituels :')));
+      m.options.forEach(function (o) {
+        var names = o.items.map(function (x) { return x.name; }).join(' + ');
+        card.appendChild(h('button', { class: 'to-missopt', onclick: function () {
+          ui.confirm({ title: L('Add ' + names + '?', 'Ajouter ' + names + ' ?'),
+            message: '+' + o.kcal + ' kcal · +' + o.protein + L(' g protein (1 serving each).', ' g de protéines (1 portion chacun).'), okLabel: L('Add', 'Ajouter') }).then(function (ok) {
+            if (!ok) return;
+            o.items.forEach(function (it) { pushEntry(entryOf(it, 1)); });
+            persist(); render(); ui.toast(L('Added · ', 'Ajouté · ') + o.kcal + ' kcal');
+          });
+        } },
+          h('span', { class: 'to-missname' }, names),
+          h('span', { class: 'list-sub' }, '+' + o.protein + L(' g protein · ', ' g de protéines · ') + o.kcal + ' kcal')));
+      });
+    }
+    root.appendChild(card);
+  }
+
+  /* ---------- Restes de ce que tu as cuisiné (v0.40) ---------- */
+  function renderLeftovers(card, cu, planned) {
+    if (!cu || !cu.cooked) return;
+    var entries = [];
+    for (var i = 0; i <= 4; i++) entries = entries.concat(peek(addDays(new Date(), -i), who).entries);
+    var plannedIds = (planned || []).map(function (m) { return m.id; });
+    var list = TE.leftovers(cu.cooked(5), entries, new Date(), 3).filter(function (lo) { return plannedIds.indexOf(lo.recipeId) < 0; }); /* déjà au planning du jour */
+    if (!list.length) return;
+    card.appendChild(h('div', { class: 'to-extrahead' }, L('🥡 Leftovers in the fridge', '🥡 Restes au frigo')));
+    list.forEach(function (lo) {
+      var r = cu.recipe(lo.recipeId);
+      if (!r) return;
+      var when = new Date(lo.date).toLocaleDateString(S2.locale, { weekday: 'long' });
+      card.appendChild(h('div', { class: 'to-entry' },
+        h('div', { class: 'to-entrymain' }, h('span', { class: 'to-entryname' }, r.name),
+          h('span', { class: 'list-sub' }, L(num(lo.left) + ' serving(s) left · cooked ', 'Reste ' + num(lo.left) + ' portion' + (lo.left > 1 ? 's' : '') + ' · cuisiné ') + (isToday(new Date(lo.date)) ? L('today', 'aujourd’hui') : when) +
+            ' · ' + Math.round(r.kcal) + ' kcal')),
+        h('button', { class: 'btn btn-primary btn-sm', onclick: function () { logRecipe(r, 1, undefined); } }, L('✓ Eaten', '✓ Mangé'))));
+    });
+  }
+
+  /* ---------- « Comme hier » (v0.40) : reprendre tout ou partie du journal de la veille ---------- */
+  function likeYesterday(entries) {
+    var picked = entries.map(function () { return true; });
+    ui.sheet(function (close) {
+      var list = h('div', { class: 'to-foodlist' }), info = h('p', { class: 'hint' });
+      function paint() {
+        list.innerHTML = '';
+        var k = 0;
+        entries.forEach(function (e, i) {
+          if (picked[i]) k += e.kcal;
+          list.appendChild(h('button', { class: 'to-food' + (picked[i] ? ' is-picked' : ''), type: 'button', 'aria-pressed': picked[i] ? 'true' : 'false',
+            onclick: function () { picked[i] = !picked[i]; paint(); } },
+            h('span', { class: 'to-foodname' }, (picked[i] ? '☑ ' : '☐ ') + e.name, h('span', { class: 'list-sub' }, e.portion || qtyText(e.qty))),
+            h('span', { class: 'to-foodkcal' }, Math.round(e.kcal) + ' kcal')));
+        });
+        info.textContent = L('Total: ', 'Total : ') + fmt(k) + ' kcal';
+      }
+      paint();
+      return [
+        h('h2', { class: 'sheet-title' }, L('Same as yesterday', 'Comme hier')),
+        h('p', { class: 'sheet-text' }, L('Tick what you ate again today.', 'Coche ce que tu as remangé aujourd’hui.')),
+        list, info,
+        h('div', { class: 'sheet-actions' },
+          h('button', { class: 'btn btn-primary btn-block', onclick: function () {
+            var n = 0;
+            entries.forEach(function (e, i) {
+              if (!picked[i]) return;
+              var c = JSON.parse(JSON.stringify(e)); delete c.id; delete c.at; c.planned = null;
+              pushEntry(c); n++;
+            });
+            close();
+            if (!n) return;
+            persist(); render(); ui.toast(L(n + ' item(s) added', n + (n > 1 ? ' éléments ajoutés' : ' élément ajouté')));
+          } }, L('Add the selection', 'Ajouter la sélection')),
+          h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, L('Cancel', 'Annuler')))
+      ];
+    }, { modal: true });
   }
   function qtyText(q) { return q === 1 ? L('1 serving', '1 portion') : '×' + num(q) + L(' serving', ' portion'); }
 
@@ -279,14 +437,18 @@
     addEntry({ type: 'recipe', ref: m.id, name: m.name, qty: qty, planned: plannedIdx === undefined ? null : plannedIdx,
       kcal: m.kcal * qty, protein: m.protein * qty, carbs: m.carbs * qty, fat: m.fat * qty });
   }
-  function addEntry(e) {
+  /* Ajoute une entrée au journal du jour affiché (sans enregistrer : persist() ensuite). */
+  function pushEntry(e) {
     e.id = ui.uid(); e.at = new Date().toISOString();
     ['kcal', 'protein', 'carbs', 'fat'].forEach(function (k) { e[k] = Math.round((e[k] || 0) * 10) / 10; });
     slot(date, who).entries.push(e);
-    if (e.type !== 'quick') {
+    if (e.type !== 'quick' && e.ref) {
       var key = e.type + ':' + e.ref, rec = data.recent[who];
       data.recent[who] = [key].concat(rec.filter(function (x) { return x !== key; })).slice(0, 12);
     }
+  }
+  function addEntry(e) {
+    pushEntry(e);
     persist(); render();
     ui.toast(L('Added · ', 'Ajouté · ') + Math.round(e.kcal) + ' kcal');
   }
@@ -326,31 +488,44 @@
 
   /* ---------- Ajouter un aliment : récents, aliments du quotidien, recettes, mes aliments, saisie rapide ---------- */
   function norm(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/œ/g, 'oe'); }
+  /* Éléments ajoutables au journal (aliments de l'app, les miens, recettes, table Ciqual). Partagés par « Ajouter », « Ce qu'il te manque »… */
+  function foodItem(f) { return { kind: 'food', id: f.id, name: f.name, portion: f.portion, kcal: f.kcal, protein: f.protein, carbs: f.carbs, fat: f.fat }; }
+  function customItem(f) { return { kind: 'custom', id: f.id, name: f.name, portion: f.portion, kcal: f.kcal, protein: f.protein, carbs: f.carbs || 0, fat: f.fat || 0 }; }
+  function recipeItem(r) { return { kind: 'recipe', id: r.id, name: r.name, portion: L('1 serving', '1 portion'), kcal: r.kcal, protein: r.protein, carbs: r.carbs, fat: r.fat }; }
+  /* Table Ciqual : valeurs pour 100 g, portion type en grammes. */
+  function cqFoods() { return S2.ciqual ? S2.ciqual.foods : []; }
+  function ciqualItem(r) {
+    var g = r[7];
+    return { kind: 'ciqual', id: r[0], name: r[1], grams: g, label: r[8] || null, per100: { kcal: r[3], protein: r[4], carbs: r[5], fat: r[6] },
+      portion: (r[8] ? r[8] + ' · ' : '') + g + ' g', kcal: r[3] * g / 100, protein: r[4] * g / 100, carbs: r[5] * g / 100, fat: r[6] * g / 100 };
+  }
+  function findRecent(key, recipes) {
+    var p = key.split(':'), type = p[0], id = p.slice(1).join(':');
+    if (type === 'food') { var f = NT.FOODS.filter(function (x) { return x.id === id; })[0]; return f && foodItem(f); }
+    if (type === 'custom') { var c = data.custom.filter(function (x) { return x.id === id; })[0]; return c && customItem(c); }
+    if (type === 'recipe') { var r = (recipes || []).filter(function (x) { return x.id === id; })[0]; return r && recipeItem(r); }
+    if (type === 'ciqual') { var cq = cqFoods().filter(function (x) { return x[0] === id; })[0]; return cq && ciqualItem(cq); }
+    return null;
+  }
+  /* Entrée du journal pour un élément (portion type pour Ciqual). */
+  function entryOf(it, qty) {
+    if (it.kind === 'ciqual') {
+      var g = Math.round(it.grams * qty), f = g / 100;
+      return { type: 'ciqual', ref: it.id, name: it.name, portion: g + ' g', qty: 1, grams: g, planned: null,
+        kcal: it.per100.kcal * f, protein: it.per100.protein * f, carbs: it.per100.carbs * f, fat: it.per100.fat * f };
+    }
+    return { type: it.kind, ref: it.id, name: it.name, portion: it.kind === 'recipe' ? null : it.portion, qty: qty, planned: null,
+      kcal: it.kcal * qty, protein: it.protein * qty, carbs: it.carbs * qty, fat: it.fat * qty };
+  }
+
   function addFood() {
     var tab = 'foods', q = '';
     var cu = api('cuisine'), recipes = cu ? cu.recipes() : [];
-    function foodItem(f) { return { kind: 'food', id: f.id, name: f.name, portion: f.portion, kcal: f.kcal, protein: f.protein, carbs: f.carbs, fat: f.fat }; }
-    function customItem(f) { return { kind: 'custom', id: f.id, name: f.name, portion: f.portion, kcal: f.kcal, protein: f.protein, carbs: f.carbs || 0, fat: f.fat || 0 }; }
-    function recipeItem(r) { return { kind: 'recipe', id: r.id, name: r.name, portion: L('1 serving', '1 portion'), kcal: r.kcal, protein: r.protein, carbs: r.carbs, fat: r.fat }; }
-    /* Table Ciqual : valeurs pour 100 g, portion type en grammes. */
-    var CQ = S2.ciqual ? S2.ciqual.foods : [];
-    function ciqualItem(r) {
-      var g = r[7];
-      return { kind: 'ciqual', id: r[0], name: r[1], grams: g, label: r[8] || null, per100: { kcal: r[3], protein: r[4], carbs: r[5], fat: r[6] },
-        portion: (r[8] ? r[8] + ' · ' : '') + g + ' g', kcal: r[3] * g / 100, protein: r[4] * g / 100, carbs: r[5] * g / 100, fat: r[6] * g / 100 };
-    }
+    var CQ = cqFoods();
     var pool = null;
     function searchPool() {
       if (!pool) pool = NT.FOODS.map(function (f) { var it = foodItem(f); it.curated = true; return it; }).concat(CQ.map(ciqualItem));
       return pool;
-    }
-    function findRecent(key) {
-      var p = key.split(':'), type = p[0], id = p.slice(1).join(':');
-      if (type === 'food') { var f = NT.FOODS.filter(function (x) { return x.id === id; })[0]; return f && foodItem(f); }
-      if (type === 'custom') { var c = data.custom.filter(function (x) { return x.id === id; })[0]; return c && customItem(c); }
-      if (type === 'recipe') { var r = recipes.filter(function (x) { return x.id === id; })[0]; return r && recipeItem(r); }
-      if (type === 'ciqual') { var cq = CQ.filter(function (x) { return x[0] === id; })[0]; return cq && ciqualItem(cq); }
-      return null;
     }
     ui.sheet(function (close) {
       var list = h('div', { class: 'to-foodlist' });
@@ -387,7 +562,7 @@
         var n = norm(q).trim();
         function match(it) { return !n || n.split(/\s+/).every(function (w) { return norm(it.name).indexOf(w) > -1; }); }
         if (!n && tab === 'foods' && data.recent[who].length) {
-          var rec = data.recent[who].map(findRecent).filter(Boolean);
+          var rec = data.recent[who].map(function (k) { return findRecent(k, recipes); }).filter(Boolean);
           if (rec.length) { list.appendChild(h('div', { class: 'to-extrahead' }, L('Recent', 'Récents'))); rec.forEach(function (it) { list.appendChild(row(it)); }); list.appendChild(h('div', { class: 'to-extrahead' }, L('All foods', 'Tous les aliments'))); }
         }
         var items;
@@ -520,6 +695,12 @@
   function renderReview() {
     var t = targetsOf(who), prof = S2.objectif.profile(who);
     if (!t || !prof) return;
+    root.appendChild(h('div', { class: 'segmented small' },
+      [['week', L('Week', 'Semaine')], ['month', L('Month', 'Mois')]].map(function (x) {
+        return h('button', { class: 'seg' + (reviewMode === x[0] ? ' is-active' : ''), 'aria-pressed': reviewMode === x[0] ? 'true' : 'false',
+          onclick: function () { reviewMode = x[0]; render(); } }, x[1]);
+      })));
+    if (reviewMode === 'month') { renderMonth(t, prof); return; }
     var mon = addDays(TE.monday(new Date()), weekOffset * 7), sun = addDays(mon, 6);
     var fmtD = function (d) { return d.toLocaleDateString(S2.locale, { day: 'numeric', month: 'short' }); };
     root.appendChild(h('div', { class: 'card to-daterow' },
@@ -597,6 +778,140 @@
       } }, L('Apply: ', 'Appliquer : ') + fmt(sug.newKcal) + ' kcal'));
     }
     root.appendChild(sc);
+  }
+
+
+  /* ---------- Bilan du mois (v0.40) : poids, tour de taille, force, régularité, photos ---------- */
+  function renderMonth(t, prof) {
+    var ref = new Date(); ref.setDate(1); ref.setMonth(ref.getMonth() + monthOffset);
+    var mr = TE.monthRange(ref), from = mr.from, to = mr.to;
+    var title = from.toLocaleDateString(S2.locale, { month: 'long', year: 'numeric' });
+    root.appendChild(h('div', { class: 'card to-daterow' },
+      h('button', { class: 'btn btn-secondary btn-icon', 'aria-label': L('Previous month', 'Mois précédent'), onclick: function () { monthOffset--; render(); } }, '‹'),
+      h('div', { class: 'to-datelabel' }, h('span', { class: 'to-today' }, monthOffset === 0 ? L('This month', 'Ce mois-ci') : L('Month', 'Mois')),
+        h('span', { class: 'to-date' }, title.charAt(0).toUpperCase() + title.slice(1))),
+      h('button', { class: 'btn btn-secondary btn-icon', 'aria-label': L('Next month', 'Mois suivant'), disabled: monthOffset >= 0, onclick: function () { monthOffset++; render(); } }, '›')));
+
+    /* Régularité */
+    var todayK = TE.dayKey(new Date()), days = [], achieved = 0;
+    for (var d = new Date(from); d <= to && TE.dayKey(d) <= todayK; d = addDays(d, 1)) {
+      var pd = peek(d, who); days.push(pd);
+      if (dayCheck(d, t).success) achieved++;
+    }
+    var ns = TE.nutritionSummary(days, t);
+    var endSoFar = new Date(Math.min(to.getTime(), new Date().setHours(23, 59, 59, 999))); /* séances prévues jusqu'à aujourd'hui seulement */
+    var mu = api('muscu'), ws = mu && endSoFar >= from ? mu.weekStats(from, endSoFar, who) : null;
+    var rc = h('div', { class: 'card to-review' }, h('div', { class: 'card-title' }, L('📆 Consistency', '📆 Régularité')));
+    if (ws) rc.appendChild(statRow(L('Workouts done', 'Séances faites'), ws.done + (ws.planned ? ' / ' + ws.planned + L(' planned', ' prévues') : ''), ws.planned ? ws.done / ws.planned : null));
+    rc.appendChild(statRow(L('Days tracked', 'Jours suivis'), ns.logged + ' / ' + ns.days, ns.days ? ns.logged / ns.days : 0));
+    if (ns.logged) {
+      rc.appendChild(statRow(L('Days on target', 'Jours dans la cible'), ns.inTarget + ' / ' + ns.logged, ns.inTarget / ns.logged));
+      rc.appendChild(statRow(L('Calories / protein per day (average)', 'Calories / protéines par jour (moyenne)'), fmt(ns.kcal) + ' kcal · ' + ns.protein + ' g', null));
+    }
+    rc.appendChild(statRow(L('Days achieved (all ticked)', 'Journées réussies (tout coché)'), achieved + ' / ' + ns.days, ns.days ? achieved / ns.days : 0));
+    root.appendChild(rc);
+
+    /* Corps : poids et tour de taille sur le mois */
+    var bc = h('div', { class: 'card to-review' }, h('div', { class: 'card-title' }, L('⚖️ Body', '⚖️ Corps')));
+    var wpts = prof.weights.map(function (w) { return { date: w.date, v: w.kg }; });
+    var wch = TE.periodChange(wpts, from, to);
+    var mpts = prof.measures.filter(function (m) { return m.waist; }).map(function (m) { return { date: m.date, v: m.waist }; });
+    var mch = TE.periodChange(mpts, from, to);
+    function change(label, c, unit) {
+      if (!c) return statRow(label, '—', null);
+      return statRow(label, c.n > 1 ? num(c.first, 1) + ' → ' + num(c.last, 1) + ' ' + unit + ' (' + (c.delta > 0 ? '+' : c.delta < 0 ? '−' : '') + num(Math.abs(c.delta), 1) + ')' : num(c.last, 1) + ' ' + unit, null);
+    }
+    bc.appendChild(change(L('Weight', 'Poids'), wch, 'kg'));
+    var monthW = wpts.filter(function (p) { var x = new Date(p.date); return x >= from && x <= to; }).map(function (p) { return { t: new Date(p.date), v: p.v }; })
+      .sort(function (a, b) { return a.t - b.t; });
+    if (monthW.length >= 2) bc.appendChild(chart(monthW, 'kg', prof.targetWeight));
+    bc.appendChild(change(L('Waist', 'Tour de taille'), mch, 'cm'));
+    if (!wch && !mch) bc.appendChild(h('p', { class: 'hint' }, L('No weigh-in or measurement this month.', 'Aucune pesée ni mensuration ce mois-ci.')));
+    root.appendChild(bc);
+
+    /* Force : meilleurs 1RM estimés du mois, comparés au mois d'avant */
+    var fc = h('div', { class: 'card to-review' }, h('div', { class: 'card-title' }, L('🏋️ Strength', '🏋️ Force')));
+    var str = mu && mu.strength ? mu.strength(from, to).slice(0, 5) : [];
+    if (!str.length) fc.appendChild(h('p', { class: 'hint' }, L('No workout this month.', 'Aucune séance ce mois-ci.')));
+    str.forEach(function (x) {
+      fc.appendChild(statRow(x.name, num(x.best, 1) + ' kg' + (x.delta === null ? '' : x.delta === 0 ? ' (=)' : ' (' + (x.delta > 0 ? '+' : '−') + num(Math.abs(x.delta), 1) + ')'), null));
+    });
+    if (str.length) fc.appendChild(h('p', { class: 'hint' }, L('Best estimated 1RM of the month; in brackets, the change vs the month before.', 'Meilleur 1RM estimé du mois ; entre parenthèses, l’écart avec le mois d’avant.')));
+    root.appendChild(fc);
+
+    renderPhotos(from, to);
+  }
+
+  /* ---------- Photos de progression (v0.40) : "sandeep2:aujourdhui-photos", compressées (480 px, JPEG), incluses dans la sauvegarde ---------- */
+  var PNS = 'aujourdhui-photos';
+  function loadPhotos() { var p = S2.storage.load(PNS, null); return p && Array.isArray(p.list) ? p : { list: [] }; }
+  function compressImage(file, max, quality) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function () {
+        var r = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+        var c = document.createElement('canvas');
+        c.width = Math.round(img.naturalWidth * r); c.height = Math.round(img.naturalHeight * r);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        resolve(c.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('image')); };
+      img.src = url;
+    });
+  }
+  function renderPhotos(from, to) {
+    var store = loadPhotos();
+    var all = store.list.slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+    var month = all.filter(function (p) { var d = new Date(p.date); return d >= from && d <= to; });
+    var card = h('div', { class: 'card to-review to-photos' }, h('div', { class: 'card-title' }, L('📸 Progress photos', '📸 Photos de progression')));
+    if (all.length >= 2) {
+      var first = all[0], last = all[all.length - 1];
+      card.appendChild(h('div', { class: 'to-compare' },
+        [first, last].map(function (p, i) {
+          return h('figure', { class: 'to-photofig' }, h('img', { src: p.url, alt: '', loading: 'lazy' }),
+            h('figcaption', { class: 'list-sub' }, (i ? L('Latest · ', 'Dernière · ') : L('First · ', 'Première · ')) + ui.date(p.date, true)));
+        })));
+    }
+    if (month.length) {
+      card.appendChild(h('div', { class: 'to-photogrid' }, month.map(function (p) {
+        return h('button', { class: 'to-photothumb', 'aria-label': L('Photo of ', 'Photo du ') + ui.date(p.date), onclick: function () { openPhoto(p); } },
+          h('img', { src: p.url, alt: '', loading: 'lazy' }));
+      })));
+    } else {
+      card.appendChild(h('p', { class: 'hint' }, L('Same place, same light, same pose, once a month: photos show changes the scale misses. They stay on this iPhone and in your backups.',
+        'Même endroit, même lumière, même pose, une fois par mois : les photos montrent ce que la balance ne voit pas. Elles restent sur cet iPhone et dans tes sauvegardes.')));
+    }
+    var inp = h('input', { type: 'file', accept: 'image/*', class: 'sr-only', 'aria-label': L('Choose a photo', 'Choisir une photo') });
+    inp.addEventListener('change', function () {
+      var f = inp.files && inp.files[0]; inp.value = '';
+      if (!f) return;
+      compressImage(f, 480, 0.7).then(function (url) {
+        var st = loadPhotos();
+        st.list.push({ id: ui.uid(), date: new Date().toISOString(), url: url });
+        if (!S2.storage.save(PNS, st)) { ui.toast(L('Storage full: photo not saved', 'Stockage plein : photo non enregistrée')); return; }
+        monthOffset = 0; render(); ui.toast(L('Photo added', 'Photo ajoutée'));
+      }, function () { ui.toast(L('This photo could not be read', 'Impossible de lire cette photo')); });
+    });
+    card.appendChild(inp);
+    card.appendChild(h('button', { class: 'btn btn-secondary btn-block', onclick: function () { inp.click(); } }, L('+ Add a photo', '+ Ajouter une photo')));
+    root.appendChild(card);
+  }
+  function openPhoto(p) {
+    ui.sheet(function (close) {
+      return [
+        h('h2', { class: 'sheet-title' }, ui.longDate(p.date)),
+        h('img', { class: 'to-photobig', src: p.url, alt: '' }),
+        h('div', { class: 'sheet-actions' },
+          h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: function () {
+            ui.confirm({ title: L('Delete this photo?', 'Supprimer cette photo ?'), okLabel: L('Delete', 'Supprimer'), danger: true }).then(function (ok) {
+              if (!ok) return;
+              var st = loadPhotos(); st.list = st.list.filter(function (x) { return x.id !== p.id; }); S2.storage.save(PNS, st); close(); render();
+            });
+          } }, L('Delete', 'Supprimer')),
+          h('button', { class: 'btn btn-primary btn-block', onclick: function () { close(); } }, L('Close', 'Fermer')))
+      ];
+    }, { modal: true });
   }
 
   function statRow(label, value, share) {

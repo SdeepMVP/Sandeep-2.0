@@ -82,9 +82,19 @@
 
   function onSave(fn) { listeners.push(fn); }
 
+  /* Rappel de sauvegarde (v0.40, PUR, testé) : sur iPhone, supprimer l'icône de l'app efface ses données.
+     o = { lastExport (ISO|null), snoozeUntil (ISO|null), hasData, now (Date), every (jours, 7 par défaut) }.
+     Renvoie { due, days } : days = jours depuis la dernière sauvegarde (null si jamais). */
+  function backupDue(o) {
+    var now = new Date(o.now || Date.now()).getTime(), every = o.every || 7;
+    var days = o.lastExport ? Math.floor((now - new Date(o.lastExport).getTime()) / 86400000) : null;
+    var snoozed = o.snoozeUntil && now < new Date(o.snoozeUntil).getTime();
+    return { due: !!o.hasData && !snoozed && (days === null || days >= every), days: days };
+  }
+
   S2.storage = {
     load: load, save: save, keys: keys,
     exportAll: exportAll, importAll: importAll, clearAll: clearAll,
-    onSave: onSave
+    onSave: onSave, backupDue: backupDue
   };
 })();

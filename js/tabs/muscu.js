@@ -6,6 +6,7 @@
   var L = S2.L;
   var ui = S2.ui, h = ui.h, num = ui.num;
   var NS = 'muscu';
+  var ME = S2.muscuEngine; /* v0.40 : volume, résumé de séance, stagnation (js/tabs/muscu-engine.js) */
   var SCHEMA = 1;
   var WEEKS = 12;
   var RPE_CUTOFF = 9.5;
@@ -331,7 +332,7 @@
   /* ---------- État d'interface ---------- */
 
   var view = 'session';        // session | history | program
-  var historyMode = 'exercises'; // exercises | sessions
+  var historyMode = 'exercises'; // exercises | sessions | bilan
   var historyEx = null;        // exId affiché en détail
   var programDay = 'push';
   var pickDay = null, pickWeek = null;
@@ -392,6 +393,7 @@
     var todayId = data.schedule[new Date().getDay()];
     if (pickDay === null && todayId && day(todayId)) pickDay = todayId;
     body.appendChild(goalsCard());
+    if (Object.keys(data.schedule).length) body.appendChild(weekPlanCard());
 
     if (!done.length && !Object.keys(data.schedule).length) {
       body.appendChild(h('div', { class: 'card mu-firstrun' },
@@ -734,7 +736,122 @@
       pickWeek = s.week;
       render();
       window.scrollTo(0, 0);
+      try { showSummary(s); } catch (e) { console.error('Résumé de séance', e); }
     });
+  }
+
+  /* ---------- v0.40 : résumé de fin de séance ---------- */
+  function namesMap() {
+    var m = {};
+    finished().forEach(function (s) { Object.keys(s.entries).forEach(function (id) { m[id] = exName(id); }); });
+    return m;
+  }
+  function showSummary(s) {
+    if (!ME) return;
+    var names = namesMap();
+    var sum = ME.sessionSummary(s, finished(), names);
+    if (!sum.sets) return;
+    var arrow = { up: '↑', down: '↓', same: '=', 'new': '•' };
+    ui.sheet(function (close) {
+      return [
+        h('h2', { class: 'sheet-title' }, sum.records ? L('🏆 New record!', '🏆 Nouveau record !') : L('💪 Workout done', '💪 Séance terminée')),
+        h('p', { class: 'sheet-text' }, sessionDay(s) + L(' · week ', ' · semaine ') + s.week),
+        h('div', { class: 'mu-sumstats' },
+          stat(L('Duration', 'Durée'), sum.minutes !== null ? sum.minutes + ' min' : '—'),
+          stat(L('Sets', 'Séries'), String(sum.sets)),
+          stat(L('Tonnage', 'Tonnage'), sum.tonnage >= 1000 ? num(sum.tonnage / 1000, 1) + ' t' : sum.tonnage + ' kg')),
+        h('div', { class: 'list mu-sumlist' }, sum.exercises.map(function (x) {
+          var diff = x.last !== null && x.e1rm ? x.e1rm - x.last : null;
+          return h('div', { class: 'list-row mu-sumrow is-' + x.trend },
+            h('div', null, h('div', { class: 'list-title' }, (x.record ? '🏆 ' : '') + (names[x.id] || x.name)),
+              h('div', { class: 'list-sub' }, L('Est. 1RM ', '1RM est. ') + num(x.e1rm, 1) + ' kg' +
+                (x.trend === 'new' ? L(' · first time', ' · première fois') : diff !== null ? L(' · last time ', ' · la dernière fois ') + num(x.last, 1) + ' kg' : ''))),
+            h('span', { class: 'mu-sumarrow', 'aria-label': ({ up: L('better', 'mieux'), down: L('lower', 'moins bien'), same: L('same', 'pareil'), 'new': L('new', 'nouveau') })[x.trend] }, arrow[x.trend]));
+        })),
+        h('p', { class: 'hint' }, sum.ups ? L(sum.ups + ' exercise(s) better than last time.', sum.ups + (sum.ups > 1 ? ' exercices en progrès' : ' exercice en progrès') + ' par rapport à la dernière fois.')
+          : L('A lighter day happens: what counts is the trend over weeks.', 'Un jour moins fort, ça arrive : ce qui compte, c’est la tendance sur plusieurs semaines.')),
+        h('div', { class: 'sheet-actions' }, h('button', { class: 'btn btn-primary btn-block', onclick: function () { close(); } }, L('Great', 'Super')))
+      ];
+    }, { modal: true });
+  }
+  function stat(label, value) { return h('div', { class: 'stat' }, h('div', { class: 'stat-label' }, label), h('div', { class: 'stat-value' }, value)); }
+
+  /* ---------- v0.40 : ma semaine (programme) : cette semaine et la suivante, jour par jour ---------- */
+  function weekPlanCard() {
+    var card = h('div', { class: 'card mu-weekplan' }, h('div', { class: 'card-title' }, L('📅 My week', '📅 Ma semaine')));
+    var mon = mondayOf(new Date()), todayK = dayKey(new Date()), today0 = new Date().setHours(0, 0, 0, 0);
+    var doneByDay = {};
+    finished().forEach(function (s) { (doneByDay[dayKey(s.startedAt)] = doneByDay[dayKey(s.startedAt)] || []).push(s); });
+    var wd = function (d) { var t = d.toLocaleDateString(S2.locale, { weekday: 'short' }).replace('.', ''); return t.charAt(0).toUpperCase() + t.slice(1); };
+    /* Cette semaine : une ligne par jour d'entraînement prévu ou fait (les jours de repos sans séance sont omis). */
+    card.appendChild(h('div', { class: 'mu-weeklabel' }, L('This week', 'Cette semaine')));
+    var list = h('div', { class: 'mu-weeklist' }), rows = 0;
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(mon); d.setDate(d.getDate() + i);
+      var k = dayKey(d), plannedDay = day(data.schedule[d.getDay()]), did = doneByDay[k] || [];
+      if (!plannedDay && !did.length) continue;
+      var t0 = new Date(d).setHours(0, 0, 0, 0); /* comparaison par date (les clés de jour ne sont pas triables) */
+      var state = did.length ? 'done' : k === todayK ? 'today' : t0 < today0 ? 'missed' : 'planned';
+      var what = did.length ? sessionDay(did[0]) : dayName(plannedDay);
+      var tag = { done: L('✓ done', '✓ faite'), today: L('today', 'aujourd’hui'), missed: L('missed', 'pas faite'), planned: L('to come', 'à venir') }[state];
+      list.appendChild(h('div', { class: 'mu-wrow is-' + state }, h('span', { class: 'mu-wrowday' }, wd(d)), h('span', { class: 'mu-wrowwhat' }, what), h('span', { class: 'mu-wrowtag' }, tag)));
+      rows++;
+    }
+    if (!rows) list.appendChild(h('p', { class: 'hint' }, L('No training day this week.', 'Aucun jour d’entraînement cette semaine.')));
+    card.appendChild(list);
+    /* Semaine prochaine : résumé sur une ligne. */
+    var next = [];
+    for (var j = 7; j < 14; j++) {
+      var nd = new Date(mon); nd.setDate(nd.getDate() + j);
+      var pd = day(data.schedule[nd.getDay()]);
+      if (pd) next.push(wd(nd) + ' ' + dayName(pd));
+    }
+    card.appendChild(h('div', { class: 'mu-weeklabel' }, L('Next week', 'Semaine prochaine')));
+    card.appendChild(h('p', { class: 'sheet-text' }, next.length ? next.join(' · ') : L('Rest', 'Repos')));
+    card.appendChild(h('button', { class: 'btn btn-ghost btn-sm', onclick: function () { go('program'); } }, L('Change my training days ›', 'Changer mes jours d’entraînement ›')));
+    return card;
+  }
+
+  /* ---------- v0.40 : bilan (volume par muscle sur la semaine, exercices qui stagnent) ---------- */
+  function renderBilan(body) {
+    if (!ME) return;
+    var names = namesMap(), all = finished();
+    var mon = mondayOf(new Date()), sun = new Date(mon); sun.setDate(sun.getDate() + 6); sun.setHours(23, 59, 59, 999);
+    var vol = ME.weeklyVolume(all, mon, sun, names);
+    var from4 = new Date(mon); from4.setDate(from4.getDate() - 28);
+    var end4 = new Date(mon.getTime() - 1);
+    var vol4 = ME.weeklyVolume(all, from4, end4, names);
+    var card = h('div', { class: 'card mu-volume' }, h('div', { class: 'card-title' }, L('💪 Sets per muscle', '💪 Séries par muscle')));
+    var groups = ME.GROUPS.map(function (g) { return g[0]; }).concat(['other']);
+    var shown = groups.filter(function (g) { return vol[g] || vol4[g]; });
+    if (!shown.length) card.appendChild(h('p', { class: 'hint' }, L('Finish a few workouts to see your volume per muscle here.', 'Termine quelques séances pour voir ici ton volume par muscle.')));
+    shown.forEach(function (g) {
+      var n = vol[g] || 0, avg = Math.round((vol4[g] || 0) / 4 * 10) / 10, lvl = ME.volumeLevel(n);
+      card.appendChild(h('div', { class: 'mu-volrow is-' + lvl },
+        h('div', { class: 'mu-goalline' }, h('span', null, ME.groupLabel(g)),
+          h('span', { class: 'mu-goalval' }, n + L(' sets', n > 1 ? ' séries' : ' série') + (avg ? L(' · avg ', ' · moy. ') + num(avg, 1) : ''))),
+        h('span', { class: 'mu-goalbar', 'aria-hidden': 'true' }, h('span', { style: 'width:' + Math.min(100, Math.round(n / 20 * 100)) + '%' }))));
+    });
+    card.appendChild(h('p', { class: 'hint' }, L('This week (Monday to Sunday); “avg” = average of the 4 previous weeks. Guide: 10 to 20 sets per muscle a week to progress.',
+      'Cette semaine (lundi à dimanche) ; « moy. » = moyenne des 4 semaines d’avant. Repère : 10 à 20 séries par muscle et par semaine pour progresser.')));
+    body.appendChild(card);
+
+    var stag = ME.stagnation(all, names);
+    var sc = h('div', { class: 'card mu-stag' }, h('div', { class: 'card-title' }, L('🔎 To watch', '🔎 À surveiller')));
+    if (!stag.length) sc.appendChild(h('p', { class: 'hint' }, L('No exercise is stalling: keep going! (An exercise is flagged when its last 3 workouts, over 2 weeks or more, did not beat its best estimated 1RM.)',
+      'Aucun exercice ne stagne : continue comme ça ! (Un exercice est signalé quand ses 3 dernières séances, sur 2 semaines ou plus, n’ont pas battu son meilleur 1RM estimé.)')));
+    stag.forEach(function (x) {
+      var nm = names[x.id] || x.name;
+      var tip = x.category === 'isolation'
+        ? L('Try a variant (another machine or angle) for a few weeks, or more reps before adding weight.', 'Essaie une variante (autre machine ou autre angle) quelques semaines, ou plus de répétitions avant d’ajouter du poids.')
+        : L('Suggestion: one lighter week (−10 % on the weight, same reps), then build back up. Also check sleep and calories.', 'Suggestion : une semaine plus légère (−10 % sur la charge, mêmes répétitions), puis repars à la hausse. Vérifie aussi ton sommeil et tes calories.');
+      sc.appendChild(h('div', { class: 'mu-stagrow' },
+        h('div', { class: 'list-title' }, nm),
+        h('div', { class: 'list-sub' }, L('Best est. 1RM ', 'Meilleur 1RM est. ') + num(x.best, 1) + L(' kg, not beaten since ', ' kg, pas battu depuis le ') + ui.date(x.since)),
+        h('p', { class: 'hint' }, tip),
+        h('button', { class: 'btn btn-ghost btn-sm', onclick: function () { historyEx = x.id; historyMode = 'exercises'; render(); window.scrollTo(0, 0); } }, L('See the curve ›', 'Voir la courbe ›'))));
+    });
+    body.appendChild(sc);
   }
 
   function abandonSession() {
@@ -772,9 +889,12 @@
       h('button', { class: 'seg' + (historyMode === 'exercises' ? ' is-active' : ''),
         onclick: function () { historyMode = 'exercises'; render(); } }, L('By exercise', 'Par exercice')),
       h('button', { class: 'seg' + (historyMode === 'sessions' ? ' is-active' : ''),
-        onclick: function () { historyMode = 'sessions'; render(); } }, L('Workouts', 'Séances'))));
+        onclick: function () { historyMode = 'sessions'; render(); } }, L('Workouts', 'Séances')),
+      h('button', { class: 'seg' + (historyMode === 'bilan' ? ' is-active' : ''),
+        onclick: function () { historyMode = 'bilan'; render(); } }, L('Review', 'Bilan'))));
 
     if (historyMode === 'sessions') return renderSessionsList(body);
+    if (historyMode === 'bilan') return renderBilan(body);
 
     var seen = {};
     data.days.forEach(function (d) {
@@ -1401,6 +1521,10 @@
         var done = finished().filter(function (s) { var t = new Date(s.startedAt); return t >= a && t <= b; }).length;
         return { planned: planned, done: done, perWeek: data.goals.perWeek, lifts: data.goals.lifts.map(function (lf) { return { name: lf.name, target: lf.target, best: bestWeight(lf.name) }; }) };
       });
+    },
+    /* v0.40 : force sur une période (bilan du mois d'Aujourd'hui) : meilleur 1RM estimé par exercice, comparé à la période d'avant. */
+    strength: function (from, to) {
+      return withPerson('me', function () { return ME ? ME.strength(finished(), from, to, namesMap()) : []; });
     },
     /* Ouvre l'onglet Muscu sur la bonne personne, avec ce jour présélectionné. */
     open: function (who, dayId) {

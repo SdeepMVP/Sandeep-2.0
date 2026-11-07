@@ -1,5 +1,16 @@
 # Changelog — Habits (ex-Sandeep 2.0), Gym Food (ex-SanEva), Dressing
 
+## 0.40.0 — 2026-11-07
+- **Never lose your data again** (all three apps): a reminder at the top of each tab after 7 days without a backup (“Back up now” / “Later”), a clear warning in Settings that deleting the app icon erases its data, and the app asks iOS to keep its storage.
+- Gym Food › Today:
+  - **My day** checklist: calories, protein, workout (or rest), water; the day is “achieved” when all are ticked, with the week shown as 7 dots;
+  - **What you are missing**: when protein is short, 1 or 2 of your usual foods that fit the calories left, added in one tap after confirming;
+  - **Same as yesterday**: tick what you ate again and add it at once;
+  - **Leftovers in the fridge**: servings cooked in Kitchen (“I cooked” / “✓ Cooked”) not eaten yet, for 3 days;
+  - **What can I cook with what I have?** link to Kitchen when nothing is planned.
+- Review › **Month**: consistency (workouts done vs planned, days tracked, on target, achieved), body (weight and waist over the month), strength (best estimated 1RM per exercise vs the month before) and **progress photos** (compressed, kept on the phone and in backups, first vs latest side by side).
+- Gym: **end-of-workout summary** (duration, sets, tonnage, records 🏆, better or lower than last time), **My week** (this week's training days done / missed / to come, and next week), History › **Review**: sets per muscle this week vs the 4 weeks before (guide 10–20), and exercises that **stall** (3 workouts over 2+ weeks without a new best) with a suggestion. New pure engine `muscu-engine.js`, with tests.
+
 ## 0.39.0 — 2026-11-07
 - **Habits, Dressing and Gym Food are now in French only.** The language choice is removed from Settings; an English choice saved earlier is ignored. Your data is unchanged.
 

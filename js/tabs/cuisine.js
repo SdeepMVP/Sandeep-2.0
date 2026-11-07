@@ -1521,7 +1521,22 @@
     },
     recipes: function () { ensureData(); return data.recipes.filter(function (r) { return r.kcal || r.protein; }).map(recipeInfo); },
     recipe: function (id) { ensureData(); var r = recipe(id); return r ? recipeInfo(r) : null; },
-    open: function (id) { ensureData(); if (!recipe(id)) return; currentId = id; page = 'detail'; mode = 'cook'; if (location.hash === '#cuisine' && root) render(); else location.hash = '#cuisine'; }
+    open: function (id) { ensureData(); if (!recipe(id)) return; currentId = id; page = 'detail'; mode = 'cook'; if (location.hash === '#cuisine' && root) render(); else location.hash = '#cuisine'; },
+    /* v0.40 : recettes cuisinées ces derniers jours (« J'ai cuisiné » / « ✓ Faite »), pour les restes affichés dans Aujourd'hui. */
+    cooked: function (days) {
+      ensureData();
+      var from = Date.now() - (days || 5) * 86400000;
+      return data.history.filter(function (x) { return new Date(x.date).getTime() >= from && recipe(x.recipeId); })
+        .map(function (x) { return { recipeId: x.recipeId, servings: x.servings || 1, date: x.date }; });
+    },
+    /* v0.40 : ouvre la liste des recettes filtrée sur « Avec ce que j'ai » (demande les ingrédients s'il n'y en a pas encore). */
+    openHave: function () {
+      ensureData();
+      page = 'list'; section = 'recipes'; flags.have = data.have.length > 0;
+      var ask = !data.have.length;
+      if (location.hash === '#cuisine' && root) render(); else location.hash = '#cuisine';
+      if (ask) setTimeout(editHave, 300);
+    }
   };
 
   S2.app.registerTab({ id: 'cuisine', label: L('Kitchen', 'Cuisine'), order: 30, icon: ICON, mount: mount });

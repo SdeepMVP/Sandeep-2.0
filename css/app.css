@@ -946,3 +946,61 @@ input[type="date"].input { display: block; line-height: 48px; }
 .ck-pastearea { min-height: 120px; font-size: 16px; }
 .ck-preview .card { display: grid; gap: 4px; }
 .ck-previewlist { margin: 4px 0 0; padding-left: 18px; display: grid; gap: 2px; font-size: 15px; }
+
+/* ---------- v0.40 : rappel de sauvegarde (toutes les apps) ---------- */
+.backup-banner { border: 1.5px solid var(--camel); background: var(--camel-soft); }
+.backup-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.backup-actions .btn { min-height: 48px; flex: 1 1 auto; }
+.backup-warn { margin-top: 8px; }
+
+/* ---------- v0.40 : Aujourd'hui · check-list, « ce qu'il te manque », restes, comme hier (préfixe to-) ---------- */
+.to-check.is-success { border: 1.5px solid var(--good); background: var(--good-bg); }
+.to-checkhead { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.to-checkcount { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--text-2); }
+.to-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.to-chip { display: inline-flex; align-items: center; min-height: 32px; padding: 4px 10px; border-radius: 999px; background: var(--surface-2); color: var(--text-2); font-size: 14px; }
+.to-chip.is-ok { background: var(--good-bg); color: var(--good); font-weight: 600; }
+.to-weekdots { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin: 4px 0 2px; }
+.to-dot { display: grid; justify-items: center; gap: 2px; }
+.to-dotmark { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--border); font-size: 14px; font-weight: 700; }
+.to-dot.is-ok .to-dotmark { background: var(--good); border-color: var(--good); color: #fff; }
+.to-dot.is-future .to-dotmark { border-style: dashed; opacity: .6; }
+.to-dot.is-current .to-dotday { color: var(--text); font-weight: 700; }
+.to-dotday { font-size: 12px; color: var(--muted); text-transform: uppercase; }
+.to-missopt { display: grid; gap: 2px; width: 100%; min-height: 52px; margin-top: 6px; padding: 8px 12px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); font: inherit; text-align: left; }
+.to-missname { font-weight: 600; }
+.to-likeyest { margin-top: 6px; }
+.to-food.is-picked { background: var(--surface-2); }
+
+/* Bilan du mois · photos */
+.to-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+.to-photofig { margin: 0; display: grid; gap: 4px; }
+.to-photofig img, .to-photothumb img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: var(--radius-sm); background: var(--surface-2); display: block; }
+.to-photogrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 8px 0; }
+.to-photothumb { padding: 0; border: 0; background: none; min-height: 48px; }
+.to-photobig { width: 100%; border-radius: var(--radius-sm); display: block; margin: 8px 0; }
+
+/* ---------- v0.40 : Muscu · ma semaine, résumé de séance, bilan (préfixe mu-) ---------- */
+.mu-weeklabel { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--camel); margin: 10px 0 4px; }
+.mu-weeklist { display: grid; }
+.mu-wrow { display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 8px; min-height: 40px; border-top: 1px solid var(--border); }
+.mu-wrow:first-child { border-top: 0; }
+.mu-wrowday { font-size: 13px; font-weight: 700; color: var(--muted); }
+.mu-wrowwhat { font-weight: 600; }
+.mu-wrowtag { font-size: 13px; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--text-2); }
+.mu-wrow.is-done .mu-wrowtag { background: var(--good-bg); color: var(--good); font-weight: 600; }
+.mu-wrow.is-missed .mu-wrowtag { color: var(--danger); }
+.mu-wrow.is-missed .mu-wrowwhat { color: var(--muted); }
+.mu-wrow.is-today .mu-wrowtag { background: var(--camel); color: #fff; font-weight: 600; }
+.mu-sumstats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0; }
+.mu-sumrow { align-items: center; }
+.mu-sumarrow { font-size: 20px; font-weight: 700; min-width: 28px; text-align: center; color: var(--muted); }
+.mu-sumrow.is-up .mu-sumarrow { color: var(--good); }
+.mu-sumrow.is-down .mu-sumarrow { color: var(--danger); }
+.mu-volrow { display: grid; gap: 4px; margin-top: 8px; }
+.mu-volrow.is-ok .mu-goalbar span { background: var(--good); }
+.mu-volrow.is-high .mu-goalbar span { background: var(--chocolate); }
+.mu-stagrow { padding: 10px 0; border-top: 1px solid var(--border); }
+.mu-stagrow:first-of-type { border-top: 0; }
+.to-entry .btn { white-space: nowrap; }

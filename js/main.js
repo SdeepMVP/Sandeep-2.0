@@ -2,6 +2,8 @@
 (function () {
   'use strict';
   S2.settings.applyTheme();
+  /* v0.40 : demande à iOS de ne pas effacer le stockage de l'app de lui-même (sans effet si l'icône est supprimée). */
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {}); } catch (e) { /* non pris en charge */ }
   S2.app.start();
 
   if (sessionStorage.getItem('s2-updated')) {

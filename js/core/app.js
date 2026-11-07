@@ -57,6 +57,11 @@
     window.scrollTo(0, 0);
     var container = h('div', { class: 'tab-view tab-' + tab.id });
     view.appendChild(container);
+    /* v0.40 : rappel de sauvegarde en haut de chaque onglet (sauf Réglages), géré par js/settings.js. */
+    try {
+      var banner = tab.id !== 'reglages' && S2.settings && S2.settings.backupBanner ? S2.settings.backupBanner() : null;
+      if (banner) view.insertBefore(banner, container);
+    } catch (e) { console.error('Rappel de sauvegarde', e); }
     try {
       if (tab.soon) renderSoon(container, tab);
       else tab.mount(container, { setTitle: setTitle });

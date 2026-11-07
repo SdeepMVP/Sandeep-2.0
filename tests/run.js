@@ -480,5 +480,124 @@ test('received groceries merge with mine: same ingredient added up, who it is fo
   ok(skyr.people.join() === 'Maeva' && skyr.aisle === 'dairy', 'new item');
 });
 
+/* ---------- v0.40 : rappel de sauvegarde (js/core/storage.js) ---------- */
+console.log('\nBackup reminder');
+require(path.join(__dirname, '..', 'js', 'core', 'storage.js'));
+var ST = window.S2.storage;
+test('backup is due after 7 days, never without data, not while snoozed', function () {
+  var now = new Date(2026, 10, 20, 12);
+  ok(ST.backupDue({ lastExport: null, hasData: true, now: now }).due, 'never backed up');
+  ok(ST.backupDue({ lastExport: null, hasData: true, now: now }).days === null, 'days null');
+  ok(!ST.backupDue({ lastExport: null, hasData: false, now: now }).due, 'nothing to save');
+  ok(!ST.backupDue({ lastExport: new Date(2026, 10, 15).toISOString(), hasData: true, now: now }).due, '5 days');
+  var r = ST.backupDue({ lastExport: new Date(2026, 10, 12).toISOString(), hasData: true, now: now });
+  ok(r.due && r.days === 8, JSON.stringify(r));
+  ok(!ST.backupDue({ lastExport: null, hasData: true, now: now, snoozeUntil: new Date(2026, 10, 21).toISOString() }).due, 'snoozed');
+  ok(ST.backupDue({ lastExport: null, hasData: true, now: now, snoozeUntil: new Date(2026, 10, 19).toISOString() }).due, 'snooze over');
+});
+
+/* ---------- v0.40 : Aujourd'hui (check-list, ce qu'il te manque, restes, mois) ---------- */
+console.log('\nToday dashboard');
+test('checklist: a day is achieved only when every point is ticked', function () {
+  var t = { kcal: 2000, protein: 140 };
+  var good = { tot: { kcal: 2050, protein: 135 }, t: t, water: 8, waterGoal: 8, training: 'done' };
+  ok(TE.checklist(good).success && TE.checklist(good).done === 4, 'all good');
+  ok(TE.checklist(Object.assign({}, good, { training: 'rest' })).success, 'rest day counts');
+  ok(TE.checklist(Object.assign({}, good, { training: 'none' })).success, 'no program counts');
+  ok(!TE.checklist(Object.assign({}, good, { training: 'missed' })).success, 'missed workout');
+  ok(!TE.checklist(Object.assign({}, good, { training: 'planned' })).success, 'workout still to do');
+  ok(!TE.checklist(Object.assign({}, good, { water: 5 })).success, 'not enough water');
+  var empty = TE.checklist({ tot: { kcal: 0, protein: 0 }, t: t, water: 8, waterGoal: 8, training: 'rest' });
+  ok(!empty.success, 'nothing logged is never achieved');
+});
+test('what you are missing: protein-dense usual foods that fit the calories left', function () {
+  var t = { kcal: 2000, protein: 150 };
+  var foods = [{ key: 'a', name: 'Skyr', kcal: 130, protein: 22 }, { key: 'b', name: 'Œufs ×2', kcal: 150, protein: 13 },
+    { key: 'c', name: 'Shaker', kcal: 120, protein: 25 }, { key: 'd', name: 'Pizza', kcal: 900, protein: 35 }, { key: 'e', name: 'Pomme', kcal: 80, protein: 0.3 }];
+  var m = TE.missing({ kcal: 1650, protein: 105 }, t, foods, 3);
+  ok(m.kind === 'protein' && m.gap === 45 && m.left === 350, JSON.stringify([m.kind, m.gap, m.left]));
+  ok(m.options.length >= 1, 'has options');
+  m.options.forEach(function (o) { ok(o.kcal <= 350 * 1.1 + 50, 'fits the calories: ' + o.kcal); ok(o.items.every(function (x) { return x.key !== 'd' && x.key !== 'e'; }), 'no pizza, no apple'); });
+  ok(m.options[0].protein >= 35, 'best option covers most of the gap: ' + m.options[0].protein);
+  var keys = [].concat.apply([], m.options.map(function (o) { return o.items.map(function (x) { return x.key; }); }));
+  ok(keys.length === new Set(keys).size, 'each food at most once across options');
+  ok(TE.missing({ kcal: 1500, protein: 145 }, t, foods).kind === 'kcal', 'protein done, kcal left');
+  ok(TE.missing({ kcal: 2500, protein: 100 }, t, foods).kind === 'over', 'over the target');
+  ok(TE.missing({ kcal: 1990, protein: 145 }, t, foods).kind === 'none', 'nothing to do');
+});
+test('leftovers: servings cooked minus servings eaten since, 3 days max', function () {
+  var now = new Date(2026, 10, 20, 19);
+  var cooked = [{ recipeId: 'curry', servings: 4, date: new Date(2026, 10, 19, 19).toISOString() },
+    { recipeId: 'old', servings: 4, date: new Date(2026, 10, 15, 19).toISOString() },
+    { recipeId: 'pasta', servings: 2, date: new Date(2026, 10, 20, 12).toISOString() }];
+  var entries = [{ type: 'recipe', ref: 'curry', qty: 1, at: new Date(2026, 10, 19, 20).toISOString() },
+    { type: 'recipe', ref: 'curry', qty: 1, at: new Date(2026, 10, 20, 12).toISOString() },
+    { type: 'recipe', ref: 'curry', qty: 1, at: new Date(2026, 10, 18, 12).toISOString() }, /* avant la cuisson : ne compte pas */
+    { type: 'recipe', ref: 'pasta', qty: 2, at: new Date(2026, 10, 20, 13).toISOString() }];
+  var lo = TE.leftovers(cooked, entries, now, 3);
+  ok(lo.length === 1 && lo[0].recipeId === 'curry' && lo[0].left === 2, JSON.stringify(lo));
+});
+test('month range and change over a period', function () {
+  var r = TE.monthRange(new Date(2026, 1, 14));
+  ok(r.days === 28 && r.from.getDate() === 1 && r.to.getDate() === 28, 'february');
+  var pts = [{ date: new Date(2026, 9, 30).toISOString(), v: 81 }, { date: new Date(2026, 10, 3).toISOString(), v: 80.4 }, { date: new Date(2026, 10, 25).toISOString(), v: 79.1 }];
+  var c = TE.periodChange(pts, new Date(2026, 10, 1), new Date(2026, 10, 30, 23));
+  ok(c.first === 80.4 && c.last === 79.1 && c.delta === -1.3 && c.n === 2, JSON.stringify(c));
+  ok(TE.periodChange(pts, new Date(2026, 11, 1), new Date(2026, 11, 31)) === null, 'no data');
+});
+
+/* ---------- v0.40 : moteur Muscu ---------- */
+console.log('\nGym engine');
+require(path.join(__dirname, '..', 'js', 'tabs', 'muscu-engine.js'));
+var ME = window.S2.muscuEngine;
+function sess(id, day, entries) { var d = new Date(2026, 10, day, 18); return { id: id, startedAt: d.toISOString(), finishedAt: new Date(d.getTime() + 3600000).toISOString(), entries: entries }; }
+function ex(name, sets, cat) { return { sets: sets.map(function (x) { return { w: x[0], r: x[1], rpe: 8 }; }), snap: { name: name, category: cat || 'main' } }; }
+test('exercise names map to muscle groups (French and English)', function () {
+  [['Développé couché barre', 'chest'], ['Barbell Bench Press', 'chest'], ['Développé militaire', 'shoulders'], ['Leg curl', 'hams'], ['Curl biceps', 'biceps'],
+    ['Tirage vertical', 'back'], ['Squat', 'quads'], ['Hip thrust', 'hams'], ['Extension triceps poulie', 'triceps'], ['Mollets debout', 'calves'],
+    ['Gainage', 'abs'], ['Chest Press Machine', 'chest'], ['Élévations latérales', 'shoulders'], ['Développé couché prise serrée', 'triceps']].forEach(function (x) {
+    ok(ME.muscleOf(x[0]) === x[1], x[0] + ' → ' + ME.muscleOf(x[0]));
+  });
+});
+test('weekly volume counts sets per muscle in the period', function () {
+  var list = [sess('a', 16, { b: ex('Développé couché barre', [[80, 6], [80, 6], [80, 5]]), r: ex('Rowing barre', [[60, 8], [60, 8]]) }),
+    sess('b', 18, { s: ex('Squat', [[100, 5], [100, 5]]), b2: ex('Développé incliné haltères', [[30, 10]]) }),
+    sess('c', 10, { b: ex('Développé couché barre', [[75, 6]]) })];
+  var v = ME.weeklyVolume(list, new Date(2026, 10, 16), new Date(2026, 10, 22, 23));
+  ok(v.chest === 4 && v.back === 2 && v.quads === 2 && !v.biceps, JSON.stringify(v));
+  ok(ME.volumeLevel(4) === 'low' && ME.volumeLevel(12) === 'ok' && ME.volumeLevel(24) === 'high', 'levels');
+});
+test('session summary: records, trend vs last time, tonnage, duration', function () {
+  var s1 = sess('1', 2, { b: ex('Bench', [[80, 5]]), c: ex('Curl', [[15, 12]], 'isolation') });
+  var s2 = sess('2', 9, { b: ex('Bench', [[85, 5]]), c: ex('Curl', [[15, 10]], 'isolation') });
+  var s3 = sess('3', 16, { b: ex('Bench', [[82.5, 5], [80, 6]]), c: ex('Curl', [[15, 10]], 'isolation'), n: ex('Dips', [[0, 0]]) });
+  var sum = ME.sessionSummary(s2, [s1], {});
+  var b = sum.exercises.filter(function (x) { return x.id === 'b'; })[0], c = sum.exercises.filter(function (x) { return x.id === 'c'; })[0];
+  ok(b.record && b.trend === 'up' && c.trend === 'down' && !c.record, JSON.stringify(sum.exercises));
+  ok(sum.sets === 2 && sum.tonnage === 85 * 5 + 150 && sum.minutes === 60 && sum.records === 1, JSON.stringify([sum.sets, sum.tonnage, sum.minutes]));
+  var sum3 = ME.sessionSummary(s3, [s1, s2], {});
+  ok(sum3.records === 0 && sum3.exercises.filter(function (x) { return x.id === 'b'; })[0].trend === 'down', 'below last time');
+  ok(sum3.exercises.filter(function (x) { return x.id === 'n'; })[0].trend === 'new', 'new exercise');
+});
+test('stagnation: 3 last workouts over 2+ weeks without beating the best', function () {
+  var flat = [sess('1', 1, { b: ex('Bench', [[80, 6]]) }), sess('2', 5, { b: ex('Bench', [[85, 5]]) }), sess('3', 9, { b: ex('Bench', [[82.5, 5]]) }),
+    sess('4', 16, { b: ex('Bench', [[85, 4]]) }), sess('5', 23, { b: ex('Bench', [[82.5, 5]]) })];
+  var st = ME.stagnation(flat, {});
+  ok(st.length === 1 && st[0].id === 'b' && st[0].category === 'main', JSON.stringify(st));
+  var growing = flat.slice(0, 4).concat([sess('5', 23, { b: ex('Bench', [[90, 5]]) })]);
+  ok(ME.stagnation(growing, {}).length === 0, 'new best = no stagnation');
+  ok(ME.stagnation(flat.slice(0, 3), {}).length === 0, 'not enough workouts');
+  var quick = [sess('1', 1, { b: ex('Bench', [[85, 5]]) }), sess('2', 2, { b: ex('Bench', [[80, 5]]) }), sess('3', 3, { b: ex('Bench', [[80, 5]]) }), sess('4', 4, { b: ex('Bench', [[80, 5]]) })];
+  ok(ME.stagnation(quick, {}).length === 0, 'less than 2 weeks');
+});
+test('strength over a month vs the month before', function () {
+  var oct = new Date(2026, 9, 20, 18), nov = new Date(2026, 10, 10, 18);
+  var list = [{ id: 'o', startedAt: oct.toISOString(), finishedAt: oct.toISOString(), entries: { b: ex('Bench', [[80, 5]]) } },
+    { id: 'n', startedAt: nov.toISOString(), finishedAt: nov.toISOString(), entries: { b: ex('Bench', [[85, 5]]), s: ex('Squat', [[100, 5]]) } }];
+  var r = ME.strength(list, new Date(2026, 10, 1), new Date(2026, 10, 30, 23, 59), {});
+  var b = r.filter(function (x) { return x.id === 'b'; })[0], sq = r.filter(function (x) { return x.id === 's'; })[0];
+  ok(b.best === 99.2 && b.prev === 93.3 && b.delta === 5.8 && sq.prev === null, JSON.stringify(r));
+});
+
 console.log('\n' + passed + ' passed, ' + failed + ' failed\n');
 process.exit(failed ? 1 : 0);
