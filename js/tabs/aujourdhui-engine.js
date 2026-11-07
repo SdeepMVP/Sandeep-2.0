@@ -124,23 +124,34 @@
   /* ---------- Recherche d'aliments (journal) ----------
      items = [{ name, curated? }] ; chaque mot cherché doit commencer un mot du nom (sans accents, singulier/pluriel confondus).
      Classement : nom qui commence par la recherche, puis premier mot, puis noms courts ; aliments « du quotidien » de l'app en premier. */
-  var SYNONYMS = { coca: 'cola', nutella: 'pate a tartiner', yogourt: 'yaourt', yogurt: 'yaourt', ketchup: 'ketchup', pates: 'pates', spaghettis: 'pates',
-    frite: 'frites', burger: 'burger', mcdo: 'hamburger', steak: 'steak', cafe: 'cafe', the: 'the', oeufs: 'oeuf', patate: 'pomme de terre', cereale: 'cereales' };
-  function fold(s) { return String(s || '').toLowerCase().replace(/œ/g, 'oe').replace(/æ/g, 'ae').normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+  /* v0.42 : les synonymes s'AJOUTENT au mot tapé (« nutella » trouve le produit Nutella ET les pâtes à tartiner). */
+  var SYNONYMS = { coca: 'cola', nutella: 'pate a tartiner', yogourt: 'yaourt', yogurt: 'yaourt', spaghettis: 'pates', spaghetti: 'pates',
+    frite: 'frites', mcdo: 'mcdonald', macdo: 'mcdonald', mcdonalds: 'mcdonald', bk: 'burger king', oeufs: 'oeuf', patate: 'pomme de terre', cereale: 'cereales',
+    redbull: 'red bull', icetea: 'ice tea', soda: 'cola', limo: 'limonade', mms: 'mm', tacos: 'tacos', kebab: 'kebab', energy: 'energisante',
+    pizza: 'pizza', biere: 'biere', vin: 'vin', glace: 'glace', chips: 'chips' };
+  function fold(s) { return String(s || '').toLowerCase().replace(/œ/g, 'oe').replace(/æ/g, 'ae').normalize('NFD').replace(/[̀-ͯ]/g, ''); }
   function stem(w) { return w.length > 3 ? w.replace(/(s|x)$/, '') : w; }
-  function words(s) { return fold(s).split(/[^a-z0-9%]+/).filter(Boolean).map(stem); }
+  function words(s) { return fold(s).replace(/&/g, '').split(/[^a-z0-9%]+/).filter(Boolean).map(stem); }
+  function findWord(nw, w) { for (var j = 0; j < nw.length; j++) if (nw[j].indexOf(w) === 0) return j; return -1; }
   function searchFoods(items, query, limit) {
-    var q = fold(query).trim();
+    var q = fold(query).replace(/&/g, '').trim();
     if (!q) return [];
-    var qw = [];
-    q.split(/\s+/).forEach(function (w) { (SYNONYMS[w] || w).split(' ').forEach(function (x) { if (x) qw.push(stem(x)); }); });
+    /* Chaque mot tapé : le mot lui-même, ou sinon tous les mots de son synonyme. */
+    var groups = q.split(/[\s\-']+/).filter(Boolean).map(function (w) {
+      var alt = SYNONYMS[w] && SYNONYMS[w] !== w ? SYNONYMS[w].split(' ').filter(Boolean).map(stem) : null;
+      return { w: stem(w), alt: alt };
+    });
+    var qw = groups.map(function (g) { return g.w; });
     var scored = [];
     items.forEach(function (it) {
       var nw = it._w || (it._w = words(it.name));
       var pos = [];
-      for (var i = 0; i < qw.length; i++) {
-        var k = -1;
-        for (var j = 0; j < nw.length; j++) if (nw[j].indexOf(qw[i]) === 0) { k = j; break; }
+      for (var i = 0; i < groups.length; i++) {
+        var k = findWord(nw, groups[i].w);
+        if (k < 0 && groups[i].alt) {
+          var ks = groups[i].alt.map(function (x) { return findWord(nw, x); });
+          if (ks.every(function (x) { return x > -1; })) k = Math.min.apply(null, ks) + 0.5; /* un peu moins bien classé que le mot exact */
+        }
         if (k < 0) return;
         pos.push(k);
       }

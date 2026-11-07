@@ -23,6 +23,7 @@ var ASSETS = [
   '../js/tabs/cuisine-share.js',
   '../js/tabs/cuisine.js',
   '../js/tabs/ciqual-data.js',
+  '../js/tabs/produits-data.js',
   '../js/tabs/aujourdhui-engine.js',
   '../js/tabs/aujourdhui.js',
   '../js/settings.js',
