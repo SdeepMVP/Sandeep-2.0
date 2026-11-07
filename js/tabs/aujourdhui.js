@@ -52,7 +52,8 @@
   function isToday(d) { return TE.dayKey(d) === TE.dayKey(new Date()); }
 
   function api(name) { return S2[name] || null; }
-  function hasPartner() { try { return !!(S2.objectif && S2.objectif.hasPartner()); } catch (e) { return false; } }
+  /* Suivi personnel : le journal, la séance et le bilan sont ceux de la personne du téléphone (la 2e personne ne sert qu'aux courses à 2). */
+  function hasPartner() { return false; }
   function nameOf(w) {
     try { return w === 'partner' ? S2.objectif.partnerName() : S2.objectif.myName(); } catch (e) { return w === 'partner' ? L('Other person', 'L’autre') : L('You', 'Toi'); }
   }
@@ -238,7 +239,7 @@
     card.appendChild(h('div', { class: 'card-title' }, L('🍽️ Meals', '🍽️ Repas')));
     if (planned.length) {
       planned.forEach(function (m) {
-        var portion = who === 'partner' ? (m.portion2 || m.portion) : m.portion;
+        var portion = m.portion;
         var logged = day.entries.filter(function (e) { return e.planned === m.slotIndex && e.ref === m.id; })[0];
         card.appendChild(h('div', { class: 'to-planrow' + (logged ? ' is-done' : '') },
           h('button', { class: 'to-planmain', onclick: function () { cu.open(m.id); } },
