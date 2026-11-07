@@ -183,7 +183,9 @@
     if (!st.partner) st.partner = normPerson({ days: [], sessions: [], activeId: null, schedule: {}, goals: {} });
     return st.partner;
   }
-  function hasPartner() { try { return !!(S2.objectif && S2.objectif.hasPartner && S2.objectif.hasPartner()); } catch (e) { return false; } }
+  /* Suivi personnel : chaque téléphone suit sa propre musculation (demande du 7 novembre 2026). Les données d'une 2e personne
+     éventuellement saisies en v0.33 (store.partner) restent dans la sauvegarde mais ne sont plus affichées. */
+  function hasPartner() { return false; }
   function personName(who) {
     try {
       if (who === 'partner') return S2.objectif.partnerName();
@@ -1373,7 +1375,7 @@
   /* API en lecture (onglet Aujourd'hui, bilan) et proposition de programme (questionnaire). Chaque appel relit les données. */
   function withPerson(who, fn) {
     var saveStore = store, saveData = data;
-    store = loadData(); data = personData(store, who === 'partner' ? 'partner' : 'me');
+    store = loadData(); data = personData(store, 'me');
     try { return fn(); } finally { if (saveStore) { store = saveStore; data = saveData; } }
   }
   function dayKey(d) { var x = new Date(d); return x.getFullYear() + '-' + (x.getMonth() + 1) + '-' + x.getDate(); }
@@ -1402,7 +1404,7 @@
     },
     /* Ouvre l'onglet Muscu sur la bonne personne, avec ce jour présélectionné. */
     open: function (who, dayId) {
-      person = who === 'partner' ? 'partner' : 'me';
+      person = 'me';
       pickDay = dayId || null; view = 'session';
       if (location.hash === '#muscu' && root) mount(root); else location.hash = '#muscu';
     },
@@ -1412,7 +1414,7 @@
       return { name: p.template.name, days: p.days.map(function (d) { return { name: dayName(d), exercises: d.slots.length }; }) };
     },
     apply: function (who, o) {
-      var st = loadData(), d = personData(st, who === 'partner' ? 'partner' : 'me');
+      var st = loadData(), d = personData(st, 'me');
       if (d.activeId) return false;
       var p = proposalDays(o);
       d.days = p.days;

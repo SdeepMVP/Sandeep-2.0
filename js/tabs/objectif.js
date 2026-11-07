@@ -277,20 +277,16 @@
       return h('div', { class: 'card' },
         h('p', { class: 'sheet-text' }, L('Shopping and cooking for two? Add the other person (height, weight, goal): the Planning in Kitchen then gives each of you the right serving, and the groceries cover both.',
           'Tu fais les courses et la cuisine à 2 ? Ajoute l’autre personne (taille, poids, objectif) : le Planning de la Cuisine donne alors à chacun la bonne portion, et les courses couvrent les deux.')),
-        h('div', { class: 'stack' }, h('button', { class: 'btn btn-secondary btn-block', onclick: function () { startWizard('partner'); } }, L('+ Add the other person', '+ Ajouter l’autre personne'))));
+        h('div', { class: 'stack' }, h('button', { class: 'btn btn-secondary btn-block', onclick: function () { editProfile('partner'); } }, L('+ Add the other person', '+ Ajouter l’autre personne'))));
     }
     return h('div', { class: 'card ob-partner' },
       h('div', { class: 'ob-who' }, partnerName() + ' · ' + goalOf(p.goal).label),
       h('div', { class: 'ob-partnernum' }, fmtInt(t2.kcal) + L(' kcal / day · ', ' kcal / jour · ') + t2.protein + L(' g protein', ' g de protéines')),
       h('div', { class: 'list-sub' }, p.height + ' cm · ' + num(p.weight, 1) + ' kg · ' + p.age + L(' years · ', ' ans · ') + activityOf(p.activity).label),
-      h('p', { class: 'hint' }, L('Used by the Planning when you choose “For two”. Their own phone keeps their own profile.', 'Utilisé par le Planning quand tu choisis « À 2 ». Son téléphone garde son propre profil.')),
-      p.targetWeight ? h('div', { class: 'list-sub' }, L('Target weight: ', 'Poids visé : ') + num(p.targetWeight, 1) + ' kg') : null,
-      h('div', { class: 'ob-twobtns' },
-        h('button', { class: 'btn btn-secondary', onclick: function () { addWeight('partner'); } }, L('⚖️ Weight', '⚖️ Pesée')),
-        h('button', { class: 'btn btn-secondary', onclick: function () { addMeasures('partner'); } }, L('📏 Measures', '📏 Mensurations'))),
+      h('p', { class: 'hint' }, L('Only used by Kitchen: servings and groceries for two in the Planning (“For two”). Their own tracking (meals, workouts, weight) stays on their phone, in their own SanEva.',
+        'Sert seulement à la Cuisine : portions et courses à 2 dans le Planning (« À 2 »). Son suivi (repas, séances, poids) reste sur son téléphone, dans son propre SanEva.')),
       h('div', { class: 'stack' },
-        h('button', { class: 'btn btn-secondary btn-block', onclick: function () { editProfile('partner'); } }, L('Edit', 'Modifier')),
-        h('button', { class: 'btn btn-ghost btn-block', onclick: function () { startWizard('partner'); } }, L('Redo the questionnaire', 'Refaire le questionnaire')),
+        h('button', { class: 'btn btn-secondary btn-block', onclick: function () { editProfile('partner'); } }, L('Update (weight, goal…)', 'Mettre à jour (poids, objectif…)')),
         h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: function () {
           ui.confirm({ title: L('Remove ' + partnerName() + '?', 'Retirer ' + partnerName() + ' ?'), message: L('Plans will be for you only again. Plans already confirmed are not changed.', 'Les plannings seront de nouveau pour toi uniquement. Les plannings déjà validés ne changent pas.'),
             okLabel: L('Remove', 'Retirer'), danger: true }).then(function (ok) { if (!ok) return; data.partner = null; persist(); render(); });
@@ -611,14 +607,15 @@
     partnerTargets: function () { var d = load(); return d.partner ? E.targets(d.partner) : null; },
     partnerName: function () { var d = load(); return d.partner && d.partner.name || L('Other person', 'L’autre'); },
     myName: function () { return load().name || L('You', 'Toi'); },
+    /* La 2e personne ne sert qu'à la Cuisine (portions et courses à 2) : le suivi (Aujourd'hui, Muscu, poids) est personnel à chaque téléphone. */
     hasPartner: function () { var d = load(); return !!(d.partner && E.isComplete(d.partner)); },
-    profile: snapshot,
-    logWeight: function (who, onDone) { addWeight(who === 'partner' ? 'partner' : 'me', onDone); },
-    logMeasures: function (who, onDone) { addMeasures(who === 'partner' ? 'partner' : 'me', onDone); },
-    startWizard: function (who, onDone) { startWizard(who === 'partner' ? 'partner' : 'me', onDone); },
+    profile: function () { return snapshot('me'); },
+    logWeight: function (who, onDone) { addWeight('me', onDone); },
+    logMeasures: function (who, onDone) { addMeasures('me', onDone); },
+    startWizard: function (who, onDone) { startWizard('me', onDone); },
     /* Ajustement proposé par le bilan et confirmé par l'utilisateur. */
     setCustomKcal: function (who, kcal) {
-      data = load(); var p = prof(who === 'partner' ? 'partner' : 'me'); if (!p) return;
+      data = load(); var p = prof('me'); if (!p) return;
       p.custom = p.custom || { kcal: null, protein: null }; p.custom.kcal = Math.round(kcal); persist(); refresh();
     }
   };
