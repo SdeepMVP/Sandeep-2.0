@@ -61,7 +61,10 @@
     d.history = d.history || []; d.have = d.have || []; d.exclude = d.exclude || [];
     /* v0.29 : planning de la semaine validé (ajout compatible). week = { start, batch, days: [{ meals: [{ recipeId, portion }] }] } */
     d.week = d.week || null; d.weekBatch = !!d.weekBatch;
-    d.forTwo = !!d.forTwo; /* v0.32 : planning à 2 (avec la 2e personne de l'onglet Objectif) */
+    /* v0.36 : app personnelle, plus de planning « à 2 » : on retire la portion de l'autre personne du planning validé
+       (le menu et les courses déjà calculés ne changent pas). */
+    d.forTwo = false;
+    if (d.week) { d.week.forTwo = false; d.week.days.forEach(function (day) { day.meals.forEach(function (m) { delete m.portion2; }); }); }
     /* v0.30 : prix saisis par l'utilisateur (€ par kg, litre ou pièce selon l'ingrédient), clé = nom normalisé. */
     d.prices = d.prices || {};
     /* Ajoute les recettes intégrées manquantes (sauf celles que l'utilisateur a supprimées). */
@@ -790,7 +793,7 @@
   var PERIODS = [[1, L('1 day', '1 jour')], [3, L('3 days', '3 jours')], [4, L('4 days', '4 jours')], [7, L('Week', 'Semaine')]];
   function periodName(n) { return n === 7 ? L('the week', 'la semaine') : n + L(' days', ' jours'); }
   function partnerT() {
-    try { return NE && S2.objectif && S2.objectif.partnerTargets ? S2.objectif.partnerTargets() : null; } catch (e) { return null; }
+    return null; /* v0.36 : app personnelle, plus de 2e personne */
   }
   function myName() { return S2.objectif && S2.objectif.myName ? S2.objectif.myName() : L('You', 'Toi'); }
   function otherName() { return S2.objectif && S2.objectif.partnerName ? S2.objectif.partnerName() : L('Other person', 'L’autre'); }
@@ -835,9 +838,6 @@
           return h('button', { class: 'seg' + (two === x[0] ? ' is-active' : ''), 'aria-pressed': two === x[0] ? 'true' : 'false',
             onclick: function () { data.forTwo = x[0]; persist(); weekDraft = !!data.week; render(); } }, x[1]);
         })));
-    } else {
-      root.appendChild(h('p', { class: 'hint' }, L('Cooking for two? ', 'Tu cuisines à 2 ? '),
-        h('a', { href: '#objectif' }, L('Add the other person in Goal ›', 'Ajoute l’autre personne dans Objectif ›'))));
     }
 
     var pool = data.recipes.filter(function (r) {

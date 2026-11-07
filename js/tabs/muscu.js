@@ -173,7 +173,7 @@
       S2.storage.save(NS, d);
     }
     normPerson(d);
-    if (d.partner) normPerson(d.partner);
+    if (d.partner !== undefined) { delete d.partner; S2.storage.save(NS, d); } /* v0.36 : app personnelle, plus de 2e personne */
     /* Futures migrations : if (d.schema < 2) { ... } */
     d.schema = SCHEMA;
     return d;

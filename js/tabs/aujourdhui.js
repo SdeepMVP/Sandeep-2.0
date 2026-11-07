@@ -26,7 +26,12 @@
     var d = S2.storage.load(NS, null);
     if (!d || typeof d !== 'object') d = defaults();
     d.days = d.days || {}; d.custom = Array.isArray(d.custom) ? d.custom : [];
-    d.recent = d.recent || {}; d.recent.me = d.recent.me || []; d.recent.partner = d.recent.partner || [];
+    d.recent = d.recent || {}; d.recent.me = d.recent.me || [];
+    /* v0.36 : app personnelle, plus de 2e personne. */
+    var had = d.recent.partner !== undefined;
+    delete d.recent.partner;
+    Object.keys(d.days).forEach(function (k) { if (d.days[k].partner) { had = true; delete d.days[k].partner; } });
+    if (had) S2.storage.save(NS, d);
     /* Futures migrations : if (d.schema < 2) { ... } */
     d.schema = SCHEMA;
     return d;

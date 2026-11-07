@@ -4,7 +4,7 @@
   var S2 = window.S2;
   var ui = S2.ui, h = ui.h, L = S2.L;
   var NS = 'settings';
-  var VERSION = '0.35.0';
+  var VERSION = '0.36.0';
 
   function get() {
     var s = S2.storage.load(NS, null) || {};

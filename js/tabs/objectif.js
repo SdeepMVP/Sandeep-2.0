@@ -42,14 +42,10 @@
     d.custom = d.custom || { kcal: null, protein: null };
     d.weights = Array.isArray(d.weights) ? d.weights : [];
     /* v0.32 : 2e personne pour cuisiner à 2 (même forme que le profil, sans suivi du poids). null = personne. */
-    d.partner = d.partner && typeof d.partner === 'object' ? d.partner : null;
+    /* v0.36 : l'app est personnelle (un téléphone = une personne) : la 2e personne des versions 0.32–0.35 est retirée. */
+    if (d.partner !== undefined) { delete d.partner; S2.storage.save(NS, d); }
     /* v0.33 : mensurations et poids de la 2e personne, réponses du questionnaire (level, place, sportGoal, perWeek, weekdays, job, targetWeight). */
     d.measures = Array.isArray(d.measures) ? d.measures : [];
-    if (d.partner) {
-      d.partner.weights = Array.isArray(d.partner.weights) ? d.partner.weights : [];
-      d.partner.measures = Array.isArray(d.partner.measures) ? d.partner.measures : [];
-      d.partner.custom = d.partner.custom || { kcal: null, protein: null };
-    }
     /* Futures migrations : if (d.schema < 2) { ... } */
     d.schema = SCHEMA;
     return d;
@@ -114,8 +110,6 @@
       h('button', { class: 'btn btn-ghost btn-block', onclick: editCustom }, t.custom ? L('Change the values set by hand', 'Changer les valeurs fixées à la main') : L('Set my targets by hand', 'Fixer mes objectifs à la main'))));
 
     /* Cuisiner à 2. */
-    root.appendChild(h('h2', { class: 'section-title' }, L('Cooking for two', 'Cuisiner à 2')));
-    root.appendChild(partnerCard());
 
     /* Explication du calcul. */
     root.appendChild(h('h2', { class: 'section-title' }, L('How it is calculated', 'Comment c’est calculé')));
@@ -269,29 +263,7 @@
     }, { modal: true });
   }
 
-  /* ---------- 2e personne (cuisiner à 2) ---------- */
-  function partnerName() { return data.partner && data.partner.name || L('The other person', 'L’autre personne'); }
-  function partnerCard() {
-    var p = data.partner, t2 = p && E.targets(p);
-    if (!t2) {
-      return h('div', { class: 'card' },
-        h('p', { class: 'sheet-text' }, L('Shopping and cooking for two? Add the other person (height, weight, goal): the Planning in Kitchen then gives each of you the right serving, and the groceries cover both.',
-          'Tu fais les courses et la cuisine à 2 ? Ajoute l’autre personne (taille, poids, objectif) : le Planning de la Cuisine donne alors à chacun la bonne portion, et les courses couvrent les deux.')),
-        h('div', { class: 'stack' }, h('button', { class: 'btn btn-secondary btn-block', onclick: function () { editProfile('partner'); } }, L('+ Add the other person', '+ Ajouter l’autre personne'))));
-    }
-    return h('div', { class: 'card ob-partner' },
-      h('div', { class: 'ob-who' }, partnerName() + ' · ' + goalOf(p.goal).label),
-      h('div', { class: 'ob-partnernum' }, fmtInt(t2.kcal) + L(' kcal / day · ', ' kcal / jour · ') + t2.protein + L(' g protein', ' g de protéines')),
-      h('div', { class: 'list-sub' }, p.height + ' cm · ' + num(p.weight, 1) + ' kg · ' + p.age + L(' years · ', ' ans · ') + activityOf(p.activity).label),
-      h('p', { class: 'hint' }, L('Only used by Kitchen: servings and groceries for two in the Planning (“For two”). Their own tracking (meals, workouts, weight) stays on their phone, in their own SanEva.',
-        'Sert seulement à la Cuisine : portions et courses à 2 dans le Planning (« À 2 »). Son suivi (repas, séances, poids) reste sur son téléphone, dans son propre SanEva.')),
-      h('div', { class: 'stack' },
-        h('button', { class: 'btn btn-secondary btn-block', onclick: function () { editProfile('partner'); } }, L('Update (weight, goal…)', 'Mettre à jour (poids, objectif…)')),
-        h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: function () {
-          ui.confirm({ title: L('Remove ' + partnerName() + '?', 'Retirer ' + partnerName() + ' ?'), message: L('Plans will be for you only again. Plans already confirmed are not changed.', 'Les plannings seront de nouveau pour toi uniquement. Les plannings déjà validés ne changent pas.'),
-            okLabel: L('Remove', 'Retirer'), danger: true }).then(function (ok) { if (!ok) return; data.partner = null; persist(); render(); });
-        } }, L('Remove', 'Retirer'))));
-  }
+  function partnerName() { return L('The other person', 'L’autre personne'); }
 
   /* ---------- Profil (feuille) : le sien, ou celui de la 2e personne ---------- */
   function editProfile(who) {
@@ -604,11 +576,11 @@
   S2.objectif = {
     targets: function (who) { var d = load(); return who === 'partner' ? (d.partner ? E.targets(d.partner) : null) : E.targets(d); },
     goalLabel: function (id) { var g = goalOf(id); return g ? g.label : ''; },
-    partnerTargets: function () { var d = load(); return d.partner ? E.targets(d.partner) : null; },
-    partnerName: function () { var d = load(); return d.partner && d.partner.name || L('Other person', 'L’autre'); },
+    partnerTargets: function () { return null; },
+    partnerName: function () { return L('Other person', 'L’autre'); },
     myName: function () { return load().name || L('You', 'Toi'); },
-    /* La 2e personne ne sert qu'à la Cuisine (portions et courses à 2) : le suivi (Aujourd'hui, Muscu, poids) est personnel à chaque téléphone. */
-    hasPartner: function () { var d = load(); return !!(d.partner && E.isComplete(d.partner)); },
+    /* App personnelle (un téléphone = une personne, v0.36) : plus de 2e personne. */
+    hasPartner: function () { return false; },
     profile: function () { return snapshot('me'); },
     logWeight: function (who, onDone) { addWeight('me', onDone); },
     logMeasures: function (who, onDone) { addMeasures('me', onDone); },
