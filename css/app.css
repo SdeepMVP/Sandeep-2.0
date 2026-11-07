@@ -930,3 +930,10 @@ input[type="date"].input { display: block; line-height: 48px; }
 .to-welcome p { max-width: 330px; }
 .to-acts { grid-template-columns: 1fr 1fr; }
 .to-meals a, .ck-results a, .hint a { color: var(--camel); font-weight: 600; }
+
+/* Aujourd'hui · aliments Ciqual (v0.34) */
+.to-gramsrow { display: grid; grid-template-columns: 64px 1fr 64px; align-items: center; gap: 10px; margin: 8px 0; }
+.to-gramsfield { display: flex; align-items: center; gap: 6px; font-size: 18px; font-weight: 700; }
+.to-gramsinp { text-align: center; font-size: 26px; font-weight: 750; font-variant-numeric: tabular-nums; }
+.to-gramchips { margin: 4px 0 8px; }
+.to-source, .to-cqhint { text-align: center; }
