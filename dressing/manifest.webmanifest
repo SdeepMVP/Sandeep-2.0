@@ -1,8 +1,8 @@
 {
   "name": "Dressing",
   "short_name": "Dressing",
-  "description": "My wardrobe and outfit ideas.",
-  "lang": "en",
+  "description": "Ma garde-robe et mes idées de tenues.",
+  "lang": "fr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

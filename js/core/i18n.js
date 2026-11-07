@@ -1,19 +1,13 @@
-/* Langue de l'interface : anglais (par défaut) ou français, choisie dans Réglages (clé "sandeep2:settings", champ lang).
-   Usage partout : S2.L('English text', 'Texte français'). Changer de langue recharge l'app (S2.setLang),
-   donc les libellés calculés au chargement (onglets, constantes) suivent aussi.
-   Les données enregistrées ne sont jamais traduites : seul l'affichage change.
-   Une app dérivée (ex. cuisine/) peut imposer sa langue via window.S2_APP = { lang: 'fr' } : le choix est alors fixe. */
+/* Langue de l'interface : français uniquement depuis la v0.39 (anglais auparavant au choix dans Réglages).
+   Usage partout : S2.L('English text', 'Texte français') — seul le texte français est affiché ; l'anglais reste dans le code.
+   Les données enregistrées ne sont jamais traduites : seul l'affichage change. */
 (function () {
   'use strict';
   var S2 = (window.S2 = window.S2 || {});
-  var lang = 'en';
-  try {
-    var s = JSON.parse(localStorage.getItem('sandeep2:settings') || 'null');
-    if (s && s.lang === 'fr') lang = 'fr';
-  } catch (e) { /* stockage indisponible : anglais */ }
-  var cfg = window.S2_APP || {};
-  if (cfg.lang === 'fr' || cfg.lang === 'en') lang = cfg.lang;
-  S2.langForced = !!cfg.lang;
+  /* Depuis la v0.39 (7 novembre 2026), les trois apps (Habits, Dressing, Gym Food) sont en français uniquement :
+     la langue est imposée, il n'y a plus de choix dans Réglages. Le champ lang déjà enregistré est ignoré. */
+  var lang = 'fr';
+  S2.langForced = true;
 
   S2.lang = lang;
   S2.locale = lang === 'fr' ? 'fr-FR' : 'en-GB';

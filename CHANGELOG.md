@@ -1,5 +1,8 @@
 # Changelog — Habits (ex-Sandeep 2.0), Gym Food (ex-SanEva), Dressing
 
+## 0.39.0 — 2026-11-07
+- **Habits, Dressing and Gym Food are now in French only.** The language choice is removed from Settings; an English choice saved earlier is ignored. Your data is unchanged.
+
 ## 0.38.0 — 2026-11-07
 - The main app is renamed **Habits** (ex-Sandeep 2.0) and now only has the **Habits** tab (+ Settings). New icon.
 - **SanEva is renamed Gym Food** (same address `cuisine/`, same data). The groceries-for-two message format is unchanged, so messages from older versions still work.

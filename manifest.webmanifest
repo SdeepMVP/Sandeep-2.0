@@ -1,8 +1,8 @@
 {
   "name": "Habits",
   "short_name": "Habits",
-  "description": "My daily habits.",
-  "lang": "en",
+  "description": "Mes habitudes du quotidien.",
+  "lang": "fr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
