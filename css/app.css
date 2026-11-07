@@ -818,3 +818,13 @@ input[type="date"].input { display: block; line-height: 48px; }
 .ck-priceunit { display: grid; justify-items: end; gap: 2px; width: 96px; flex-shrink: 0; }
 .ck-priceinp { text-align: right; min-height: 44px; font-size: 16px; }
 .ck-priceinp.is-bad { border-color: var(--danger); }
+
+/* Objectif · cuisiner à 2 (v0.32) */
+.ob-partner { display: grid; gap: 4px; }
+.ob-partnernum { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* Cuisine · planning 3 / 4 jours et à 2 (v0.32) */
+.ck-startrow { display: grid; grid-template-columns: 48px 1fr 48px; align-items: center; gap: 8px; padding: 8px 10px; }
+.ck-startrow .btn-icon { min-width: 48px; min-height: 48px; font-size: 22px; }
+.ck-startlabel { display: grid; gap: 2px; text-align: center; }
+.ck-partnerline { color: var(--camel); font-weight: 600; }

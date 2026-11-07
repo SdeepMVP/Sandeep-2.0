@@ -1,5 +1,10 @@
 # Changelog — Sandeep 2.0
 
+## 0.32.0 — 2026-11-07
+- SanEva Kitchen Planning: **1 day · 3 days · 4 days · Week**, to shop twice a week. A new plan starts the day after the confirmed one (or today), with ‹ › to move the start, and **avoids the dishes of the previous plan**; “Plan the next days” on a confirmed plan. Any length can be confirmed into the menu and groceries.
+- **Cooking for two**: in Goal, add the other person (height, weight, age, activity, goal). Planning then offers **For me / For two**: recipes are chosen for you and the other person gets their own serving (×0.5 to ×2 in quarters, adjusted over the day to their calories), shown on every meal with both people's day totals; the menu and groceries cover both.
+- Tests for 3/4-day plans, avoiding the previous plan and cooking for two.
+
 ## 0.31.0 — 2026-11-06
 - SanEva Kitchen: **15 new lunch & dinner recipes** (all for 2, in French and English, protein and calories per serving calculated from the ingredients): light chicken tikka masala, steak with sweet potato fries, tofu & chickpea curry (vegetarian), light shepherd’s pie, turkey in creamy mushroom sauce, honey mustard pork tenderloin, chicken & chickpea couscous, beef & black bean burrito bowl, chicken souvlaki with tzatziki, chicken pad thai, light beef stroganoff, pesto-crusted salmon traybake, oven chicken nuggets & fries, crustless courgette & feta quiche (vegetarian), Basque-style chicken. Now 72 recipes (51 lunch & dinner); they are added to existing data automatically.
 - Basket prices for their new ingredients (pork, steak, chickpeas, couscous, sweetcorn, pita, bean sprouts, peanuts…); pork and steak count as meat for the Vegetarian filter and the meat aisle.

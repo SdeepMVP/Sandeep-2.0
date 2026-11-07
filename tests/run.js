@@ -262,6 +262,30 @@ test('week plan: batch cooking uses far fewer recipes, each at most 3 days', fun
     week.forEach(function (d, i) { ok(Math.abs(d.kcal - t.kcal) / t.kcal < 0.15 && d.protein >= 0.8 * t.protein, p.goal + ' day ' + i); });
   });
 });
+test('3- and 4-day plans; the next period avoids the recipes of the previous one', function () {
+  var t = N.targets(prof({ goal: 'recomp' }));
+  var a = N.weekPlan(RECIPES, t, { days: 3, seed: 5 }), b = N.weekPlan(RECIPES, t, { days: 4, seed: 6 });
+  ok(a.length === 3 && b.length === 4, 'lengths');
+  var avoid = {}; N.weekTotals(a).forEach(function (x) { avoid[x.recipe.id] = true; });
+  var c = N.weekPlan(RECIPES, t, { days: 4, seed: 6, avoid: avoid });
+  function overlap(w) { return N.weekTotals(w).filter(function (x) { return avoid[x.recipe.id]; }).length; }
+  ok(overlap(c) < overlap(b) || overlap(c) === 0, 'overlap ' + overlap(c) + ' vs ' + overlap(b));
+  c.forEach(function (d, i) { ok(Math.abs(d.kcal - t.kcal) / t.kcal < 0.15, 'day ' + i + ' ' + d.kcal); });
+});
+test('cooking for two: second person gets portions matching their own calories', function () {
+  var t1 = N.targets(prof({ goal: 'bulk' })), t2 = N.targets(prof({ sex: 'f', weight: 58, height: 165, age: 27, goal: 'cut' }));
+  var week = N.weekPlan(RECIPES, t1, { days: 3 }), two = N.forTwo(week, t2);
+  ok(two.length === 3 && week[0].meals[0].portion2 === undefined, 'original untouched');
+  two.forEach(function (d, i) {
+    ok(Math.abs(d.kcal2 - t2.kcal) / t2.kcal < 0.08, 'day ' + i + ' partner ' + d.kcal2 + ' vs ' + t2.kcal);
+    ok(d.kcal === week[i].kcal, 'first person unchanged');
+  });
+  var one = N.weekTotals(week).reduce(function (n, x) { return n + x.portions; }, 0);
+  var both = N.weekTotals(two).reduce(function (n, x) { return n + x.portions; }, 0);
+  var p2 = two.reduce(function (n, d) { return n + d.meals.reduce(function (a, m) { return a + m.portion2; }, 0); }, 0);
+  ok(Math.abs(both - one - p2) < 1e-9, 'totals include both people');
+  ok(N.forTwo(week, null) === week, 'no partner');
+});
 test('week plan: another week and another day change the suggestion, deterministically', function () {
   var t = N.targets(prof({ goal: 'cut' }));
   var a = N.weekPlan(RECIPES, t, { seed: 0 }), a2 = N.weekPlan(RECIPES, t, { seed: 0 }), b = N.weekPlan(RECIPES, t, { seed: 1 });

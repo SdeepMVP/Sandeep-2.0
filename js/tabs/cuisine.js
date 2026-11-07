@@ -61,6 +61,7 @@
     d.history = d.history || []; d.have = d.have || []; d.exclude = d.exclude || [];
     /* v0.29 : planning de la semaine validé (ajout compatible). week = { start, batch, days: [{ meals: [{ recipeId, portion }] }] } */
     d.week = d.week || null; d.weekBatch = !!d.weekBatch;
+    d.forTwo = !!d.forTwo; /* v0.32 : planning à 2 (avec la 2e personne de l'onglet Objectif) */
     /* v0.30 : prix saisis par l'utilisateur (€ par kg, litre ou pièce selon l'ingrédient), clé = nom normalisé. */
     d.prices = d.prices || {};
     /* Ajoute les recettes intégrées manquantes (sauf celles que l'utilisateur a supprimées). */
@@ -399,8 +400,9 @@
   var section = 'recipes'; // recipes | menu | shop (onglets en haut de la liste)
   var flags = { fav: false, quick: false, noOven: false, veggie: false, have: false, goal: false };
   var dayIdx = 0;          // journée type affichée (section Planning › Un jour)
-  var planMode = 'day';    // day | week
-  var weekSeed = 0, weekPicks = [], weekDraft = false; // proposition de semaine en cours (non enregistrée)
+  var planDays = null;     // 1 | 3 | 4 | 7 jours (null = longueur du planning validé, sinon 1)
+  var planShift = 0;       // décalage (jours) du début de la proposition par rapport au début proposé
+  var weekSeed = 0, weekPicks = [], weekDraft = false; // proposition en cours (non enregistrée)
 
   /* ---------- Objectif (SanEva) : lu via S2.objectif, jamais dans les données d'un autre onglet ---------- */
   var NE = S2.nutritionEngine;
@@ -776,6 +778,26 @@
   }
 
   /* ---------- Ma journée : une journée type qui colle aux besoins (suggestion, rien n'est ajouté sans toi) ---------- */
+  /* ---------- Planning : un jour, 3 jours, 4 jours ou la semaine (courses 1 ou 2 fois par semaine), pour 1 ou à 2 ---------- */
+  var PERIODS = [[1, L('1 day', '1 jour')], [3, L('3 days', '3 jours')], [4, L('4 days', '4 jours')], [7, L('Week', 'Semaine')]];
+  function periodName(n) { return n === 7 ? L('the week', 'la semaine') : n + L(' days', ' jours'); }
+  function partnerT() {
+    try { return NE && S2.objectif && S2.objectif.partnerTargets ? S2.objectif.partnerTargets() : null; } catch (e) { return null; }
+  }
+  function myName() { return S2.objectif && S2.objectif.myName ? S2.objectif.myName() : L('You', 'Toi'); }
+  function otherName() { return S2.objectif && S2.objectif.partnerName ? S2.objectif.partnerName() : L('Other person', 'L’autre'); }
+  function pShort(x) { return '×' + num(x); }
+  /* Texte des portions d'un repas : la sienne, et celle de l'autre personne quand on cuisine à 2. */
+  function mealText(m) {
+    if (m.portion2 === undefined) return portionText(m.portion) + ' · ' + m.kcal + ' kcal · ' + m.protein + ' g';
+    return myName() + ' ' + pShort(m.portion) + ' (' + m.kcal + ' kcal) · ' + otherName() + ' ' + pShort(m.portion2) + ' (' + m.kcal2 + ' kcal)';
+  }
+  function mealServings(m) { return Math.max(1, Math.ceil(m.portion + (m.portion2 || 0))); }
+  function partnerLine(kcal2, protein2, T2, avg) {
+    return h('div', { class: 'list-sub ck-partnerline' }, otherName() + (avg ? L(', per day on average: ', ', par jour en moyenne : ') : ' : ') +
+      kcal2 + ' / ' + T2.kcal + ' kcal · ' + protein2 + ' / ' + T2.protein + L(' g protein', ' g de protéines'));
+  }
+
   function renderDay() {
     var T = goalTargets();
     if (!T) {
@@ -785,15 +807,30 @@
         h('a', { class: 'btn btn-primary', href: '#objectif' }, L('Fill in my profile', 'Remplir mon profil'))));
       return;
     }
+    if (planDays === null) planDays = data.week && [3, 4, 7].indexOf(data.week.days.length) > -1 ? data.week.days.length : 1;
     root.appendChild(h('div', { class: 'segmented ck-planmode' },
-      [['day', L('One day', 'Un jour')], ['week', L('The week', 'La semaine')]].map(function (x) {
-        return h('button', { class: 'seg' + (planMode === x[0] ? ' is-active' : ''), 'aria-pressed': planMode === x[0] ? 'true' : 'false',
-          onclick: function () { planMode = x[0]; render(); } }, x[1]);
+      PERIODS.map(function (x) {
+        return h('button', { class: 'seg' + (planDays === x[0] ? ' is-active' : ''), 'aria-pressed': planDays === x[0] ? 'true' : 'false',
+          onclick: function () { planDays = x[0]; weekDraft = false; weekPicks = []; planShift = 0; render(); } }, x[1]);
       })));
+
+    var T2 = partnerT();
+    var two = !!(T2 && data.forTwo);
     root.appendChild(h('div', { class: 'card ck-daytarget' },
-      h('div', { class: 'list-sub' }, (S2.objectif.goalLabel(T.goal) || '') + L(' · per day', ' · par jour')),
+      h('div', { class: 'list-sub' }, (two ? myName() + ' · ' : '') + (S2.objectif.goalLabel(T.goal) || '') + L(' · per day', ' · par jour')),
       h('div', { class: 'ck-daytargetnum' }, T.kcal + ' kcal · ' + T.protein + L(' g protein', ' g de protéines')),
-      h('div', { class: 'list-sub' }, T.meals + L(' meals', ' repas') + ' · ' + L('carbs ', 'glucides ') + T.carbs + ' g · ' + L('fat ', 'lipides ') + T.fat + ' g')));
+      h('div', { class: 'list-sub' }, T.meals + L(' meals', ' repas') + ' · ' + L('carbs ', 'glucides ') + T.carbs + ' g · ' + L('fat ', 'lipides ') + T.fat + ' g'),
+      two ? h('div', { class: 'list-sub ck-partnerline' }, otherName() + ' : ' + T2.kcal + ' kcal · ' + T2.protein + L(' g protein', ' g de protéines')) : null));
+    if (T2) {
+      root.appendChild(h('div', { class: 'segmented small' },
+        [[false, L('For me', 'Pour moi')], [true, L('For two (with ', 'À 2 (avec ') + otherName() + ')']].map(function (x) {
+          return h('button', { class: 'seg' + (two === x[0] ? ' is-active' : ''), 'aria-pressed': two === x[0] ? 'true' : 'false',
+            onclick: function () { data.forTwo = x[0]; persist(); weekDraft = !!data.week; render(); } }, x[1]);
+        })));
+    } else {
+      root.appendChild(h('p', { class: 'hint' }, L('Cooking for two? ', 'Tu cuisines à 2 ? '),
+        h('a', { href: '#objectif' }, L('Add the other person in Goal ›', 'Ajoute l’autre personne dans Objectif ›'))));
+    }
 
     var pool = data.recipes.filter(function (r) {
       var v = view(r);
@@ -806,7 +843,8 @@
     var active = [flags.veggie && L('vegetarian', 'végétarien'), flags.noOven && L('no oven', 'sans four'), flags.quick && L('15 min max', '15 min max'),
       data.exclude.length && L('without ', 'sans ') + data.exclude.join(', ')].filter(Boolean);
     if (active.length) root.appendChild(h('p', { class: 'hint' }, L('Filters applied: ', 'Filtres appliqués : ') + active.join(' · ')));
-    if (planMode === 'week') { renderWeek(T, pool); return; }
+    if (planDays > 1) { renderPeriod(T, pool, planDays, two ? T2 : null); return; }
+
     var plans = NE.dayPlans(pool, T, 8);
     if (!plans.length) {
       root.appendChild(h('div', { class: 'empty-state small' }, h('p', null, L('Not enough recipes with calories and protein for a full day. Remove a filter or add recipes.',
@@ -815,26 +853,28 @@
     }
     if (dayIdx >= plans.length) dayIdx = 0;
     var plan = plans[dayIdx];
+    if (two) plan = NE.forTwo([plan], T2)[0];
     var labels = SLOT_LABELS[plan.meals.length] || [];
     root.appendChild(h('h2', { class: 'section-title' }, L('Suggested day ', 'Journée proposée ') + (dayIdx + 1) + ' / ' + plans.length));
     root.appendChild(h('div', { class: 'list' }, plan.meals.map(function (m, i) {
       var v = view(m.recipe);
       return h('button', { class: 'list-row list-row-btn ck-dayrow', onclick: function () {
-        servingsView[m.recipe.id] = Math.max(1, Math.ceil(m.portion)); open(m.recipe.id); } },
+        servingsView[m.recipe.id] = mealServings(m); open(m.recipe.id); } },
         h('div', { class: 'ck-daymain' },
           h('span', { class: 'ck-dayslot' }, labels[i] || ''),
           h('span', { class: 'list-title' }, v.name),
-          h('span', { class: 'list-sub' }, portionText(m.portion) + ' · ' + m.kcal + ' kcal · ' + m.protein + ' g' + (m.recipe.time ? ' · ⏱ ' + m.recipe.time + ' min' : ''))),
+          h('span', { class: 'list-sub' }, mealText(m) + (m.recipe.time ? ' · ⏱ ' + m.recipe.time + ' min' : ''))),
         h('span', { class: 'chev', 'aria-hidden': 'true' }, '›'));
     })));
     root.appendChild(h('div', { class: 'card ck-daytotal' },
-      goalBar(L('calories: ', 'calories : ') + plan.kcal + ' / ' + T.kcal + ' kcal', plan.kcal / T.kcal),
-      goalBar(L('protein: ', 'protéines : ') + plan.protein + ' / ' + T.protein + ' g', plan.protein / T.protein)));
+      goalBar((two ? myName() + ' · ' : '') + L('calories: ', 'calories : ') + plan.kcal + ' / ' + T.kcal + ' kcal', plan.kcal / T.kcal),
+      goalBar((two ? myName() + ' · ' : '') + L('protein: ', 'protéines : ') + plan.protein + ' / ' + T.protein + ' g', plan.protein / T.protein),
+      two ? partnerLine(plan.kcal2, plan.protein2, T2) : null));
     root.appendChild(h('div', { class: 'bottom-actions' },
       plans.length > 1 ? h('button', { class: 'btn btn-secondary btn-block btn-lg', onclick: function () { dayIdx = (dayIdx + 1) % plans.length; render(); } },
         L('↻ Another suggestion', '↻ Autre proposition')) : null,
       h('button', { class: 'btn btn-primary btn-block btn-lg', onclick: function () {
-        plan.meals.forEach(function (m) { addToPlan(m.recipe, Math.max(1, Math.ceil(m.portion))); });
+        plan.meals.forEach(function (m) { addToPlan(m.recipe, mealServings(m)); });
         render();
         ui.toast(L('Day added to the menu', 'Journée ajoutée au menu') + ' · ' + plan.meals.length + L(' meals', ' repas'));
       } }, L('+ Add this day to the menu', '+ Ajouter cette journée au menu'))));
@@ -842,41 +882,71 @@
       'Les demi-portions sont arrondies au-dessus dans le menu et les courses (cuisine une portion entière, garde le reste). Valeurs estimées par portion.')));
   }
 
-  /* ---------- Planning › La semaine : 7 journées enchaînées, à valider pour remplir le menu et les courses ---------- */
+  /* ---------- Dates ---------- */
+  function addDays(iso, n) { var d = new Date(iso); d.setDate(d.getDate() + n); d.setHours(0, 0, 0, 0); return d.toISOString(); }
   function dayLabel(start, i) {
-    var d = new Date(start); d.setDate(d.getDate() + i);
-    var s = d.toLocaleDateString(S2.locale, { weekday: 'long', day: 'numeric', month: 'short' });
+    var s = new Date(addDays(start, i)).toLocaleDateString(S2.locale, { weekday: 'long', day: 'numeric', month: 'short' });
     return s.charAt(0).toUpperCase() + s.slice(1);
   }
   function dayShort(start, i) {
-    var d = new Date(start); d.setDate(d.getDate() + i);
-    return d.toLocaleDateString(S2.locale, { weekday: 'short' }).replace('.', '');
+    return new Date(addDays(start, i)).toLocaleDateString(S2.locale, { weekday: 'short' }).replace('.', '');
   }
   function todayStart() { var d = new Date(); d.setHours(0, 0, 0, 0); return d.toISOString(); }
-  /* Semaine enregistrée → même forme que le moteur (recettes supprimées depuis : retirées). */
+  /* Début proposé : le lendemain du dernier jour du planning validé s'il n'est pas fini, sinon aujourd'hui. */
+  function defaultStart() {
+    var today = todayStart();
+    if (!data.week) return today;
+    var end = addDays(data.week.start, data.week.days.length);
+    return end > today ? end : today;
+  }
+  /* Planning enregistré → même forme que le moteur (recettes supprimées depuis : retirées). */
   function savedWeek() {
     if (!data.week) return null;
     return data.week.days.map(function (day) {
       var meals = day.meals.map(function (m) {
         var r = recipe(m.recipeId);
-        return r ? { recipe: r, portion: m.portion, kcal: Math.round((r.kcal || 0) * m.portion), protein: Math.round((r.protein || 0) * m.portion) } : null;
+        if (!r) return null;
+        var o = { recipe: r, portion: m.portion, kcal: Math.round((r.kcal || 0) * m.portion), protein: Math.round((r.protein || 0) * m.portion) };
+        if (m.portion2) { o.portion2 = m.portion2; o.kcal2 = Math.round((r.kcal || 0) * m.portion2); o.protein2 = Math.round((r.protein || 0) * m.portion2); }
+        return o;
       }).filter(Boolean);
-      return { meals: meals, kcal: meals.reduce(function (n, m) { return n + m.kcal; }, 0), protein: meals.reduce(function (n, m) { return n + m.protein; }, 0) };
+      var d = { meals: meals, kcal: meals.reduce(function (n, m) { return n + m.kcal; }, 0), protein: meals.reduce(function (n, m) { return n + m.protein; }, 0) };
+      if (data.week.forTwo) { d.kcal2 = meals.reduce(function (n, m) { return n + (m.kcal2 || 0); }, 0); d.protein2 = meals.reduce(function (n, m) { return n + (m.protein2 || 0); }, 0); }
+      return d;
     });
   }
 
-  function renderWeek(T, pool) {
-    var saved = !weekDraft && data.week ? savedWeek() : null;
-    var week, start;
-    if (saved) { week = saved; start = data.week.start; }
-    else {
-      week = NE.weekPlan(pool, T, { seed: weekSeed, picks: weekPicks, batch: data.weekBatch });
-      start = todayStart();
+  function renderPeriod(T, pool, n, T2) {
+    var savedFits = !weekDraft && data.week && data.week.days.length === n;
+    var week, start, two;
+    if (savedFits) {
+      week = savedWeek(); start = data.week.start; two = !!data.week.forTwo;
+      T2 = two ? (partnerT() || T2) : null;
+    } else {
+      var base = defaultStart();
+      start = addDays(base, planShift);
+      /* Recettes du planning validé : évitées pour ne pas remanger la même chose à la période suivante. */
+      var avoid = {};
+      if (data.week) data.week.days.forEach(function (d) { d.meals.forEach(function (m) { avoid[m.recipeId] = true; }); });
+      var seed = weekSeed * 997 + Math.round(new Date(start).getTime() / 86400000);
+      week = NE.weekPlan(pool, T, { days: n, seed: seed, picks: weekPicks, batch: data.weekBatch, avoid: avoid });
+      two = !!T2;
+      if (two) week = NE.forTwo(week, T2);
       if (!week.length) {
-        root.appendChild(h('div', { class: 'empty-state small' }, h('p', null, L('Not enough recipes with calories and protein for a full week. Remove a filter or add recipes.',
-          'Pas assez de recettes avec calories et protéines pour une semaine. Retire un filtre ou ajoute des recettes.'))));
+        root.appendChild(h('div', { class: 'empty-state small' }, h('p', null, L('Not enough recipes with calories and protein for this plan. Remove a filter or add recipes.',
+          'Pas assez de recettes avec calories et protéines pour ce planning. Retire un filtre ou ajoute des recettes.'))));
         return;
       }
+      /* Début du planning (aujourd'hui au plus tôt, 2 semaines au plus tard). */
+      var today = todayStart(), maxStart = addDays(today, 14);
+      root.appendChild(h('div', { class: 'card ck-startrow' },
+        h('button', { class: 'btn btn-secondary btn-icon', 'aria-label': L('One day earlier', 'Un jour plus tôt'), disabled: start <= today,
+          onclick: function () { planShift--; weekPicks = []; render(); } }, '‹'),
+        h('div', { class: 'ck-startlabel' },
+          h('span', { class: 'list-sub' }, L('Starting', 'À partir de')),
+          h('span', { class: 'ck-weekname' }, dayLabel(start, 0))),
+        h('button', { class: 'btn btn-secondary btn-icon', 'aria-label': L('One day later', 'Un jour plus tard'), disabled: start >= maxStart,
+          onclick: function () { planShift++; weekPicks = []; render(); } }, '›')));
       /* Variété ou batch cooking (préférence enregistrée). */
       root.appendChild(h('div', { class: 'segmented small' },
         [[false, L('Varied', 'Variée')], [true, L('Batch cooking', 'Batch cooking')]].map(function (x) {
@@ -890,15 +960,16 @@
     }
 
     var totals = NE.weekTotals(week);
-    var avgK = Math.round(week.reduce(function (n, d) { return n + d.kcal; }, 0) / week.length);
-    var avgP = Math.round(week.reduce(function (n, d) { return n + d.protein; }, 0) / week.length);
-    var toCook = totals.reduce(function (n, x) { return n + Math.max(1, Math.ceil(x.portions)); }, 0);
-    root.appendChild(h('h2', { class: 'section-title' }, saved ? L('My week', 'Ma semaine') : L('Suggested week', 'Semaine proposée')));
-    if (saved) root.appendChild(h('p', { class: 'hint' }, L('Confirmed on ', 'Validée le ') + ui.date(data.week.saved || data.week.start) + L(': its meals are in the menu and the groceries.', ' : ses repas sont dans le menu et les courses.')));
+    var avg = function (k) { return Math.round(week.reduce(function (s, d) { return s + (d[k] || 0); }, 0) / week.length); };
+    var toCook = totals.reduce(function (s, x) { return s + Math.max(1, Math.ceil(x.portions)); }, 0);
+    root.appendChild(h('h2', { class: 'section-title' }, (savedFits ? L('My plan · ', 'Mon planning · ') : L('Suggestion · ', 'Proposition · ')) + periodName(n) + (two ? L(' · for two', ' · à 2') : '')));
+    root.appendChild(h('p', { class: 'hint' }, dayLabel(start, 0) + ' → ' + dayLabel(start, n - 1).toLowerCase() +
+      (savedFits ? L(' · confirmed on ', ' · validé le ') + ui.date(data.week.saved || data.week.start) + L(': its meals are in the menu and the groceries.', ' : ses repas sont dans le menu et les courses.') : '')));
     root.appendChild(h('div', { class: 'card ck-daytotal' },
       h('div', { class: 'list-sub' }, plural(totals.length, 'different recipe', 'recette') + (FR && totals.length > 1 ? ' différentes' : FR ? ' différente' : '') + ' · ' + plural(toCook, 'serving', 'portion') + L(' to cook', ' à cuisiner')),
-      goalBar(L('calories per day on average: ', 'calories par jour en moyenne : ') + avgK + ' / ' + T.kcal + ' kcal', avgK / T.kcal),
-      goalBar(L('protein per day on average: ', 'protéines par jour en moyenne : ') + avgP + ' / ' + T.protein + ' g', avgP / T.protein)));
+      goalBar((two ? myName() + ' · ' : '') + L('calories per day on average: ', 'calories par jour en moyenne : ') + avg('kcal') + ' / ' + T.kcal + ' kcal', avg('kcal') / T.kcal),
+      goalBar((two ? myName() + ' · ' : '') + L('protein per day on average: ', 'protéines par jour en moyenne : ') + avg('protein') + ' / ' + T.protein + ' g', avg('protein') / T.protein),
+      two && T2 ? partnerLine(avg('kcal2'), avg('protein2'), T2, true) : null));
 
     week.forEach(function (day, i) {
       var labels = SLOT_LABELS[day.meals.length] || [];
@@ -906,54 +977,68 @@
         h('div', { class: 'ck-weekhead' },
           h('div', null,
             h('div', { class: 'ck-weekname' }, dayLabel(start, i)),
-            h('div', { class: 'list-sub' }, day.kcal + ' kcal · ' + day.protein + L(' g protein', ' g de protéines'))),
-          !saved && day.choices > 1 ? h('button', { class: 'btn btn-ghost btn-sm', 'aria-label': L('Another suggestion for this day', 'Autre proposition pour ce jour'), onclick: function () {
+            h('div', { class: 'list-sub' }, (two ? myName() + ' ' : '') + day.kcal + ' kcal · ' + day.protein + ' g' +
+              (two ? ' · ' + otherName() + ' ' + day.kcal2 + ' kcal · ' + day.protein2 + ' g' : L(' protein', ' de protéines')))),
+          !savedFits && day.choices > 1 ? h('button', { class: 'btn btn-ghost btn-sm', 'aria-label': L('Another suggestion for this day', 'Autre proposition pour ce jour'), onclick: function () {
             weekPicks[i] = ((weekPicks[i] || 0) + 1) % day.choices; render();
           } }, L('↻ Change', '↻ Changer')) : null),
         h('div', { class: 'ck-weekmeals' }, day.meals.map(function (m, k) {
-          return h('button', { class: 'ck-weekmeal', onclick: function () { servingsView[m.recipe.id] = Math.max(1, Math.ceil(m.portion)); open(m.recipe.id); } },
+          return h('button', { class: 'ck-weekmeal', onclick: function () { servingsView[m.recipe.id] = mealServings(m); open(m.recipe.id); } },
             h('span', { class: 'ck-dayslot' }, labels[k] || ''),
             h('span', { class: 'ck-weekrecipe' }, view(m.recipe).name),
-            h('span', { class: 'list-sub' }, portionText(m.portion) + ' · ' + m.kcal + ' kcal · ' + m.protein + ' g'));
+            h('span', { class: 'list-sub' }, mealText(m)));
         }))));
     });
 
-    if (saved) {
+    if (savedFits) {
       root.appendChild(h('div', { class: 'bottom-actions' },
-        h('button', { class: 'btn btn-primary btn-block btn-lg', onclick: function () { section = 'shop'; render(); window.scrollTo(0, 0); } }, L('🛒 Groceries for the week ›', '🛒 Courses de la semaine ›')),
-        h('button', { class: 'btn btn-secondary btn-block', onclick: function () { weekDraft = true; weekSeed++; weekPicks = []; render(); window.scrollTo(0, 0); } }, L('Plan a new week', 'Prévoir une nouvelle semaine')),
+        h('button', { class: 'btn btn-primary btn-block btn-lg', onclick: function () { section = 'shop'; render(); window.scrollTo(0, 0); } }, L('🛒 Groceries ›', '🛒 Courses ›')),
+        h('button', { class: 'btn btn-secondary btn-block', onclick: function () { weekDraft = true; weekSeed++; weekPicks = []; planShift = 0; render(); window.scrollTo(0, 0); } },
+          L('Plan the next days', 'Prévoir la suite')),
         h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: function () {
-          ui.confirm({ title: L('Remove this week’s plan?', 'Retirer le planning de la semaine ?'),
+          ui.confirm({ title: L('Remove this plan?', 'Retirer ce planning ?'),
             message: L('The plan is removed. The meals already in the menu stay there (remove them from the menu if needed).', 'Le planning est retiré. Les repas déjà dans le menu y restent (retire-les du menu si besoin).'),
             okLabel: L('Remove', 'Retirer'), danger: true }).then(function (ok) { if (!ok) return; data.week = null; persist(); render(); });
         } }, L('Remove this plan', 'Retirer ce planning'))));
+      root.appendChild(h('p', { class: 'hint' }, L('“Plan the next days” starts the day after this plan and avoids its dishes. Pick 3 or 4 days at the top to shop twice a week.',
+        '« Prévoir la suite » commence le lendemain de ce planning et évite ses plats. Choisis 3 ou 4 jours en haut pour faire les courses 2 fois par semaine.')));
       return;
     }
     root.appendChild(h('div', { class: 'bottom-actions' },
-      h('button', { class: 'btn btn-primary btn-block btn-lg', onclick: function () { confirmWeek(week, start, totals); } }, L('✓ Confirm the week', '✓ Valider la semaine')),
-      h('button', { class: 'btn btn-secondary btn-block', onclick: function () { weekSeed++; weekPicks = []; render(); window.scrollTo(0, 0); } }, L('↻ Another week', '↻ Autre semaine')),
-      data.week ? h('button', { class: 'btn btn-ghost btn-block', onclick: function () { weekDraft = false; render(); window.scrollTo(0, 0); } }, L('Back to my confirmed week', 'Revenir à ma semaine validée')) : null));
-    root.appendChild(h('p', { class: 'hint' }, L('Confirming puts each recipe once in the menu with all its servings for the week (rounded up), so the groceries add everything up. “↻ Change” only replaces that day.',
-      'Valider met chaque recette une seule fois au menu avec toutes ses portions de la semaine (arrondies au-dessus) : les courses additionnent tout. « ↻ Changer » ne remplace que ce jour-là.')));
+      h('button', { class: 'btn btn-primary btn-block btn-lg', onclick: function () { confirmWeek(week, start, totals, two); } },
+        n === 7 ? L('✓ Confirm the week', '✓ Valider la semaine') : L('✓ Confirm these ' + n + ' days', '✓ Valider ces ' + n + ' jours')),
+      h('button', { class: 'btn btn-secondary btn-block', onclick: function () { weekSeed++; weekPicks = []; render(); window.scrollTo(0, 0); } }, L('↻ Another suggestion', '↻ Autre proposition')),
+      data.week ? h('button', { class: 'btn btn-ghost btn-block', onclick: function () { weekDraft = false; planDays = data.week.days.length; render(); window.scrollTo(0, 0); } },
+        L('Back to my confirmed plan', 'Revenir à mon planning validé')) : null));
+    root.appendChild(h('p', { class: 'hint' }, (n === 3 || n === 4
+      ? L('Shopping twice a week: confirm 3 days now, then 4 days next time (it starts the day after and avoids the same dishes). ',
+        'Courses 2 fois par semaine : valide 3 jours maintenant, puis 4 jours la fois suivante (ça commence le lendemain et évite les mêmes plats). ') : '') +
+      L('Confirming puts each recipe once in the menu with all its servings (rounded up' + (two ? ', both people' : '') + '), so the groceries add everything up. “↻ Change” only replaces that day.',
+        'Valider met chaque recette une seule fois au menu avec toutes ses portions (arrondies au-dessus' + (two ? ', pour les 2' : '') + ') : les courses additionnent tout. « ↻ Changer » ne remplace que ce jour-là.')));
   }
 
-  function confirmWeek(week, start, totals) {
+  function confirmWeek(week, start, totals, two) {
+    var n = week.length;
     function apply(replace) {
       if (replace) { data.plan.items = []; data.plan.checks = {}; }
       totals.forEach(function (x) {
         data.plan.items.push({ uid: ui.uid(), recipeId: x.recipe.id, servings: Math.min(24, Math.max(1, Math.ceil(x.portions))),
           added: new Date().toISOString(), days: x.days.map(function (i) { return dayShort(start, i); }).join(', ') });
       });
-      data.week = { start: start, saved: new Date().toISOString(), batch: data.weekBatch,
-        days: week.map(function (d) { return { meals: d.meals.map(function (m) { return { recipeId: m.recipe.id, portion: m.portion }; }) }; }) };
-      weekDraft = false; persist(); render(); window.scrollTo(0, 0);
-      ui.toast(L('Week confirmed · ', 'Semaine validée · ') + plural(totals.length, 'recipe', 'recette') + L(' in the menu', ' au menu'));
+      data.week = { start: start, saved: new Date().toISOString(), batch: data.weekBatch, forTwo: !!two,
+        days: week.map(function (d) { return { meals: d.meals.map(function (m) {
+          var o = { recipeId: m.recipe.id, portion: m.portion };
+          if (m.portion2) o.portion2 = m.portion2;
+          return o;
+        }) }; }) };
+      weekDraft = false; planDays = n; planShift = 0; persist(); render(); window.scrollTo(0, 0);
+      ui.toast(L('Plan confirmed · ', 'Planning validé · ') + plural(totals.length, 'recipe', 'recette') + L(' in the menu', ' au menu'));
     }
     if (!planItems().length) { apply(false); return; }
     ui.sheet(function (close) {
       return [
         h('h2', { class: 'sheet-title' }, L('Your menu already has meals', 'Ton menu contient déjà des repas')),
-        h('p', { class: 'sheet-text' }, L('Replace it with this week (grocery ticks are reset), or add the week to it?', 'Le remplacer par cette semaine (les cases des courses sont remises à zéro), ou y ajouter la semaine ?')),
+        h('p', { class: 'sheet-text' }, L('Replace it with this plan (grocery ticks are reset), or add the plan to it?', 'Le remplacer par ce planning (les cases des courses sont remises à zéro), ou y ajouter le planning ?')),
         h('div', { class: 'sheet-actions' },
           h('button', { class: 'btn btn-primary btn-block', onclick: function () { close(); apply(true); } }, L('Replace the menu', 'Remplacer le menu')),
           h('button', { class: 'btn btn-secondary btn-block', onclick: function () { close(); apply(false); } }, L('Add to the menu', 'Ajouter au menu')),
