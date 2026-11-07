@@ -1,5 +1,10 @@
 # Changelog — Habits (ex-Sandeep 2.0), Gym Food (ex-SanEva), Dressing
 
+## 0.42.0 — 2026-11-07
+- Today › Add food: **196 brands and everyday dishes** on top of the Ciqual table (1,274 foods in all): sodas (Coca-Cola, Coca Zero, Fanta, Sprite, Orangina, Oasis, Ice Tea, Schweppes, Pepsi…), energy and sports drinks (Red Bull, Monster, Powerade…), beers and cocktails, fast food (McDonald's, Burger King, KFC, French tacos, kebab, sushi, poke, pizza by the slice…), bars and sweets (Kinder, Twix, Mars, Snickers, M&M's, Haribo, Nutella…), crisps, biscuits, cereals, dairy desserts, ice creams and everyday dishes. Values are average label values, for guidance.
+- Search: brands come first, synonyms now add to the typed word (“nutella” finds Nutella and spreads; “mcdo”, “bk”, “redbull”, “mms”…).
+- Drinks are counted in ml.
+
 ## 0.41.0 — 2026-11-07
 - Gym: **bodyweight exercises** (push-ups, pull-ups, dips…) now have records, curves, end-of-workout comparison and stall detection: estimated 1RM with your bodyweight (Goal) + any extra weight, or best set in reps if your weight is unknown. Plank and other holds count in reps/seconds. Leave “kg” empty (shown as “BW”) or type the extra weight.
 - Gym: **after the 12 weeks**: a “cycle done” card suggests a **deload week** (−10 % weights, one set less, no suggestions, ignored for stalls), then a **new cycle** (same program from week 1, history kept) or another program. Deload can also be picked any week.

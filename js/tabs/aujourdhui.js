@@ -604,11 +604,19 @@
   function customItem(f) { return { kind: 'custom', id: f.id, name: f.name, portion: f.portion, kcal: f.kcal, protein: f.protein, carbs: f.carbs || 0, fat: f.fat || 0 }; }
   function recipeItem(r) { return { kind: 'recipe', id: r.id, name: r.name, portion: L('1 serving', '1 portion'), kcal: r.kcal, protein: r.protein, carbs: r.carbs, fat: r.fat }; }
   /* Table Ciqual : valeurs pour 100 g, portion type en grammes. */
-  function cqFoods() { return S2.ciqual ? S2.ciqual.foods : []; }
+  /* Table Ciqual + produits de marque et plats du quotidien (v0.42, js/tabs/produits-data.js) : même format de ligne. */
+  var cqCache = null;
+  function cqFoods() {
+    if (!cqCache) cqCache = (S2.products ? S2.products.foods : []).concat(S2.ciqual ? S2.ciqual.foods : []);
+    return cqCache;
+  }
+  /* v0.42 : boissons comptées en ml (1 ml ≈ 1 g) : groupes Ciqual 0 (alcools) et 5 (boissons sans alcool), produits « drink » et « alcohol ». */
+  function isLiquid(r) { return r[2] === 0 || r[2] === 5 || r[2] === 'drink' || r[2] === 'alcohol'; }
   function ciqualItem(r) {
     var g = r[7];
     return { kind: 'ciqual', id: r[0], name: r[1], grams: g, label: r[8] || null, per100: { kcal: r[3], protein: r[4], carbs: r[5], fat: r[6] },
-      portion: (r[8] ? r[8] + ' · ' : '') + g + ' g', kcal: r[3] * g / 100, protein: r[4] * g / 100, carbs: r[5] * g / 100, fat: r[6] * g / 100 };
+      unit: isLiquid(r) ? 'ml' : 'g',
+      portion: (r[8] ? r[8] + ' · ' : '') + g + (isLiquid(r) ? ' ml' : ' g'), kcal: r[3] * g / 100, protein: r[4] * g / 100, carbs: r[5] * g / 100, fat: r[6] * g / 100 };
   }
   function findRecent(key, recipes) {
     var p = key.split(':'), type = p[0], id = p.slice(1).join(':');
@@ -622,7 +630,7 @@
   function entryOf(it, qty) {
     if (it.kind === 'ciqual') {
       var g = Math.round(it.grams * qty), f = g / 100;
-      return { type: 'ciqual', ref: it.id, name: it.name, portion: g + ' g', qty: 1, grams: g, planned: null,
+      return { type: 'ciqual', ref: it.id, name: it.name, portion: g + ' ' + (it.unit || 'g'), qty: 1, grams: g, planned: null,
         kcal: it.per100.kcal * f, protein: it.per100.protein * f, carbs: it.per100.carbs * f, fat: it.per100.fat * f };
     }
     return { type: it.kind, ref: it.id, name: it.name, portion: it.kind === 'recipe' ? null : it.portion, qty: qty, planned: null,
@@ -636,7 +644,7 @@
     var CQ = cqFoods();
     var pool = null;
     function searchPool() {
-      if (!pool) pool = NT.FOODS.map(function (f) { var it = foodItem(f); it.curated = true; return it; }).concat(CQ.map(ciqualItem));
+      if (!pool) pool = NT.FOODS.map(function (f) { var it = foodItem(f); it.curated = true; return it; }).concat(CQ.map(function (r) { var it = ciqualItem(r); if (String(r[0]).indexOf('p-') === 0) it.curated = true; return it; }));
       return pool;
     }
     ui.sheet(function (close) {
@@ -656,7 +664,7 @@
           if (it.kind === 'ciqual') {
             pickGrams(it, function (g) {
               var f = g / 100;
-              addEntry({ type: 'ciqual', ref: it.id, name: it.name, portion: g + ' g', qty: 1, grams: g, planned: null,
+              addEntry({ type: 'ciqual', ref: it.id, name: it.name, portion: g + ' ' + (it.unit || 'g'), qty: 1, grams: g, planned: null,
                 kcal: it.per100.kcal * f, protein: it.per100.protein * f, carbs: it.per100.carbs * f, fat: it.per100.fat * f });
             });
             return;
@@ -681,7 +689,7 @@
         if (tab === 'foods') {
           /* Sans recherche : les aliments du quotidien de l'app ; avec recherche : eux + la table Ciqual (classés). */
           items = n ? TE.searchFoods(searchPool(), q, 60) : NT.FOODS.map(foodItem);
-          if (!n) list.appendChild(h('p', { class: 'hint to-cqhint' }, L('Type to search among ' + (NT.FOODS.length + CQ.length) + ' foods (Ciqual table).', 'Tape pour chercher parmi ' + (NT.FOODS.length + CQ.length) + ' aliments (table Ciqual).')));
+          if (!n) list.appendChild(h('p', { class: 'hint to-cqhint' }, L('Type to search among ' + (NT.FOODS.length + CQ.length) + ' foods (Ciqual table, brands, fast food…).', 'Tape pour chercher parmi ' + (NT.FOODS.length + CQ.length) + ' aliments (table Ciqual, marques, fast-food…).')));
         } else {
           items = (tab === 'recipes' ? recipes.map(recipeItem) : data.custom.map(customItem)).filter(match);
         }
@@ -698,7 +706,7 @@
         h('div', { class: 'sheet-actions' },
           h('button', { class: 'btn btn-secondary btn-block', onclick: function () { close(); quickEntry(); } }, L('⚡ Quick entry (calories only)', '⚡ Saisie rapide (calories seulement)')),
           h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, L('Close', 'Fermer'))),
-        CQ.length ? h('p', { class: 'hint to-source' }, L('Food values: Anses, Ciqual 2025 table (Licence Ouverte).', 'Valeurs des aliments : Anses, table Ciqual 2025 (Licence Ouverte).')) : null
+        CQ.length ? h('p', { class: 'hint to-source' }, L('Food values: Anses, Ciqual 2025 table (Licence Ouverte). Brands and fast food: average label values, for guidance; check the label if in doubt.', 'Valeurs des aliments : Anses, table Ciqual 2025 (Licence Ouverte). Marques et fast-food : valeurs moyennes d’étiquette, indicatives ; vérifie l’étiquette en cas de doute.')) : null
       ];
     });
   }
@@ -708,7 +716,8 @@
     var g = item.grams;
     ui.sheet(function (close) {
       var info = h('div', { class: 'list-sub' });
-      var inp = h('input', { class: 'input to-gramsinp', type: 'text', inputmode: 'numeric', value: String(g), 'aria-label': L('Quantity in grams', 'Quantité en grammes') });
+      var inp = h('input', { class: 'input to-gramsinp', type: 'text', inputmode: 'numeric', value: String(g), 'aria-label': item.unit === 'ml' ? L('Quantity in ml', 'Quantité en ml') : L('Quantity in grams', 'Quantité en grammes') });
+      var U = item.unit || 'g';
       var err = h('p', { class: 'form-error', hidden: true });
       function paint() {
         var f = (g || 0) / 100, p = item.per100;
@@ -717,22 +726,22 @@
       }
       inp.addEventListener('input', function () { g = ui.parseNum(inp.value); paint(); });
       function set(v) { g = v; inp.value = String(v); paint(); }
-      var chips = [[item.grams, item.label ? item.label : L('portion', 'portion')], [Math.round(item.grams / 2), '½'], [item.grams * 2, '×2'], [100, '100 g']]
+      var chips = [[item.grams, item.label ? item.label : L('portion', 'portion')], [Math.round(item.grams / 2), '½'], [item.grams * 2, '×2'], [100, '100 ' + (item.unit || 'g')]]
         .filter(function (c, i, a) { return a.findIndex(function (x) { return x[0] === c[0]; }) === i; });
       paint();
       return [
         h('h2', { class: 'sheet-title' }, item.name),
         h('div', { class: 'to-gramsrow' },
-          h('button', { class: 'btn btn-step', type: 'button', 'aria-label': L('10 g less', '10 g de moins'), onclick: function () { set(Math.max(5, Math.round((g || 0) - 10))); } }, '−'),
-          h('label', { class: 'to-gramsfield' }, inp, h('span', null, 'g')),
-          h('button', { class: 'btn btn-step', type: 'button', 'aria-label': L('10 g more', '10 g de plus'), onclick: function () { set(Math.round((g || 0) + 10)); } }, '+')),
+          h('button', { class: 'btn btn-step', type: 'button', 'aria-label': L('10 ' + U + ' less', '10 ' + U + ' de moins'), onclick: function () { set(Math.max(5, Math.round((g || 0) - 10))); } }, '−'),
+          h('label', { class: 'to-gramsfield' }, inp, h('span', null, item.unit || 'g')),
+          h('button', { class: 'btn btn-step', type: 'button', 'aria-label': L('10 ' + U + ' more', '10 ' + U + ' de plus'), onclick: function () { set(Math.round((g || 0) + 10)); } }, '+')),
         h('div', { class: 'ck-chips to-gramchips' }, chips.map(function (c) {
-          return h('button', { class: 'ck-chip', type: 'button', onclick: function () { set(c[0]); } }, c[1] + (c[1].indexOf(' g') > -1 ? '' : ' · ' + c[0] + ' g'));
+          return h('button', { class: 'ck-chip', type: 'button', onclick: function () { set(c[0]); } }, c[1] + (/^100 /.test(c[1]) ? '' : ' · ' + c[0] + ' ' + (item.unit || 'g')));
         })),
         info, err,
         h('div', { class: 'sheet-actions' },
           h('button', { class: 'btn btn-primary btn-block', onclick: function () {
-            if (!g || g <= 0 || g > 3000) { err.textContent = L('Quantity between 1 and 3000 g.', 'Quantité entre 1 et 3000 g.'); err.hidden = false; return; }
+            if (!g || g <= 0 || g > 3000) { err.textContent = L('Quantity between 1 and 3000 ' + U + '.', 'Quantité entre 1 et 3000 ' + U + '.'); err.hidden = false; return; }
             close(); done(Math.round(g));
           } }, L('Add', 'Ajouter')),
           h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, L('Cancel', 'Annuler')))

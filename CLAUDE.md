@@ -54,6 +54,7 @@ js/tabs/muscu-engine.js     moteur PUR de la Muscu : groupe musculaire d'un exer
 (photos de progression d'Aujourd'hui : `sandeep2:aujourdhui-photos`, 480 px JPEG, incluses dans la sauvegarde)
 js/tabs/cuisine-nutrition.js table nutritionnelle PURE des ingrédients + aliments du quotidien (journal)
 js/tabs/ciqual-data.js      ~1 000 aliments de la table Ciqual 2025 (Anses, Licence Ouverte), valeurs pour 100 g + portion type ; fichier généré, citer la source
+js/tabs/produits-data.js    ~200 produits de marque et plats du quotidien (sodas, fast-food, barres…), même format que Ciqual, ids `p-…` ; valeurs moyennes d'étiquette INDICATIVES ; généré par `tools/gen-produits.py` (modifier le script puis relancer `python3 tools/gen-produits.py js/tabs/produits-data.js`)
 js/tabs/objectif.js         onglet Objectif de Gym Food (questionnaire, profil, besoins du jour, poids, mensurations, 2e personne) ; expose S2.objectif
 js/tabs/objectif-engine.js  moteur PUR nutrition : besoins (Mifflin-St Jeor), adéquation des recettes, journées types
 js/tabs/garde-robe-engine.js  moteur PUR de Wardrobe (règles, notes, recherche, apprentissage) : pas de DOM ni de stockage

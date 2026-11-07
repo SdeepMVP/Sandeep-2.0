@@ -659,5 +659,36 @@ test('sleep and steps averages ignore days without entry', function () {
   ok(TE.wellbeing([]).sleepAvg === null, 'empty');
 });
 
+/* ---------- v0.42 : produits de marque et plats du quotidien ---------- */
+console.log('\nBrands and everyday dishes');
+require(path.join(__dirname, '..', 'js', 'tabs', 'produits-data.js'));
+var PR = window.S2.products.foods;
+test('about 200 products with valid values, unique ids, calories matching macros', function () {
+  ok(PR.length >= 190, 'count ' + PR.length);
+  var seen = {};
+  PR.forEach(function (r) {
+    ok(/^p-/.test(r[0]) && !seen[r[0]], 'id ' + r[0]); seen[r[0]] = true;
+    ok(typeof r[1] === 'string' && r[1].length > 2, 'name ' + r[0]);
+    for (var i = 3; i <= 7; i++) ok(typeof r[i] === 'number' && r[i] >= 0, r[0] + ' value ' + i);
+    ok(r[7] > 0 && r[3] < 950, r[0] + ' portion / kcal');
+    if (r[2] !== 'alcohol' && r[3] > 20) { var calc = 4 * r[4] + 4 * r[5] + 9 * r[6]; ok(Math.abs(calc - r[3]) / r[3] <= 0.15, r[1] + ': ' + r[3] + ' kcal vs ' + Math.round(calc)); }
+  });
+});
+test('search finds brands first (Coca, Fanta, Red Bull, Big Mac, M&M’s, Nutella…)', function () {
+  var items = window.S2.nutritionTable.FOODS.map(function (f) { return { name: f.name, curated: true }; })
+    .concat(PR.map(function (r) { return { name: r[1], curated: true }; }))
+    .concat(CQ.foods.map(function (r) { return { name: r[1] }; }));
+  function first(q) { var r = TE.searchFoods(items, q, 5); return r.length ? r[0].name : ''; }
+  ok(first('coca') === 'Coca-Cola', first('coca'));
+  ok(first('coca zero') === 'Coca-Cola Zéro sucres', first('coca zero'));
+  ok(first('fanta') === 'Fanta Orange', first('fanta'));
+  ok(first('redbull') === 'Red Bull' && first('red bull') === 'Red Bull', first('redbull'));
+  ok(/Big Mac/.test(first('big mac')), first('big mac'));
+  ok(/McDonald/.test(first('mcdo frites')) && /frite/i.test(first('mcdo frites')), first('mcdo frites'));
+  ok(/^M&M/.test(first('mms')), first('mms'));
+  var nut = TE.searchFoods(items, 'nutella', 10).map(function (x) { return x.name; });
+  ok(nut[0] === 'Nutella' && nut.some(function (n) { return /tartiner/.test(n); }), 'synonyms add, not replace: ' + nut.join(' | '));
+});
+
 console.log('\n' + passed + ' passed, ' + failed + ' failed\n');
 process.exit(failed ? 1 : 0);
