@@ -1,10 +1,10 @@
-/* Écran Réglages : langue, thème, export / import JSON, effacement. Données : "sandeep2:settings". */
+/* Écran Réglages : thème, export / import JSON, effacement. Données : "sandeep2:settings". */
 (function () {
   'use strict';
   var S2 = window.S2;
   var ui = S2.ui, h = ui.h, L = S2.L;
   var NS = 'settings';
-  var VERSION = '0.38.0';
+  var VERSION = '0.39.0';
 
   function get() {
     var s = S2.storage.load(NS, null) || {};
@@ -119,18 +119,8 @@
   function mount(c) {
     var s = get();
     var themes = [['auto', 'Auto'], ['light', L('Light', 'Clair')], ['dark', L('Dark', 'Sombre')]];
-    var langs = [['en', 'English'], ['fr', 'Français']];
 
-    /* Langue de toute l'app : enregistrée puis rechargement (les données ne changent pas). */
-    if (!S2.langForced) c.appendChild(h('h2', { class: 'section-title' }, L('Language', 'Langue')));
-    if (!S2.langForced) c.appendChild(h('div', { class: 'card' },
-      h('div', { class: 'segmented' }, langs.map(function (l) {
-        return h('button', { class: 'seg' + (S2.lang === l[0] ? ' is-active' : ''), lang: l[0], 'aria-pressed': S2.lang === l[0] ? 'true' : 'false',
-          onclick: function () { if (S2.lang !== l[0]) S2.setLang(l[0]); } }, l[1]);
-      })),
-      h('p', { class: 'hint' }, L('Changes the whole app. Your data stays the same; names you typed yourself are not translated.',
-        'Change toute l’app. Tes données ne changent pas ; les noms que tu as saisis toi-même ne sont pas traduits.'))));
-
+    /* Plus de choix de langue depuis la v0.39 : les trois apps sont en français uniquement (js/core/i18n.js). */
     c.appendChild(h('h2', { class: 'section-title' }, L('Appearance', 'Apparence')));
     c.appendChild(h('div', { class: 'card' },
       h('div', { class: 'field-label' }, L('Theme', 'Thème')),
@@ -186,8 +176,8 @@
       };
       linkCard('Dressing', 'dressing/', L('Wardrobe now lives in Dressing, its own app: install it on your Home Screen. Your clothes, photos and outfits saved here stay in this app’s backups: export a backup above and import it in Dressing to get them there (it only takes Wardrobe and settings).',
         'La Garde-robe est maintenant dans Dressing, son app à elle : installe-la sur l’écran d’accueil. Tes pièces, photos et tenues enregistrées ici restent dans les sauvegardes de cette app : exporte une sauvegarde ci-dessus et importe-la dans Dressing pour les y retrouver (elle ne prend que la Garde-robe et les réglages).'));
-      linkCard('Gym Food', 'cuisine/', L('Gym and Kitchen now live only in Gym Food, their own app in French: install it on your phone and on Maeva’s. Each phone keeps its own data. Your workouts and recipes saved here stay in this app’s backups: export a backup above and import it in Gym Food to get them there (it only takes Gym, Kitchen and settings).',
-        'La Muscu et la Cuisine sont maintenant seulement dans Gym Food, leur propre app en français : installe-la sur ton téléphone et sur celui de Maeva. Chaque téléphone garde ses données. Tes séances et recettes enregistrées ici restent dans les sauvegardes de cette app : exporte une sauvegarde ci-dessus et importe-la dans Gym Food pour les y retrouver (elle ne prend que la Muscu, la Cuisine et les réglages).'));
+      linkCard('Gym Food', 'cuisine/', L('Gym and Kitchen now live only in Gym Food, their own app: install it on your phone and on Maeva’s. Each phone keeps its own data. Your workouts and recipes saved here stay in this app’s backups: export a backup above and import it in Gym Food to get them there (it only takes Gym, Kitchen and settings).',
+        'La Muscu et la Cuisine sont maintenant seulement dans Gym Food, leur propre app : installe-la sur ton téléphone et sur celui de Maeva. Chaque téléphone garde ses données. Tes séances et recettes enregistrées ici restent dans les sauvegardes de cette app : exporte une sauvegarde ci-dessus et importe-la dans Gym Food pour les y retrouver (elle ne prend que la Muscu, la Cuisine et les réglages).'));
     }
 
     c.appendChild(h('h2', { class: 'section-title' }, L('Install on iPhone', 'Installer sur l’iPhone')));
