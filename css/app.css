@@ -937,3 +937,12 @@ input[type="date"].input { display: block; line-height: 48px; }
 .to-gramsinp { text-align: center; font-size: 26px; font-weight: 750; font-variant-numeric: tabular-nums; }
 .to-gramchips { margin: 4px 0 8px; }
 .to-source, .to-cqhint { text-align: center; }
+
+/* Cuisine · courses à 2 par message (v0.37) */
+.ck-sharedcard { display: grid; gap: 6px; border-color: var(--camel); }
+.ck-sharedcard .card-title { margin: 0; }
+.ck-sharedrow { display: flex; justify-content: space-between; align-items: center; gap: 8px; border-top: 1px solid var(--border); padding-top: 6px; }
+.ck-for { color: var(--camel); font-weight: 600; }
+.ck-pastearea { min-height: 120px; font-size: 16px; }
+.ck-preview .card { display: grid; gap: 4px; }
+.ck-previewlist { margin: 4px 0 0; padding-left: 18px; display: grid; gap: 2px; font-size: 15px; }

@@ -451,5 +451,34 @@ test('search finds everyday foods first (eggs, cooked rice, cola, chicken…), q
   ok(Date.now() - t0 < 300, (Date.now() - t0) + ' ms');
 });
 
+/* ---------- Courses à 2 : échange de listes par message ---------- */
+require(path.join(__dirname, '..', 'js', 'tabs', 'cuisine-share.js'));
+var SHR = window.S2.cuisineShare;
+console.log('\nGroceries for two');
+function grp(key, qty, unit, name, aisle) { return { key: key, qty: qty, first: { qty: qty, unit: unit, link: unit ? 'de ' : '', name: name }, aisle: aisle || 'meat', recipes: ['R'] }; }
+test('a groceries message round-trips (accents included) and stays readable', function () {
+  var items = [grp('g|blanc de poulet', 240, 'g', 'blanc de poulet'), grp('#|oeuf', 3, '', 'œufs', 'dairy'), grp('x|sel poivre', null, '', 'Sel & poivre', 'grocery')];
+  var msg = SHR.message(SHR.pack('Maëva', items), 'Courses de Maëva', items.map(function (g) { return g.name || g.first.name; }));
+  ok(/• blanc de poulet/.test(msg) && msg.indexOf('SANEVA1:') > 0, 'readable + tag');
+  var back = SHR.read('Message reçu :\n' + msg + '\n— envoyé de mon iPhone');
+  ok(back && back.from === 'Maëva' && back.items.length === 3, JSON.stringify(back));
+  ok(back.items[1].first.name === 'œufs' && back.items[0].qty === 240 && back.items[2].qty === null, 'values');
+});
+test('invalid or tampered messages are refused', function () {
+  ok(SHR.read('Courses : poulet, riz') === null, 'plain text');
+  ok(SHR.read('SANEVA1:!!!') === null, 'garbage');
+  ok(SHR.read('SANEVA1:' + btoa('{"v":2,"items":[]}')) === null, 'wrong version');
+  ok(SHR.read('SANEVA1:' + btoa('{"v":1,"items":[{"k":5}]}')) === null, 'bad item');
+});
+test('received groceries merge with mine: same ingredient added up, who it is for', function () {
+  var mine = [grp('g|blanc de poulet', 240, 'g', 'blanc de poulet'), grp('g|riz', 150, 'g', 'riz', 'grocery')];
+  var theirs = SHR.read(SHR.message(SHR.pack('Maeva', [grp('g|blanc de poulet', 300, 'g', 'blanc de poulet'), grp('g|skyr', 450, 'g', 'skyr', 'dairy')]), 't', []));
+  var all = SHR.merge(mine, [theirs], 'Sandeep');
+  var chicken = all.filter(function (g) { return g.key === 'g|blanc de poulet'; })[0];
+  ok(all.length === 3 && chicken.qty === 540 && chicken.people.join() === 'Sandeep,Maeva', JSON.stringify(chicken));
+  var skyr = all.filter(function (g) { return g.key === 'g|skyr'; })[0];
+  ok(skyr.people.join() === 'Maeva' && skyr.aisle === 'dairy', 'new item');
+});
+
 console.log('\n' + passed + ' passed, ' + failed + ' failed\n');
 process.exit(failed ? 1 : 0);
