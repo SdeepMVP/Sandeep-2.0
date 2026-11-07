@@ -64,7 +64,7 @@
     /* v0.36 : app personnelle, plus de planning « à 2 » : on retire la portion de l'autre personne du planning validé
        (le menu et les courses déjà calculés ne changent pas). */
     d.forTwo = false;
-    /* v0.37 : listes de courses reçues d'une autre app SanEva (courses à 2) : [{ id, from, at, added, items }]. */
+    /* v0.37 : listes de courses reçues d'une autre app Gym Food (courses à 2) : [{ id, from, at, added, items }]. */
     d.shared = Array.isArray(d.shared) ? d.shared : [];
     if (d.week) { d.week.forTwo = false; d.week.days.forEach(function (day) { day.meals.forEach(function (m) { delete m.portion2; }); }); }
     /* v0.30 : prix saisis par l'utilisateur (€ par kg, litre ou pièce selon l'ingrédient), clé = nom normalisé. */
@@ -418,7 +418,7 @@
   var planShift = 0;       // décalage (jours) du début de la proposition par rapport au début proposé
   var weekSeed = 0, weekPicks = [], weekDraft = false; // proposition en cours (non enregistrée)
 
-  /* ---------- Objectif (SanEva) : lu via S2.objectif, jamais dans les données d'un autre onglet ---------- */
+  /* ---------- Objectif (Gym Food) : lu via S2.objectif, jamais dans les données d'un autre onglet ---------- */
   var NE = S2.nutritionEngine;
   function goalTargets() {
     try { return NE && S2.objectif ? S2.objectif.targets() : null; } catch (e) { return null; }
@@ -1263,8 +1263,8 @@
     if (!mine.length) { ui.toast(planItems().length ? L('You have everything!', 'Tu as tout !') : L('Your menu is empty', 'Ton menu est vide')); return; }
     var me = myLabel();
     var payload = SH.pack(me, mine);
-    var title = L('🛒 ' + me + '’s groceries (' + mine.length + ' items) — to add in SanEva › Kitchen › Groceries › “Add someone’s groceries”:',
-      '🛒 Courses de ' + me + ' (' + mine.length + ' articles) — à ajouter dans SanEva › Cuisine › Courses › « Ajouter les courses de quelqu’un » :');
+    var title = L('🛒 ' + me + '’s groceries (' + mine.length + ' items) — to add in Gym Food › Kitchen › Groceries › “Add someone’s groceries”:',
+      '🛒 Courses de ' + me + ' (' + mine.length + ' articles) — à ajouter dans Gym Food › Cuisine › Courses › « Ajouter les courses de quelqu’un » :');
     var text = SH.message(payload, title, mine.map(function (g) { return g.text; }));
     if (navigator.share) navigator.share({ title: L('My groceries', 'Mes courses'), text: text }).catch(function () {});
     else if (navigator.clipboard) navigator.clipboard.writeText(text).then(function () { ui.toast(L('Copied: paste it in a message', 'Copié : colle-le dans un message')); });
@@ -1288,7 +1288,7 @@
         preview.innerHTML = '';
         addBtn.disabled = !parsed;
         if (!ta.value.trim()) return;
-        if (!parsed) { preview.appendChild(h('p', { class: 'form-error' }, L('This is not a SanEva groceries message. Paste the whole message, including the line starting with SANEVA1.', 'Ce n’est pas un message de courses SanEva. Colle tout le message, y compris la ligne qui commence par SANEVA1.'))); return; }
+        if (!parsed) { preview.appendChild(h('p', { class: 'form-error' }, L('This is not a Gym Food groceries message. Paste the whole message, including the line starting with SANEVA1.', 'Ce n’est pas un message de courses Gym Food. Colle tout le message, y compris la ligne qui commence par SANEVA1.'))); return; }
         var again = data.shared.some(function (x) { return x.from === parsed.from; });
         preview.appendChild(h('div', { class: 'card' },
           h('div', { class: 'list-title' }, L(parsed.from + '’s groceries', 'Courses de ' + parsed.from)),
@@ -1302,8 +1302,8 @@
       ta.addEventListener('input', check);
       return [
         h('h2', { class: 'sheet-title' }, L('Add someone’s groceries', 'Ajouter les courses de quelqu’un')),
-        h('p', { class: 'sheet-text' }, L('In their SanEva, they tap “📤 Send my groceries” and send you the message. Copy the whole message and paste it here.',
-          'Dans son SanEva, l’autre personne touche « 📤 Envoyer mes courses » et t’envoie le message. Copie tout le message et colle-le ici.')),
+        h('p', { class: 'sheet-text' }, L('In their Gym Food, they tap “📤 Send my groceries” and send you the message. Copy the whole message and paste it here.',
+          'Dans son Gym Food, l’autre personne touche « 📤 Envoyer mes courses » et t’envoie le message. Copie tout le message et colle-le ici.')),
         navigator.clipboard && navigator.clipboard.readText ? h('button', { class: 'btn btn-secondary btn-block', type: 'button', onclick: function () {
           navigator.clipboard.readText().then(function (t) { ta.value = t; check(); }).catch(function () { ui.toast(L('Paste it in the box instead', 'Colle-le plutôt dans le champ')); });
         } }, L('📋 Paste', '📋 Coller')) : null,

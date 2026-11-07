@@ -1,4 +1,4 @@
-/* Moteur PUR de l'onglet Objectif (SanEva) : besoins caloriques et macros, adéquation des recettes, journée type.
+/* Moteur PUR de l'onglet Objectif (Gym Food) : besoins caloriques et macros, adéquation des recettes, journée type.
    Aucun DOM ni stockage : testable sous Node (tests/run.js). Utilisé par js/tabs/objectif.js et js/tabs/cuisine.js.
    Formule : Mifflin-St Jeor (métabolisme de base) × niveau d'activité = dépense du jour, puis ajustement selon l'objectif.
    Protéines et lipides en g par kg de poids de corps, glucides = le reste des calories. Valeurs indicatives. */

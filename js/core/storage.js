@@ -48,7 +48,7 @@
     var data = {};
     keys().forEach(function (ns) { data[ns] = load(ns); });
     return {
-      app: 'Sandeep 2.0',
+      app: 'Sandeep 2.0', /* marqueur du format de sauvegarde (commun aux 3 apps) : ne jamais changer */
       format: 1,
       exportedAt: new Date().toISOString(),
       data: data
@@ -59,7 +59,7 @@
   function importAll(obj) {
     if (!obj || typeof obj !== 'object' || obj.app !== 'Sandeep 2.0' ||
         !obj.data || typeof obj.data !== 'object') {
-      throw new Error('This file is not a Sandeep 2.0 backup.');
+      throw new Error(S2.L ? S2.L('This file is not a backup of this app.', 'Ce fichier n’est pas une sauvegarde de cette app.') : 'This file is not a backup of this app.');
     }
     var backup = exportAll();
     try {

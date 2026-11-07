@@ -4,7 +4,7 @@
   var S2 = window.S2;
   var ui = S2.ui, h = ui.h, L = S2.L;
   var NS = 'settings';
-  var VERSION = '0.37.0';
+  var VERSION = '0.38.0';
 
   function get() {
     var s = S2.storage.load(NS, null) || {};
@@ -76,7 +76,7 @@
     reader.onload = function () {
       var obj;
       try { obj = JSON.parse(reader.result); } catch (e) { ui.toast(L('Unreadable JSON file', 'Fichier JSON illisible')); return; }
-      if (!obj || obj.app !== 'Sandeep 2.0' || !obj.data) { ui.toast(L('This is not a Sandeep 2.0 backup', 'Ce n’est pas une sauvegarde Sandeep 2.0')); return; }
+      if (!obj || obj.app !== 'Sandeep 2.0' || !obj.data) { ui.toast(L('This is not a backup of this app', 'Ce n’est pas une sauvegarde de cette app')); return; }
       var muscu = obj.data.muscu;
       var n = muscu && muscu.sessions ? muscu.sessions.length : 0;
       var hasGym = S2.app.tabs().some(function (t) { return t.id === 'muscu'; });
@@ -167,20 +167,27 @@
       h('p', { class: 'sheet-text' }, L('Spaces: ', 'Espaces : ') + (keys.join(', ') || L('none', 'aucun')) + ' · ' + ui.num(bytes / 1024, 1) + L(' KB used.', ' Ko utilisés.')),
       h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: wipe }, L('Erase everything', 'Tout effacer'))));
 
-    /* Lien vers SanEva (dossier cuisine/) : seule app qui contient la Cuisine (depuis la v0.22) et la Muscu (depuis la v0.27). Absent de SanEva elle-même. */
+    /* Liens vers les apps séparées, seulement dans l'app principale (Habits) :
+       Dressing (dossier dressing/) contient la Garde-robe depuis la v0.37 ; Gym Food (dossier cuisine/) la Cuisine (v0.22) et la Muscu (v0.27). */
     if (!window.S2_APP) {
-      var sanevaUrl = new URL('cuisine/', location.href.split('#')[0]).href;
-      c.appendChild(h('h2', { class: 'section-title' }, 'SanEva'));
-      c.appendChild(h('div', { class: 'card' },
-        h('p', { class: 'sheet-text' }, L('Gym and Kitchen now live only in SanEva, their own app in French: install it on your phone and on Maeva’s. Each phone keeps its own data. Your workouts and recipes saved here stay in this app’s backups: export a backup below and import it in SanEva to get them there (it only takes Gym, Kitchen and settings).',
-          'La Muscu et la Cuisine sont maintenant seulement dans SanEva, leur propre app en français : installe-la sur ton téléphone et sur celui de Maeva. Chaque téléphone garde ses données. Tes séances et recettes enregistrées ici restent dans les sauvegardes de cette app : exporte une sauvegarde ci-dessous et importe-la dans SanEva pour les y retrouver (elle ne prend que la Muscu, la Cuisine et les réglages).')),
-        h('p', { class: 'hint' }, sanevaUrl),
-        h('div', { class: 'stack' },
-          h('a', { class: 'btn btn-primary btn-block', href: sanevaUrl }, L('Open SanEva', 'Ouvrir SanEva')),
-          h('button', { class: 'btn btn-secondary btn-block', onclick: function () {
-          if (navigator.share) navigator.share({ title: 'SanEva', url: sanevaUrl }).catch(function () {});
-          else if (navigator.clipboard) navigator.clipboard.writeText(sanevaUrl).then(function () { ui.toast(L('Link copied', 'Lien copié')); });
-        } }, L('Share the link', 'Partager le lien')))));
+      var base = location.href.split('#')[0];
+      var linkCard = function (name, folder, text) {
+        var url = new URL(folder, base).href;
+        c.appendChild(h('h2', { class: 'section-title' }, name));
+        c.appendChild(h('div', { class: 'card' },
+          h('p', { class: 'sheet-text' }, text),
+          h('p', { class: 'hint' }, url),
+          h('div', { class: 'stack' },
+            h('a', { class: 'btn btn-primary btn-block', href: url }, L('Open ', 'Ouvrir ') + name),
+            h('button', { class: 'btn btn-secondary btn-block', onclick: function () {
+              if (navigator.share) navigator.share({ title: name, url: url }).catch(function () {});
+              else if (navigator.clipboard) navigator.clipboard.writeText(url).then(function () { ui.toast(L('Link copied', 'Lien copié')); });
+            } }, L('Share the link', 'Partager le lien')))));
+      };
+      linkCard('Dressing', 'dressing/', L('Wardrobe now lives in Dressing, its own app: install it on your Home Screen. Your clothes, photos and outfits saved here stay in this app’s backups: export a backup above and import it in Dressing to get them there (it only takes Wardrobe and settings).',
+        'La Garde-robe est maintenant dans Dressing, son app à elle : installe-la sur l’écran d’accueil. Tes pièces, photos et tenues enregistrées ici restent dans les sauvegardes de cette app : exporte une sauvegarde ci-dessus et importe-la dans Dressing pour les y retrouver (elle ne prend que la Garde-robe et les réglages).'));
+      linkCard('Gym Food', 'cuisine/', L('Gym and Kitchen now live only in Gym Food, their own app in French: install it on your phone and on Maeva’s. Each phone keeps its own data. Your workouts and recipes saved here stay in this app’s backups: export a backup above and import it in Gym Food to get them there (it only takes Gym, Kitchen and settings).',
+        'La Muscu et la Cuisine sont maintenant seulement dans Gym Food, leur propre app en français : installe-la sur ton téléphone et sur celui de Maeva. Chaque téléphone garde ses données. Tes séances et recettes enregistrées ici restent dans les sauvegardes de cette app : exporte une sauvegarde ci-dessus et importe-la dans Gym Food pour les y retrouver (elle ne prend que la Muscu, la Cuisine et les réglages).'));
     }
 
     c.appendChild(h('h2', { class: 'section-title' }, L('Install on iPhone', 'Installer sur l’iPhone')));
@@ -196,7 +203,7 @@
       h('div', { class: 'stack' },
         h('button', { class: 'btn btn-secondary btn-block', onclick: checkUpdate }, L('Check now', 'Vérifier maintenant')))));
 
-    c.appendChild(h('p', { class: 'hint center' }, (window.S2_APP && window.S2_APP.name || 'Sandeep 2.0') + ' · version ' + VERSION));
+    c.appendChild(h('p', { class: 'hint center' }, (window.S2_APP && window.S2_APP.name || 'Habits') + ' · version ' + VERSION));
   }
 
   S2.settings = { applyTheme: applyTheme, get: get, VERSION: VERSION };

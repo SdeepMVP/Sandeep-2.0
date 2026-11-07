@@ -1,4 +1,4 @@
-/* Onglet Aujourd'hui (SanEva) : le suivi du jour, pour la personne du téléphone et la 2e personne (Objectif › Cuisiner à 2).
+/* Onglet Aujourd'hui (Gym Food) : le suivi du jour, pour la personne du téléphone et la 2e personne (Objectif › Cuisiner à 2).
    - Journal : repas prévus par le planning (Cuisine) à cocher, aliments du quotidien, recettes, saisie rapide ; eau.
    - Entraînement du jour (Muscu › jours d'entraînement) et activités (cardio, marche…).
    - Bilan de la semaine : séances, nutrition, courbes du poids et du tour de taille, ajustement proposé des calories.
@@ -93,7 +93,7 @@
   function renderWelcome() {
     root.appendChild(h('div', { class: 'empty-state small to-welcome' },
       h('div', { class: 'empty-icon', html: ICON, 'aria-hidden': 'true' }),
-      h('h2', null, L('Welcome to SanEva', 'Bienvenue sur SanEva')),
+      h('h2', null, L('Welcome to Gym Food', 'Bienvenue sur Gym Food')),
       h('p', null, L('Tell the app who you are, your sport and your goals: it suggests your calories, your program and your training days. Then follow each day what you eat and your workouts, here.',
         'Dis à l’app qui tu es, ton sport et tes objectifs : elle te propose tes calories, ton programme et tes jours d’entraînement. Ensuite, tu suis ici chaque jour ce que tu manges et tes séances.')),
       h('button', { class: 'btn btn-primary btn-lg', onclick: function () { S2.objectif.startWizard('me', render); } }, L('Start (2 min)', 'Commencer (2 min)'))));

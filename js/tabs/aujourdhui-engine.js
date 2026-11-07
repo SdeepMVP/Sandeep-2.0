@@ -1,4 +1,4 @@
-/* Moteur PUR de l'onglet Aujourd'hui (SanEva) : totaux du journal, bilan de la semaine, tendance du poids et
+/* Moteur PUR de l'onglet Aujourd'hui (Gym Food) : totaux du journal, bilan de la semaine, tendance du poids et
    suggestion d'ajustement des calories. Aucun DOM ni stockage : testable sous Node (tests/run.js).
    La suggestion n'est qu'une proposition : l'utilisateur la confirme (ou non) dans l'app. */
 (function () {

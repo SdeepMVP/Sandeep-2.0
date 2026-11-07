@@ -174,7 +174,7 @@ test('105-piece closet: full shopping analysis in under 2 s', function () {
   console.log('      (' + ms + ' ms, ' + res.length + ' suggestions)');
 });
 
-/* ---------- Objectif (SanEva) : besoins et recettes ---------- */
+/* ---------- Objectif (Gym Food) : besoins et recettes ---------- */
 require(path.join(__dirname, '..', 'js', 'tabs', 'objectif-engine.js'));
 require(path.join(__dirname, '..', 'js', 'tabs', 'cuisine-recipes.js'));
 var N = window.S2.nutritionEngine, RECIPES = window.S2.cuisineRecipes;
@@ -296,7 +296,7 @@ test('week plan: another week and another day change the suggestion, determinist
   ok(c[2].pick === 1 && ids([a[0], a[1]]) === ids([c[0], c[1]]) && ids([a[2]]) !== ids([c[2]]), 'day 3 not changed alone');
 });
 
-/* ---------- Cuisine (SanEva) : prix du panier ---------- */
+/* ---------- Cuisine (Gym Food) : prix du panier ---------- */
 require(path.join(__dirname, '..', 'js', 'tabs', 'cuisine-prices.js'));
 var PR = window.S2.cuisinePrices;
 console.log('\nGrocery prices');
