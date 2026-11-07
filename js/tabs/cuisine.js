@@ -64,6 +64,8 @@
     /* v0.36 : app personnelle, plus de planning « à 2 » : on retire la portion de l'autre personne du planning validé
        (le menu et les courses déjà calculés ne changent pas). */
     d.forTwo = false;
+    /* v0.37 : listes de courses reçues d'une autre app SanEva (courses à 2) : [{ id, from, at, added, items }]. */
+    d.shared = Array.isArray(d.shared) ? d.shared : [];
     if (d.week) { d.week.forTwo = false; d.week.days.forEach(function (day) { day.meals.forEach(function (m) { delete m.portion2; }); }); }
     /* v0.30 : prix saisis par l'utilisateur (€ par kg, litre ou pièce selon l'ingrédient), clé = nom normalisé. */
     d.prices = d.prices || {};
@@ -294,7 +296,7 @@
   }
 
   /* Liste de courses commune : additionne les quantités de même unité et même nom, puis range par rayon. */
-  function shoppingList() {
+  function shoppingList(mineOnly) {
     var groups = {}, order = [];
     planItems().forEach(function (it) {
       var r = recipe(it.recipeId), v = view(r), factor = (it.servings || 1) / (r.servings || 1);
@@ -307,8 +309,11 @@
         if (g.recipes.indexOf(v.name) < 0) g.recipes.push(v.name);
       });
     });
-    return order.map(function (k) {
-      var g = groups[k], f = g.first;
+    var list = order.map(function (k) { return groups[k]; });
+    /* Courses à 2 : on ajoute les listes reçues (mêmes ingrédients additionnés). */
+    if (!mineOnly && data.shared.length && SH) SH.merge(list, data.shared, myLabel());
+    return list.map(function (g) {
+      var f = g.first;
       if (g.qty === null) { g.text = f.name; return g; }
       var total = roundQty(g.qty), name = f.name;
       if (!f.unit && f.qty < 2 && total >= 2) name = FR ? pluralize(name) : pluralizeEn(name);
@@ -1115,6 +1120,8 @@
 
   /* ---------- Prix estimé du panier (js/tabs/cuisine-prices.js : prix moyens intégrés, aucun accès réseau) ---------- */
   var PRICES = S2.cuisinePrices;
+  var SH = S2.cuisineShare;
+  function myLabel() { try { return S2.objectif && S2.objectif.myName ? S2.objectif.myName() : L('Me', 'Moi'); } catch (e) { return L('Me', 'Moi'); } }
   var NT = S2.nutritionTable;
   function money(x, round) {
     return Number(x).toLocaleString(S2.locale, { style: 'currency', currency: 'EUR', minimumFractionDigits: round ? 0 : 2, maximumFractionDigits: round ? 0 : 2 });
@@ -1181,8 +1188,27 @@
     if (!list.length) {
       root.appendChild(h('div', { class: 'empty-state small' },
         h('p', null, L('Add meals to the menu: their ingredients are combined here.', 'Ajoute des repas au menu : leurs ingrédients sont regroupés ici.')),
-        h('button', { class: 'btn btn-secondary', onclick: function () { section = 'recipes'; render(); } }, L('Choose recipes', 'Choisir des recettes'))));
+        h('button', { class: 'btn btn-secondary', onclick: function () { section = 'recipes'; render(); } }, L('Choose recipes', 'Choisir des recettes')),
+        SH ? h('button', { class: 'btn btn-ghost', onclick: importShared }, L('📥 Add someone’s groceries', '📥 Ajouter les courses de quelqu’un')) : null));
       return;
+    }
+    var shared = data.shared;
+    if (shared.length) {
+      root.appendChild(h('div', { class: 'card ck-sharedcard' },
+        h('div', { class: 'card-title' }, L('🛒 Groceries for two', '🛒 Courses à 2')),
+        h('p', { class: 'hint' }, L('Your list includes the groceries received below. Same ingredients are added up.', 'Ta liste comprend les courses reçues ci-dessous. Les mêmes ingrédients sont additionnés.')),
+        shared.map(function (sl) {
+          return h('div', { class: 'ck-sharedrow' },
+            h('div', null, h('div', { class: 'list-title' }, sl.from),
+              h('div', { class: 'list-sub' }, plural(sl.items.length, 'item', 'article') + (sl.at ? L(' · sent ', ' · envoyé le ') + ui.date(sl.at) : ''))),
+            h('button', { class: 'btn btn-ghost btn-sm danger-text', onclick: function () {
+              ui.confirm({ title: L('Remove ' + sl.from + '’s groceries?', 'Retirer les courses de ' + sl.from + ' ?'),
+                message: L('Their items are taken out of your list. Your own menu does not change.', 'Ses articles sont retirés de ta liste. Ton menu ne change pas.'),
+                okLabel: L('Remove', 'Retirer'), danger: true }).then(function (ok) {
+                if (!ok) return; data.shared = data.shared.filter(function (x) { return x.id !== sl.id; }); persist(); render();
+              });
+            } }, L('Remove', 'Retirer')));
+        })));
     }
     var got = list.filter(function (g) { return checks[g.key]; }).length;
     var items = PRICES ? priceItems(list) : [], cost = PRICES ? PRICES.basket(items) : null, priceOf = {};
@@ -1196,7 +1222,7 @@
         h('div', { class: 'ck-basketstats' },
           got && cost.left !== cost.basket ? h('div', null, h('span', { class: 'ck-basketval' }, money(cost.left, true)), h('span', { class: 'list-sub' }, L('left to buy', 'reste à acheter'))) : null,
           cost.used < cost.basket * 0.9 ? h('div', null, h('span', { class: 'ck-basketval' }, money(cost.used - cost.pantry, true)), h('span', { class: 'list-sub' }, L('eaten from it', 'consommé'))) : null,
-          servings ? h('div', null, h('span', { class: 'ck-basketval' }, money(cost.used / servings)), h('span', { class: 'list-sub' }, L('per serving', 'par portion'))) : null,
+          servings && !data.shared.length ? h('div', null, h('span', { class: 'ck-basketval' }, money(cost.used / servings)), h('span', { class: 'list-sub' }, L('per serving', 'par portion'))) : null,
           cost.pantry >= 0.5 ? h('div', null, h('span', { class: 'ck-basketval' }, '+ ' + money(cost.pantry, true)), h('span', { class: 'list-sub' }, L('pantry, pro rata', 'placard, au prorata'))) : null),
         h('p', { class: 'hint' }, L('Average supermarket prices, whole packs (6 eggs, 500 g of chicken…). “Eaten” = what the menu really uses (opened packs serve later). Oil, spices and sauces from the pantry are counted apart, only for what is used.',
           'Prix moyens en supermarché, paquets entiers (6 œufs, 500 g de poulet…). « Consommé » = ce que le menu utilise vraiment (les paquets entamés servent ensuite). Huile, épices et sauces du placard sont comptées à part, seulement pour ce qui est utilisé.') +
@@ -1218,25 +1244,73 @@
           onclick: function () { if (on) delete checks[g.key]; else checks[g.key] = true; persist(); render(); } },
           h('span', { class: 'ck-box', 'aria-hidden': 'true' }, on ? '✓' : ''),
           h('span', { class: 'ck-checktext' }, g.text,
-            g.recipes.length > 1 || planItems().length > 1 ? h('span', { class: 'ck-from' }, g.recipes.join(' · ')) : null),
+            shared.length && g.people ? h('span', { class: 'ck-from ck-for' }, L('For: ', 'Pour : ') + g.people.join(' + ')) : null,
+            g.recipes.length && (g.recipes.length > 1 || planItems().length > 1) ? h('span', { class: 'ck-from' }, g.recipes.join(' · ')) : null),
           e && e.known && !e.none ? h('span', { class: 'ck-itemprice' + (e.pantry ? ' is-pantry' : '') }, e.pantry ? money(e.used) : money(e.price)) : null);
       })));
     });
     root.appendChild(h('p', { class: 'hint' }, L('Same ingredients are added up (same unit). Tick what you have or put in the basket.',
       'Les mêmes ingrédients sont additionnés (même unité). Coche ce que tu as ou ce que tu mets dans le panier.')));
     root.appendChild(h('div', { class: 'bottom-actions' },
-      h('button', { class: 'btn btn-primary btn-block', onclick: function () {
-        var missing = list.filter(function (g) { return !checks[g.key]; });
-        if (!missing.length) { ui.toast(L('You have everything!', 'Tu as tout !')); return; }
-        var text = L('Groceries', 'Courses') + '\n' + AISLE_ORDER.map(function (aid) {
-          var rows = missing.filter(function (g) { return g.aisle === aid; });
-          if (!rows.length) return '';
-          return '\n' + AISLES.filter(function (a) { return a.id === aid; })[0].label + '\n' + rows.map(function (g) { return '• ' + g.text; }).join('\n');
-        }).join('');
-        if (navigator.share) navigator.share({ title: L('Groceries', 'Courses'), text: text }).catch(function () {});
-        else if (navigator.clipboard) navigator.clipboard.writeText(text).then(function () { ui.toast(L('List copied', 'Liste copiée')); });
-      } }, L('Share the missing items', 'Partager ce qui manque')),
+      SH ? h('button', { class: 'btn btn-primary btn-block', onclick: sendMine }, L('📤 Send my groceries', '📤 Envoyer mes courses')) : null,
+      SH ? h('button', { class: 'btn btn-secondary btn-block', onclick: importShared }, L('📥 Add someone’s groceries', '📥 Ajouter les courses de quelqu’un')) : null,
       got ? h('button', { class: 'btn btn-ghost btn-block', onclick: function () { data.plan.checks = {}; persist(); render(); } }, L('Untick everything', 'Tout décocher')) : null));
+  }
+
+  /* ---------- Courses à 2 : envoyer sa liste, ajouter celle de l'autre (par message, sans serveur) ---------- */
+  function sendMine() {
+    var mine = shoppingList(true).filter(function (g) { return !data.plan.checks[g.key]; });
+    if (!mine.length) { ui.toast(planItems().length ? L('You have everything!', 'Tu as tout !') : L('Your menu is empty', 'Ton menu est vide')); return; }
+    var me = myLabel();
+    var payload = SH.pack(me, mine);
+    var title = L('🛒 ' + me + '’s groceries (' + mine.length + ' items) — to add in SanEva › Kitchen › Groceries › “Add someone’s groceries”:',
+      '🛒 Courses de ' + me + ' (' + mine.length + ' articles) — à ajouter dans SanEva › Cuisine › Courses › « Ajouter les courses de quelqu’un » :');
+    var text = SH.message(payload, title, mine.map(function (g) { return g.text; }));
+    if (navigator.share) navigator.share({ title: L('My groceries', 'Mes courses'), text: text }).catch(function () {});
+    else if (navigator.clipboard) navigator.clipboard.writeText(text).then(function () { ui.toast(L('Copied: paste it in a message', 'Copié : colle-le dans un message')); });
+    else ui.toast(L('Sharing is not available here', 'Le partage n’est pas disponible ici'));
+  }
+  function importShared() {
+    var parsed = null;
+    ui.sheet(function (close) {
+      var ta = h('textarea', { class: 'input ck-textarea ck-pastearea', rows: 5, placeholder: L('Paste the message received here', 'Colle ici le message reçu'), 'aria-label': L('Message', 'Message') });
+      var preview = h('div', { class: 'ck-preview' });
+      var addBtn = h('button', { class: 'btn btn-primary btn-block', disabled: true, onclick: function () {
+        if (!parsed) return;
+        var replaced = data.shared.some(function (x) { return x.from === parsed.from; });
+        data.shared = data.shared.filter(function (x) { return x.from !== parsed.from; });
+        data.shared.push({ id: ui.uid(), from: parsed.from, at: parsed.at, added: new Date().toISOString(), items: parsed.items });
+        persist(); close(); section = 'shop'; render(); window.scrollTo(0, 0);
+        ui.toast((replaced ? L('Updated: ', 'Mise à jour : ') : L('Added: ', 'Ajouté : ')) + L(parsed.from + '’s groceries', 'courses de ' + parsed.from));
+      } }, L('Add to my list', 'Ajouter à ma liste'));
+      function check() {
+        parsed = SH.read(ta.value);
+        preview.innerHTML = '';
+        addBtn.disabled = !parsed;
+        if (!ta.value.trim()) return;
+        if (!parsed) { preview.appendChild(h('p', { class: 'form-error' }, L('This is not a SanEva groceries message. Paste the whole message, including the line starting with SANEVA1.', 'Ce n’est pas un message de courses SanEva. Colle tout le message, y compris la ligne qui commence par SANEVA1.'))); return; }
+        var again = data.shared.some(function (x) { return x.from === parsed.from; });
+        preview.appendChild(h('div', { class: 'card' },
+          h('div', { class: 'list-title' }, L(parsed.from + '’s groceries', 'Courses de ' + parsed.from)),
+          h('div', { class: 'list-sub' }, plural(parsed.items.length, 'item', 'article') + (parsed.at ? L(' · sent ', ' · envoyé le ') + ui.date(parsed.at) : '')),
+          h('ul', { class: 'ck-previewlist' }, parsed.items.slice(0, 6).map(function (it) {
+            var f = it.first;
+            return h('li', null, it.qty === null ? f.name : num(roundQty(it.qty)) + ' ' + f.unit + f.link + f.name);
+          }).concat(parsed.items.length > 6 ? [h('li', { class: 'muted' }, L('and ' + (parsed.items.length - 6) + ' more', 'et ' + (parsed.items.length - 6) + ' autres'))] : [])),
+          again ? h('p', { class: 'note' }, L('It replaces the list already received from ' + parsed.from + '.', 'Elle remplace la liste déjà reçue de ' + parsed.from + '.')) : null));
+      }
+      ta.addEventListener('input', check);
+      return [
+        h('h2', { class: 'sheet-title' }, L('Add someone’s groceries', 'Ajouter les courses de quelqu’un')),
+        h('p', { class: 'sheet-text' }, L('In their SanEva, they tap “📤 Send my groceries” and send you the message. Copy the whole message and paste it here.',
+          'Dans son SanEva, l’autre personne touche « 📤 Envoyer mes courses » et t’envoie le message. Copie tout le message et colle-le ici.')),
+        navigator.clipboard && navigator.clipboard.readText ? h('button', { class: 'btn btn-secondary btn-block', type: 'button', onclick: function () {
+          navigator.clipboard.readText().then(function (t) { ta.value = t; check(); }).catch(function () { ui.toast(L('Paste it in the box instead', 'Colle-le plutôt dans le champ')); });
+        } }, L('📋 Paste', '📋 Coller')) : null,
+        ta, preview,
+        h('div', { class: 'sheet-actions' }, addBtn, h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, L('Cancel', 'Annuler')))
+      ];
+    }, { modal: true });
   }
 
   function checkRow(text, on, toggle) {

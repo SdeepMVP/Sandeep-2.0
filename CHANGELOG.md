@@ -1,5 +1,12 @@
 # Changelog — Sandeep 2.0
 
+## 0.37.0 — 2026-11-07
+- SanEva Kitchen › Groceries: **groceries for two, by message**. Each person plans in their own app, then:
+  - **📤 Send my groceries** opens the iPhone share sheet (iMessage, WhatsApp, AirDrop…) with a readable list and a SanEva line;
+  - **📥 Add someone’s groceries**: paste the message, check the preview, confirm.
+- The received list merges with yours: same ingredients are added up, each line shows who it is for, and the basket price covers both. **Remove** takes their part out after shopping. A new message from the same person replaces their previous list.
+- No server and no account. Only your unticked items are sent, and invalid messages are refused. Tests for the message format and the merge.
+
 ## 0.36.0 — 2026-11-07
 - SanEva is now **fully personal**: one phone, one person. The other person is removed everywhere: Goal (“Cooking for two”), Kitchen Planning (“For two”) and leftover data in Gym and Today. Their profile is deleted from the phone's data on first launch. Menus and groceries already confirmed are kept as they are.
 
