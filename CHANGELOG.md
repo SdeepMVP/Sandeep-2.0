@@ -1,5 +1,13 @@
 # Changelog — Habits (ex-Sandeep 2.0), Gym Food (ex-SanEva), Dressing
 
+## 0.43.0 — 2026-11-08
+- **Undo** for 6 seconds after a deletion or an action you may regret: journal entries, activities, leftovers, own foods, photos, weigh-ins and measurements, workouts (finished or discarded), program days and exercises, program template, new cycle, recipes, menu items, “Cooked”, plan, received grocery lists. While a sheet is open the message shows at the top.
+- **Fix mistakes**: tap a logged food to change its quantity (grams / ml or servings) or meal; tap an activity to change it; **fix a finished workout** (weight, reps, RPE, add or remove sets) from History › Workouts or an exercise's history; **see, fix or delete weigh-ins and measurements** (Goal, or Today › Review › Fix) — the profile weight follows the latest weigh-in left.
+- **My foods**: ✎ to edit or delete a food you created (it could not be reached before).
+- Kitchen: remove an entry from “Recently cooked”; Today: remove leftovers you threw away or gave.
+- Gym: go back to the previous cycle if a new one was started by mistake (no workout in it yet).
+- Settings: a **safety copy** is kept before an import or “Erase everything”, with “Restore the data from before”.
+
 ## 0.42.0 — 2026-11-07
 - Today › Add food: **196 brands and everyday dishes** on top of the Ciqual table (1,274 foods in all): sodas (Coca-Cola, Coca Zero, Fanta, Sprite, Orangina, Oasis, Ice Tea, Schweppes, Pepsi…), energy and sports drinks (Red Bull, Monster, Powerade…), beers and cocktails, fast food (McDonald's, Burger King, KFC, French tacos, kebab, sushi, poke, pizza by the slice…), bars and sweets (Kinder, Twix, Mars, Snickers, M&M's, Haribo, Nutella…), crisps, biscuits, cereals, dairy desserts, ice creams and everyday dishes. Values are average label values, for guidance.
 - Search: brands come first, synonyms now add to the typed word (“nutella” finds Nutella and spreads; “mcdo”, “bk”, “redbull”, “mms”…).

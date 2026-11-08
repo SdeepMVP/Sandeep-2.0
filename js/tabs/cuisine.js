@@ -116,6 +116,11 @@
     return d;
   }
   function persist() { S2.storage.save(NS, data); }
+  /* v0.43 : photo des données avant une action qu'on peut regretter, pour « Annuler ». */
+  function snapshot() {
+    var saved = JSON.stringify(data);
+    return function () { data = JSON.parse(saved); persist(); if (root) render(); };
+  }
   function recipe(id) { return data.recipes.filter(function (r) { return r.id === id; })[0]; }
   function checksOf(id) { return data.checks[id] || (data.checks[id] = { ing: {}, steps: {} }); }
 
@@ -1011,7 +1016,7 @@
         h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: function () {
           ui.confirm({ title: L('Remove this plan?', 'Retirer ce planning ?'),
             message: L('The plan is removed. The meals already in the menu stay there (remove them from the menu if needed).', 'Le planning est retiré. Les repas déjà dans le menu y restent (retire-les du menu si besoin).'),
-            okLabel: L('Remove', 'Retirer'), danger: true }).then(function (ok) { if (!ok) return; data.week = null; persist(); render(); });
+            okLabel: L('Remove', 'Retirer'), danger: true }).then(function (ok) { if (!ok) return; var back = snapshot(); data.week = null; persist(); render(); ui.undo(L('Plan removed', 'Planning retiré'), back); });
         } }, L('Remove this plan', 'Retirer ce planning'))));
       root.appendChild(h('p', { class: 'hint' }, L('“Plan the next days” starts the day after this plan and avoids its dishes. Pick 3 or 4 days at the top to shop twice a week.',
         '« Prévoir la suite » commence le lendemain de ce planning et évite ses plats. Choisis 3 ou 4 jours en haut pour faire les courses 2 fois par semaine.')));
@@ -1085,11 +1090,14 @@
               onclick: function () { it.servings = Math.min(24, it.servings + 1); persist(); render(); } }, '+')),
           h('div', { class: 'ck-menuacts' },
             h('button', { class: 'btn btn-secondary btn-sm', onclick: function () {
+              var back = snapshot();
               logCooked(r, it.servings); data.plan.items.splice(data.plan.items.indexOf(it), 1); persist(); render();
-              ui.toast(L('Marked as cooked', 'Marquée comme cuisinée'));
+              ui.undo(L('Marked as cooked', 'Marquée comme cuisinée'), back);
             } }, L('✓ Cooked', '✓ Faite')),
             h('button', { class: 'btn btn-ghost btn-sm', 'aria-label': L('Remove from the menu', 'Retirer du menu'), onclick: function () {
+              var back = snapshot();
               data.plan.items.splice(data.plan.items.indexOf(it), 1); persist(); render();
+              ui.undo(L('Removed from the menu', 'Retirée du menu'), back);
             } }, '✕')));
       })));
       root.appendChild(h('div', { class: 'bottom-actions' },
@@ -1097,7 +1105,8 @@
         h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: function () {
           ui.confirm({ title: L('Clear the menu?', 'Vider le menu ?'), message: L('All planned meals and grocery ticks will be removed.', 'Tous les repas prévus et les cases cochées des courses seront retirés.'),
             okLabel: L('Clear', 'Vider'), cancelLabel: L('Cancel', 'Annuler'), danger: true }).then(function (ok) {
-            if (!ok) return; data.plan.items = []; data.plan.checks = {}; persist(); render();
+            if (!ok) return; var back = snapshot(); data.plan.items = []; data.plan.checks = {}; persist(); render();
+            ui.undo(L('Menu cleared', 'Menu vidé'), back);
           });
         } }, L('Clear the menu', 'Vider le menu'))));
     }
@@ -1111,9 +1120,16 @@
           h('button', { class: 'ck-menuname', onclick: function () { open(r.id); } },
             h('span', { class: 'list-title' }, view(r).name),
             h('span', { class: 'list-sub' }, ui.date(x.date) + ' · ' + plural(x.servings || 1, 'serving', 'portion'))),
-          h('button', { class: 'btn btn-secondary btn-sm', onclick: function () {
-            addToPlan(r, x.servings || r.servings || 1); render(); ui.toast(L('Added to the menu', 'Ajoutée au menu'));
-          } }, L('+ Menu', '+ Menu')));
+          h('div', { class: 'ck-histacts' },
+            h('button', { class: 'btn btn-secondary btn-sm', onclick: function () {
+              addToPlan(r, x.servings || r.servings || 1); render(); ui.toast(L('Added to the menu', 'Ajoutée au menu'));
+            } }, L('+ Menu', '+ Menu')),
+            /* v0.43 : « Faite » par erreur : la retirer de l'historique (et des restes d'Aujourd'hui). */
+            h('button', { class: 'btn btn-icon', 'aria-label': L('Remove from history', 'Retirer de l’historique'), onclick: function () {
+              var back = snapshot();
+              data.history.splice(data.history.indexOf(x), 1); persist(); render();
+              ui.undo(L('Removed from history', 'Retiré de l’historique'), back);
+            } }, '✕')));
       })));
     }
   }
@@ -1205,7 +1221,8 @@
               ui.confirm({ title: L('Remove ' + sl.from + '’s groceries?', 'Retirer les courses de ' + sl.from + ' ?'),
                 message: L('Their items are taken out of your list. Your own menu does not change.', 'Ses articles sont retirés de ta liste. Ton menu ne change pas.'),
                 okLabel: L('Remove', 'Retirer'), danger: true }).then(function (ok) {
-                if (!ok) return; data.shared = data.shared.filter(function (x) { return x.id !== sl.id; }); persist(); render();
+                if (!ok) return; var back = snapshot(); data.shared = data.shared.filter(function (x) { return x.id !== sl.id; }); persist(); render();
+                ui.undo(L('List removed', 'Liste retirée'), back);
               });
             } }, L('Remove', 'Retirer')));
         })));
@@ -1361,10 +1378,11 @@
             ch.steps[i] = true; persist();
             if (last) {
               /* Recette terminée : historique, et la recette quitte le menu si elle y était. */
+              var undoCook = snapshot();
               logCooked(r, serv);
               var it = planItems().filter(function (x) { return x.recipeId === r.id; })[0];
               if (it) data.plan.items.splice(data.plan.items.indexOf(it), 1);
-              persist(); closeSheet(); ui.toast(L('Enjoy your meal!', 'Bon appétit !'));
+              persist(); closeSheet(); ui.undo(L('Enjoy your meal!', 'Bon appétit !'), undoCook);
             } else { i++; paint(); }
           } }, last ? L('Done ✓', 'Terminé ✓') : L('Next ›', 'Suivant ›'))));
       }
@@ -1488,11 +1506,12 @@
       message: L('“' + name + '” will be removed from your recipes.', '« ' + name + ' » sera retirée de tes recettes.'),
       okLabel: L('Delete', 'Supprimer'), cancelLabel: L('Cancel', 'Annuler'), danger: true }).then(function (ok) {
       if (!ok) return;
+      var undoIt = snapshot();
       data.recipes = data.recipes.filter(function (x) { return x.id !== r.id; });
       delete data.checks[r.id]; delete data.favs[r.id]; delete data.notes[r.id];
       data.plan.items = data.plan.items.filter(function (it) { return it.recipeId !== r.id; });
       if (r.builtin && data.removedBuiltins.indexOf(r.id) < 0) data.removedBuiltins.push(r.id);
-      persist(); back(); ui.toast(L('Recipe deleted', 'Recette supprimée'));
+      persist(); back(); ui.undo(L('Recipe deleted', 'Recette supprimée'), undoIt);
     });
   }
 

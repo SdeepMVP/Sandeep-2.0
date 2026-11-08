@@ -265,6 +265,12 @@ select.input option { color: var(--text); }
   transition: opacity .2s, transform .2s;
 }
 .toast.is-visible { opacity: 1; transform: translate(-50%, 0); }
+/* v0.43 : message avec « Annuler » (cliquable) */
+.toast.has-action { pointer-events: auto; display: flex; align-items: center; gap: 12px; padding: 4px 6px 4px 16px; max-width: calc(100vw - 32px); }
+/* Feuille ouverte : le message passe en haut de l'écran pour ne pas cacher ses boutons. */
+#overlay-root:not(:empty) ~ #toast { top: calc(env(safe-area-inset-top) + 12px); bottom: auto; transform: translate(-50%, -20px); }
+#overlay-root:not(:empty) ~ #toast.is-visible { transform: translate(-50%, 0); }
+.toast-undo { min-height: 44px; padding: 0 14px; border: 0; border-radius: 999px; background: var(--camel); color: #fff; font: inherit; font-weight: 700; }
 
 /* Graphique */
 .chart { position: relative; padding-top: 30px; }
@@ -1018,3 +1024,15 @@ input[type="date"].input { display: block; line-height: 48px; }
 .mu-cycledone { border: 1.5px solid var(--good); background: var(--good-bg); }
 .mu-deloadseg { margin: 6px 0; }
 .stepper.is-muted { opacity: .5; }
+
+/* ---------- v0.43 : corriger / annuler ---------- */
+.to-rowedit { background: none; border: 0; padding: 4px 0; color: inherit; font: inherit; text-align: left; min-height: 44px; flex: 1; min-width: 0; }
+.to-entrymain.to-rowedit { display: grid; gap: 1px; }
+.to-foodwrap { display: flex; align-items: stretch; gap: 4px; }
+.to-foodwrap .to-food { flex: 1; min-width: 0; }
+.to-foodedit { min-width: 48px; }
+.ob-weights li .btn-icon, .ob-measrow .btn-icon { min-width: 40px; min-height: 40px; }
+.ob-weightrow { display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; min-height: 44px; background: none; border: 0; padding: 0; color: inherit; font: inherit; }
+.mu-edsets { display: grid; gap: 6px; margin: 6px 0 12px; }
+.mu-edrow { display: grid; grid-template-columns: 28px 1fr 1fr 1fr 44px; gap: 6px; align-items: center; }
+.ck-histacts { display: flex; gap: 6px; }

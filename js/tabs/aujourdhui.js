@@ -36,11 +36,18 @@
     delete d.recent.partner;
     Object.keys(d.days).forEach(function (k) { if (d.days[k].partner) { had = true; delete d.days[k].partner; } });
     if (had) S2.storage.save(NS, d);
+    /* v0.43 (ajout compatible) : restes retirés à la main (jetés, donnés…) : [« recipeId|date de cuisson »]. */
+    d.leftoversGone = Array.isArray(d.leftoversGone) ? d.leftoversGone : [];
     /* Futures migrations : if (d.schema < 2) { ... } */
     d.schema = SCHEMA;
     return d;
   }
   var data = null, root = null;
+  /* v0.43 : photo des données avant une suppression, pour « Annuler ». */
+  function snapshot() {
+    var saved = JSON.stringify(data);
+    return function () { data = JSON.parse(saved); persist(); render(); };
+  }
   function persist() { S2.storage.save(NS, data); }
   function slot(date, who) {
     var k = TE.dayKey(date);
@@ -213,20 +220,24 @@
     day.activities.forEach(function (a) {
       var act = activityOf(a.type);
       card.appendChild(h('div', { class: 'to-activity' },
-        h('span', null, act[2] + ' ' + act[1] + ' · ' + a.minutes + ' min' + (a.note ? ' · ' + a.note : '') +
-          (a.kcal ? ' · ≈ ' + fmt(a.kcal) + ' kcal' : '') + (a.bonus ? L(' (+' + fmt(a.bonus) + ' to target)', ' (+' + fmt(a.bonus) + ' à la cible)') : '')),
+        h('button', { class: 'to-rowedit', 'aria-label': L('Edit this activity', 'Modifier cette activité'), onclick: function () { addActivity(a); } },
+          act[2] + ' ' + act[1] + ' · ' + a.minutes + ' min' + (a.note ? ' · ' + a.note : '') +
+          (a.kcal ? ' · ≈ ' + fmt(a.kcal) + ' kcal' : '') + (a.bonus ? L(' (+' + fmt(a.bonus) + ' to target)', ' (+' + fmt(a.bonus) + ' à la cible)') : '') + ' ✎'),
         h('button', { class: 'btn btn-icon', 'aria-label': L('Remove', 'Retirer'), onclick: function () {
           ui.confirm({ title: L('Remove this activity?', 'Retirer cette activité ?'), okLabel: L('Remove', 'Retirer'), danger: true }).then(function (ok) {
-            if (!ok) return; var s = slot(date, who); s.activities = s.activities.filter(function (x) { return x.id !== a.id; }); persist(); render();
+            if (!ok) return; var back = snapshot();
+            var s = slot(date, who); s.activities = s.activities.filter(function (x) { return x.id !== a.id; }); persist(); render();
+            ui.undo(L('Activity removed', 'Activité retirée'), back);
           });
         } }, '✕')));
     });
-    card.appendChild(h('button', { class: 'btn btn-ghost btn-sm to-addact', onclick: addActivity }, L('+ Activity (cardio, walk…)', '+ Activité (cardio, marche…)')));
+    card.appendChild(h('button', { class: 'btn btn-ghost btn-sm to-addact', onclick: function () { addActivity(null); } }, L('+ Activity (cardio, walk…)', '+ Activité (cardio, marche…)')));
     root.appendChild(card);
   }
 
-  function addActivity() {
-    var type = 'walk', minutes = 30;
+  /* Ajouter une activité, ou la modifier (v0.43 : existing = activité à modifier). */
+  function addActivity(existing) {
+    var type = existing ? existing.type : 'walk', minutes = existing ? existing.minutes : 30;
     ui.sheet(function (close) {
       var box = h('div', { class: 'ob-choices to-acts' });
       function paint() {
@@ -237,12 +248,12 @@
         });
       }
       paint();
-      var inp = h('input', { class: 'input', type: 'text', inputmode: 'numeric', value: '30', 'aria-label': L('Minutes', 'Minutes') });
-      var note = h('input', { class: 'input', type: 'text', placeholder: L('Optional (e.g. 5 km)', 'Facultatif (ex. 5 km)'), 'aria-label': L('Note', 'Note') });
+      var inp = h('input', { class: 'input', type: 'text', inputmode: 'numeric', value: String(minutes), 'aria-label': L('Minutes', 'Minutes') });
+      var note = h('input', { class: 'input', type: 'text', value: existing ? existing.note || '' : '', placeholder: L('Optional (e.g. 5 km)', 'Facultatif (ex. 5 km)'), 'aria-label': L('Note', 'Note') });
       var err = h('p', { class: 'form-error', hidden: true });
       /* v0.41 : dépense estimée, et choix d'en ajouter la moitié à la cible du jour. */
       var prof = null; try { prof = S2.objectif.profile(who); } catch (e) { prof = null; }
-      var kg = prof && prof.weight || 70, addHalf = true;
+      var kg = prof && prof.weight || 70, addHalf = existing ? !!existing.bonus : true;
       var est = h('p', { class: 'sheet-text to-actest' });
       var tick = h('button', { class: 'to-acttick is-on', type: 'button', 'aria-pressed': 'true', onclick: function () { addHalf = !addHalf; paintEst(); } });
       function paintEst() {
@@ -257,18 +268,20 @@
         minutes = ui.parseNum(inp.value);
         if (!minutes || minutes < 1 || minutes > 600) { err.textContent = L('Duration between 1 and 600 minutes.', 'Durée entre 1 et 600 minutes.'); err.hidden = false; return; }
         var k = TE.activityKcal(type, Math.round(minutes), kg);
-        slot(date, who).activities.push({ id: ui.uid(), type: type, minutes: Math.round(minutes), note: note.value.trim(), kcal: k, bonus: addHalf ? Math.round(k / 2) : 0 });
-        persist(); close(); render(); ui.toast(L('Activity added', 'Activité ajoutée'));
+        var a = { id: existing ? existing.id : ui.uid(), type: type, minutes: Math.round(minutes), note: note.value.trim(), kcal: k, bonus: addHalf ? Math.round(k / 2) : 0 };
+        var acts = slot(date, who).activities, i = existing ? acts.map(function (x) { return x.id; }).indexOf(existing.id) : -1;
+        if (i > -1) acts[i] = a; else acts.push(a);
+        persist(); close(); render(); ui.toast(existing ? L('Activity updated', 'Activité modifiée') : L('Activity added', 'Activité ajoutée'));
       }
       paintEst();
       return [
-        h('h2', { class: 'sheet-title' }, L('Activity', 'Activité')), box,
+        h('h2', { class: 'sheet-title' }, existing ? L('Edit the activity', 'Modifier l’activité') : L('Activity', 'Activité')), box,
         h('div', { class: 'form-grid ob-grid2' }, h('label', { class: 'field' }, h('span', { class: 'field-label' }, L('Minutes', 'Minutes')), inp), h('label', { class: 'field' }, h('span', { class: 'field-label' }, L('Note', 'Note')), note)),
         est, tick,
         h('p', { class: 'hint' }, L('Estimates are often too high: adding half is a safe bet. Your choice is kept for this activity.', 'Les estimations sont souvent trop hautes : en ajouter la moitié est prudent. Ton choix est gardé pour cette activité.')),
         err,
         h('div', { class: 'sheet-actions' },
-          h('button', { class: 'btn btn-primary btn-block', onclick: save }, L('Add', 'Ajouter')),
+          h('button', { class: 'btn btn-primary btn-block', onclick: save }, existing ? L('Save', 'Enregistrer') : L('Add', 'Ajouter')),
           h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, L('Cancel', 'Annuler')))
       ];
     }, { modal: true });
@@ -313,7 +326,8 @@
         h('button', { class: 'btn btn-ghost btn-sm', 'aria-label': L('Add to ', 'Ajouter au ') + MEAL_LABEL[meal], onclick: function () { addFood(meal); } }, '+')));
       list.forEach(function (e) {
         card.appendChild(h('div', { class: 'to-entry' },
-          h('div', { class: 'to-entrymain' }, h('span', { class: 'to-entryname' }, e.name),
+          h('button', { class: 'to-entrymain to-rowedit', 'aria-label': L('Edit ', 'Modifier ') + e.name, onclick: function () { editEntry(e); } },
+            h('span', { class: 'to-entryname' }, e.name + ' ✎'),
             h('span', { class: 'list-sub' }, (e.portion ? e.portion + (e.qty !== 1 ? ' ×' + num(e.qty) : '') : qtyText(e.qty)) + ' · ' + Math.round(e.kcal) + ' kcal · ' + Math.round(e.protein) + L(' g protein', ' g prot.'))),
           h('button', { class: 'btn btn-icon', 'aria-label': L('Remove', 'Retirer'), onclick: function () { removeEntry(e); } }, '✕')));
       });
@@ -417,7 +431,9 @@
     var entries = [];
     for (var i = 0; i <= 4; i++) entries = entries.concat(peek(addDays(new Date(), -i), who).entries);
     var plannedIds = (planned || []).map(function (m) { return m.id; });
-    var list = TE.leftovers(cu.cooked(5), entries, new Date(), 3).filter(function (lo) { return plannedIds.indexOf(lo.recipeId) < 0; }); /* déjà au planning du jour */
+    var list = TE.leftovers(cu.cooked(5), entries, new Date(), 3).filter(function (lo) {
+      return plannedIds.indexOf(lo.recipeId) < 0 && data.leftoversGone.indexOf(lo.recipeId + '|' + lo.date) < 0; /* déjà au planning du jour, ou retiré à la main */
+    });
     if (!list.length) return;
     card.appendChild(h('div', { class: 'to-extrahead' }, L('🥡 Leftovers in the fridge', '🥡 Restes au frigo')));
     list.forEach(function (lo) {
@@ -428,7 +444,13 @@
         h('div', { class: 'to-entrymain' }, h('span', { class: 'to-entryname' }, r.name),
           h('span', { class: 'list-sub' }, L(num(lo.left) + ' serving(s) left · cooked ', 'Reste ' + num(lo.left) + ' portion' + (lo.left > 1 ? 's' : '') + ' · cuisiné ') + (isToday(new Date(lo.date)) ? L('today', 'aujourd’hui') : when) +
             ' · ' + Math.round(r.kcal) + ' kcal')),
-        h('button', { class: 'btn btn-primary btn-sm', onclick: function () { logRecipe(r, 1, undefined); } }, L('✓ Eaten', '✓ Mangé'))));
+        h('div', { class: 'to-planbtns' },
+          h('button', { class: 'btn btn-secondary btn-sm', 'aria-label': L('No more leftovers (thrown away, given…)', 'Plus de restes (jetés, donnés…)'), onclick: function () {
+            var back = snapshot();
+            data.leftoversGone.push(lo.recipeId + '|' + lo.date); if (data.leftoversGone.length > 50) data.leftoversGone.shift();
+            persist(); render(); ui.undo(L('Leftovers removed', 'Restes retirés'), back);
+          } }, '✕'),
+          h('button', { class: 'btn btn-primary btn-sm', onclick: function () { logRecipe(r, 1, undefined); } }, L('✓ Eaten', '✓ Mangé')))));
     });
   }
 
@@ -563,10 +585,64 @@
     persist(); render();
     ui.toast(L('Added · ', 'Ajouté · ') + Math.round(e.kcal) + ' kcal');
   }
+  /* v0.43 : corriger une entrée du journal : quantité (grammes / ml ou portions), moment du repas ; valeurs saisies pour une saisie rapide. */
+  function editEntry(e) {
+    var isGrams = e.type === 'ciqual' && e.grams > 0;
+    var isQuick = e.type === 'quick';
+    var unit = isGrams && / ml$/.test(e.portion || '') ? 'ml' : 'g';
+    var meal = TE.mealOf(e);
+    ui.sheet(function (close) {
+      var amount = h('input', { class: 'input', type: 'text', inputmode: 'decimal', autocomplete: 'off', value: isGrams ? String(e.grams) : num(e.qty),
+        'aria-label': isGrams ? L('Quantity', 'Quantité') + ' (' + unit + ')' : L('Servings', 'Portions') });
+      var k = h('input', { class: 'input', type: 'text', inputmode: 'decimal', value: num(Math.round(e.kcal)), 'aria-label': 'kcal' });
+      var p = h('input', { class: 'input', type: 'text', inputmode: 'decimal', value: num(Math.round(e.protein * 10) / 10), 'aria-label': L('Protein (g)', 'Protéines (g)') });
+      var mealBox = h('div', { class: 'segmented small to-mealpick' });
+      function paintMeal() {
+        mealBox.innerHTML = '';
+        TE.MEALS.forEach(function (m) {
+          mealBox.appendChild(h('button', { class: 'seg' + (meal === m ? ' is-active' : ''), type: 'button', 'aria-pressed': meal === m ? 'true' : 'false', onclick: function () { meal = m; paintMeal(); } }, MEAL_LABEL[m]));
+        });
+      }
+      paintMeal();
+      var err = h('p', { class: 'form-error', hidden: true });
+      function save() {
+        var s0 = slot(date, who), x = s0.entries.filter(function (y) { return y.id === e.id; })[0];
+        if (!x) { close(); return; }
+        if (isQuick) {
+          var kv = ui.parseNum(k.value), pv = ui.parseNum(p.value);
+          if (!kv || kv < 1 || kv > 5000) { err.textContent = L('Calories between 1 and 5000.', 'Calories entre 1 et 5000.'); err.hidden = false; return; }
+          x.kcal = kv; x.protein = pv || 0;
+        } else {
+          var v = ui.parseNum(amount.value);
+          var max = isGrams ? 3000 : 10;
+          if (!v || v <= 0 || v > max) { err.textContent = isGrams ? L('Quantity between 1 and 3000.', 'Quantité entre 1 et 3000.') : L('Between 0.25 and 10 servings.', 'Entre 0,25 et 10 portions.'); err.hidden = false; return; }
+          var y = TE.rescaleEntry(x, v, unit);
+          ['kcal', 'protein', 'carbs', 'fat', 'grams', 'portion', 'qty'].forEach(function (key) { if (y[key] !== undefined) x[key] = y[key]; });
+        }
+        x.meal = meal;
+        persist(); close(); render(); ui.toast(L('Updated', 'Modifié'));
+      }
+      return [
+        h('h2', { class: 'sheet-title' }, e.name),
+        h('div', { class: 'field' }, h('span', { class: 'field-label' }, L('Meal', 'Repas')), mealBox),
+        isQuick ? h('div', { class: 'form-grid ob-grid2' }, field(L('Calories (kcal)', 'Calories (kcal)'), k), field(L('Protein (g)', 'Protéines (g)'), p))
+          : field(isGrams ? L('Quantity', 'Quantité') + ' (' + unit + ')' : L('Servings', 'Portions'), amount),
+        isQuick ? null : h('p', { class: 'hint' }, L('Calories and macros follow the quantity.', 'Les calories et les macros suivent la quantité.')),
+        err,
+        h('div', { class: 'sheet-actions' },
+          h('button', { class: 'btn btn-primary btn-block', onclick: save }, L('Save', 'Enregistrer')),
+          h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: function () { close(); removeEntry(e); } }, L('Remove', 'Retirer')),
+          h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, L('Cancel', 'Annuler')))
+      ];
+    }, { modal: true });
+  }
+
   function removeEntry(e) {
     ui.confirm({ title: L('Remove “' + e.name + '”?', 'Retirer « ' + e.name + ' » ?'), okLabel: L('Remove', 'Retirer'), danger: true }).then(function (ok) {
       if (!ok) return;
+      var back = snapshot();
       var s = slot(date, who); s.entries = s.entries.filter(function (x) { return x.id !== e.id; }); persist(); render();
+      ui.undo(L('“' + e.name + '” removed', '« ' + e.name + ' » retiré'), back);
     });
   }
 
@@ -659,6 +735,15 @@
         });
       }
       function row(it) {
+        /* v0.43 : « Les miens » : ✎ pour modifier ou supprimer l'aliment. */
+        if (it.kind === 'custom') {
+          var c = data.custom.filter(function (x) { return x.id === it.id; })[0];
+          return h('div', { class: 'to-foodwrap' }, rowBtn(it),
+            h('button', { class: 'btn btn-icon to-foodedit', type: 'button', 'aria-label': L('Edit ', 'Modifier ') + it.name, onclick: function () { close(); editCustom(c); } }, '✎'));
+        }
+        return rowBtn(it);
+      }
+      function rowBtn(it) {
         return h('button', { class: 'to-food', type: 'button', onclick: function () {
           close();
           if (it.kind === 'ciqual') {
@@ -805,7 +890,9 @@
           h('button', { class: 'btn btn-primary btn-block', onclick: save }, L('Save', 'Enregistrer')),
           isNew ? null : h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: function () {
             ui.confirm({ title: L('Delete this food?', 'Supprimer cet aliment ?'), message: L('Days where you logged it are not changed.', 'Les jours où tu l’as noté ne changent pas.'), okLabel: L('Delete', 'Supprimer'), danger: true }).then(function (ok) {
-              if (!ok) return; data.custom = data.custom.filter(function (x) { return x.id !== f.id; }); persist(); close();
+              if (!ok) return; var back = snapshot();
+              data.custom = data.custom.filter(function (x) { return x.id !== f.id; }); persist(); close(); render();
+              ui.undo(L('Food deleted', 'Aliment supprimé'), back);
             });
           } }, L('Delete', 'Supprimer')),
           h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, L('Cancel', 'Annuler')))
@@ -866,13 +953,17 @@
     else wc.appendChild(h('p', { class: 'hint' }, L('Weigh yourself 2 to 3 times a week, in the morning: the curve appears here.', 'Pèse-toi 2 à 3 fois par semaine, le matin : la courbe apparaît ici.')));
     if (trend) wc.appendChild(h('p', { class: 'sheet-text' }, L('Trend over 4 weeks: ', 'Tendance sur 4 semaines : ') + (trend.perWeek > 0 ? '+' : trend.perWeek < 0 ? '−' : '') + num(Math.abs(trend.perWeek), 2) +
       L(' kg / week (', ' kg / semaine (') + (trend.pct > 0 ? '+' : trend.pct < 0 ? '−' : '') + num(Math.abs(trend.pct), 1) + ' %)'));
-    wc.appendChild(h('button', { class: 'btn btn-ghost btn-sm', onclick: function () { S2.objectif.logWeight(who, render); } }, L('+ Weigh in', '+ Me peser')));
+    wc.appendChild(h('div', { class: 'ck-histacts' },
+      h('button', { class: 'btn btn-ghost btn-sm', onclick: function () { S2.objectif.logWeight(who, render); } }, L('+ Weigh in', '+ Me peser')),
+      S2.objectif.fixWeights && prof.weights.length ? h('button', { class: 'btn btn-ghost btn-sm', onclick: function () { S2.objectif.fixWeights(); } }, L('✎ Fix', '✎ Corriger')) : null));
     root.appendChild(wc);
     var mpts = prof.measures.filter(function (m) { return m.waist; }).map(function (m) { return { t: new Date(m.date), v: m.waist }; });
     var mc = h('div', { class: 'card to-review' }, h('div', { class: 'card-title' }, L('📏 Waist', '📏 Tour de taille')));
     if (mpts.length >= 2) mc.appendChild(chart(mpts, 'cm'));
     else mc.appendChild(h('p', { class: 'hint' }, mpts.length ? L('Last: ', 'Dernier : ') + num(mpts[0].v, 1) + ' cm. ' + L('Measure again in a few weeks.', 'Remesure dans quelques semaines.') : L('Measure your waist once a month: it shows fat loss even when the scale does not move.', 'Mesure ton tour de taille une fois par mois : il montre la perte de gras même quand la balance ne bouge pas.')));
-    mc.appendChild(h('button', { class: 'btn btn-ghost btn-sm', onclick: function () { S2.objectif.logMeasures(who, render); } }, L('+ Measurements', '+ Mensurations')));
+    mc.appendChild(h('div', { class: 'ck-histacts' },
+      h('button', { class: 'btn btn-ghost btn-sm', onclick: function () { S2.objectif.logMeasures(who, render); } }, L('+ Measurements', '+ Mensurations')),
+      S2.objectif.fixMeasures && prof.measures.length ? h('button', { class: 'btn btn-ghost btn-sm', onclick: function () { S2.objectif.fixMeasures(); } }, L('✎ Fix', '✎ Corriger')) : null));
     root.appendChild(mc);
 
     /* Ajustement proposé (sur les 2 dernières semaines de suivi) */
@@ -1030,7 +1121,9 @@
           h('button', { class: 'btn btn-ghost btn-block danger-text', onclick: function () {
             ui.confirm({ title: L('Delete this photo?', 'Supprimer cette photo ?'), okLabel: L('Delete', 'Supprimer'), danger: true }).then(function (ok) {
               if (!ok) return;
-              var st = loadPhotos(); st.list = st.list.filter(function (x) { return x.id !== p.id; }); S2.storage.save(PNS, st); close(); render();
+              var st = loadPhotos(), saved = JSON.stringify(st);
+              st.list = st.list.filter(function (x) { return x.id !== p.id; }); S2.storage.save(PNS, st); close(); render();
+              ui.undo(L('Photo deleted', 'Photo supprimée'), function () { S2.storage.save(PNS, JSON.parse(saved)); render(); });
             });
           } }, L('Delete', 'Supprimer')),
           h('button', { class: 'btn btn-primary btn-block', onclick: function () { close(); } }, L('Close', 'Fermer')))
