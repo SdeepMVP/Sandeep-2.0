@@ -174,7 +174,8 @@
         return h('li', null, h('span', null, ui.date(w.date, true)), h('span', null, num(w.kg, 1) + ' kg'));
       })) : null,
       tw ? h('p', { class: 'note' }, L('Target weight: ', 'Poids visé : ') + num(tw, 1) + ' kg' + (gap ? ' (' + (gap > 0 ? '−' : '+') + num(Math.abs(gap), 1) + L(' kg to go)', ' kg à faire)') : L(' — reached!', ' — atteint !'))) : null,
-      h('div', { class: 'stack' }, h('button', { class: 'btn btn-secondary btn-block', onclick: function () { addWeight('me'); } }, L('Update my weight', 'Mettre à jour mon poids'))),
+      h('div', { class: 'stack' }, h('button', { class: 'btn btn-secondary btn-block', onclick: function () { addWeight('me'); } }, L('Update my weight', 'Mettre à jour mon poids')),
+        list.length ? h('button', { class: 'btn btn-ghost btn-block', onclick: function () { historySheet('weights'); } }, L('See / fix my weigh-ins', 'Voir / corriger mes pesées')) : null),
       h('p', { class: 'hint' }, L('Your targets follow your current weight. The curve is in Today › Review.', 'Tes objectifs suivent ton poids actuel. La courbe est dans Aujourd’hui › Bilan.')));
   }
 
@@ -192,8 +193,88 @@
         return row(m[1], num(last[m[0]], 1) + ' cm' + (d ? ' (' + (d > 0 ? '+' : '−') + num(Math.abs(d), 1) + ')' : ''));
       })));
     }
-    card.appendChild(h('div', { class: 'stack' }, h('button', { class: 'btn btn-secondary btn-block', onclick: function () { addMeasures(who); } }, L('Add measurements', 'Ajouter des mensurations'))));
+    card.appendChild(h('div', { class: 'stack' }, h('button', { class: 'btn btn-secondary btn-block', onclick: function () { addMeasures(who); } }, L('Add measurements', 'Ajouter des mensurations')),
+      list.length ? h('button', { class: 'btn btn-ghost btn-block', onclick: function () { historySheet('measures'); } }, L('See / fix my measurements', 'Voir / corriger mes mensurations')) : null));
     return card;
+  }
+
+  /* ---------- v0.43 : corriger ou supprimer une pesée / des mensurations (avec « Annuler ») ----------
+     Le poids du profil (qui sert aux besoins du jour) suit toujours la pesée la plus récente qui reste. */
+  function syncWeight(p) {
+    var list = (p.weights || []).slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+    if (list.length) p.weight = list[list.length - 1].kg;
+  }
+  function historySheet(kind) {
+    data = load();
+    var p = data;
+    ui.sheet(function (close) {
+      var box = h('div', { class: 'list' });
+      function paint() {
+        box.innerHTML = '';
+        var list = (p[kind] || []).slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+        if (!list.length) { box.appendChild(h('p', { class: 'hint' }, L('Nothing saved.', 'Rien d’enregistré.'))); return; }
+        list.forEach(function (x) {
+          var txt = kind === 'weights' ? num(x.kg, 1) + ' kg'
+            : MEASURES.filter(function (m) { return x[m[0]]; }).map(function (m) { return m[1] + ' ' + num(x[m[0]], 1); }).join(' · ') + ' cm';
+          box.appendChild(h('div', { class: 'list-row ob-measrow' },
+            h('div', null, h('div', { class: 'list-title' }, ui.longDate(x.date)), h('div', { class: 'list-sub' }, txt)),
+            h('div', { class: 'ck-histacts' },
+              h('button', { class: 'btn btn-icon', 'aria-label': L('Edit', 'Modifier'), onclick: function () { editOne(x); } }, '✎'),
+              h('button', { class: 'btn btn-icon', 'aria-label': L('Delete', 'Supprimer'), onclick: function () { removeOne(x); } }, '✕'))));
+        });
+      }
+      function saveAll(msg, saved) {
+        if (kind === 'weights') syncWeight(p);
+        persist(); paint(); refresh();
+        if (saved) ui.undo(msg, function () { data = JSON.parse(saved); p = data; persist(); paint(); refresh(); });
+        else ui.toast(msg);
+      }
+      function removeOne(x) {
+        ui.confirm({ title: kind === 'weights' ? L('Delete this weigh-in?', 'Supprimer cette pesée ?') : L('Delete these measurements?', 'Supprimer ces mensurations ?'),
+          message: ui.longDate(x.date), okLabel: L('Delete', 'Supprimer'), danger: true }).then(function (ok) {
+          if (!ok) return;
+          var saved = JSON.stringify(data);
+          p[kind] = p[kind].filter(function (y) { return y !== x; });
+          saveAll(kind === 'weights' ? L('Weigh-in deleted', 'Pesée supprimée') : L('Measurements deleted', 'Mensurations supprimées'), saved);
+        });
+      }
+      function editOne(x) {
+        ui.sheet(function (close2) {
+          var err = h('p', { class: 'form-error', hidden: true }), inputs = {};
+          var keys = kind === 'weights' ? [['kg', L('Weight (kg)', 'Poids (kg)'), 30, 250]] : MEASURES.map(function (m) { return [m[0], m[1] + ' (cm)', 10, 250]; });
+          var fields = keys.map(function (k) {
+            var inp = h('input', { class: 'input', type: 'text', inputmode: 'decimal', value: x[k[0]] ? num(x[k[0]], 1) : '', 'aria-label': k[1] });
+            inputs[k[0]] = inp;
+            return h('label', { class: 'field' }, h('span', { class: 'field-label' }, k[1]), inp);
+          });
+          function save() {
+            var next = {}, any = false, bad = false;
+            keys.forEach(function (k) {
+              var raw = inputs[k[0]].value.trim(); if (!raw) return;
+              var v = ui.parseNum(raw);
+              if (v === null || v < k[2] || v > k[3]) { bad = true; return; }
+              next[k[0]] = Math.round(v * 10) / 10; any = true;
+            });
+            if (bad || !any) { err.textContent = kind === 'weights' ? L('Weight between 30 and 250 kg.', 'Poids entre 30 et 250 kg.') : L('Fill in at least one measurement, in cm.', 'Renseigne au moins une mesure, en cm.'); err.hidden = false; return; }
+            var saved = JSON.stringify(data);
+            keys.forEach(function (k) { if (next[k[0]] !== undefined) x[k[0]] = next[k[0]]; else delete x[k[0]]; });
+            close2(); saveAll(L('Updated', 'Modifié'), saved);
+          }
+          return [h('h2', { class: 'sheet-title' }, ui.longDate(x.date)), h('div', { class: 'form-grid ob-grid2' }, fields), err,
+            h('div', { class: 'sheet-actions' },
+              h('button', { class: 'btn btn-primary btn-block', onclick: save }, L('Save', 'Enregistrer')),
+              h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close2(); } }, L('Cancel', 'Annuler')))];
+        }, { modal: true });
+      }
+      paint();
+      return [
+        h('h2', { class: 'sheet-title' }, kind === 'weights' ? L('My weigh-ins', 'Mes pesées') : L('My measurements', 'Mes mensurations')),
+        h('p', { class: 'hint' }, kind === 'weights' ? L('A wrong weigh-in skews your curve, your trend and your targets: fix or delete it.', 'Une pesée fausse fausse ta courbe, ta tendance et tes besoins : corrige-la ou supprime-la.')
+          : L('Fix a typo or delete a wrong entry.', 'Corrige une faute de frappe ou supprime une saisie fausse.')),
+        box,
+        h('div', { class: 'sheet-actions' }, h('button', { class: 'btn btn-primary btn-block', onclick: function () { close(); if (S2.app) S2.app.refresh(); } }, L('Done', 'Terminé')))
+      ];
+    }, { modal: true });
   }
   function addMeasures(who, onDone) {
     data = load();
@@ -574,6 +655,9 @@
       custom: p.custom || {}, complete: E.isComplete(p) };
   }
   S2.objectif = {
+    /* v0.43 : corriger / supprimer les pesées et mensurations (aussi depuis Aujourd'hui › Bilan). */
+    fixWeights: function () { historySheet('weights'); },
+    fixMeasures: function () { historySheet('measures'); },
     targets: function (who) { var d = load(); return who === 'partner' ? (d.partner ? E.targets(d.partner) : null) : E.targets(d); },
     goalLabel: function (id) { var g = goalOf(id); return g ? g.label : ''; },
     partnerTargets: function () { return null; },

@@ -265,8 +265,19 @@
     return { first: f, last: l, delta: Math.round((l - f) * 10) / 10, n: inP.length };
   }
 
+  /* v0.43 : corriger la quantité d'une entrée du journal. Grammes / ml (aliments Ciqual et produits) ou portions (le reste) :
+     calories et macros suivent la quantité. Renvoie une nouvelle entrée (l'ancienne n'est pas modifiée). */
+  function rescaleEntry(e, amount, unit) {
+    var o = {}; Object.keys(e).forEach(function (k) { o[k] = e[k]; });
+    var byGrams = e.type === 'ciqual' && e.grams > 0;
+    var f = byGrams ? amount / e.grams : amount / (e.qty || 1);
+    ['kcal', 'protein', 'carbs', 'fat'].forEach(function (k) { o[k] = Math.round((e[k] || 0) * f * 10) / 10; });
+    if (byGrams) { o.grams = Math.round(amount); o.portion = o.grams + ' ' + (unit || 'g'); } else o.qty = Math.round(amount * 100) / 100;
+    return o;
+  }
+
   S2.todayEngine = { RATES: RATES, STEP: STEP, dayKey: dayKey, totals: totals, inTarget: inTarget, nutritionSummary: nutritionSummary,
     weightTrend: weightTrend, suggestion: suggestion, monday: monday, searchFoods: searchFoods,
     checklist: checklist, missing: missing, leftovers: leftovers, monthRange: monthRange, periodChange: periodChange,
-    MET: MET, activityKcal: activityKcal, dayTarget: dayTarget, MEALS: MEALS, guessMeal: guessMeal, mealOf: mealOf, wellbeing: wellbeing };
+    MET: MET, activityKcal: activityKcal, dayTarget: dayTarget, MEALS: MEALS, guessMeal: guessMeal, mealOf: mealOf, wellbeing: wellbeing, rescaleEntry: rescaleEntry };
 })();

@@ -196,6 +196,11 @@
     } catch (e) { return who === 'partner' ? L('Other person', 'L’autre') : L('Me', 'Moi'); }
   }
   function persist() { S2.storage.save(NS, store); }
+  /* v0.43 : photo des données avant une action qu'on peut regretter, pour « Annuler ». */
+  function snapshot() {
+    var saved = JSON.stringify(store);
+    return function () { store = JSON.parse(saved); data = personData(store, person); persist(); render(); };
+  }
 
   function day(id) { return data.days.filter(function (d) { return d.id === id; })[0]; }
   /* Nom du jour d'une séance, même si ce jour a été retiré du programme depuis (nom gardé dans la séance). */
@@ -471,6 +476,12 @@
 
     body.appendChild(h('div', { class: 'card mu-weekcard' },
       h('div', { class: 'field-label' }, L('Program week', 'Semaine du programme') + (cyc.cycle > 1 ? L(' · cycle ', ' · cycle ') + cyc.cycle : '')),
+      /* v0.43 : nouveau cycle lancé par erreur (aucune séance dedans) : revenir au cycle d'avant. */
+      cyc.cycle > 1 && !cyc.sessions ? h('button', { class: 'btn btn-ghost btn-sm', onclick: function () {
+        ui.confirm({ title: L('Back to cycle ' + (cyc.cycle - 1) + '?', 'Revenir au cycle ' + (cyc.cycle - 1) + ' ?'), okLabel: L('Go back', 'Revenir') }).then(function (ok) {
+          if (!ok) return; data.cycle = cyc.cycle - 1; pickWeek = null; persist(); render(); ui.toast(L('Back to cycle ', 'Retour au cycle ') + data.cycle);
+        });
+      } }, L('‹ Back to the previous cycle', '‹ Revenir au cycle précédent')) : null,
       h('div', { class: 'segmented small mu-deloadseg' },
         [[false, L('Normal week', 'Semaine normale')], [true, L('Deload', 'Décharge')]].map(function (x) {
           return h('button', { class: 'seg' + (pickDeload === x[0] ? ' is-active' : ''), 'aria-pressed': pickDeload === x[0] ? 'true' : 'false',
@@ -847,7 +858,9 @@
             message: L('Same days and exercises, back to week 1. Your history and records are kept.', 'Mêmes jours et exercices, retour à la semaine 1. Ton historique et tes records sont gardés.'),
             okLabel: L('Start the new cycle', 'Lancer le nouveau cycle') }).then(function (ok) {
             if (!ok) return;
-            data.cycle = cyc.cycle + 1; pickWeek = 1; pickDeload = false; persist(); render(); ui.toast(L('Cycle ' + data.cycle + ' started', 'Cycle ' + data.cycle + ' lancé'));
+            var back = snapshot(), oldWeek = pickWeek;
+            data.cycle = cyc.cycle + 1; pickWeek = 1; pickDeload = false; persist(); render();
+            ui.undo(L('Cycle ' + data.cycle + ' started', 'Cycle ' + data.cycle + ' lancé'), function () { pickWeek = oldWeek; back(); });
           });
         } }, L('Start a new cycle', 'Lancer un nouveau cycle')),
         h('button', { class: 'btn btn-ghost btn-block', onclick: pickTemplate }, L('Change program', 'Changer de programme'))));
@@ -942,11 +955,13 @@
       message: L('All sets logged in this workout will be deleted.', 'Toutes les séries saisies dans cette séance seront supprimées.'),
       okLabel: L('Delete workout', 'Supprimer la séance'), danger: true }).then(function (ok) {
       if (!ok) return;
+      var back = snapshot();
       var s = active();
       data.sessions = data.sessions.filter(function (x) { return x.id !== s.id; });
       data.activeId = null;
       persist();
       render();
+      ui.undo(L('Workout discarded', 'Séance abandonnée'), back);
     });
   }
 
@@ -1049,7 +1064,8 @@
       body.appendChild(h('div', { class: 'card mu-histcard' },
         h('div', { class: 'mu-histhead' },
           h('span', { class: 'list-title' }, ui.longDate(x.session.startedAt)),
-          h('span', { class: 'muted' }, weekLabel(x.session, true))),
+          h('span', { class: 'muted' }, weekLabel(x.session, true)),
+          h('button', { class: 'btn btn-icon', 'aria-label': L('Fix this workout', 'Corriger cette séance'), onclick: function () { editSession(x.session); } }, '✎')),
         h('ol', { class: 'mu-histsets' }, x.entry.sets.map(function (st, i) {
           var isBest = x.best && x.best.index === i;
           return h('li', { class: isBest ? 'is-best' : '' },
@@ -1135,17 +1151,80 @@
           h('div', { class: 'list-sub' }, setsSummary(e.sets, isBW((e.snap && e.snap.name) || exName(exId))))));
       });
       if (!Object.keys(s.entries).length) card.appendChild(h('p', { class: 'muted' }, L('Empty workout.', 'Séance vide.')));
-      card.appendChild(h('button', { class: 'btn btn-ghost btn-sm danger-text', onclick: function () {
-        ui.confirm({ title: L('Delete this workout?', 'Supprimer cette séance ?'),
-          message: L('It will be removed from your history. This cannot be undone.', 'Elle sera retirée de ton historique. C’est définitif.'),
-          okLabel: L('Delete', 'Supprimer'), danger: true }).then(function (ok) {
-          if (!ok) return;
-          data.sessions = data.sessions.filter(function (x) { return x.id !== s.id; });
-          persist(); render();
-        });
-      } }, L('Delete workout', 'Supprimer la séance')));
+      card.appendChild(h('div', { class: 'ck-histacts' },
+        h('button', { class: 'btn btn-secondary btn-sm', onclick: function () { editSession(s); } }, L('✎ Fix', '✎ Corriger')),
+        h('button', { class: 'btn btn-ghost btn-sm danger-text', onclick: function () {
+          ui.confirm({ title: L('Delete this workout?', 'Supprimer cette séance ?'),
+            message: L('It will be removed from your history.', 'Elle sera retirée de ton historique.'),
+            okLabel: L('Delete', 'Supprimer'), danger: true }).then(function (ok) {
+            if (!ok) return;
+            var back = snapshot();
+            data.sessions = data.sessions.filter(function (x) { return x.id !== s.id; });
+            persist(); render();
+            ui.undo(L('Workout deleted', 'Séance supprimée'), back);
+          });
+        } }, L('Delete workout', 'Supprimer la séance'))));
       body.appendChild(card);
     });
+  }
+
+  /* ---------- v0.43 : corriger une séance terminée (charge, répétitions, RPE ; ajouter ou retirer une série) ---------- */
+  function editSession(s) {
+    var draft = JSON.parse(JSON.stringify(s.entries));
+    ui.sheet(function (close) {
+      var body = h('div');
+      function paint() {
+        body.innerHTML = '';
+        Object.keys(draft).forEach(function (exId) {
+          var e = draft[exId], nm = (e.snap && e.snap.name) ? trEx(e.snap.name) : exName(exId), bw = isBW(nm);
+          body.appendChild(h('h3', { class: 'mu-exname' }, nm));
+          var box = h('div', { class: 'mu-edsets' }, h('div', { class: 'mu-edrow mu-sethead' }, h('span', null, '#'), h('span', null, bw ? L('extra kg', 'lest kg') : 'kg'), h('span', null, L('Reps', 'Rép.')), h('span', null, 'RPE'), h('span')));
+          e.sets.forEach(function (st, i) {
+            function inp(key, mode, label) {
+              var x = h('input', { class: 'input mu-in', type: 'text', inputmode: mode, autocomplete: 'off', value: st[key] === null || st[key] === undefined ? '' : num(st[key]), 'aria-label': label + ' ' + (i + 1) });
+              x.addEventListener('input', function () { var v = ui.parseNum(x.value); st[key] = x.value.trim() === '' ? null : v; });
+              return x;
+            }
+            box.appendChild(h('div', { class: 'mu-edrow' }, h('span', { class: 'mu-setnum' }, i + 1),
+              inp('w', 'decimal', L('Weight', 'Poids')), inp('r', 'numeric', L('Reps', 'Répétitions')), inp('rpe', 'decimal', 'RPE'),
+              h('button', { class: 'btn btn-icon', type: 'button', 'aria-label': L('Remove set ', 'Retirer la série ') + (i + 1), onclick: function () { e.sets.splice(i, 1); paint(); } }, '✕')));
+          });
+          box.appendChild(h('button', { class: 'btn btn-ghost btn-sm', type: 'button', onclick: function () {
+            var last = e.sets[e.sets.length - 1] || { w: null, r: null, rpe: null };
+            e.sets.push({ w: last.w, r: last.r, rpe: last.rpe }); paint();
+          } }, L('+ Set', '+ Série')));
+          body.appendChild(box);
+        });
+        if (!Object.keys(draft).length) body.appendChild(h('p', { class: 'muted' }, L('Empty workout.', 'Séance vide.')));
+      }
+      var err = h('p', { class: 'form-error', hidden: true });
+      function save() {
+        var bad = false;
+        Object.keys(draft).forEach(function (id) {
+          draft[id].sets.forEach(function (st) {
+            if (st.r === null || isNaN(st.r) || st.r < 0 || st.r > 300) bad = true;
+            if (st.w !== null && (isNaN(st.w) || st.w < 0 || st.w > 500)) bad = true;
+            if (st.rpe !== null && (isNaN(st.rpe) || st.rpe < 5 || st.rpe > 10)) bad = true;
+            if (st.r !== null) st.r = Math.round(st.r);
+          });
+          if (!draft[id].sets.length) delete draft[id];
+        });
+        if (bad) { err.textContent = L('Each set needs reps (0–300); weight 0–500 kg; RPE 5–10.', 'Chaque série a besoin de répétitions (0–300) ; poids 0–500 kg ; RPE 5–10.'); err.hidden = false; return; }
+        var back = snapshot();
+        s.entries = draft;
+        persist(); close(); render();
+        ui.undo(L('Workout corrected', 'Séance corrigée'), back);
+      }
+      paint();
+      return [
+        h('h2', { class: 'sheet-title' }, L('Fix the workout', 'Corriger la séance')),
+        h('p', { class: 'sheet-text' }, sessionDay(s) + ' · ' + weekLabel(s).toLowerCase() + ' · ' + ui.longDate(s.startedAt)),
+        body, err,
+        h('div', { class: 'sheet-actions' },
+          h('button', { class: 'btn btn-primary btn-block', onclick: save }, L('Save', 'Enregistrer')),
+          h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, L('Cancel', 'Annuler')))
+      ];
+    }, { modal: true });
   }
 
   /* ---------- Programme (édition) ---------- */
@@ -1232,10 +1311,12 @@
             '« ' + dayName(d) + ' » et ses ' + d.slots.length + ' exercice(s) seront retirés du programme. Les séances déjà faites restent dans l’historique.'),
           okLabel: L('Delete the day', 'Supprimer le jour'), danger: true }).then(function (ok) {
           if (!ok) return;
+          var back = snapshot();
           data.days.splice(data.days.indexOf(d), 1);
           if (pickDay === d.id) pickDay = null;
           programDay = data.days[0] ? data.days[0].id : null;
           persist(); close(); render();
+          ui.undo(L('Day deleted', 'Jour supprimé'), back);
         });
       }
       inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') save(); });
@@ -1282,13 +1363,14 @@
         'Tes jours et exercices actuels seront remplacés. Les séances déjà faites restent dans l’historique.'),
       okLabel: L('Use this program', 'Utiliser ce programme') }).then(function (ok) {
       if (!ok) return;
+      var back = snapshot();
       data.days = templateDays(t);
       /* v0.41 : nouveau programme après un cycle terminé (ou pas encore commencé) : il démarre son propre cycle, semaine 1. */
       var cyc = cycleInfo();
       if (cyc.done) { data.cycle = cyc.cycle + 1; pickWeek = 1; pickDeload = false; }
       programDay = data.days[0].id; pickDay = null;
       persist(); view = 'program'; render(); window.scrollTo(0, 0);
-      ui.toast(L('Program ready: adjust it as you like', 'Programme prêt : ajuste-le comme tu veux'));
+      ui.undo(L('Program ready: adjust it as you like', 'Programme prêt : ajuste-le comme tu veux'), back);
     });
   }
 
@@ -1378,8 +1460,10 @@
             'Il sera retiré du programme ' + dayName(d) + '. Son historique est conservé.'),
           okLabel: L('Remove', 'Retirer'), danger: true }).then(function (ok) {
           if (!ok) return;
+          var back = snapshot();
           d.slots.splice(d.slots.indexOf(sl), 1);
           persist(); close(); render();
+          ui.undo(L('Exercise removed', 'Exercice retiré'), back);
         });
       }
 

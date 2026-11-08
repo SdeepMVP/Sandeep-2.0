@@ -78,9 +78,27 @@
     var t = document.getElementById('toast');
     if (!t) { t = h('div', { id: 'toast', class: 'toast', role: 'status' }); document.body.appendChild(t); }
     t.textContent = msg;
+    t.classList.remove('has-action');
     t.classList.add('is-visible');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function () { t.classList.remove('is-visible'); }, 2200);
+  }
+  /* v0.43 : message avec « Annuler » pendant 6 secondes, après une suppression ou une action qu'on peut regretter.
+     restore() remet les données comme avant ; un seul « Annuler » possible à la fois (le dernier). */
+  function undo(msg, restore) {
+    var t = document.getElementById('toast');
+    if (!t) { t = h('div', { id: 'toast', class: 'toast', role: 'status' }); document.body.appendChild(t); }
+    t.innerHTML = '';
+    var used = false;
+    t.appendChild(h('span', null, msg));
+    t.appendChild(h('button', { class: 'toast-undo', type: 'button', onclick: function () {
+      if (used) return; used = true;
+      t.classList.remove('is-visible', 'has-action');
+      try { restore(); toast(L('Undone', 'Annulé')); } catch (e) { console.error('Annuler', e); toast(L('Could not undo', 'Impossible d’annuler')); }
+    } }, L('Undo', 'Annuler')));
+    t.classList.add('is-visible', 'has-action');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('is-visible', 'has-action'); }, 6000);
   }
 
   /* Nombres et dates selon la langue (point en anglais, virgule en français ; les deux acceptés à la saisie). */
@@ -111,7 +129,7 @@
   }
 
   S2.ui = {
-    h: h, sheet: sheet, confirm: confirm, toast: toast,
+    h: h, sheet: sheet, confirm: confirm, toast: toast, undo: undo,
     num: num, parseNum: parseNum, date: date, longDate: longDate, uid: uid
   };
 })();

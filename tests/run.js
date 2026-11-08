@@ -690,5 +690,18 @@ test('search finds brands first (Coca, Fanta, Red Bull, Big Mac, M&M’s, Nutell
   ok(nut[0] === 'Nutella' && nut.some(function (n) { return /tartiner/.test(n); }), 'synonyms add, not replace: ' + nut.join(' | '));
 });
 
+/* ---------- v0.43 : corriger une entrée ---------- */
+console.log('\nFixing mistakes');
+test('fixing a logged quantity rescales calories and macros (grams or servings)', function () {
+  var coke = { type: 'ciqual', ref: 'p-coca', name: 'Coca-Cola', grams: 330, portion: '330 ml', qty: 1, kcal: 138.6, protein: 0, carbs: 35, fat: 0 };
+  var half = TE.rescaleEntry(coke, 165, 'ml');
+  ok(half.kcal === 69.3 && half.carbs === 17.5 && half.grams === 165 && half.portion === '165 ml' && coke.kcal === 138.6, JSON.stringify(half));
+  var skyr = { type: 'food', ref: 'skyr', qty: 1, kcal: 95, protein: 16, carbs: 6, fat: 0.3 };
+  var two = TE.rescaleEntry(skyr, 2);
+  ok(two.qty === 2 && two.kcal === 190 && two.protein === 32, JSON.stringify(two));
+  var back = TE.rescaleEntry(two, 0.5);
+  ok(back.kcal === 47.5 && back.qty === 0.5, JSON.stringify(back));
+});
+
 console.log('\n' + passed + ' passed, ' + failed + ' failed\n');
 process.exit(failed ? 1 : 0);

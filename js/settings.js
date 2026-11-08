@@ -4,7 +4,7 @@
   var S2 = window.S2;
   var ui = S2.ui, h = ui.h, L = S2.L;
   var NS = 'settings';
-  var VERSION = '0.42.0';
+  var VERSION = '0.43.0';
 
   function get() {
     var s = S2.storage.load(NS, null) || {};
@@ -87,6 +87,22 @@
     }, function () { ui.toast(L('Copy failed', 'La copie a échoué')); });
   }
 
+  /* v0.43 : copie de sécurité avant un import ou un effacement, pour pouvoir revenir en arrière.
+     Clé hors de l'espace « sandeep2: » (pas exportée, pas effacée par « Tout effacer »), une par app. */
+  var SAFETY = 'sandeep2-safety:' + (window.S2_APP && window.S2_APP.id || 'main');
+  function saveSafety(reason) {
+    try { localStorage.setItem(SAFETY, JSON.stringify({ at: new Date().toISOString(), reason: reason, backup: S2.storage.exportAll() })); return true; }
+    catch (e) { try { localStorage.removeItem(SAFETY); } catch (e2) { /* rien */ } return false; }
+  }
+  function readSafety() { try { var x = JSON.parse(localStorage.getItem(SAFETY) || 'null'); return x && x.backup ? x : null; } catch (e) { return null; } }
+  /* Demande la copie ; si le stockage est plein, propose de continuer sans. */
+  function withSafety(reason, go) {
+    if (saveSafety(reason)) { go(); return; }
+    ui.confirm({ title: L('No room for a safety copy', 'Pas de place pour une copie de sécurité'),
+      message: L('The phone storage is full, so the app cannot keep a copy to undo this. Export a backup first, or continue anyway.', 'Le stockage du téléphone est plein : l’app ne peut pas garder de copie pour annuler. Exporte d’abord une sauvegarde, ou continue quand même.'),
+      okLabel: L('Continue anyway', 'Continuer quand même'), danger: true }).then(function (ok) { if (ok) go(); });
+  }
+
   function onImportFile(input) {
     var f = input.files && input.files[0];
     input.value = '';
@@ -107,8 +123,10 @@
         okLabel: L('Replace my data', 'Remplacer mes données'), danger: true
       }).then(function (ok) {
         if (!ok) return;
-        try { S2.storage.importAll(obj); } catch (e) { ui.toast(e.message); return; }
-        location.reload();
+        withSafety('import', function () {
+          try { S2.storage.importAll(obj); } catch (e) { ui.toast(e.message); return; }
+          location.reload();
+        });
       });
     };
     reader.readAsText(f);
@@ -119,9 +137,9 @@
       message: L('All app data will be deleted from this iPhone. Export a backup first.', 'Toutes les données de l’app seront supprimées de cet iPhone. Exporte d’abord une sauvegarde.'),
       okLabel: L('Continue', 'Continuer'), danger: true }).then(function (ok) {
       if (!ok) return;
-      return ui.confirm({ title: L('Are you sure?', 'Vraiment ?'), message: L('This cannot be undone.', 'C’est irréversible.'),
+      return ui.confirm({ title: L('Are you sure?', 'Vraiment ?'), message: L('A copy is kept on this phone so you can go back (Settings › Backup), as long as you do not delete the app.', 'Une copie est gardée sur ce téléphone pour revenir en arrière (Réglages › Sauvegarde), tant que tu ne supprimes pas l’app.'),
         okLabel: L('Erase permanently', 'Effacer définitivement'), danger: true })
-        .then(function (ok2) { if (ok2) { S2.storage.clearAll(); location.hash = ''; location.reload(); } });
+        .then(function (ok2) { if (ok2) withSafety('wipe', function () { S2.storage.clearAll(); location.hash = ''; location.reload(); }); });
     });
   }
 
@@ -170,6 +188,30 @@
         h('button', { class: 'btn btn-secondary btn-block', onclick: function () { fileInput.click(); } }, L('Import a JSON file', 'Importer un fichier JSON')),
         navigator.clipboard ? h('button', { class: 'btn btn-ghost btn-block', onclick: copyJson }, L('Copy JSON', 'Copier le JSON')) : null),
       fileInput));
+    var safety = readSafety();
+    if (safety) {
+      var what = safety.reason === 'wipe' ? L('erase', 'effacement') : L('import', 'import');
+      c.appendChild(h('div', { class: 'card backup-banner' },
+        h('div', { class: 'card-title' }, L('↩ Undo the last ', '↩ Annuler le dernier ') + what),
+        h('p', { class: 'sheet-text' }, L('A copy of your data from before the ' + what + ' of ', 'Une copie de tes données d’avant l’' + what + ' du ') + ui.longDate(safety.at) +
+          L(' is kept on this phone.', ' est gardée sur ce téléphone.')),
+        h('div', { class: 'stack' },
+          h('button', { class: 'btn btn-primary btn-block', onclick: function () {
+            ui.confirm({ title: L('Go back to the data from before?', 'Revenir aux données d’avant ?'),
+              message: L('Your current data will be replaced by the copy of ', 'Tes données actuelles seront remplacées par la copie du ') + ui.longDate(safety.at) + '.',
+              okLabel: L('Go back', 'Revenir en arrière'), danger: true }).then(function (ok) {
+              if (!ok) return;
+              try { S2.storage.importAll(safety.backup); } catch (e) { ui.toast(e.message); return; }
+              try { localStorage.removeItem(SAFETY); } catch (e) { /* rien */ }
+              location.reload();
+            });
+          } }, L('Restore the data from before', 'Restaurer les données d’avant')),
+          h('button', { class: 'btn btn-ghost btn-block', onclick: function () {
+            ui.confirm({ title: L('Delete this copy?', 'Supprimer cette copie ?'), message: L('You will no longer be able to go back.', 'Tu ne pourras plus revenir en arrière.'), okLabel: L('Delete', 'Supprimer'), danger: true }).then(function (ok) {
+              if (!ok) return; try { localStorage.removeItem(SAFETY); } catch (e) { /* rien */ } S2.app.refresh();
+            });
+          } }, L('Delete the copy', 'Supprimer la copie')))));
+    }
 
     c.appendChild(h('h2', { class: 'section-title' }, L('Data', 'Données')));
     var keys = S2.storage.keys();
