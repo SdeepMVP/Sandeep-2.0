@@ -2734,6 +2734,857 @@
         ],
         tips: 'Even better reheated the next day: perfect for batch cooking.'
       }
+    },
+    /* ---------- v0.44 : 20 dîners faciles et riches en protéines (poulet, bœuf, poisson et fruits de mer, œufs…) ---------- */
+    {
+      id: 'm-soy-honey-chicken-broccoli', name: 'Poulet soja-miel, brocoli & riz', category: 'main',
+      time: 20, servings: 2, protein: 57, kcal: 585,
+      tags: ['poulet', 'brocoli', 'riz'], keywords: ['dîner', 'dinner', 'protéiné', 'chicken', 'broccoli', 'rice', 'soy', 'honey', 'rapide'],
+      ingredients: [
+        '400 g de filet de poulet',
+        '300 g de brocoli',
+        '120 g de riz (cru)',
+        '3 c. à soupe de sauce soja',
+        '1 c. à soupe de miel',
+        '1 gousse d’ail',
+        '1 c. à soupe d’huile',
+        '1 c. à café de graines de sésame'
+      ],
+      steps: [
+        'Cuis le riz 10 à 12 minutes dans l’eau bouillante salée, et le brocoli en fleurettes 5 minutes à la vapeur (ou dans l’eau du riz les 5 dernières minutes).',
+        'Coupe le poulet en dés. Dans une poêle chaude, fais-le dorer 6 à 7 minutes dans l’huile.',
+        'Ajoute l’ail râpé, la sauce soja et le miel. Laisse réduire 1 minute en remuant : la sauce nappe le poulet.',
+        'Ajoute le brocoli, mélange, et sers sur le riz avec les graines de sésame.'
+      ],
+      tips: 'Double les quantités : ça se garde 3 jours au frigo en boîtes.',
+      en: {
+        name: 'Soy-Honey Chicken, Broccoli & Rice',
+        tags: ['chicken', 'broccoli', 'rice'],
+        ingredients: [
+          '400 g chicken breast',
+          '300 g broccoli',
+          '120 g rice (uncooked)',
+          '3 tbsp soy sauce',
+          '1 tbsp honey',
+          '1 garlic clove',
+          '1 tbsp oil',
+          '1 tsp sesame seeds'
+        ],
+        steps: [
+          'Cook the rice for 10–12 minutes in boiling salted water, and steam the broccoli florets for 5 minutes (or add them to the rice water for the last 5 minutes).',
+          'Dice the chicken. In a hot pan, brown it in the oil for 6–7 minutes.',
+          'Add the grated garlic, soy sauce and honey. Let it reduce for 1 minute, stirring: the sauce coats the chicken.',
+          'Add the broccoli, stir, and serve over the rice with the sesame seeds.'
+        ],
+        tips: 'Double it: it keeps 3 days in the fridge in boxes.'
+      }
+    },
+    {
+      id: 'm-beef-sweet-potato-skillet', name: 'Poêlée bœuf haché, patate douce & épinards', category: 'main',
+      time: 25, servings: 2, protein: 51, kcal: 575,
+      tags: ['bœuf haché', 'patate douce', 'épinards', 'feta'], keywords: ['dîner', 'dinner', 'protéiné', 'beef', 'mince', 'sweet potato', 'spinach', 'one pan'],
+      ingredients: [
+        '400 g de bœuf haché 5 %',
+        '400 g de patate douce',
+        '150 g d’épinards',
+        '1 oignon',
+        '1 c. à soupe d’huile d’olive',
+        '1 c. à café de paprika',
+        '50 g de feta',
+        'Sel & poivre'
+      ],
+      steps: [
+        'Épluche la patate douce et coupe-la en petits dés (1 cm). Fais-la cuire 10 minutes à couvert dans une grande poêle avec l’huile et 3 c. à soupe d’eau.',
+        'Ajoute l’oignon émincé et le bœuf haché. Fais dorer 6 à 7 minutes en émiettant la viande.',
+        'Ajoute le paprika, le sel, le poivre et les épinards. Mélange jusqu’à ce qu’ils tombent (1 à 2 minutes).',
+        'Sers avec la feta émiettée par-dessus.'
+      ],
+      tips: 'Les petits dés cuisent vite : c’est le secret d’une poêlée en 25 minutes.',
+      en: {
+        name: 'Beef, Sweet Potato & Spinach Skillet',
+        tags: ['beef mince', 'sweet potato', 'spinach', 'feta'],
+        ingredients: [
+          '400 g lean beef mince (5% fat)',
+          '400 g sweet potato',
+          '150 g spinach',
+          '1 onion',
+          '1 tbsp olive oil',
+          '1 tsp paprika',
+          '50 g feta',
+          'Salt & pepper'
+        ],
+        steps: [
+          'Peel the sweet potato and cut it into small (1 cm) cubes. Cook them covered for 10 minutes in a large pan with the oil and 3 tbsp water.',
+          'Add the sliced onion and the mince. Brown for 6–7 minutes, breaking up the meat.',
+          'Add the paprika, salt, pepper and the spinach. Stir until it wilts (1–2 minutes).',
+          'Serve with the feta crumbled on top.'
+        ],
+        tips: 'Small cubes cook fast: that is how the skillet is ready in 25 minutes.'
+      }
+    },
+    {
+      id: 'm-ham-mushroom-omelette', name: 'Omelette jambon, champignons & fromage', category: 'main',
+      time: 15, servings: 2, protein: 48, kcal: 525,
+      tags: ['œufs', 'jambon', 'champignons', 'fromage'], keywords: ['dîner', 'dinner', 'protéiné', 'omelette', 'eggs', 'ham', 'mushroom', 'cheese', 'rapide'],
+      ingredients: [
+        '6 œufs',
+        '4 tranches de jambon (160 g)',
+        '200 g de champignons',
+        '40 g de fromage râpé',
+        '1 c. à café d’huile',
+        '2 tranches de pain complet',
+        'Sel & poivre'
+      ],
+      steps: [
+        'Émince les champignons et fais-les revenir 5 minutes dans l’huile, à feu vif.',
+        'Bats les œufs avec du sel et du poivre. Coupe le jambon en lanières.',
+        'Verse les œufs sur les champignons, ajoute le jambon et le fromage, et laisse cuire 4 à 5 minutes à feu moyen.',
+        'Plie l’omelette en deux, coupe-la en deux parts et sers avec le pain.'
+      ],
+      tips: 'Couvre la poêle 1 minute à la fin si tu aimes l’omelette bien prise.',
+      en: {
+        name: 'Ham, Mushroom & Cheese Omelette',
+        tags: ['eggs', 'ham', 'mushrooms', 'cheese'],
+        ingredients: [
+          '6 eggs',
+          '4 slices ham (160 g)',
+          '200 g mushrooms',
+          '40 g grated cheese',
+          '1 tsp oil',
+          '2 slices wholegrain bread',
+          'Salt & pepper'
+        ],
+        steps: [
+          'Slice the mushrooms and fry them for 5 minutes in the oil over high heat.',
+          'Beat the eggs with salt and pepper. Cut the ham into strips.',
+          'Pour the eggs over the mushrooms, add the ham and cheese, and cook for 4–5 minutes over medium heat.',
+          'Fold the omelette in half, cut it into two portions and serve with the bread.'
+        ],
+        tips: 'Cover the pan for 1 minute at the end if you like it well set.'
+      }
+    },
+    {
+      id: 'm-salmon-greenbeans-skyr', name: 'Saumon, pommes de terre & sauce skyr citron', category: 'main',
+      time: 25, servings: 2, protein: 41, kcal: 535,
+      tags: ['saumon', 'pommes de terre', 'haricots verts', 'skyr'], keywords: ['dîner', 'dinner', 'protéiné', 'salmon', 'potatoes', 'green beans', 'lemon', 'oven'],
+      ingredients: [
+        '2 pavés de saumon (260 g)',
+        '400 g de pommes de terre',
+        '300 g de haricots verts',
+        '150 g de skyr nature',
+        '1 citron',
+        '1 c. à soupe d’aneth',
+        '1 c. à café d’huile d’olive',
+        'Sel & poivre'
+      ],
+      steps: [
+        'Coupe les pommes de terre en quartiers et fais-les cuire 15 minutes dans l’eau bouillante salée ; ajoute les haricots verts les 8 dernières minutes.',
+        'Pendant ce temps, fais cuire le saumon 4 minutes côté peau puis 2 minutes de l’autre côté dans une poêle avec l’huile.',
+        'Mélange le skyr avec le jus d’un demi-citron, l’aneth, du sel et du poivre.',
+        'Sers le saumon avec les légumes égouttés, la sauce skyr et des quartiers de citron.'
+      ],
+      tips: 'La sauce skyr remplace la crème : autant de goût, deux fois plus de protéines.',
+      en: {
+        name: 'Salmon, Potatoes & Lemon Skyr Sauce',
+        tags: ['salmon', 'potatoes', 'green beans', 'skyr'],
+        ingredients: [
+          '2 salmon fillets (260 g)',
+          '400 g potatoes',
+          '300 g green beans',
+          '150 g plain skyr',
+          '1 lemon',
+          '1 tbsp dill',
+          '1 tsp olive oil',
+          'Salt & pepper'
+        ],
+        steps: [
+          'Cut the potatoes into wedges and boil them for 15 minutes in salted water; add the green beans for the last 8 minutes.',
+          'Meanwhile, cook the salmon for 4 minutes skin side down then 2 minutes on the other side in a pan with the oil.',
+          'Mix the skyr with the juice of half a lemon, the dill, salt and pepper.',
+          'Serve the salmon with the drained vegetables, the skyr sauce and lemon wedges.'
+        ],
+        tips: 'Skyr sauce replaces cream: same taste, twice the protein.'
+      }
+    },
+    {
+      id: 'm-garlic-shrimp-egg-noodles', name: 'Nouilles sautées crevettes & œufs', category: 'main',
+      time: 20, servings: 2, protein: 53, kcal: 595,
+      tags: ['crevettes', 'œufs', 'nouilles', 'légumes'], keywords: ['dîner', 'dinner', 'protéiné', 'shrimp', 'prawns', 'noodles', 'eggs', 'wok', 'rapide'],
+      ingredients: [
+        '300 g de crevettes décortiquées',
+        '3 œufs',
+        '120 g de nouilles (crues)',
+        '300 g de légumes à wok',
+        '2 gousses d’ail',
+        '3 c. à soupe de sauce soja',
+        '1 c. à soupe d’huile',
+        '1 cébette'
+      ],
+      steps: [
+        'Cuis les nouilles selon le paquet, égoutte-les et passe-les sous l’eau froide.',
+        'Dans un wok très chaud, fais sauter les crevettes 2 minutes dans l’huile avec l’ail. Réserve-les.',
+        'Fais sauter les légumes 3 minutes, pousse-les sur le côté et brouille les œufs dans l’espace libre.',
+        'Remets les crevettes, ajoute les nouilles et la sauce soja, mélange 1 minute à feu vif et parsème de cébette.'
+      ],
+      tips: 'Le wok doit fumer : les légumes restent croquants et rien ne colle.',
+      en: {
+        name: 'Shrimp & Egg Stir-Fried Noodles',
+        tags: ['shrimp', 'eggs', 'noodles', 'vegetables'],
+        ingredients: [
+          '300 g peeled shrimp',
+          '3 eggs',
+          '120 g noodles (uncooked)',
+          '300 g stir-fry vegetables',
+          '2 garlic cloves',
+          '3 tbsp soy sauce',
+          '1 tbsp oil',
+          '1 spring onion'
+        ],
+        steps: [
+          'Cook the noodles as the packet says, drain and rinse them under cold water.',
+          'In a very hot wok, stir-fry the shrimp with the garlic in the oil for 2 minutes. Set aside.',
+          'Stir-fry the vegetables for 3 minutes, push them aside and scramble the eggs in the free space.',
+          'Return the shrimp, add the noodles and soy sauce, toss for 1 minute over high heat and sprinkle with spring onion.'
+        ],
+        tips: 'The wok must be smoking hot: vegetables stay crunchy and nothing sticks.'
+      }
+    },
+    {
+      id: 'm-tuna-edamame-bowl', name: 'Bowl thon, edamame, riz & avocat', category: 'main',
+      time: 15, servings: 2, protein: 52, kcal: 600,
+      tags: ['thon', 'edamame', 'riz', 'avocat'], keywords: ['dîner', 'dinner', 'protéiné', 'tuna', 'edamame', 'rice', 'avocado', 'bowl', 'sans cuisson'],
+      ingredients: [
+        '2 boîtes de thon au naturel (280 g égoutté)',
+        '120 g de riz (cru)',
+        '150 g d’edamame',
+        '1 avocat',
+        '1/2 concombre',
+        '2 c. à soupe de sauce soja',
+        '1 c. à café de graines de sésame'
+      ],
+      steps: [
+        'Cuis le riz 10 à 12 minutes, égoutte-le et laisse-le tiédir. Ajoute les edamame dans l’eau les 3 dernières minutes.',
+        'Coupe l’avocat et le concombre en dés. Égoutte le thon.',
+        'Répartis le riz et les edamame dans deux bols, ajoute le thon, l’avocat et le concombre.',
+        'Arrose de sauce soja et parsème de sésame.'
+      ],
+      tips: 'Avec du riz déjà cuit, c’est prêt en 5 minutes.',
+      en: {
+        name: 'Tuna, Edamame, Rice & Avocado Bowl',
+        tags: ['tuna', 'edamame', 'rice', 'avocado'],
+        ingredients: [
+          '2 cans tuna in water (280 g drained)',
+          '120 g rice (uncooked)',
+          '150 g edamame',
+          '1 avocado',
+          '1/2 cucumber',
+          '2 tbsp soy sauce',
+          '1 tsp sesame seeds'
+        ],
+        steps: [
+          'Cook the rice for 10–12 minutes, drain and let it cool slightly. Add the edamame to the water for the last 3 minutes.',
+          'Dice the avocado and cucumber. Drain the tuna.',
+          'Share the rice and edamame between two bowls, add the tuna, avocado and cucumber.',
+          'Drizzle with soy sauce and sprinkle with sesame seeds.'
+        ],
+        tips: 'With cooked rice, it is ready in 5 minutes.'
+      }
+    },
+    {
+      id: 'm-turkey-courgette-curry', name: 'Curry express de dinde & courgettes', category: 'main',
+      time: 25, servings: 2, protein: 56, kcal: 580,
+      tags: ['dinde', 'courgettes', 'lait de coco', 'riz'], keywords: ['dîner', 'dinner', 'protéiné', 'turkey', 'courgette', 'zucchini', 'curry', 'coconut', 'rice'],
+      ingredients: [
+        '400 g d’escalopes de dinde',
+        '2 courgettes',
+        '1 oignon',
+        '200 ml de lait de coco allégé',
+        '1 c. à soupe de curry',
+        '120 g de riz (cru)',
+        '1 c. à café d’huile',
+        'Sel'
+      ],
+      steps: [
+        'Lance la cuisson du riz (10 à 12 minutes).',
+        'Coupe la dinde en morceaux et fais-la dorer 5 minutes dans l’huile. Ajoute l’oignon émincé et le curry, 1 minute.',
+        'Ajoute les courgettes en dés et le lait de coco, sale, et laisse mijoter 8 minutes.',
+        'Sers le curry sur le riz.'
+      ],
+      tips: 'Le lait de coco allégé garde le goût avec deux fois moins de calories.',
+      en: {
+        name: 'Quick Turkey & Courgette Curry',
+        tags: ['turkey', 'courgettes', 'coconut milk', 'rice'],
+        ingredients: [
+          '400 g turkey escalopes',
+          '2 courgettes',
+          '1 onion',
+          '200 ml light coconut milk',
+          '1 tbsp curry powder',
+          '120 g rice (uncooked)',
+          '1 tsp oil',
+          'Salt'
+        ],
+        steps: [
+          'Start cooking the rice (10–12 minutes).',
+          'Cut the turkey into pieces and brown it in the oil for 5 minutes. Add the sliced onion and the curry powder for 1 minute.',
+          'Add the diced courgettes and the coconut milk, season with salt, and simmer for 8 minutes.',
+          'Serve the curry over the rice.'
+        ],
+        tips: 'Light coconut milk keeps the taste with half the calories.'
+      }
+    },
+    {
+      id: 'm-tuna-mozza-pasta', name: 'Pâtes thon, tomate & mozzarella', category: 'main',
+      time: 20, servings: 2, protein: 61, kcal: 625,
+      tags: ['thon', 'pâtes', 'tomates', 'mozzarella'], keywords: ['dîner', 'dinner', 'protéiné', 'tuna', 'pasta', 'tomato', 'mozzarella', 'rapide'],
+      ingredients: [
+        '160 g de pâtes (crues)',
+        '2 boîtes de thon au naturel (280 g égoutté)',
+        '400 g de tomates concassées',
+        '1 boule de mozzarella (125 g)',
+        '1 gousse d’ail',
+        '1 c. à café d’origan',
+        '1 c. à café d’huile d’olive',
+        'Sel & poivre'
+      ],
+      steps: [
+        'Cuis les pâtes selon le paquet.',
+        'Pendant ce temps, fais revenir l’ail 1 minute dans l’huile, ajoute les tomates, l’origan, du sel et du poivre, et laisse réduire 8 minutes.',
+        'Ajoute le thon émietté, 2 minutes.',
+        'Mélange avec les pâtes égouttées et ajoute la mozzarella en morceaux juste avant de servir : elle fond à peine.'
+      ],
+      tips: 'Garde un peu d’eau de cuisson des pâtes pour rendre la sauce plus onctueuse.',
+      en: {
+        name: 'Tuna, Tomato & Mozzarella Pasta',
+        tags: ['tuna', 'pasta', 'tomatoes', 'mozzarella'],
+        ingredients: [
+          '160 g pasta (uncooked)',
+          '2 cans tuna in water (280 g drained)',
+          '400 g chopped tomatoes',
+          '1 mozzarella ball (125 g)',
+          '1 garlic clove',
+          '1 tsp oregano',
+          '1 tsp olive oil',
+          'Salt & pepper'
+        ],
+        steps: [
+          'Cook the pasta as the packet says.',
+          'Meanwhile, fry the garlic in the oil for 1 minute, add the tomatoes, oregano, salt and pepper, and reduce for 8 minutes.',
+          'Add the flaked tuna for 2 minutes.',
+          'Toss with the drained pasta and add the torn mozzarella just before serving: it barely melts.'
+        ],
+        tips: 'Keep a little pasta water to make the sauce silkier.'
+      }
+    },
+    {
+      id: 'm-chicken-skyr-wraps', name: 'Wraps poulet, sauce skyr & crudités', category: 'main',
+      time: 15, servings: 2, protein: 60, kcal: 665,
+      tags: ['poulet', 'skyr', 'tortillas', 'crudités'], keywords: ['dîner', 'dinner', 'protéiné', 'chicken', 'wraps', 'skyr', 'tortilla', 'rapide'],
+      ingredients: [
+        '350 g de filet de poulet',
+        '4 tortillas',
+        '150 g de skyr nature',
+        '1 c. à café de moutarde',
+        '1 c. à café de paprika',
+        '2 poignées de salade',
+        '2 tomates',
+        '1/2 concombre',
+        '1 c. à café d’huile'
+      ],
+      steps: [
+        'Coupe le poulet en lanières, saupoudre-le de paprika et de sel, et fais-le dorer 6 minutes dans l’huile.',
+        'Mélange le skyr et la moutarde. Coupe les tomates et le concombre en fines tranches.',
+        'Réchauffe les tortillas 20 secondes dans la poêle.',
+        'Tartine-les de sauce, ajoute la salade, les crudités et le poulet, puis roule-les bien serré.'
+      ],
+      tips: 'Coupe-les en deux en biais : plus faciles à manger et à emporter.',
+      en: {
+        name: 'Chicken Wraps with Skyr Sauce',
+        tags: ['chicken', 'skyr', 'tortillas', 'raw vegetables'],
+        ingredients: [
+          '350 g chicken breast',
+          '4 tortillas',
+          '150 g plain skyr',
+          '1 tsp mustard',
+          '1 tsp paprika',
+          '2 handfuls lettuce',
+          '2 tomatoes',
+          '1/2 cucumber',
+          '1 tsp oil'
+        ],
+        steps: [
+          'Cut the chicken into strips, sprinkle with paprika and salt, and brown for 6 minutes in the oil.',
+          'Mix the skyr and mustard. Thinly slice the tomatoes and cucumber.',
+          'Warm the tortillas for 20 seconds in the pan.',
+          'Spread with the sauce, add the lettuce, vegetables and chicken, then roll them up tightly.'
+        ],
+        tips: 'Cut them in half on the diagonal: easier to eat and to take away.'
+      }
+    },
+    {
+      id: 'm-beef-black-bean-tacos', name: 'Tacos bœuf, haricots noirs & cheddar', category: 'main',
+      time: 20, servings: 2, protein: 63, kcal: 825,
+      tags: ['bœuf haché', 'haricots noirs', 'cheddar', 'tortillas'], keywords: ['dîner', 'dinner', 'protéiné', 'beef', 'tacos', 'black beans', 'cheddar', 'mexican'],
+      ingredients: [
+        '350 g de bœuf haché 5 %',
+        '1 boîte de haricots noirs (environ 250 g égouttés)',
+        '4 tortillas',
+        '40 g de cheddar',
+        '4 c. à soupe de salsa',
+        '1 c. à café de cumin',
+        '1 poignée de salade',
+        '1 citron vert'
+      ],
+      steps: [
+        'Fais dorer le bœuf haché 5 minutes dans une poêle chaude, en l’émiettant.',
+        'Ajoute les haricots rincés, le cumin, du sel et 3 c. à soupe d’eau. Laisse 3 minutes en écrasant un peu les haricots.',
+        'Réchauffe les tortillas à la poêle.',
+        'Garnis-les de viande, de cheddar râpé, de salsa et de salade, avec un filet de citron vert.'
+      ],
+      tips: 'Les haricots noirs ajoutent protéines et fibres : tu cales sans alourdir.',
+      en: {
+        name: 'Beef, Black Bean & Cheddar Tacos',
+        tags: ['beef mince', 'black beans', 'cheddar', 'tortillas'],
+        ingredients: [
+          '350 g lean beef mince (5% fat)',
+          '1 can black beans (about 250 g drained)',
+          '4 tortillas',
+          '40 g cheddar',
+          '4 tbsp salsa',
+          '1 tsp cumin',
+          '1 handful lettuce',
+          '1 lime'
+        ],
+        steps: [
+          'Brown the mince for 5 minutes in a hot pan, breaking it up.',
+          'Add the rinsed beans, cumin, salt and 3 tbsp water. Cook for 3 minutes, lightly mashing the beans.',
+          'Warm the tortillas in the pan.',
+          'Fill them with the meat, grated cheddar, salsa and lettuce, with a squeeze of lime.'
+        ],
+        tips: 'Black beans add protein and fibre: filling without feeling heavy.'
+      }
+    },
+    {
+      id: 'm-shrimp-quinoa-bowl', name: 'Bowl crevettes, quinoa & avocat', category: 'main',
+      time: 20, servings: 2, protein: 49, kcal: 600,
+      tags: ['crevettes', 'quinoa', 'avocat', 'maïs'], keywords: ['dîner', 'dinner', 'protéiné', 'shrimp', 'prawns', 'quinoa', 'avocado', 'bowl'],
+      ingredients: [
+        '300 g de crevettes décortiquées',
+        '120 g de quinoa (cru)',
+        '1 avocat',
+        '100 g de maïs',
+        '150 g de tomates cerises',
+        '150 g de fromage blanc 0 %',
+        '1 citron vert',
+        '1 c. à café d’huile',
+        '1 c. à café de paprika'
+      ],
+      steps: [
+        'Rince le quinoa et fais-le cuire 12 minutes dans l’eau bouillante salée. Égoutte.',
+        'Fais sauter les crevettes 2 à 3 minutes dans l’huile avec le paprika.',
+        'Mélange le fromage blanc avec le jus du citron vert, du sel et du poivre.',
+        'Compose les bowls : quinoa, crevettes, avocat en tranches, maïs, tomates cerises et la sauce.'
+      ],
+      tips: 'La sauce au fromage blanc ajoute 10 g de protéines par bowl.',
+      en: {
+        name: 'Shrimp, Quinoa & Avocado Bowl',
+        tags: ['shrimp', 'quinoa', 'avocado', 'sweetcorn'],
+        ingredients: [
+          '300 g peeled shrimp',
+          '120 g quinoa (uncooked)',
+          '1 avocado',
+          '100 g sweetcorn',
+          '150 g cherry tomatoes',
+          '150 g fat-free fromage blanc',
+          '1 lime',
+          '1 tsp oil',
+          '1 tsp paprika'
+        ],
+        steps: [
+          'Rinse the quinoa and cook it for 12 minutes in boiling salted water. Drain.',
+          'Stir-fry the shrimp with the paprika in the oil for 2–3 minutes.',
+          'Mix the fromage blanc with the lime juice, salt and pepper.',
+          'Build the bowls: quinoa, shrimp, sliced avocado, sweetcorn, cherry tomatoes and the sauce.'
+        ],
+        tips: 'The fromage blanc sauce adds 10 g of protein per bowl.'
+      }
+    },
+    {
+      id: 'm-chicken-chickpea-spinach', name: 'Poulet, pois chiches & épinards au paprika', category: 'main',
+      time: 20, servings: 2, protein: 55, kcal: 495,
+      tags: ['poulet', 'pois chiches', 'épinards', 'feta'], keywords: ['dîner', 'dinner', 'protéiné', 'chicken', 'chickpeas', 'spinach', 'feta', 'one pan', 'rapide'],
+      ingredients: [
+        '350 g de filet de poulet',
+        '250 g de pois chiches en boîte (égouttés)',
+        '150 g d’épinards',
+        '200 g de tomates cerises',
+        '50 g de feta',
+        '1 c. à café de paprika fumé',
+        '1 gousse d’ail',
+        '1 c. à soupe d’huile d’olive'
+      ],
+      steps: [
+        'Coupe le poulet en dés et fais-le dorer 6 minutes dans l’huile avec le paprika et l’ail.',
+        'Ajoute les pois chiches rincés et les tomates cerises coupées en deux, 4 minutes.',
+        'Ajoute les épinards et mélange jusqu’à ce qu’ils tombent.',
+        'Sers avec la feta émiettée.'
+      ],
+      tips: 'Tout cuit dans la même poêle : une seule vaisselle.',
+      en: {
+        name: 'Paprika Chicken, Chickpeas & Spinach',
+        tags: ['chicken', 'chickpeas', 'spinach', 'feta'],
+        ingredients: [
+          '350 g chicken breast',
+          '250 g canned chickpeas (drained)',
+          '150 g spinach',
+          '200 g cherry tomatoes',
+          '50 g feta',
+          '1 tsp smoked paprika',
+          '1 garlic clove',
+          '1 tbsp olive oil'
+        ],
+        steps: [
+          'Dice the chicken and brown it in the oil with the paprika and garlic for 6 minutes.',
+          'Add the rinsed chickpeas and the halved cherry tomatoes for 4 minutes.',
+          'Add the spinach and stir until it wilts.',
+          'Serve with the feta crumbled on top.'
+        ],
+        tips: 'Everything cooks in one pan: only one pan to wash.'
+      }
+    },
+    {
+      id: 'm-cod-quinoa-broccoli', name: 'Cabillaud citronné, quinoa & brocoli', category: 'main',
+      time: 20, servings: 2, protein: 45, kcal: 495,
+      tags: ['cabillaud', 'quinoa', 'brocoli', 'citron'], keywords: ['dîner', 'dinner', 'protéiné', 'cod', 'fish', 'quinoa', 'broccoli', 'lemon', 'léger'],
+      ingredients: [
+        '2 dos de cabillaud (320 g)',
+        '120 g de quinoa (cru)',
+        '300 g de brocoli',
+        '1 citron',
+        '20 g de parmesan',
+        '1 c. à soupe d’huile d’olive',
+        'Sel & poivre'
+      ],
+      steps: [
+        'Fais cuire le quinoa 12 minutes ; ajoute le brocoli en petites fleurettes les 5 dernières minutes. Égoutte.',
+        'Sale et poivre le cabillaud. Fais-le cuire 3 à 4 minutes par face dans l’huile, à feu moyen.',
+        'Arrose de jus de citron hors du feu.',
+        'Sers sur le quinoa et le brocoli, avec le parmesan râpé.'
+      ],
+      tips: 'Le poisson est cuit quand il se détache en lamelles nacrées.',
+      en: {
+        name: 'Lemon Cod, Quinoa & Broccoli',
+        tags: ['cod', 'quinoa', 'broccoli', 'lemon'],
+        ingredients: [
+          '2 cod fillets (320 g)',
+          '120 g quinoa (uncooked)',
+          '300 g broccoli',
+          '1 lemon',
+          '20 g parmesan',
+          '1 tbsp olive oil',
+          'Salt & pepper'
+        ],
+        steps: [
+          'Cook the quinoa for 12 minutes; add the small broccoli florets for the last 5 minutes. Drain.',
+          'Season the cod. Cook it for 3–4 minutes per side in the oil over medium heat.',
+          'Squeeze the lemon over it off the heat.',
+          'Serve on the quinoa and broccoli, with the grated parmesan.'
+        ],
+        tips: 'The fish is done when it flakes into pearly layers.'
+      }
+    },
+    {
+      id: 'm-steak-sweet-potato-mash', name: 'Steak, purée de patate douce & haricots verts', category: 'main',
+      time: 25, servings: 2, protein: 43, kcal: 500,
+      tags: ['steak', 'patate douce', 'haricots verts'], keywords: ['dîner', 'dinner', 'protéiné', 'steak', 'beef', 'sweet potato', 'mash', 'green beans'],
+      ingredients: [
+        '2 steaks (300 g)',
+        '500 g de patate douce',
+        '300 g de haricots verts',
+        '100 g de fromage blanc 0 %',
+        '1 c. à café d’huile',
+        'Sel & poivre'
+      ],
+      steps: [
+        'Épluche la patate douce, coupe-la en cubes et fais-la cuire 15 minutes dans l’eau bouillante salée ; ajoute les haricots verts dans une autre casserole ou à la vapeur 8 minutes.',
+        'Écrase la patate douce avec le fromage blanc, du sel et du poivre.',
+        'Fais cuire les steaks 2 à 3 minutes par face dans une poêle très chaude avec l’huile. Laisse-les reposer 2 minutes.',
+        'Sers avec la purée et les haricots verts.'
+      ],
+      tips: 'Le fromage blanc rend la purée crémeuse sans beurre, et ajoute des protéines.',
+      en: {
+        name: 'Steak, Sweet Potato Mash & Green Beans',
+        tags: ['steak', 'sweet potato', 'green beans'],
+        ingredients: [
+          '2 steaks (300 g)',
+          '500 g sweet potato',
+          '300 g green beans',
+          '100 g fat-free fromage blanc',
+          '1 tsp oil',
+          'Salt & pepper'
+        ],
+        steps: [
+          'Peel and cube the sweet potato and boil it for 15 minutes in salted water; cook the green beans in another pan or steam them for 8 minutes.',
+          'Mash the sweet potato with the fromage blanc, salt and pepper.',
+          'Cook the steaks for 2–3 minutes per side in a very hot pan with the oil. Let them rest for 2 minutes.',
+          'Serve with the mash and the green beans.'
+        ],
+        tips: 'Fromage blanc makes the mash creamy without butter, and adds protein.'
+      }
+    },
+    {
+      id: 'm-potato-ham-frittata', name: 'Frittata pommes de terre, jambon & cottage', category: 'main',
+      time: 25, servings: 2, protein: 45, kcal: 560,
+      tags: ['œufs', 'jambon', 'cottage cheese', 'pommes de terre'], keywords: ['dîner', 'dinner', 'protéiné', 'frittata', 'eggs', 'ham', 'cottage cheese', 'potatoes'],
+      ingredients: [
+        '6 œufs',
+        '150 g de cottage cheese',
+        '3 tranches de jambon (120 g)',
+        '300 g de pommes de terre',
+        '1 oignon',
+        '1 c. à soupe d’huile d’olive',
+        '1 poignée de roquette',
+        'Sel & poivre'
+      ],
+      steps: [
+        'Coupe les pommes de terre en fines rondelles et fais-les cuire 10 minutes à couvert dans l’huile avec l’oignon émincé, en remuant.',
+        'Bats les œufs avec le cottage cheese, du sel et du poivre. Ajoute le jambon en morceaux.',
+        'Verse sur les pommes de terre et laisse cuire 8 minutes à feu doux, à couvert, jusqu’à ce que le dessus soit pris.',
+        'Coupe en parts et sers avec la roquette.'
+      ],
+      tips: 'Froide, elle fait un très bon déjeuner à emporter le lendemain.',
+      en: {
+        name: 'Potato, Ham & Cottage Cheese Frittata',
+        tags: ['eggs', 'ham', 'cottage cheese', 'potatoes'],
+        ingredients: [
+          '6 eggs',
+          '150 g cottage cheese',
+          '3 slices ham (120 g)',
+          '300 g potatoes',
+          '1 onion',
+          '1 tbsp olive oil',
+          '1 handful rocket',
+          'Salt & pepper'
+        ],
+        steps: [
+          'Slice the potatoes thinly and cook them covered for 10 minutes in the oil with the sliced onion, stirring.',
+          'Beat the eggs with the cottage cheese, salt and pepper. Add the chopped ham.',
+          'Pour over the potatoes and cook covered over low heat for 8 minutes, until the top is set.',
+          'Cut into slices and serve with the rocket.'
+        ],
+        tips: 'Cold, it makes a great packed lunch the next day.'
+      }
+    },
+    {
+      id: 'm-chicken-egg-fried-rice', name: 'Riz sauté poulet, œufs & petits pois', category: 'main',
+      time: 15, servings: 2, protein: 57, kcal: 705,
+      tags: ['poulet', 'œufs', 'riz', 'petits pois'], keywords: ['dîner', 'dinner', 'protéiné', 'fried rice', 'chicken', 'eggs', 'peas', 'restes', 'rapide'],
+      ingredients: [
+        '300 g de filet de poulet',
+        '3 œufs',
+        '400 g de riz cuit',
+        '150 g de petits pois',
+        '3 c. à soupe de sauce soja',
+        '1 c. à soupe d’huile',
+        '2 cébettes'
+      ],
+      steps: [
+        'Coupe le poulet en petits dés et fais-le sauter 5 minutes dans l’huile, à feu vif.',
+        'Ajoute les petits pois et le riz cuit, et fais sauter 3 minutes.',
+        'Pousse le riz sur le côté, verse les œufs battus et brouille-les, puis mélange le tout.',
+        'Ajoute la sauce soja et les cébettes émincées, 1 minute.'
+      ],
+      tips: 'Le riz de la veille est idéal : il ne colle pas.',
+      en: {
+        name: 'Chicken & Egg Fried Rice with Peas',
+        tags: ['chicken', 'eggs', 'rice', 'peas'],
+        ingredients: [
+          '300 g chicken breast',
+          '3 eggs',
+          '400 g cooked rice',
+          '150 g peas',
+          '3 tbsp soy sauce',
+          '1 tbsp oil',
+          '2 spring onions'
+        ],
+        steps: [
+          'Dice the chicken and stir-fry it in the oil over high heat for 5 minutes.',
+          'Add the peas and the cooked rice and stir-fry for 3 minutes.',
+          'Push the rice aside, pour in the beaten eggs and scramble them, then mix everything.',
+          'Add the soy sauce and sliced spring onions for 1 minute.'
+        ],
+        tips: 'Yesterday’s rice is best: it does not stick.'
+      }
+    },
+    {
+      id: 'm-tofu-edamame-noodles', name: 'Nouilles tofu, edamame & brocoli', category: 'main',
+      time: 20, servings: 2, protein: 50, kcal: 735,
+      tags: ['tofu', 'edamame', 'nouilles', 'brocoli'], keywords: ['dîner', 'dinner', 'protéiné', 'végétarien', 'vegetarian', 'tofu', 'edamame', 'noodles', 'broccoli'],
+      ingredients: [
+        '400 g de tofu ferme',
+        '150 g d’edamame',
+        '120 g de nouilles (crues)',
+        '250 g de brocoli',
+        '3 c. à soupe de sauce soja',
+        '1 c. à soupe de beurre de cacahuète',
+        '1 c. à soupe d’huile',
+        '1 gousse d’ail'
+      ],
+      steps: [
+        'Cuis les nouilles selon le paquet, avec le brocoli et les edamame les 4 dernières minutes. Égoutte.',
+        'Coupe le tofu en cubes, sèche-le avec du papier absorbant et fais-le dorer 8 minutes dans l’huile.',
+        'Mélange la sauce soja, le beurre de cacahuète, l’ail râpé et 3 c. à soupe d’eau chaude.',
+        'Ajoute nouilles, brocoli, edamame et sauce dans la poêle, mélange 1 minute.'
+      ],
+      tips: 'Bien sécher le tofu : il devient croustillant au lieu de bouillir.',
+      en: {
+        name: 'Tofu, Edamame & Broccoli Noodles',
+        tags: ['tofu', 'edamame', 'noodles', 'broccoli'],
+        ingredients: [
+          '400 g firm tofu',
+          '150 g edamame',
+          '120 g noodles (uncooked)',
+          '250 g broccoli',
+          '3 tbsp soy sauce',
+          '1 tbsp peanut butter',
+          '1 tbsp oil',
+          '1 garlic clove'
+        ],
+        steps: [
+          'Cook the noodles as the packet says, adding the broccoli and edamame for the last 4 minutes. Drain.',
+          'Cube the tofu, pat it dry with kitchen paper and brown it in the oil for 8 minutes.',
+          'Mix the soy sauce, peanut butter, grated garlic and 3 tbsp hot water.',
+          'Add the noodles, broccoli, edamame and sauce to the pan and toss for 1 minute.'
+        ],
+        tips: 'Dry the tofu well: it gets crispy instead of boiling.'
+      }
+    },
+    {
+      id: 'm-warm-lentil-egg-tuna', name: 'Salade tiède lentilles, œufs & thon', category: 'main',
+      time: 15, servings: 2, protein: 52, kcal: 550,
+      tags: ['lentilles', 'œufs', 'thon', 'tomates'], keywords: ['dîner', 'dinner', 'protéiné', 'lentils', 'eggs', 'tuna', 'salad', 'rapide'],
+      ingredients: [
+        '400 g de lentilles cuites',
+        '4 œufs',
+        '1 boîte de thon au naturel (140 g égoutté)',
+        '200 g de tomates cerises',
+        '1 échalote',
+        '1 c. à soupe de moutarde',
+        '1 c. à soupe d’huile d’olive',
+        '1 c. à soupe de vinaigre'
+      ],
+      steps: [
+        'Fais cuire les œufs 7 minutes dans l’eau bouillante (mollets), puis passe-les sous l’eau froide et écale-les.',
+        'Réchauffe les lentilles 2 minutes à la poêle ou au micro-ondes.',
+        'Mélange la moutarde, le vinaigre, l’huile et l’échalote émincée.',
+        'Mélange lentilles, thon, tomates cerises et vinaigrette, et pose les œufs coupés en deux par-dessus.'
+      ],
+      tips: 'Lentilles en conserve ou sous vide : aucune cuisson longue.',
+      en: {
+        name: 'Warm Lentil, Egg & Tuna Salad',
+        tags: ['lentils', 'eggs', 'tuna', 'tomatoes'],
+        ingredients: [
+          '400 g cooked lentils',
+          '4 eggs',
+          '1 can tuna in water (140 g drained)',
+          '200 g cherry tomatoes',
+          '1 shallot',
+          '1 tbsp mustard',
+          '1 tbsp olive oil',
+          '1 tbsp vinegar'
+        ],
+        steps: [
+          'Boil the eggs for 7 minutes (soft), then cool them under cold water and peel them.',
+          'Warm the lentils for 2 minutes in a pan or the microwave.',
+          'Mix the mustard, vinegar, oil and chopped shallot.',
+          'Toss the lentils, tuna, cherry tomatoes and dressing, and top with the halved eggs.'
+        ],
+        tips: 'Canned or vacuum-packed lentils: no long cooking.'
+      }
+    },
+    {
+      id: 'm-beef-meatballs-couscous', name: 'Boulettes de bœuf sauce tomate & semoule', category: 'main',
+      time: 25, servings: 2, protein: 60, kcal: 650,
+      tags: ['bœuf haché', 'tomates', 'semoule', 'parmesan'], keywords: ['dîner', 'dinner', 'protéiné', 'meatballs', 'beef', 'tomato', 'couscous'],
+      ingredients: [
+        '400 g de bœuf haché 5 %',
+        '1 œuf',
+        '20 g de chapelure',
+        '400 g de tomates concassées',
+        '120 g de semoule',
+        '20 g de parmesan',
+        '1 c. à café d’huile',
+        'Origan, sel & poivre'
+      ],
+      steps: [
+        'Mélange le bœuf, l’œuf, la chapelure, du sel et du poivre. Forme 12 boulettes.',
+        'Fais-les dorer 5 minutes dans l’huile, ajoute les tomates et l’origan, couvre et laisse mijoter 10 minutes.',
+        'Verse 150 ml d’eau bouillante salée sur la semoule, couvre 5 minutes puis égrène à la fourchette.',
+        'Sers les boulettes et leur sauce sur la semoule, avec le parmesan.'
+      ],
+      tips: 'Mouille-toi les mains pour former les boulettes : la viande ne colle pas.',
+      en: {
+        name: 'Beef Meatballs in Tomato Sauce & Couscous',
+        tags: ['beef mince', 'tomatoes', 'couscous', 'parmesan'],
+        ingredients: [
+          '400 g lean beef mince (5% fat)',
+          '1 egg',
+          '20 g breadcrumbs',
+          '400 g chopped tomatoes',
+          '120 g couscous',
+          '20 g parmesan',
+          '1 tsp oil',
+          'Oregano, salt & pepper'
+        ],
+        steps: [
+          'Mix the mince, egg, breadcrumbs, salt and pepper. Shape 12 meatballs.',
+          'Brown them in the oil for 5 minutes, add the tomatoes and oregano, cover and simmer for 10 minutes.',
+          'Pour 150 ml boiling salted water over the couscous, cover for 5 minutes then fluff with a fork.',
+          'Serve the meatballs and sauce over the couscous, with the parmesan.'
+        ],
+        tips: 'Wet your hands to shape the meatballs: the meat will not stick.'
+      }
+    },
+    {
+      id: 'm-chicken-broccoli-gratin', name: 'Gratin poulet, brocoli & fromage blanc', category: 'main',
+      time: 25, servings: 2, protein: 70, kcal: 480,
+      tags: ['poulet', 'brocoli', 'fromage blanc', 'fromage'], keywords: ['dîner', 'dinner', 'protéiné', 'gratin', 'chicken', 'broccoli', 'oven', 'four'],
+      ingredients: [
+        '400 g de filet de poulet',
+        '400 g de brocoli',
+        '200 g de fromage blanc 0 %',
+        '1 œuf',
+        '50 g de fromage râpé',
+        '1 c. à café de moutarde',
+        'Muscade, sel & poivre'
+      ],
+      steps: [
+        'Préchauffe le four à 210 °C. Fais cuire le brocoli 5 minutes à la vapeur ou dans l’eau bouillante.',
+        'Coupe le poulet en dés et fais-le dorer 5 minutes à la poêle.',
+        'Mélange le fromage blanc, l’œuf, la moutarde, la muscade, du sel et du poivre.',
+        'Mets brocoli et poulet dans un plat, nappe de sauce, parsème de fromage râpé et enfourne 12 minutes.'
+      ],
+      tips: 'La sauce fromage blanc-œuf remplace la béchamel : légère et très protéinée.',
+      en: {
+        name: 'Chicken, Broccoli & Fromage Blanc Gratin',
+        tags: ['chicken', 'broccoli', 'fromage blanc', 'cheese'],
+        ingredients: [
+          '400 g chicken breast',
+          '400 g broccoli',
+          '200 g fat-free fromage blanc',
+          '1 egg',
+          '50 g grated cheese',
+          '1 tsp mustard',
+          'Nutmeg, salt & pepper'
+        ],
+        steps: [
+          'Preheat the oven to 210 °C. Steam or boil the broccoli for 5 minutes.',
+          'Dice the chicken and brown it in a pan for 5 minutes.',
+          'Mix the fromage blanc, egg, mustard, nutmeg, salt and pepper.',
+          'Put the broccoli and chicken in a dish, cover with the sauce, sprinkle with cheese and bake for 12 minutes.'
+        ],
+        tips: 'The fromage blanc and egg sauce replaces béchamel: light and high in protein.'
+      }
     }
   ];
 })();

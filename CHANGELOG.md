@@ -1,5 +1,8 @@
 # Changelog — Habits (ex-Sandeep 2.0), Gym Food (ex-SanEva), Dressing
 
+## 0.44.0 — 2026-11-11
+- Kitchen: **20 new easy high-protein dinners** (15–25 min, 41 to 70 g of protein per serving, 2 servings), built around chicken, beef, fish and seafood, eggs (plus turkey and tofu): soy-honey chicken & broccoli, beef & sweet potato skillet, ham-mushroom omelette, salmon with lemon skyr sauce, shrimp & egg noodles, tuna-edamame bowl, turkey curry, tuna-mozzarella pasta, chicken skyr wraps, beef & black bean tacos, shrimp quinoa bowl, paprika chicken & chickpeas, lemon cod & quinoa, steak & sweet potato mash, potato-ham frittata, chicken fried rice, tofu-edamame noodles, warm lentil-egg-tuna salad, beef meatballs & couscous, chicken-broccoli gratin. Calories and protein computed by the nutrition table; search “dîner” finds them all. Added automatically to existing data.
+
 ## 0.43.0 — 2026-11-08
 - **Undo** for 6 seconds after a deletion or an action you may regret: journal entries, activities, leftovers, own foods, photos, weigh-ins and measurements, workouts (finished or discarded), program days and exercises, program template, new cycle, recipes, menu items, “Cooked”, plan, received grocery lists. While a sheet is open the message shows at the top.
 - **Fix mistakes**: tap a logged food to change its quantity (grams / ml or servings) or meal; tap an activity to change it; **fix a finished workout** (weight, reps, RPE, add or remove sets) from History › Workouts or an exercise's history; **see, fix or delete weigh-ins and measurements** (Goal, or Today › Review › Fix) — the profile weight follows the latest weigh-in left.
