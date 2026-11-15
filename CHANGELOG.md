@@ -1,5 +1,8 @@
 # Changelog — Habits (ex-Sandeep 2.0), Gym Food (ex-SanEva), Dressing
 
+## 0.46.0 — 2026-11-15
+- Kitchen › Planning: **change one meal only**. A “↻” next to each meal (one day, several days, and a confirmed plan) opens 5 suggestions that keep the day close to your targets (same kind of meal, not already that day), or “Pick a recipe myself…” (search, own category or all recipes). The rest of the day stays the same. On a confirmed plan, the menu and the groceries follow. Undo available.
+
 ## 0.45.0 — 2026-11-15
 - Kitchen: new recipe **Ham & cheddar tortilla omelette, lemon skyr sauce** (1 serving, 8 min, about 44 g protein, 645 kcal), with timers in the cooking guide. The nutrition table now knows lemon juice.
 

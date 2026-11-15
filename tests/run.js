@@ -703,5 +703,23 @@ test('fixing a logged quantity rescales calories and macros (grams or servings)'
   ok(back.kcal === 47.5 && back.qty === 0.5, JSON.stringify(back));
 });
 
+/* ---------- v0.46 : changer un seul repas du planning ---------- */
+console.log('\nPlanning: change one meal');
+test('alternatives for one meal: same kind, not already in the day, keep the day near the targets', function () {
+  var t = N.targets(prof({ goal: 'recomp' }));
+  var day = N.dayPlans(RECIPES, t, 1)[0];
+  var k = day.meals.map(function (m) { return m.recipe.category; }).indexOf('main');
+  var alts = N.mealAlternatives(RECIPES, t, day.meals, k, { count: 5 });
+  ok(alts.length === 5, 'count ' + alts.length);
+  var ids = day.meals.map(function (m) { return m.recipe.id; });
+  alts.forEach(function (a) { ok(a.recipe.category === 'main' && ids.indexOf(a.recipe.id) < 0 && a.portion > 0, a.recipe.id); });
+  var swapped = N.swapMeal(day, k, alts[0].recipe, t);
+  ok(swapped.meals[k].recipe.id === alts[0].recipe.id && day.meals[k].recipe.id !== alts[0].recipe.id, 'swapped, original untouched');
+  var sumK = swapped.meals.reduce(function (n, m) { return n + m.kcal; }, 0);
+  ok(swapped.kcal === sumK && Math.abs(swapped.kcal - t.kcal) / t.kcal < 0.3, 'day total ' + swapped.kcal + ' vs ' + t.kcal);
+  var bk = day.meals.map(function (m) { return m.recipe.category; }).indexOf('breakfast');
+  if (bk > -1) N.mealAlternatives(RECIPES, t, day.meals, bk).forEach(function (a) { ok(a.recipe.category === 'breakfast', 'breakfast stays breakfast'); });
+});
+
 console.log('\n' + passed + ' passed, ' + failed + ' failed\n');
 process.exit(failed ? 1 : 0);

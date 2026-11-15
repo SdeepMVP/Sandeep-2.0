@@ -1036,3 +1036,14 @@ input[type="date"].input { display: block; line-height: 48px; }
 .mu-edsets { display: grid; gap: 6px; margin: 6px 0 12px; }
 .mu-edrow { display: grid; grid-template-columns: 28px 1fr 1fr 1fr 44px; gap: 6px; align-items: center; }
 .ck-histacts { display: flex; gap: 6px; }
+
+/* ---------- v0.46 : Cuisine › Planning · changer un seul repas ---------- */
+.ck-mealrow { display: flex; align-items: stretch; gap: 6px; }
+.ck-mealrow > .ck-weekmeal, .ck-mealrow > .list-row { flex: 1; min-width: 0; }
+.ck-swapbtn { min-width: 44px; align-self: center; font-size: 18px; }
+.ck-picklist { max-height: 50vh; overflow-y: auto; -webkit-overflow-scrolling: touch; margin: 8px 0; }
+.ck-weekmeals .ck-mealrow { border-top: 1px solid var(--border); }
+.ck-weekmeals .ck-mealrow .ck-weekmeal { border-top: 0; }
+.list > .ck-mealrow { border-bottom: 1px solid var(--border); padding-right: 6px; }
+.list > .ck-mealrow:last-child { border-bottom: 0; }
+.list > .ck-mealrow > .list-row { border-bottom: 0; }
