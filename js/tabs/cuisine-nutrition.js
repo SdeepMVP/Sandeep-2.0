@@ -69,6 +69,7 @@
     [/^(petite )?pomme de terre|^potato/, [77, 2, 17, 0.1], { w: 150 }],
     [/^(patate douce|sweet potato)/, [86, 1.6, 20, 0.1], { w: 250 }],
     [/^(pomme|apple)/, [52, 0.3, 12, 0.2], { w: 150 }],
+    [/^(jus de citron|lemon juice|lime juice)/, [22, 0.4, 7, 0.2]],
     [/^(citron|lemon|lime)/, [29, 1, 9, 0.3], { w: 60 }],
     [/^(concombre|cucumber)/, [15, 0.7, 3, 0.1], { w: 300 }],
     [/^poignee de tomate cerise/, [18, 0.9, 3.9, 0.2], { w: 80 }],
