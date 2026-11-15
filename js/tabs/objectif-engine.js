@@ -272,10 +272,43 @@
     });
   }
 
+  /* ---------- v0.46 : changer UN repas d'une journée ----------
+     Recettes de remplacement pour le repas k (même catégorie, pas déjà dans la journée), classées pour que la journée
+     reste proche des besoins : calories, protéines, puis variété (used = { id: nombre de fois déjà prévue }). */
+  function mealAlternatives(recipes, t, meals, k, opts) {
+    if (!t || !meals || !meals[k]) return [];
+    opts = opts || {};
+    var cur = meals[k], cat = cur.recipe.category, used = opts.used || {};
+    var inDay = meals.map(function (m) { return m.recipe.id; });
+    var K0 = 0, P0 = 0;
+    meals.forEach(function (m, i) { if (i !== k) { K0 += m.kcal; P0 += m.protein; } });
+    return (recipes || []).filter(function (r) {
+      return r && r.kcal > 0 && r.protein > 0 && r.category === cat && inDay.indexOf(r.id) < 0;
+    }).map(function (r) {
+      var f = recipeFit(r, t), kcal = Math.round(r.kcal * f.portion), protein = Math.round(r.protein * f.portion);
+      return { recipe: r, portion: f.portion, kcal: kcal, protein: protein, level: f.level,
+        score: comboScore(K0 + kcal, P0 + protein, t) + (used[r.id] || 0) * 0.1 };
+    }).sort(function (a, b) { return a.score - b.score; }).slice(0, opts.count || 5);
+  }
+  /* Remplace le repas k par `recipe` (portion conseillée pour l'objectif) et recalcule la journée. Renvoie une copie. */
+  function swapMeal(day, k, recipe, t) {
+    var f = recipeFit(recipe, t), portion = f ? f.portion : 1;
+    var meals = day.meals.map(function (m, i) {
+      if (i !== k) return m;
+      return { recipe: recipe, slot: m.slot, portion: portion, kcal: Math.round((recipe.kcal || 0) * portion), protein: Math.round((recipe.protein || 0) * portion), swapped: true };
+    });
+    var o = {}; Object.keys(day).forEach(function (x) { o[x] = day[x]; });
+    o.meals = meals;
+    o.kcal = meals.reduce(function (n, m) { return n + m.kcal; }, 0);
+    o.protein = meals.reduce(function (n, m) { return n + m.protein; }, 0);
+    return o;
+  }
+
   S2.nutritionEngine = {
     ACTIVITY: ACTIVITY, GOALS: GOALS, PORTIONS: PORTIONS, STRUCTURE: STRUCTURE,
     isComplete: isComplete, bmr: bmr, targets: targets,
     portionFor: portionFor, recipeFit: recipeFit, dayPlans: dayPlans,
-    weekPlan: weekPlan, weekTotals: weekTotals, forTwo: forTwo, portionForKcal: portionForKcal
+    weekPlan: weekPlan, weekTotals: weekTotals, forTwo: forTwo, portionForKcal: portionForKcal,
+    mealAlternatives: mealAlternatives, swapMeal: swapMeal
   };
 })();

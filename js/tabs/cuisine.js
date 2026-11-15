@@ -422,6 +422,9 @@
   var planDays = null;     // 1 | 3 | 4 | 7 jours (null = longueur du planning validé, sinon 1)
   var planShift = 0;       // décalage (jours) du début de la proposition par rapport au début proposé
   var weekSeed = 0, weekPicks = [], weekDraft = false; // proposition en cours (non enregistrée)
+  /* v0.46 : repas changés un par un dans une proposition (non enregistré) : clé → id de recette.
+     'd|<journée>|<repas>' (mode Un jour), 'p|<graine>|<jour>|<proposition du jour>|<repas>' (plusieurs jours). */
+  var mealSwaps = {};
 
   /* ---------- Objectif (Gym Food) : lu via S2.objectif, jamais dans les données d'un autre onglet ---------- */
   var NE = S2.nutritionEngine;
@@ -871,25 +874,34 @@
     }
     if (dayIdx >= plans.length) dayIdx = 0;
     var plan = plans[dayIdx];
+    plan.meals.forEach(function (m, k) { var id = mealSwaps['d|' + dayIdx + '|' + k], r = id && recipe(id); if (r) plan = NE.swapMeal(plan, k, r, T); });
     if (two) plan = NE.forTwo([plan], T2)[0];
     var labels = SLOT_LABELS[plan.meals.length] || [];
     root.appendChild(h('h2', { class: 'section-title' }, L('Suggested day ', 'Journée proposée ') + (dayIdx + 1) + ' / ' + plans.length));
     root.appendChild(h('div', { class: 'list' }, plan.meals.map(function (m, i) {
       var v = view(m.recipe);
-      return h('button', { class: 'list-row list-row-btn ck-dayrow', onclick: function () {
-        servingsView[m.recipe.id] = mealServings(m); open(m.recipe.id); } },
-        h('div', { class: 'ck-daymain' },
-          h('span', { class: 'ck-dayslot' }, labels[i] || ''),
-          h('span', { class: 'list-title' }, v.name),
-          h('span', { class: 'list-sub' }, mealText(m) + (m.recipe.time ? ' · ⏱ ' + m.recipe.time + ' min' : ''))),
-        h('span', { class: 'chev', 'aria-hidden': 'true' }, '›'));
+      return h('div', { class: 'ck-mealrow' },
+        h('button', { class: 'list-row list-row-btn ck-dayrow', onclick: function () {
+          servingsView[m.recipe.id] = mealServings(m); open(m.recipe.id); } },
+          h('div', { class: 'ck-daymain' },
+            h('span', { class: 'ck-dayslot' }, labels[i] || ''),
+            h('span', { class: 'list-title' }, v.name),
+            h('span', { class: 'list-sub' }, mealText(m) + (m.recipe.time ? ' · ⏱ ' + m.recipe.time + ' min' : ''))),
+          h('span', { class: 'chev', 'aria-hidden': 'true' }, '›')),
+        swapButton(labels[i] || '', function () {
+          openSwap({ title: labels[i] || '', meals: plan.meals, k: i, pool: pool, T: T, used: {}, apply: function (r) {
+            var key = 'd|' + dayIdx + '|' + i, before = mealSwaps[key];
+            mealSwaps[key] = r.id; render();
+            ui.undo(L('Meal changed', 'Repas changé'), function () { if (before) mealSwaps[key] = before; else delete mealSwaps[key]; render(); });
+          } });
+        }));
     })));
     root.appendChild(h('div', { class: 'card ck-daytotal' },
       goalBar((two ? myName() + ' · ' : '') + L('calories: ', 'calories : ') + plan.kcal + ' / ' + T.kcal + ' kcal', plan.kcal / T.kcal),
       goalBar((two ? myName() + ' · ' : '') + L('protein: ', 'protéines : ') + plan.protein + ' / ' + T.protein + ' g', plan.protein / T.protein),
       two ? partnerLine(plan.kcal2, plan.protein2, T2) : null));
     root.appendChild(h('div', { class: 'bottom-actions' },
-      plans.length > 1 ? h('button', { class: 'btn btn-secondary btn-block btn-lg', onclick: function () { dayIdx = (dayIdx + 1) % plans.length; render(); } },
+      plans.length > 1 ? h('button', { class: 'btn btn-secondary btn-block btn-lg', onclick: function () { dayIdx = (dayIdx + 1) % plans.length; clearSwaps('d|'); render(); } },
         L('↻ Another suggestion', '↻ Autre proposition')) : null,
       h('button', { class: 'btn btn-primary btn-block btn-lg', onclick: function () {
         plan.meals.forEach(function (m) { addToPlan(m.recipe, mealServings(m)); });
@@ -948,6 +960,11 @@
       if (data.week) data.week.days.forEach(function (d) { d.meals.forEach(function (m) { avoid[m.recipeId] = true; }); });
       var seed = weekSeed * 997 + Math.round(new Date(start).getTime() / 86400000);
       week = NE.weekPlan(pool, T, { days: n, seed: seed, picks: weekPicks, batch: data.weekBatch, avoid: avoid });
+      /* v0.46 : repas changés un par un dans cette proposition. */
+      week = week.map(function (day, i) {
+        day.meals.forEach(function (m, k) { var id = mealSwaps[swapKey(seed, i, day.pick, k)], r = id && recipe(id); if (r) day = NE.swapMeal(day, k, r, T); });
+        return day;
+      });
       two = !!T2;
       if (two) week = NE.forTwo(week, T2);
       if (!week.length) {
@@ -1001,10 +1018,21 @@
             weekPicks[i] = ((weekPicks[i] || 0) + 1) % day.choices; render();
           } }, L('↻ Change', '↻ Changer')) : null),
         h('div', { class: 'ck-weekmeals' }, day.meals.map(function (m, k) {
-          return h('button', { class: 'ck-weekmeal', onclick: function () { servingsView[m.recipe.id] = mealServings(m); open(m.recipe.id); } },
-            h('span', { class: 'ck-dayslot' }, labels[k] || ''),
-            h('span', { class: 'ck-weekrecipe' }, view(m.recipe).name),
-            h('span', { class: 'list-sub' }, mealText(m)));
+          return h('div', { class: 'ck-mealrow' },
+            h('button', { class: 'ck-weekmeal', onclick: function () { servingsView[m.recipe.id] = mealServings(m); open(m.recipe.id); } },
+              h('span', { class: 'ck-dayslot' }, labels[k] || ''),
+              h('span', { class: 'ck-weekrecipe' }, view(m.recipe).name),
+              h('span', { class: 'list-sub' }, mealText(m))),
+            swapButton((labels[k] || '') + ' · ' + dayLabel(start, i), function () {
+              var used = {};
+              week.forEach(function (d) { d.meals.forEach(function (x) { used[x.recipe.id] = (used[x.recipe.id] || 0) + 1; }); });
+              openSwap({ title: (labels[k] || '') + ' · ' + dayLabel(start, i), meals: day.meals, k: k, pool: pool, T: T, used: used, apply: function (r) {
+                if (savedFits) { swapSavedMeal(i, k, r, T); return; }
+                var key = swapKey(seed, i, day.pick, k), before = mealSwaps[key];
+                mealSwaps[key] = r.id; render();
+                ui.undo(L('Meal changed', 'Repas changé'), function () { if (before) mealSwaps[key] = before; else delete mealSwaps[key]; render(); });
+              } });
+            }));
         }))));
     });
 
@@ -1031,8 +1059,85 @@
     root.appendChild(h('p', { class: 'hint' }, (n === 3 || n === 4
       ? L('Shopping twice a week: confirm 3 days now, then 4 days next time (it starts the day after and avoids the same dishes). ',
         'Courses 2 fois par semaine : valide 3 jours maintenant, puis 4 jours la fois suivante (ça commence le lendemain et évite les mêmes plats). ') : '') +
-      L('Confirming puts each recipe once in the menu with all its servings (rounded up' + (two ? ', both people' : '') + '), so the groceries add everything up. “↻ Change” only replaces that day.',
-        'Valider met chaque recette une seule fois au menu avec toutes ses portions (arrondies au-dessus' + (two ? ', pour les 2' : '') + ') : les courses additionnent tout. « ↻ Changer » ne remplace que ce jour-là.')));
+      L('Confirming puts each recipe once in the menu with all its servings (rounded up' + (two ? ', both people' : '') + '), so the groceries add everything up. “↻ Change” replaces the whole day, “↻” next to a meal replaces only that meal (another suggestion or a recipe you pick).',
+        'Valider met chaque recette une seule fois au menu avec toutes ses portions (arrondies au-dessus' + (two ? ', pour les 2' : '') + ') : les courses additionnent tout. « ↻ Changer » remplace tout le jour, « ↻ » à côté d’un repas ne remplace que ce repas (autre suggestion ou recette de ton choix).')));
+  }
+
+  /* ---------- v0.46 : changer un seul repas ---------- */
+  function swapKey(seed, i, pick, k) { return 'p|' + seed + '|' + i + '|' + (pick || 0) + '|' + k; }
+  function clearSwaps(prefix) { Object.keys(mealSwaps).forEach(function (key) { if (key.indexOf(prefix) === 0) delete mealSwaps[key]; }); }
+  function swapButton(label, onclick) {
+    return h('button', { class: 'btn btn-icon ck-swapbtn', type: 'button', 'aria-label': L('Change this meal: ', 'Changer ce repas : ') + label, onclick: onclick }, '↻');
+  }
+  /* Feuille : 5 suggestions qui gardent la journée proche de tes besoins, ou une recette de ton choix. */
+  function openSwap(ctx) {
+    var cur = ctx.meals[ctx.k];
+    var alts = NE.mealAlternatives(ctx.pool, ctx.T, ctx.meals, ctx.k, { used: ctx.used, count: 5 });
+    ui.sheet(function (close) {
+      return [
+        h('h2', { class: 'sheet-title' }, L('Change this meal', 'Changer ce repas')),
+        h('p', { class: 'sheet-text' }, ctx.title + ' · ' + L('now: ', 'actuellement : ') + view(cur.recipe).name),
+        h('div', { class: 'field-label' }, L('Suggestions that keep your day on target', 'Suggestions qui gardent ta journée dans tes besoins')),
+        alts.length ? h('div', { class: 'list' }, alts.map(function (a) {
+          return h('button', { class: 'list-row list-row-btn', onclick: function () { close(); ctx.apply(a.recipe); } },
+            h('div', null, h('div', { class: 'list-title' }, view(a.recipe).name),
+              h('div', { class: 'list-sub' }, portionText(a.portion) + ' · ' + a.kcal + ' kcal · ' + a.protein + L(' g protein', ' g de protéines') + (a.recipe.time ? ' · ⏱ ' + a.recipe.time + ' min' : ''))),
+            h('span', { class: 'chev', 'aria-hidden': 'true' }, '›'));
+        })) : h('p', { class: 'hint' }, L('No other recipe of this kind.', 'Pas d’autre recette de ce type.')),
+        h('div', { class: 'sheet-actions' },
+          h('button', { class: 'btn btn-secondary btn-block', onclick: function () { close(); pickOwnRecipe(ctx); } }, L('Pick a recipe myself…', 'Choisir une recette moi-même…')),
+          h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, L('Cancel', 'Annuler')))
+      ];
+    }, { modal: true });
+  }
+  function pickOwnRecipe(ctx) {
+    var cur = ctx.meals[ctx.k], cat = cur.recipe.category, all = false, q = '';
+    ui.sheet(function (close) {
+      var list = h('div', { class: 'list ck-picklist' });
+      var search = h('input', { class: 'input', type: 'search', placeholder: L('Search a recipe', 'Rechercher une recette'), 'aria-label': L('Search', 'Rechercher'), autocomplete: 'off' });
+      var toggle = h('div', { class: 'segmented small' });
+      function paint() {
+        toggle.innerHTML = '';
+        [[false, cat === 'breakfast' ? L('Breakfasts', 'Petits-déj') : L('Lunch & dinner', 'Déj & dîner')], [true, L('All recipes', 'Toutes')]].forEach(function (x) {
+          toggle.appendChild(h('button', { class: 'seg' + (all === x[0] ? ' is-active' : ''), type: 'button', onclick: function () { all = x[0]; paint(); } }, x[1]));
+        });
+        list.innerHTML = '';
+        var n0 = norm(q).trim();
+        var rs = data.recipes.filter(function (r) { return r.kcal > 0 && (all || r.category === cat) && r.id !== cur.recipe.id && (!n0 || norm(view(r).name).indexOf(n0) > -1 || matches(r, view(r), q)); })
+          .sort(function (a, b) { return view(a).name.localeCompare(view(b).name, S2.lang); });
+        rs.forEach(function (r) {
+          var f = NE.recipeFit(r, ctx.T), pr = f ? f.portion : 1;
+          list.appendChild(h('button', { class: 'list-row list-row-btn', onclick: function () { close(); ctx.apply(r); } },
+            h('div', null, h('div', { class: 'list-title' }, (data.favs[r.id] ? '♥ ' : '') + view(r).name),
+              h('div', { class: 'list-sub' }, portionText(pr) + ' · ' + Math.round(r.kcal * pr) + ' kcal · ' + Math.round(r.protein * pr) + ' g')),
+            h('span', { class: 'chev', 'aria-hidden': 'true' }, '›')));
+        });
+        if (!rs.length) list.appendChild(h('p', { class: 'hint' }, L('No recipe found.', 'Aucune recette trouvée.')));
+      }
+      search.addEventListener('input', function () { q = search.value; paint(); });
+      paint();
+      return [h('h2', { class: 'sheet-title' }, L('Pick a recipe', 'Choisir une recette')), search, toggle, list,
+        h('div', { class: 'sheet-actions' }, h('button', { class: 'btn btn-ghost btn-block', onclick: function () { close(); } }, L('Cancel', 'Annuler')))];
+    }, { modal: true });
+  }
+  /* Planning déjà validé : on change le repas, et le menu (donc les courses) suit : portions de l'ancienne et de la nouvelle recette. */
+  function swapSavedMeal(i, k, r, T) {
+    var back = snapshot();
+    var meal = data.week.days[i].meals[k], oldId = meal.recipeId;
+    var f = NE.recipeFit(r, T);
+    data.week.days[i].meals[k] = { recipeId: r.id, portion: f ? f.portion : 1 };
+    syncPlanItem(oldId); syncPlanItem(r.id);
+    persist(); render();
+    ui.undo(L('Meal changed: menu and groceries updated', 'Repas changé : menu et courses mis à jour'), back);
+  }
+  function syncPlanItem(id) {
+    var total = 0, days = [];
+    data.week.days.forEach(function (d, di) { d.meals.forEach(function (m) { if (m.recipeId === id) { total += m.portion + (m.portion2 || 0); if (days.indexOf(di) < 0) days.push(di); } }); });
+    var item = data.plan.items.filter(function (it) { return it.recipeId === id; })[0];
+    if (!total) { if (item && item.days !== undefined) data.plan.items.splice(data.plan.items.indexOf(item), 1); return; }
+    var servings = Math.min(24, Math.max(1, Math.ceil(total))), label = days.map(function (di) { return dayShort(data.week.start, di); }).join(', ');
+    if (item) { item.servings = servings; item.days = label; }
+    else data.plan.items.push({ uid: ui.uid(), recipeId: id, servings: servings, added: new Date().toISOString(), days: label });
   }
 
   function confirmWeek(week, start, totals, two) {
