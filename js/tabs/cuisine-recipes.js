@@ -3585,6 +3585,62 @@
         ],
         tips: 'The fromage blanc and egg sauce replaces béchamel: light and high in protein.'
       }
+    },
+    /* ---------- v0.45 : recette de Sandeep (15 novembre 2026) ---------- */
+    {
+      id: 'b-ham-cheddar-tortilla-omelette', name: 'Tortilla-omelette jambon-cheddar, sauce skyr-citron', category: 'breakfast',
+      time: 8, servings: 1, protein: 44, kcal: 645,
+      tags: ['œufs', 'tortilla', 'jambon', 'cheddar', 'skyr'], keywords: ['tortilla omelette', 'omelette', 'egg wrap', 'eggs', 'ham', 'cheddar', 'skyr', 'croustillant', 'rapide', 'dîner', 'dinner', 'protéiné'],
+      ingredients: [
+        '3 œufs moyens',
+        '1 tortilla de blé (environ 25 cm, 60 g)',
+        '30 g de cheddar râpé (ou emmental)',
+        '40 g de jambon en dés ou en lanières',
+        '5 g de beurre',
+        '1 pincée de sel (œufs)',
+        '1/4 c. à café de poivre noir et paprika',
+        '30 g de skyr nature',
+        '1 c. à café de jus de citron',
+        '1 pincée d’ail en poudre',
+        '1 pincée de sel (sauce)'
+      ],
+      steps: [
+        'Préparer la sauce : dans un petit bol, mélange le skyr, le jus de citron, l’ail en poudre et le sel. Goûte : elle doit être fraîche et légèrement acidulée. Réserve au frais.',
+        'Battre les œufs : dans un bol, bats les œufs avec le sel, le poivre et le paprika jusqu’à ce que blanc et jaune soient bien mélangés.',
+        'Fondre le beurre (1 minute) : poêle antiadhésive à feu moyen avec le beurre. Attends qu’il mousse légèrement, sans brunir.',
+        'Verser et poser la tortilla (90 secondes) : verse les œufs et incline la poêle pour couvrir tout le fond. Tout de suite, pose la tortilla à plat dessus et appuie avec la spatule. Laisse cuire jusqu’à ce que le dessus de l’œuf ne soit presque plus liquide.',
+        'Retourner et garnir (30 secondes) : retourne le tout d’un geste franc, tortilla en dessous, œuf au-dessus. Répartis le cheddar sur toute la surface et le jambon sur une moitié seulement. Couvre la poêle pour faire fondre le fromage.',
+        'Plier et rendre croustillant (1 minute) : plie en deux côté jambon. Laisse dorer 30 secondes, retourne, puis 30 secondes de l’autre côté. La tortilla doit être dorée et croustillante.',
+        'Servir : coupe en deux et trempe chaque bouchée dans la sauce skyr-citron bien fraîche.'
+      ],
+      tips: 'Croustillante dehors, fondante dedans. Pour une sauce plus parfumée, ajoute une pincée de paprika ou d’herbes de Provence au skyr.',
+      en: {
+        name: 'Ham & Cheddar Tortilla Omelette, Lemon Skyr Sauce',
+        tags: ['eggs', 'tortilla', 'ham', 'cheddar', 'skyr'],
+        ingredients: [
+          '3 medium eggs',
+          '1 wheat tortilla (about 25 cm, 60 g)',
+          '30 g grated cheddar (or emmental)',
+          '40 g ham, diced or in strips',
+          '5 g butter',
+          '1 pinch salt (eggs)',
+          '1/4 tsp black pepper and paprika',
+          '30 g plain skyr',
+          '1 tsp lemon juice',
+          '1 pinch garlic powder',
+          '1 pinch salt (sauce)'
+        ],
+        steps: [
+          'Make the sauce: in a small bowl, mix the skyr, lemon juice, garlic powder and salt. Taste: it should be fresh and slightly tangy. Keep it in the fridge.',
+          'Beat the eggs: in a bowl, beat the eggs with the salt, pepper and paprika until the whites and yolks are fully mixed.',
+          'Melt the butter (1 minute): non-stick pan over medium heat with the butter. Wait until it foams slightly, without browning.',
+          'Pour and add the tortilla (90 seconds): pour in the eggs and tilt the pan to cover the bottom. Straight away, lay the tortilla flat on top and press with the spatula. Cook until the top of the egg is almost set.',
+          'Flip and fill (30 seconds): flip everything in one firm move, tortilla underneath, egg on top. Spread the cheddar over the whole surface and the ham over one half only. Cover the pan to melt the cheese.',
+          'Fold and crisp (1 minute): fold in half over the ham. Brown for 30 seconds, flip, then 30 seconds on the other side. The tortilla should be golden and crisp.',
+          'Serve: cut in half and dip each bite in the cold lemon skyr sauce.'
+        ],
+        tips: 'Crisp outside, melting inside. For a more fragrant sauce, add a pinch of paprika or herbes de Provence to the skyr.'
+      }
     }
   ];
 })();

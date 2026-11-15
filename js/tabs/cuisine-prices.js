@@ -70,6 +70,7 @@
     [/^petite pomme de terre/, { kg: 3, pack: 750 }],
     [/^patate douce|^sweet potato/, { unit: 0.8, w: 300, pack: 1 }],
     [/^pomme|^apple/, { unit: 0.4, pack: 1 }],
+    [/^jus de citron|^lemon juice|^lime juice/, { l: 4, pantry: true }],
     [/^citron|^lemon|^lime/, { unit: 0.45, pack: 1 }],
     [/^concombre|^cucumber/, { unit: 0.9, pack: 1 }],
     [/^poignee de tomate cerise|^tomate cerise|^cherry tomato/, { kg: 6, pack: 250, w: 80 }],

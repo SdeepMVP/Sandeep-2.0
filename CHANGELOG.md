@@ -1,5 +1,8 @@
 # Changelog — Habits (ex-Sandeep 2.0), Gym Food (ex-SanEva), Dressing
 
+## 0.45.0 — 2026-11-15
+- Kitchen: new recipe **Ham & cheddar tortilla omelette, lemon skyr sauce** (1 serving, 8 min, about 44 g protein, 645 kcal), with timers in the cooking guide. The nutrition table now knows lemon juice.
+
 ## 0.44.0 — 2026-11-11
 - Kitchen: **20 new easy high-protein dinners** (15–25 min, 41 to 70 g of protein per serving, 2 servings), built around chicken, beef, fish and seafood, eggs (plus turkey and tofu): soy-honey chicken & broccoli, beef & sweet potato skillet, ham-mushroom omelette, salmon with lemon skyr sauce, shrimp & egg noodles, tuna-edamame bowl, turkey curry, tuna-mozzarella pasta, chicken skyr wraps, beef & black bean tacos, shrimp quinoa bowl, paprika chicken & chickpeas, lemon cod & quinoa, steak & sweet potato mash, potato-ham frittata, chicken fried rice, tofu-edamame noodles, warm lentil-egg-tuna salad, beef meatballs & couscous, chicken-broccoli gratin. Calories and protein computed by the nutrition table; search “dîner” finds them all. Added automatically to existing data.
 
