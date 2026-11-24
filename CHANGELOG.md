@@ -1,5 +1,8 @@
 # Changelog — Habits (ex-Sandeep 2.0), Gym Food (ex-SanEva), Dressing
 
+## 0.49.0 — 2026-11-24
+- Gym Food: the **Goal tab is hidden**; tabs are now **Gym, Kitchen, Settings**. Nothing is deleted: your profile still feeds Kitchen (daily needs for the Planning and portions) and Gym (bodyweight for bodyweight exercises). If no profile is filled in yet, Kitchen and Gym open the questionnaire directly. Apps can now list the tabs they show (`S2_APP.tabs`), so the tab can come back by editing one line of `cuisine/config.js`.
+
 ## 0.48.0 — 2026-11-24
 - Gym Food: the **Today tab is removed** (calorie tracking took too much time). The app opens on **Gym**; tabs are now Gym, Goal, Kitchen, Settings. Your journal data (meals, water, weigh-ins already in Goal, photos) stays on the phone and in backups; nothing is deleted. Weigh-ins and measurements remain in Goal (see / fix). The weekly and monthly reviews, the daily checklist and the calorie adjustment suggestion went with the tab. New users now get the welcome questionnaire at the top of Gym.
 

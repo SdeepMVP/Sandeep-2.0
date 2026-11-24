@@ -10,6 +10,10 @@
   /* tab = { id, label, icon (svg), soon (bool), title?, mount(container, ctx) } */
   function registerTab(tab) {
     if (!tab || !tab.id) return;
+    /* v0.49 : une app dérivée peut n'afficher que certains onglets (window.S2_APP.tabs) ; le fichier reste chargé
+       (son API sert aux autres onglets), seul l'onglet est masqué. Réglages est toujours affiché. */
+    var only = window.S2_APP && window.S2_APP.tabs;
+    if (only && only.indexOf(tab.id) < 0 && tab.id !== 'reglages') return;
     if (tabs.some(function (t) { return t.id === tab.id; })) {
       console.warn('Onglet déjà enregistré :', tab.id);
       return;

@@ -794,11 +794,13 @@
       h('span', { class: 'ck-goalpct' }, pct + ' %'), h('span', { class: 'list-sub' }, label),
       h('span', { class: 'ck-bar', 'aria-hidden': 'true' }, h('span', { style: 'width:' + Math.min(100, pct) + '%' })));
   }
+  /* v0.49 : l'onglet Objectif peut être masqué : le questionnaire s'ouvre directement ici. */
+  function startProfile() { if (S2.objectif && S2.objectif.startWizard) S2.objectif.startWizard('me', function () { if (root) render(); }); else location.hash = '#objectif'; }
   function askProfile() {
     ui.confirm({ title: L('Fill in your profile first', 'Remplis d’abord ton profil'),
-      message: L('In the Goal tab, enter your height, weight and goal: recipes are then matched to your daily needs.',
-        'Dans l’onglet Objectif, entre ta taille, ton poids et ton objectif : les recettes sont ensuite choisies selon tes besoins du jour.'),
-      okLabel: L('Go to Goal', 'Aller à Objectif') }).then(function (ok) { if (ok) location.hash = '#objectif'; });
+      message: L('A few questions (height, weight, goal): recipes are then matched to your daily needs.',
+        'Quelques questions (taille, poids, objectif) : les recettes sont ensuite choisies selon tes besoins du jour.'),
+      okLabel: L('Answer (2 min)', 'Répondre (2 min)') }).then(function (ok) { if (ok) startProfile(); });
   }
 
   /* ---------- Ma journée : une journée type qui colle aux besoins (suggestion, rien n'est ajouté sans toi) ---------- */
@@ -826,9 +828,9 @@
     var T = goalTargets();
     if (!T) {
       root.appendChild(h('div', { class: 'empty-state small' },
-        h('p', null, L('Fill in your height, weight and goal in the Goal tab: the app then suggests a day of recipes that matches your needs.',
-          'Remplis ta taille, ton poids et ton objectif dans l’onglet Objectif : l’app te propose ensuite une journée de recettes qui colle à tes besoins.')),
-        h('a', { class: 'btn btn-primary', href: '#objectif' }, L('Fill in my profile', 'Remplir mon profil'))));
+        h('p', null, L('Answer a few questions (height, weight, goal): the app then suggests a day of recipes that matches your needs.',
+          'Réponds à quelques questions (taille, poids, objectif) : l’app te propose ensuite une journée de recettes qui colle à tes besoins.')),
+        h('button', { class: 'btn btn-primary', onclick: startProfile }, L('Fill in my profile', 'Remplir mon profil'))));
       return;
     }
     if (planDays === null) planDays = data.week && [3, 4, 7].indexOf(data.week.days.length) > -1 ? data.week.days.length : 1;
