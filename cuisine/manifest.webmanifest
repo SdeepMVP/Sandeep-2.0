@@ -1,7 +1,7 @@
 {
   "name": "Gym Food",
   "short_name": "Gym Food",
-  "description": "Suivi du jour : repas, séances et objectifs, pour toi et à 2.",
+  "description": "Muscu, objectifs et cuisine.",
   "lang": "fr",
   "start_url": "./",
   "scope": "./",

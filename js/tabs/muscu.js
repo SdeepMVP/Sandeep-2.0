@@ -456,6 +456,17 @@
     var sd = scheduledDay(new Date()), todayId = sd ? sd.id : null;
     var next = nextInRotation(), nextId = !fixedDays() && next ? next.id : null;
     if (pickDay === null && (todayId || nextId)) pickDay = todayId || nextId;
+    /* v0.48 : l'onglet Aujourd'hui (qui accueillait les nouveaux) est retiré : la Muscu, 1er onglet, propose le questionnaire
+       tant que le profil n'est pas rempli. */
+    var noProfile = false; try { noProfile = !!(S2.objectif && S2.objectif.startWizard && !S2.objectif.targets()); } catch (e) { noProfile = false; }
+    if (noProfile) {
+      body.appendChild(h('div', { class: 'card mu-firstrun backup-banner' },
+        h('div', { class: 'card-title' }, L('Welcome to Gym Food', 'Bienvenue sur Gym Food')),
+        h('p', { class: 'sheet-text' }, L('A few questions about you, your sport and your goals (2 min): the app suggests your program, your calories and your protein. You confirm everything.',
+          'Quelques questions sur toi, ton sport et tes objectifs (2 min) : l’app te propose ton programme, tes calories et tes protéines. Tu valides tout.')),
+        h('button', { class: 'btn btn-primary btn-block btn-lg', onclick: function () { S2.objectif.startWizard('me', function () { store = loadData(); data = personData(store, person); pickDay = null; render(); }); } },
+          L('Start (2 min)', 'Commencer (2 min)'))));
+    }
     body.appendChild(goalsCard());
 
     if (!done.length && !Object.keys(data.schedule).length) {
