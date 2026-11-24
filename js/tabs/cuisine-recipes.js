@@ -3641,6 +3641,650 @@
         ],
         tips: 'Crisp outside, melting inside. For a more fragrant sauce, add a pinch of paprika or herbes de Provence to the skyr.'
       }
+    },
+    /* ---------- v0.50 : 15 déjeuners et dîners sans four (poêle, wok, casserole ou sans cuisson) ---------- */
+    {
+      id: 'm-chicken-pepper-fajitas', name: 'Fajitas poulet-poivrons, sauce skyr', category: 'main',
+      time: 20, servings: 2, protein: 60, kcal: 725,
+      tags: ['poulet', 'poivrons', 'tortillas', 'skyr'], keywords: ['sans four', 'no oven', 'déjeuner', 'dîner', 'lunch', 'dinner', 'fajitas', 'chicken', 'peppers', 'mexican'],
+      ingredients: [
+        '350 g de filet de poulet',
+        '2 poivrons',
+        '1 oignon',
+        '4 tortillas',
+        '1 c. à café de cumin',
+        '1 c. à café de paprika',
+        '1 c. à soupe d’huile',
+        '150 g de skyr nature',
+        '1 citron vert'
+      ],
+      steps: [
+        'Coupe le poulet, les poivrons et l’oignon en lanières.',
+        'Fais dorer le poulet 5 minutes dans l’huile très chaude avec le cumin, le paprika et du sel. Réserve.',
+        'Dans la même poêle, fais sauter les poivrons et l’oignon 6 minutes : ils doivent rester un peu croquants. Remets le poulet, arrose de jus de citron vert.',
+        'Réchauffe les tortillas 20 secondes à sec dans la poêle, garnis-les et ajoute une cuillère de skyr.'
+      ],
+      tips: 'Poêle bien chaude et pas trop remplie : les lanières dorent au lieu de bouillir.',
+      en: {
+        name: 'Chicken & Pepper Fajitas with Skyr',
+        tags: ['chicken', 'peppers', 'tortillas', 'skyr'],
+        ingredients: [
+          '350 g chicken breast',
+          '2 peppers',
+          '1 onion',
+          '4 tortillas',
+          '1 tsp cumin',
+          '1 tsp paprika',
+          '1 tbsp oil',
+          '150 g plain skyr',
+          '1 lime'
+        ],
+        steps: [
+          'Cut the chicken, peppers and onion into strips.',
+          'Brown the chicken for 5 minutes in very hot oil with the cumin, paprika and salt. Set aside.',
+          'In the same pan, stir-fry the peppers and onion for 6 minutes: they should stay slightly crunchy. Return the chicken and squeeze over the lime.',
+          'Warm the tortillas for 20 seconds in the dry pan, fill them and add a spoonful of skyr.'
+        ],
+        tips: 'A very hot pan, not overcrowded: the strips brown instead of stewing.'
+      }
+    },
+    {
+      id: 'm-chicken-teriyaki-rice', name: 'Poulet teriyaki, riz & haricots verts', category: 'main',
+      time: 20, servings: 2, protein: 54, kcal: 570,
+      tags: ['poulet', 'riz', 'haricots verts'], keywords: ['sans four', 'no oven', 'déjeuner', 'dîner', 'lunch', 'dinner', 'teriyaki', 'chicken', 'rice', 'green beans', 'soy'],
+      ingredients: [
+        '400 g de filet de poulet',
+        '120 g de riz (cru)',
+        '250 g de haricots verts',
+        '3 c. à soupe de sauce soja',
+        '1 c. à soupe de miel',
+        '1 c. à café de gingembre râpé',
+        '1 c. à café de fécule de maïs',
+        '1 c. à soupe d’huile'
+      ],
+      steps: [
+        'Lance le riz (10 à 12 minutes) et fais cuire les haricots verts 8 minutes dans l’eau bouillante salée.',
+        'Mélange la sauce soja, le miel, le gingembre, la fécule et 4 c. à soupe d’eau.',
+        'Coupe le poulet en morceaux et fais-le dorer 6 minutes dans l’huile.',
+        'Verse la sauce, laisse épaissir 1 minute en remuant, et sers avec le riz et les haricots verts.'
+      ],
+      tips: 'La fécule donne la sauce brillante et nappante du teriyaki.',
+      en: {
+        name: 'Chicken Teriyaki, Rice & Green Beans',
+        tags: ['chicken', 'rice', 'green beans'],
+        ingredients: [
+          '400 g chicken breast',
+          '120 g rice (uncooked)',
+          '250 g green beans',
+          '3 tbsp soy sauce',
+          '1 tbsp honey',
+          '1 tsp grated ginger',
+          '1 tsp cornflour',
+          '1 tbsp oil'
+        ],
+        steps: [
+          'Start the rice (10–12 minutes) and boil the green beans for 8 minutes in salted water.',
+          'Mix the soy sauce, honey, ginger, cornflour and 4 tbsp water.',
+          'Cut the chicken into pieces and brown it in the oil for 6 minutes.',
+          'Pour in the sauce, let it thicken for 1 minute while stirring, and serve with the rice and green beans.'
+        ],
+        tips: 'The cornflour gives teriyaki its glossy, coating sauce.'
+      }
+    },
+    {
+      id: 'm-beef-onion-greenbeans', name: 'Bœuf sauté aux oignons, haricots verts & riz', category: 'main',
+      time: 20, servings: 2, protein: 43, kcal: 555,
+      tags: ['bœuf', 'oignons', 'haricots verts', 'riz'], keywords: ['sans four', 'no oven', 'déjeuner', 'dîner', 'lunch', 'dinner', 'beef', 'stir fry', 'onion', 'green beans', 'rice', 'wok'],
+      ingredients: [
+        '300 g de steak (rumsteck ou bavette)',
+        '2 oignons',
+        '250 g de haricots verts',
+        '120 g de riz (cru)',
+        '3 c. à soupe de sauce soja',
+        '1 gousse d’ail',
+        '1 c. à soupe d’huile'
+      ],
+      steps: [
+        'Lance le riz. Fais blanchir les haricots verts 5 minutes dans l’eau bouillante, égoutte.',
+        'Coupe le bœuf en fines lamelles et les oignons en quartiers.',
+        'Saisis le bœuf 2 minutes à feu très vif dans l’huile, réserve. Fais sauter les oignons 4 minutes, puis les haricots et l’ail 2 minutes.',
+        'Remets le bœuf, ajoute la sauce soja, mélange 30 secondes et sers sur le riz.'
+      ],
+      tips: 'Le bœuf se saisit vite et à part : il reste tendre.',
+      en: {
+        name: 'Beef Stir-Fry with Onions, Green Beans & Rice',
+        tags: ['beef', 'onions', 'green beans', 'rice'],
+        ingredients: [
+          '300 g steak (rump or flank)',
+          '2 onions',
+          '250 g green beans',
+          '120 g rice (uncooked)',
+          '3 tbsp soy sauce',
+          '1 garlic clove',
+          '1 tbsp oil'
+        ],
+        steps: [
+          'Start the rice. Blanch the green beans for 5 minutes in boiling water, drain.',
+          'Slice the beef thinly and cut the onions into wedges.',
+          'Sear the beef for 2 minutes over very high heat in the oil, set aside. Stir-fry the onions for 4 minutes, then the beans and garlic for 2 minutes.',
+          'Return the beef, add the soy sauce, toss for 30 seconds and serve over the rice.'
+        ],
+        tips: 'Sear the beef quickly and separately: it stays tender.'
+      }
+    },
+    {
+      id: 'm-tuna-pasta-salad', name: 'Salade de pâtes thon, maïs & œufs', category: 'main',
+      time: 15, servings: 2, protein: 64, kcal: 670,
+      tags: ['thon', 'pâtes', 'œufs', 'maïs'], keywords: ['sans four', 'no oven', 'déjeuner', 'dîner', 'lunch', 'dinner', 'pasta salad', 'tuna', 'eggs', 'sweetcorn', 'lunch box', 'à emporter'],
+      ingredients: [
+        '160 g de pâtes (crues)',
+        '2 boîtes de thon au naturel (280 g égoutté)',
+        '3 œufs',
+        '150 g de maïs',
+        '200 g de tomates cerises',
+        '100 g de fromage blanc 0 %',
+        '1 c. à café de moutarde',
+        '1 c. à soupe de persil'
+      ],
+      steps: [
+        'Cuis les pâtes selon le paquet et les œufs 9 minutes (durs). Rafraîchis-les sous l’eau froide.',
+        'Mélange le fromage blanc, la moutarde, le persil, du sel et du poivre : c’est la sauce.',
+        'Écale et coupe les œufs. Coupe les tomates cerises en deux.',
+        'Mélange pâtes, thon émietté, maïs, tomates et sauce, puis pose les œufs dessus.'
+      ],
+      tips: 'Se garde 2 jours au frigo : parfaite en boîte pour le déjeuner.',
+      en: {
+        name: 'Tuna, Sweetcorn & Egg Pasta Salad',
+        tags: ['tuna', 'pasta', 'eggs', 'sweetcorn'],
+        ingredients: [
+          '160 g pasta (uncooked)',
+          '2 cans tuna in water (280 g drained)',
+          '3 eggs',
+          '150 g sweetcorn',
+          '200 g cherry tomatoes',
+          '100 g fat-free fromage blanc',
+          '1 tsp mustard',
+          '1 tbsp parsley'
+        ],
+        steps: [
+          'Cook the pasta as the packet says and the eggs for 9 minutes (hard). Cool them under cold water.',
+          'Mix the fromage blanc, mustard, parsley, salt and pepper: that is the dressing.',
+          'Peel and cut the eggs. Halve the cherry tomatoes.',
+          'Toss the pasta, flaked tuna, sweetcorn, tomatoes and dressing, then top with the eggs.'
+        ],
+        tips: 'Keeps 2 days in the fridge: perfect in a lunch box.'
+      }
+    },
+    {
+      id: 'm-lemon-turkey-couscous', name: 'Dinde au citron, courgettes & semoule', category: 'main',
+      time: 20, servings: 2, protein: 58, kcal: 520,
+      tags: ['dinde', 'courgettes', 'semoule', 'citron'], keywords: ['sans four', 'no oven', 'déjeuner', 'dîner', 'lunch', 'dinner', 'turkey', 'lemon', 'courgette', 'couscous'],
+      ingredients: [
+        '400 g d’escalopes de dinde',
+        '2 courgettes',
+        '120 g de semoule',
+        '1 citron',
+        '1 gousse d’ail',
+        '1 c. à soupe d’huile d’olive',
+        '1 c. à café d’herbes de Provence'
+      ],
+      steps: [
+        'Verse 150 ml d’eau bouillante salée sur la semoule, couvre 5 minutes puis égrène à la fourchette.',
+        'Coupe la dinde en lanières et fais-la dorer 5 minutes dans l’huile avec les herbes.',
+        'Ajoute les courgettes en dés et l’ail, 6 minutes à feu moyen.',
+        'Arrose du jus du citron, râpe un peu de zeste et sers sur la semoule.'
+      ],
+      tips: 'Le zeste de citron change tout : ne le saute pas.',
+      en: {
+        name: 'Lemon Turkey, Courgettes & Couscous',
+        tags: ['turkey', 'courgettes', 'couscous', 'lemon'],
+        ingredients: [
+          '400 g turkey escalopes',
+          '2 courgettes',
+          '120 g couscous',
+          '1 lemon',
+          '1 garlic clove',
+          '1 tbsp olive oil',
+          '1 tsp herbes de Provence'
+        ],
+        steps: [
+          'Pour 150 ml boiling salted water over the couscous, cover for 5 minutes then fluff with a fork.',
+          'Cut the turkey into strips and brown it for 5 minutes in the oil with the herbs.',
+          'Add the diced courgettes and the garlic for 6 minutes over medium heat.',
+          'Squeeze over the lemon juice, grate a little zest and serve on the couscous.'
+        ],
+        tips: 'The lemon zest makes all the difference: do not skip it.'
+      }
+    },
+    {
+      id: 'm-tomato-garlic-shrimp', name: 'Crevettes à la tomate & à l’ail, riz', category: 'main',
+      time: 20, servings: 2, protein: 45, kcal: 510,
+      tags: ['crevettes', 'tomates', 'riz'], keywords: ['sans four', 'no oven', 'déjeuner', 'dîner', 'lunch', 'dinner', 'shrimp', 'prawns', 'tomato', 'garlic', 'rice'],
+      ingredients: [
+        '350 g de crevettes décortiquées',
+        '400 g de tomates concassées',
+        '120 g de riz (cru)',
+        '3 gousses d’ail',
+        '1 oignon',
+        '1 c. à soupe d’huile d’olive',
+        '1 c. à café de paprika',
+        '1 c. à soupe de persil'
+      ],
+      steps: [
+        'Lance le riz (10 à 12 minutes).',
+        'Fais revenir l’oignon émincé 4 minutes dans l’huile, puis l’ail et le paprika 1 minute.',
+        'Ajoute les tomates, sale, poivre et laisse réduire 8 minutes.',
+        'Ajoute les crevettes et laisse cuire 3 minutes, jusqu’à ce qu’elles soient roses. Parsème de persil et sers sur le riz.'
+      ],
+      tips: 'Les crevettes cuisent en 3 minutes : trop cuites, elles deviennent caoutchouteuses.',
+      en: {
+        name: 'Garlic Tomato Shrimp & Rice',
+        tags: ['shrimp', 'tomatoes', 'rice'],
+        ingredients: [
+          '350 g peeled shrimp',
+          '400 g chopped tomatoes',
+          '120 g rice (uncooked)',
+          '3 garlic cloves',
+          '1 onion',
+          '1 tbsp olive oil',
+          '1 tsp paprika',
+          '1 tbsp parsley'
+        ],
+        steps: [
+          'Start the rice (10–12 minutes).',
+          'Fry the sliced onion in the oil for 4 minutes, then the garlic and paprika for 1 minute.',
+          'Add the tomatoes, season and reduce for 8 minutes.',
+          'Add the shrimp and cook for 3 minutes, until pink. Sprinkle with parsley and serve over the rice.'
+        ],
+        tips: 'Shrimp cook in 3 minutes: overcooked, they turn rubbery.'
+      }
+    },
+    {
+      id: 'm-chicken-quinoa-avocado-salad', name: 'Salade poulet, quinoa & avocat', category: 'main',
+      time: 20, servings: 2, protein: 56, kcal: 685,
+      tags: ['poulet', 'quinoa', 'avocat', 'concombre'], keywords: ['sans four', 'no oven', 'déjeuner', 'dîner', 'lunch', 'dinner', 'salad', 'chicken', 'quinoa', 'avocado', 'lunch box', 'à emporter'],
+      ingredients: [
+        '350 g de filet de poulet',
+        '120 g de quinoa (cru)',
+        '1 avocat',
+        '1 concombre',
+        '200 g de tomates cerises',
+        '50 g de feta',
+        '1 citron',
+        '1 c. à soupe d’huile d’olive'
+      ],
+      steps: [
+        'Rince le quinoa et fais-le cuire 12 minutes, égoutte-le et laisse-le tiédir.',
+        'Fais cuire le poulet 5 à 6 minutes par face à la poêle, puis coupe-le en tranches.',
+        'Coupe l’avocat, le concombre et les tomates.',
+        'Mélange le tout avec la feta émiettée, le jus du citron, l’huile, du sel et du poivre.'
+      ],
+      tips: 'Prépare quinoa et poulet la veille : la salade se monte en 5 minutes.',
+      en: {
+        name: 'Chicken, Quinoa & Avocado Salad',
+        tags: ['chicken', 'quinoa', 'avocado', 'cucumber'],
+        ingredients: [
+          '350 g chicken breast',
+          '120 g quinoa (uncooked)',
+          '1 avocado',
+          '1 cucumber',
+          '200 g cherry tomatoes',
+          '50 g feta',
+          '1 lemon',
+          '1 tbsp olive oil'
+        ],
+        steps: [
+          'Rinse the quinoa and cook it for 12 minutes, drain and let it cool slightly.',
+          'Pan-fry the chicken for 5–6 minutes per side, then slice it.',
+          'Cut the avocado, cucumber and tomatoes.',
+          'Toss everything with the crumbled feta, lemon juice, oil, salt and pepper.'
+        ],
+        tips: 'Cook the quinoa and chicken the day before: the salad comes together in 5 minutes.'
+      }
+    },
+    {
+      id: 'm-pan-gnocchi-chicken-tomato', name: 'Gnocchis poêlés, poulet & tomates cerises', category: 'main',
+      time: 20, servings: 2, protein: 50, kcal: 605,
+      tags: ['gnocchis', 'poulet', 'tomates cerises', 'parmesan'], keywords: ['sans four', 'no oven', 'déjeuner', 'dîner', 'lunch', 'dinner', 'gnocchi', 'chicken', 'cherry tomatoes', 'parmesan', 'one pan'],
+      ingredients: [
+        '400 g de gnocchis',
+        '300 g de filet de poulet',
+        '250 g de tomates cerises',
+        '100 g d’épinards',
+        '30 g de parmesan',
+        '1 gousse d’ail',
+        '1 c. à soupe d’huile d’olive'
+      ],
+      steps: [
+        'Fais dorer les gnocchis 6 à 8 minutes dans la moitié de l’huile, sans les cuire avant : ils deviennent croustillants. Réserve.',
+        'Fais dorer le poulet en dés 6 minutes avec le reste d’huile.',
+        'Ajoute les tomates cerises et l’ail, 3 minutes, puis les épinards jusqu’à ce qu’ils tombent.',
+        'Remets les gnocchis, mélange et sers avec le parmesan râpé.'
+      ],
+      tips: 'Gnocchis du rayon frais, directement à la poêle : pas besoin de les faire bouillir.',
+      en: {
+        name: 'Pan-Fried Gnocchi, Chicken & Cherry Tomatoes',
+        tags: ['gnocchi', 'chicken', 'cherry tomatoes', 'parmesan'],
+        ingredients: [
+          '400 g gnocchi',
+          '300 g chicken breast',
+          '250 g cherry tomatoes',
+          '100 g spinach',
+          '30 g parmesan',
+          '1 garlic clove',
+          '1 tbsp olive oil'
+        ],
+        steps: [
+          'Brown the gnocchi for 6–8 minutes in half the oil, without boiling them first: they turn crispy. Set aside.',
+          'Brown the diced chicken for 6 minutes with the rest of the oil.',
+          'Add the cherry tomatoes and garlic for 3 minutes, then the spinach until it wilts.',
+          'Return the gnocchi, toss and serve with grated parmesan.'
+        ],
+        tips: 'Fresh gnocchi straight into the pan: no need to boil them.'
+      }
+    },
+    {
+      id: 'm-nicoise-express', name: 'Salade niçoise express', category: 'main',
+      time: 20, servings: 2, protein: 56, kcal: 535,
+      tags: ['thon', 'œufs', 'haricots verts', 'pommes de terre'], keywords: ['sans four', 'no oven', 'déjeuner', 'dîner', 'lunch', 'dinner', 'nicoise', 'salad', 'tuna', 'eggs', 'green beans', 'potatoes'],
+      ingredients: [
+        '2 boîtes de thon au naturel (280 g égoutté)',
+        '4 œufs',
+        '300 g de pommes de terre',
+        '200 g de haricots verts',
+        '200 g de tomates cerises',
+        '1 poignée de salade',
+        '1 c. à soupe d’huile d’olive',
+        '1 c. à soupe de vinaigre',
+        '1 c. à café de moutarde'
+      ],
+      steps: [
+        'Fais cuire les pommes de terre en dés 12 minutes dans l’eau bouillante salée ; ajoute les haricots verts les 7 dernières minutes et les œufs les 9 dernières.',
+        'Rafraîchis le tout sous l’eau froide, écale les œufs.',
+        'Mélange l’huile, le vinaigre et la moutarde.',
+        'Dispose la salade, les pommes de terre, les haricots, les tomates, le thon et les œufs en quartiers, puis arrose de vinaigrette.'
+      ],
+      tips: 'Une seule casserole pour tout : pommes de terre, haricots et œufs cuisent ensemble.',
+      en: {
+        name: 'Quick Niçoise Salad',
+        tags: ['tuna', 'eggs', 'green beans', 'potatoes'],
+        ingredients: [
+          '2 cans tuna in water (280 g drained)',
+          '4 eggs',
+          '300 g potatoes',
+          '200 g green beans',
+          '200 g cherry tomatoes',
+          '1 handful lettuce',
+          '1 tbsp olive oil',
+          '1 tbsp vinegar',
+          '1 tsp mustard'
+        ],
+        steps: [
+          'Boil the diced potatoes for 12 minutes in salted water; add the green beans for the last 7 minutes and the eggs for the last 9.',
+          'Cool everything under cold water and peel the eggs.',
+          'Mix the oil, vinegar and mustard.',
+          'Lay out the lettuce, potatoes, beans, tomatoes, tuna and egg quarters, then drizzle with the dressing.'
+        ],
+        tips: 'One pan for everything: potatoes, beans and eggs cook together.'
+      }
+    },
+    {
+      id: 'm-chickpea-spinach-egg-curry', name: 'Curry pois chiches, épinards & œufs, riz', category: 'main',
+      time: 25, servings: 2, protein: 30, kcal: 645,
+      tags: ['pois chiches', 'épinards', 'œufs', 'riz'], keywords: ['sans four', 'no oven', 'déjeuner', 'dîner', 'lunch', 'dinner', 'végétarien', 'vegetarian', 'curry', 'chickpeas', 'spinach', 'eggs', 'coconut'],
+      ingredients: [
+        '250 g de pois chiches en boîte (égouttés)',
+        '4 œufs',
+        '150 g d’épinards',
+        '200 ml de lait de coco allégé',
+        '200 g de tomates concassées',
+        '1 oignon',
+        '1 c. à soupe de curry',
+        '100 g de riz (cru)',
+        '1 c. à café d’huile'
+      ],
+      steps: [
+        'Lance le riz et fais cuire les œufs 7 minutes (mollets), puis rafraîchis-les et écale-les.',
+        'Fais revenir l’oignon 4 minutes dans l’huile, ajoute le curry 1 minute.',
+        'Ajoute les pois chiches, les tomates et le lait de coco, laisse mijoter 8 minutes, puis ajoute les épinards.',
+        'Sers le curry sur le riz avec les œufs coupés en deux.'
+      ],
+      tips: 'Végétarien et rassasiant : les œufs et les pois chiches apportent les protéines.',
+      en: {
+        name: 'Chickpea, Spinach & Egg Curry with Rice',
+        tags: ['chickpeas', 'spinach', 'eggs', 'rice'],
+        ingredients: [
+          '250 g canned chickpeas (drained)',
+          '4 eggs',
+          '150 g spinach',
+          '200 ml light coconut milk',
+          '200 g chopped tomatoes',
+          '1 onion',
+          '1 tbsp curry powder',
+          '100 g rice (uncooked)',
+          '1 tsp oil'
+        ],
+        steps: [
+          'Start the rice and boil the eggs for 7 minutes (soft), then cool and peel them.',
+          'Fry the onion in the oil for 4 minutes, add the curry powder for 1 minute.',
+          'Add the chickpeas, tomatoes and coconut milk, simmer for 8 minutes, then add the spinach.',
+          'Serve the curry over the rice with the halved eggs.'
+        ],
+        tips: 'Vegetarian and filling: eggs and chickpeas bring the protein.'
+      }
+    },
+    {
+      id: 'm-shrimp-lemon-garlic-pasta', name: 'Pâtes crevettes, citron & ail', category: 'main',
+      time: 15, servings: 2, protein: 54, kcal: 585,
+      tags: ['crevettes', 'pâtes', 'citron', 'parmesan'], keywords: ['sans four', 'no oven', 'déjeuner', 'dîner', 'lunch', 'dinner', 'pasta', 'shrimp', 'prawns', 'lemon', 'garlic', 'rapide'],
+      ingredients: [
+        '160 g de spaghetti (crus)',
+        '350 g de crevettes décortiquées',
+        '3 gousses d’ail',
+        '1 citron',
+        '100 g d’épinards',
+        '30 g de parmesan',
+        '1 c. à soupe d’huile d’olive',
+        '1 pincée de piment'
+      ],
+      steps: [
+        'Cuis les spaghetti selon le paquet. Garde un verre d’eau de cuisson.',
+        'Fais revenir l’ail émincé et le piment 1 minute dans l’huile, sans colorer.',
+        'Ajoute les crevettes 3 minutes, puis les épinards, le zeste et le jus du citron.',
+        'Ajoute les pâtes, le parmesan et un peu d’eau de cuisson, mélange 1 minute : la sauce devient crémeuse.'
+      ],
+      tips: 'L’eau de cuisson + le parmesan font une sauce sans crème.',
+      en: {
+        name: 'Lemon Garlic Shrimp Pasta',
+        tags: ['shrimp', 'pasta', 'lemon', 'parmesan'],
+        ingredients: [
+          '160 g spaghetti (uncooked)',
+          '350 g peeled shrimp',
+          '3 garlic cloves',
+          '1 lemon',
+          '100 g spinach',
+          '30 g parmesan',
+          '1 tbsp olive oil',
+          '1 pinch chilli'
+        ],
+        steps: [
+          'Cook the spaghetti as the packet says. Keep a glass of the cooking water.',
+          'Fry the sliced garlic and chilli in the oil for 1 minute without browning.',
+          'Add the shrimp for 3 minutes, then the spinach and the lemon zest and juice.',
+          'Add the pasta, parmesan and a little cooking water, toss for 1 minute: the sauce turns creamy.'
+        ],
+        tips: 'Cooking water and parmesan make a sauce without cream.'
+      }
+    },
+    {
+      id: 'm-cod-potato-mash-peas', name: 'Cabillaud poêlé, écrasé de pommes de terre & petits pois', category: 'main',
+      time: 25, servings: 2, protein: 43, kcal: 475,
+      tags: ['cabillaud', 'pommes de terre', 'petits pois'], keywords: ['sans four', 'no oven', 'déjeuner', 'dîner', 'lunch', 'dinner', 'cod', 'fish', 'mash', 'potatoes', 'peas'],
+      ingredients: [
+        '2 dos de cabillaud (320 g)',
+        '500 g de pommes de terre',
+        '200 g de petits pois',
+        '100 g de fromage blanc 0 %',
+        '10 g de beurre',
+        '1 citron',
+        'Sel & poivre'
+      ],
+      steps: [
+        'Fais cuire les pommes de terre en morceaux 15 minutes dans l’eau bouillante salée, avec les petits pois les 4 dernières minutes.',
+        'Égoutte, puis écrase grossièrement avec le fromage blanc, du sel et du poivre.',
+        'Fais cuire le cabillaud 3 à 4 minutes par face dans le beurre, à feu moyen.',
+        'Sers sur l’écrasé, avec un filet de citron.'
+      ],
+      tips: 'Le fromage blanc remplace la crème dans l’écrasé : plus léger, plus de protéines.',
+      en: {
+        name: 'Pan-Fried Cod, Crushed Potatoes & Peas',
+        tags: ['cod', 'potatoes', 'peas'],
+        ingredients: [
+          '2 cod fillets (320 g)',
+          '500 g potatoes',
+          '200 g peas',
+          '100 g fat-free fromage blanc',
+          '10 g butter',
+          '1 lemon',
+          'Salt & pepper'
+        ],
+        steps: [
+          'Boil the potato chunks for 15 minutes in salted water, adding the peas for the last 4 minutes.',
+          'Drain, then roughly crush with the fromage blanc, salt and pepper.',
+          'Cook the cod for 3–4 minutes per side in the butter over medium heat.',
+          'Serve on the crushed potatoes with a squeeze of lemon.'
+        ],
+        tips: 'Fromage blanc replaces cream in the crush: lighter, more protein.'
+      }
+    },
+    {
+      id: 'm-turkey-chili-express', name: 'Chili de dinde express & riz', category: 'main',
+      time: 25, servings: 2, protein: 57, kcal: 755,
+      tags: ['dinde hachée', 'haricots rouges', 'tomates', 'riz'], keywords: ['sans four', 'no oven', 'déjeuner', 'dîner', 'lunch', 'dinner', 'chili', 'turkey', 'mince', 'kidney beans', 'rice', 'one pot'],
+      ingredients: [
+        '400 g de dinde hachée',
+        '1 boîte de haricots rouges (environ 250 g égouttés)',
+        '400 g de tomates concassées',
+        '1 oignon',
+        '1 poivron',
+        '1 c. à café de cumin',
+        '1 c. à café de paprika',
+        '120 g de riz (cru)',
+        '1 c. à café d’huile'
+      ],
+      steps: [
+        'Lance le riz (10 à 12 minutes).',
+        'Fais revenir l’oignon et le poivron en dés 5 minutes dans l’huile, puis ajoute la dinde et fais-la dorer 5 minutes en l’émiettant.',
+        'Ajoute le cumin, le paprika, les tomates et les haricots rincés. Laisse mijoter 10 minutes.',
+        'Sers sur le riz.'
+      ],
+      tips: 'Encore meilleur le lendemain : double les quantités pour le batch cooking.',
+      en: {
+        name: 'Quick Turkey Chili & Rice',
+        tags: ['turkey mince', 'kidney beans', 'tomatoes', 'rice'],
+        ingredients: [
+          '400 g turkey mince',
+          '1 can kidney beans (about 250 g drained)',
+          '400 g chopped tomatoes',
+          '1 onion',
+          '1 pepper',
+          '1 tsp cumin',
+          '1 tsp paprika',
+          '120 g rice (uncooked)',
+          '1 tsp oil'
+        ],
+        steps: [
+          'Start the rice (10–12 minutes).',
+          'Fry the diced onion and pepper in the oil for 5 minutes, then add the turkey and brown it for 5 minutes, breaking it up.',
+          'Add the cumin, paprika, tomatoes and rinsed beans. Simmer for 10 minutes.',
+          'Serve over the rice.'
+        ],
+        tips: 'Even better the next day: double it for batch cooking.'
+      }
+    },
+    {
+      id: 'm-pork-sauteed-potatoes', name: 'Filet mignon, pommes de terre sautées & champignons', category: 'main',
+      time: 25, servings: 2, protein: 50, kcal: 480,
+      tags: ['porc', 'pommes de terre', 'champignons'], keywords: ['sans four', 'no oven', 'déjeuner', 'dîner', 'lunch', 'dinner', 'pork', 'tenderloin', 'potatoes', 'mushrooms', 'one pan'],
+      ingredients: [
+        '400 g de filet mignon de porc',
+        '400 g de pommes de terre',
+        '250 g de champignons',
+        '1 échalote',
+        '1 c. à soupe d’huile',
+        '1 c. à café de moutarde',
+        '1 c. à soupe de persil'
+      ],
+      steps: [
+        'Coupe les pommes de terre en petits dés et fais-les cuire 15 minutes à couvert dans l’huile, en remuant de temps en temps.',
+        'Pendant ce temps, coupe le filet mignon en médaillons épais (2 cm) et badigeonne-les de moutarde.',
+        'Pousse les pommes de terre, ajoute les médaillons 3 minutes par face, puis les champignons et l’échalote émincés 5 minutes.',
+        'Sale, poivre et parsème de persil.'
+      ],
+      tips: 'Les médaillons doivent rester légèrement rosés au centre : ils sont plus tendres.',
+      en: {
+        name: 'Pork Tenderloin, Sautéed Potatoes & Mushrooms',
+        tags: ['pork', 'potatoes', 'mushrooms'],
+        ingredients: [
+          '400 g pork tenderloin',
+          '400 g potatoes',
+          '250 g mushrooms',
+          '1 shallot',
+          '1 tbsp oil',
+          '1 tsp mustard',
+          '1 tbsp parsley'
+        ],
+        steps: [
+          'Cut the potatoes into small cubes and cook them covered in the oil for 15 minutes, stirring now and then.',
+          'Meanwhile, cut the tenderloin into thick (2 cm) medallions and brush them with mustard.',
+          'Push the potatoes aside, add the medallions for 3 minutes per side, then the sliced mushrooms and shallot for 5 minutes.',
+          'Season and sprinkle with parsley.'
+        ],
+        tips: 'The medallions should stay slightly pink in the middle: they are more tender.'
+      }
+    },
+    {
+      id: 'm-lentil-smoked-salmon-salad', name: 'Salade lentilles, saumon fumé & concombre', category: 'main',
+      time: 10, servings: 2, protein: 44, kcal: 500,
+      tags: ['lentilles', 'saumon fumé', 'concombre', 'skyr'], keywords: ['sans four', 'no oven', 'déjeuner', 'dîner', 'lunch', 'dinner', 'salad', 'lentils', 'smoked salmon', 'cucumber', 'sans cuisson', 'no cook'],
+      ingredients: [
+        '400 g de lentilles cuites',
+        '150 g de saumon fumé',
+        '1 concombre',
+        '1 échalote',
+        '150 g de skyr nature',
+        '1 citron',
+        '1 c. à soupe d’aneth',
+        '1 c. à soupe d’huile d’olive'
+      ],
+      steps: [
+        'Rince et égoutte les lentilles.',
+        'Coupe le concombre en dés, l’échalote finement et le saumon en lanières.',
+        'Mélange le skyr avec le jus du citron, l’aneth, l’huile, du sel et du poivre.',
+        'Mélange lentilles, concombre, échalote et sauce, puis ajoute le saumon fumé.'
+      ],
+      tips: 'Zéro cuisson : prête en 10 minutes avec des lentilles en conserve.',
+      en: {
+        name: 'Lentil, Smoked Salmon & Cucumber Salad',
+        tags: ['lentils', 'smoked salmon', 'cucumber', 'skyr'],
+        ingredients: [
+          '400 g cooked lentils',
+          '150 g smoked salmon',
+          '1 cucumber',
+          '1 shallot',
+          '150 g plain skyr',
+          '1 lemon',
+          '1 tbsp dill',
+          '1 tbsp olive oil'
+        ],
+        steps: [
+          'Rinse and drain the lentils.',
+          'Dice the cucumber, finely chop the shallot and cut the salmon into strips.',
+          'Mix the skyr with the lemon juice, dill, oil, salt and pepper.',
+          'Toss the lentils, cucumber, shallot and dressing, then add the smoked salmon.'
+        ],
+        tips: 'No cooking: ready in 10 minutes with canned lentils.'
+      }
     }
   ];
 })();

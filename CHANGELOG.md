@@ -1,5 +1,9 @@
 # Changelog — Habits (ex-Sandeep 2.0), Gym Food (ex-SanEva), Dressing
 
+## 0.50.0 — 2026-11-24
+- Kitchen becomes a **recipe book to follow step by step**: the **Planning section is removed** (sections: Recipes, Menu, Groceries); a recipe now opens on **Cook** (steps, step-by-step guide with timers). With the Goal tab hidden, Kitchen no longer shows anything goal-related (“My goal” chip, suggested serving, % of needs).
+- **15 new lunch and dinner recipes without an oven** (pan, wok, saucepan or no cooking), 30 to 64 g of protein per serving: chicken & pepper fajitas, chicken teriyaki, beef & onion stir-fry, tuna pasta salad, lemon turkey & couscous, garlic tomato shrimp, chicken quinoa avocado salad, pan-fried gnocchi with chicken, quick niçoise, chickpea spinach egg curry, lemon garlic shrimp pasta, cod with crushed potatoes & peas, quick turkey chili, pork tenderloin with sautéed potatoes, lentil & smoked salmon salad. All found with the “No oven” chip.
+
 ## 0.49.0 — 2026-11-24
 - Gym Food: the **Goal tab is hidden**; tabs are now **Gym, Kitchen, Settings**. Nothing is deleted: your profile still feeds Kitchen (daily needs for the Planning and portions) and Gym (bodyweight for bodyweight exercises). If no profile is filled in yet, Kitchen and Gym open the questionnaire directly. Apps can now list the tabs they show (`S2_APP.tabs`), so the tab can come back by editing one line of `cuisine/config.js`.
 

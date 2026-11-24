@@ -431,7 +431,13 @@
   function goalTargets() {
     try { return NE && S2.objectif ? S2.objectif.targets() : null; } catch (e) { return null; }
   }
-  function hasGoalTab() { return !!(NE && S2.objectif); }
+  /* v0.50 : l'onglet Objectif peut être masqué (S2_APP.tabs) : la Cuisine n'affiche alors plus rien lié à l'objectif
+     (puce « Mon objectif », portion conseillée, % des besoins). */
+  function hasGoalTab() {
+    var only = window.S2_APP && window.S2_APP.tabs;
+    if (only && only.indexOf('objectif') < 0) return false;
+    return !!(NE && S2.objectif);
+  }
   var FIT_LABEL = {
     good: L('🎯 Great for your goal', '🎯 Idéale pour ton objectif'),
     ok: L('Fine for your goal', 'Correcte pour ton objectif'),
@@ -456,7 +462,8 @@
   function mount(container) {
     data = loadData();
     /* Profil rempli dans Objectif : les recettes sont classées selon l'objectif dès l'ouverture (puce désactivable). */
-    if (!goalDefaultSet) { goalDefaultSet = true; if (goalTargets()) flags.goal = true; }
+    /* v0.50 : plus de tri par objectif par défaut (livre de recettes) ; la puce « Mon objectif » reste disponible. */
+    goalDefaultSet = true;
     root = container;
     root.setAttribute('lang', S2.lang);
     if (page === 'detail' && !recipe(currentId)) page = 'list';
@@ -467,14 +474,16 @@
     if (page === 'detail') renderDetail(recipe(currentId));
     else renderList();
   }
-  function open(id) { currentId = id; page = 'detail'; mode = 'groceries'; render(); window.scrollTo(0, 0); }
+  /* v0.50 : une recette s'ouvre sur « Cuisiner » (étapes, guide pas à pas) : livre de recettes. */
+  function open(id) { currentId = id; page = 'detail'; mode = 'cook'; render(); window.scrollTo(0, 0); }
   function back() { page = 'list'; render(); window.scrollTo(0, 0); }
 
   /* ---------- Liste + recherche ---------- */
   function renderList() {
     var nMenu = planItems().length;
     var secs = [['recipes', L('Recipes', 'Recettes')]];
-    if (hasGoalTab()) secs.push(['day', L('Planning', 'Planning')]);
+    /* v0.50 (24 novembre 2026) : section Planning retirée à la demande de Sandeep : la Cuisine redevient un livre de recettes
+       à suivre pas à pas (+ menu et courses). Le code du Planning (renderDay, renderPeriod…) reste en place, inutilisé. */
     secs.push(['menu', L('Menu', 'Menu') + (nMenu ? ' · ' + nMenu : '')], ['shop', L('Groceries', 'Courses')]);
     root.appendChild(h('div', { class: 'segmented ck-sections' },
       secs.map(function (x) {
@@ -482,7 +491,7 @@
           onclick: function () { section = x[0]; render(); window.scrollTo(0, 0); } }, x[1]);
       })));
     if (section === 'menu') { renderMenu(); return; }
-    if (section === 'day' && hasGoalTab()) { renderDay(); return; }
+    if (section === 'day') section = 'recipes';
     if (section === 'shop') { renderShop(); return; }
     var search = h('input', { class: 'input ck-search', type: 'search', value: query, autocomplete: 'off', enterkeyhint: 'search',
       placeholder: L('Recipe or ingredient, e.g. chicken', 'Recette ou ingrédient, ex. poulet'),
@@ -602,7 +611,7 @@
     if (r.protein || r.kcal) root.appendChild(h('p', { class: 'hint' },
       L('Approximate values per serving (one person)', 'Valeurs approximatives par portion (une personne)') +
       (serv > 1 && r.protein ? L(' · ≈ ' + Math.round(r.protein * serv) + ' g protein in total for ' + serv, ' · ≈ ' + Math.round(r.protein * serv) + ' g de protéines au total pour ' + serv) : '') + '.'));
-    var T = goalTargets(), fit = T && NE.recipeFit(r, T);
+    var T = hasGoalTab() ? goalTargets() : null, fit = T && NE.recipeFit(r, T);
     if (fit) root.appendChild(h('div', { class: 'card ck-goalcard ck-fit-' + fit.level },
       h('div', { class: 'ck-fit ck-fit-' + fit.level }, FIT_LABEL[fit.level]),
       h('p', { class: 'sheet-text' }, L('Your serving: ', 'Ta portion : '), h('b', null, portionText(fit.portion)), ' ≈ ' + fit.kcal + ' kcal · ' + fit.protein + L(' g protein', ' g de protéines')),
