@@ -180,7 +180,20 @@
     return { cycle: cycle, lastWeek: lastWeek, done: lastWeek >= weeks, deloadDone: deloadAfter, sessions: inCycle.length };
   }
 
+  /* ---------- v0.47 : rotation ----------
+     Jours du programme enchaînés dans l'ordre, quand on peut : le suivant est celui qui suit la dernière séance terminée
+     (semaines de décharge comprises, elles suivent la même rotation). Jour supprimé ou aucune séance : premier jour. */
+  function nextInRotation(dayIds, sessions) {
+    if (!dayIds || !dayIds.length) return null;
+    var done = (sessions || []).filter(function (s) { return s.finishedAt; }).sort(function (a, b) { return a.startedAt < b.startedAt ? -1 : 1; });
+    for (var i = done.length - 1; i >= 0; i--) {
+      var idx = dayIds.indexOf(done[i].dayId);
+      if (idx > -1) return dayIds[(idx + 1) % dayIds.length];
+    }
+    return dayIds[0];
+  }
+
   S2.muscuEngine = { GROUPS: GROUPS, muscleOf: muscleOf, groupLabel: groupLabel, e1rm: e1rm, weeklyVolume: weeklyVolume, volumeLevel: volumeLevel,
     sessionSummary: sessionSummary, stagnation: stagnation, strength: strength,
-    isBodyweight: isBodyweight, isIsometric: isIsometric, perf: perf, cycleStatus: cycleStatus };
+    isBodyweight: isBodyweight, isIsometric: isIsometric, perf: perf, cycleStatus: cycleStatus, nextInRotation: nextInRotation };
 })();
