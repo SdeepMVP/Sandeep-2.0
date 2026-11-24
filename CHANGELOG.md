@@ -1,5 +1,8 @@
 # Changelog — Habits (ex-Sandeep 2.0), Gym Food (ex-SanEva), Dressing
 
+## 0.48.0 — 2026-11-24
+- Gym Food: the **Today tab is removed** (calorie tracking took too much time). The app opens on **Gym**; tabs are now Gym, Goal, Kitchen, Settings. Your journal data (meals, water, weigh-ins already in Goal, photos) stays on the phone and in backups; nothing is deleted. Weigh-ins and measurements remain in Goal (see / fix). The weekly and monthly reviews, the daily checklist and the calorie adjustment suggestion went with the tab. New users now get the welcome questionnaire at the top of Gym.
+
 ## 0.47.0 — 2026-11-24
 - Gym: the **“My week” card is removed**. Training is now a **rotation** by default: the program days follow each other in order, whenever you go. Workout preselects the **next day of the rotation** (tagged “next”), Today shows “Next in your rotation: …” with a Start button, and a day without a workout is never “missed” (Today's checklist: “Workout · when you can”).
 - Program › “When I train”: choose **Rotation (when I can)** or **Fixed days** (the weekly days, kept as before). Pure engine `nextInRotation`, with a test.
