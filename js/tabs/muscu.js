@@ -454,8 +454,8 @@
     if (pickWeek === null) pickWeek = cyc.lastWeek ? Math.min(WEEKS, cyc.lastWeek) : 1;
     /* Séance prévue aujourd'hui (jours d'entraînement) : présélectionnée, modifiable. */
     var sd = scheduledDay(new Date()), todayId = sd ? sd.id : null;
-    var next = nextInRotation(), nextId = !fixedDays() && next ? next.id : null;
-    if (pickDay === null && (todayId || nextId)) pickDay = todayId || nextId;
+    /* v0.51 : en rotation, aucune séance n'est suggérée ni présélectionnée : Sandeep choisit lui-même (demande du 24 novembre 2026). */
+    if (pickDay === null && todayId) pickDay = todayId;
     /* v0.48 : l'onglet Aujourd'hui (qui accueillait les nouveaux) est retiré : la Muscu, 1er onglet, propose le questionnaire
        tant que le profil n'est pas rempli. */
     var noProfile = false; try { noProfile = !!(S2.objectif && S2.objectif.startWizard && !S2.objectif.targets()); } catch (e) { noProfile = false; }
@@ -489,8 +489,7 @@
         'aria-pressed': pickDay === d.id ? 'true' : 'false',
         onclick: function () { pickDay = d.id; render(); }
       },
-        h('span', { class: 'mu-dayname' }, dayName(d), todayId === d.id ? h('span', { class: 'mu-todaytag' }, L('today', 'aujourd’hui'))
-          : nextId === d.id ? h('span', { class: 'mu-todaytag' }, L('next', 'suivante')) : null),
+        h('span', { class: 'mu-dayname' }, dayName(d), todayId === d.id ? h('span', { class: 'mu-todaytag' }, L('today', 'aujourd’hui')) : null),
         h('span', { class: 'mu-daymeta' }, L(d.slots.length + ' exercise' + (d.slots.length === 1 ? '' : 's'),
           d.slots.length + ' exercice' + (d.slots.length > 1 ? 's' : ''))),
         h('span', { class: 'mu-daymeta' }, lastOfDay
@@ -1492,8 +1491,8 @@
           onclick: function () { data.trainMode = x[0]; pickDay = null; persist(); render(); } }, x[1]);
       })));
     if (!fixedDays()) {
-      card.appendChild(h('p', { class: 'hint' }, L('Your days follow each other in the program order, whenever you go: the app always suggests the next one (in Workout and in Today). No day is ever “missed”.',
-        'Tes jours s’enchaînent dans l’ordre du programme, quand tu y vas : l’app te propose toujours la séance suivante (dans Séance et dans Aujourd’hui). Aucun jour n’est jamais « manqué ».')));
+      card.appendChild(h('p', { class: 'hint' }, L('You train whenever you can and pick the day yourself in Workout: no workout is suggested and none is ever “missed”.',
+        'Tu t’entraînes quand tu peux et tu choisis toi-même le jour dans Séance : aucune séance n’est suggérée et aucune n’est jamais « manquée ».')));
       return card;
     }
     WEEKDAYS.forEach(function (wd) {
