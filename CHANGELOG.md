@@ -1,5 +1,9 @@
 # Changelog — Habits (ex-Sandeep 2.0), Gym Food (ex-SanEva), Dressing
 
+## 0.47.0 — 2026-11-24
+- Gym: the **“My week” card is removed**. Training is now a **rotation** by default: the program days follow each other in order, whenever you go. Workout preselects the **next day of the rotation** (tagged “next”), Today shows “Next in your rotation: …” with a Start button, and a day without a workout is never “missed” (Today's checklist: “Workout · when you can”).
+- Program › “When I train”: choose **Rotation (when I can)** or **Fixed days** (the weekly days, kept as before). Pure engine `nextInRotation`, with a test.
+
 ## 0.46.0 — 2026-11-15
 - Kitchen › Planning: **change one meal only**. A “↻” next to each meal (one day, several days, and a confirmed plan) opens 5 suggestions that keep the day close to your targets (same kind of meal, not already that day), or “Pick a recipe myself…” (search, own category or all recipes). The rest of the day stays the same. On a confirmed plan, the menu and the groceries follow. Undo available.
 

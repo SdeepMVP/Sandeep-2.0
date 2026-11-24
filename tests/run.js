@@ -504,6 +504,7 @@ test('checklist: a day is achieved only when every point is ticked', function ()
   ok(TE.checklist(good).success && TE.checklist(good).done === 4, 'all good');
   ok(TE.checklist(Object.assign({}, good, { training: 'rest' })).success, 'rest day counts');
   ok(TE.checklist(Object.assign({}, good, { training: 'none' })).success, 'no program counts');
+  ok(TE.checklist(Object.assign({}, good, { training: 'free' })).success, 'rotation day without workout is not a failure');
   ok(!TE.checklist(Object.assign({}, good, { training: 'missed' })).success, 'missed workout');
   ok(!TE.checklist(Object.assign({}, good, { training: 'planned' })).success, 'workout still to do');
   ok(!TE.checklist(Object.assign({}, good, { water: 5 })).success, 'not enough water');
@@ -719,6 +720,20 @@ test('alternatives for one meal: same kind, not already in the day, keep the day
   ok(swapped.kcal === sumK && Math.abs(swapped.kcal - t.kcal) / t.kcal < 0.3, 'day total ' + swapped.kcal + ' vs ' + t.kcal);
   var bk = day.meals.map(function (m) { return m.recipe.category; }).indexOf('breakfast');
   if (bk > -1) N.mealAlternatives(RECIPES, t, day.meals, bk).forEach(function (a) { ok(a.recipe.category === 'breakfast', 'breakfast stays breakfast'); });
+});
+
+/* ---------- v0.47 : rotation ---------- */
+console.log('\nGym rotation');
+test('rotation: the next day follows the last finished workout, in program order, looping', function () {
+  var ids = ['legs', 'push', 'pull', 'shoulders'];
+  function s(day, d) { var t = new Date(2026, 10, d, 18).toISOString(); return { dayId: day, startedAt: t, finishedAt: t }; }
+  ok(ME.nextInRotation(ids, []) === 'legs', 'no workout yet → first day');
+  ok(ME.nextInRotation(ids, [s('legs', 1), s('push', 4)]) === 'pull', 'after push → pull');
+  ok(ME.nextInRotation(ids, [s('pull', 10), s('shoulders', 12)]) === 'legs', 'loops back to the first day');
+  ok(ME.nextInRotation(ids, [s('push', 3), s('legs', 2)]) === 'pull', 'order by date, not by list');
+  ok(ME.nextInRotation(ids, [s('push', 3), s('old-day', 5)]) === 'pull', 'deleted day ignored');
+  ok(ME.nextInRotation(ids, [{ dayId: 'push', startedAt: new Date(2026, 10, 6).toISOString(), finishedAt: null }]) === 'legs', 'workout in progress does not count');
+  ok(ME.nextInRotation([], []) === null, 'no program');
 });
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed\n');

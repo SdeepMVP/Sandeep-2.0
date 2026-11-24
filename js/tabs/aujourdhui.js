@@ -212,6 +212,10 @@
       } else if (!st.hasProgram) {
         card.appendChild(h('p', { class: 'hint' }, L('No program yet.', 'Pas encore de programme.')));
         card.appendChild(h('button', { class: 'btn btn-secondary btn-block', onclick: function () { mu.open(who); } }, L('Set up my program ›', 'Préparer mon programme ›')));
+      } else if (st.rotation && st.next) {
+        /* v0.47 : rotation (pas de jours fixes) : la séance suivante est proposée chaque jour, sans jamais être « manquée ». */
+        card.appendChild(h('div', { class: 'to-planned' }, L('Next in your rotation: ', 'Prochaine séance de ta rotation : ') + st.next.name + ' · ' + st.next.exercises + L(st.next.exercises > 1 ? ' exercises' : ' exercise', st.next.exercises > 1 ? ' exercices' : ' exercice')));
+        if (isToday(date)) card.appendChild(h('button', { class: 'btn btn-secondary btn-block', onclick: function () { mu.open(who, st.next.id); } }, L('Start it ›', 'La commencer ›')));
       } else {
         card.appendChild(h('div', { class: 'to-planned is-rest' }, L('Rest day', 'Jour de repos')));
         if (isToday(date)) card.appendChild(h('button', { class: 'btn btn-ghost btn-block', onclick: function () { mu.open(who); } }, L('Train anyway ›', 'M’entraîner quand même ›')));
@@ -346,7 +350,7 @@
     try { st = mu.dayStatus(d, who); } catch (e) { return 'none'; }
     if (st.done.length) return 'done';
     if (!st.hasProgram) return 'none';
-    if (!st.planned) return 'rest';
+    if (!st.planned) return st.rotation ? 'free' : 'rest';
     return TE.dayKey(d) < TE.dayKey(new Date()) ? 'missed' : 'planned';
   }
   function dayCheck(d, t) {
@@ -361,7 +365,7 @@
         h('div', { class: 'card-title' }, c.success ? L('🎉 Day achieved', '🎉 Journée réussie') : L('✅ My day', '✅ Ma journée')),
         h('span', { class: 'to-checkcount' }, c.done + ' / ' + c.total)),
       h('div', { class: 'to-chips' }, c.items.map(function (it) {
-        var extra = it.id === 'training' ? ({ rest: L(' · rest', ' · repos'), none: '', planned: L(' · to do', ' · à faire'), missed: L(' · missed', ' · pas faite'), done: '' })[it.state] : '';
+        var extra = it.id === 'training' ? ({ rest: L(' · rest', ' · repos'), free: L(' · when you can', ' · quand tu peux'), none: '', planned: L(' · to do', ' · à faire'), missed: L(' · missed', ' · pas faite'), done: '' })[it.state] : '';
         return h('span', { class: 'to-chip' + (it.ok ? ' is-ok' : '') }, (it.ok ? '✓ ' : '○ ') + labels[it.id] + extra);
       })));
     /* Semaine en cours : un point par jour (réussi, raté, à venir). */

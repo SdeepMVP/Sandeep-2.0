@@ -174,7 +174,7 @@
   }
 
   /* ---------- Check-list du jour (v0.40) ----------
-     o = { tot, t (cibles), water, waterGoal, training: 'done' | 'rest' | 'planned' | 'missed' | 'none' }.
+     o = { tot, t (cibles), water, waterGoal, training: 'done' | 'rest' | 'free' (rotation, v0.47) | 'planned' | 'missed' | 'none' }.
      Une journée est « réussie » quand chaque point applicable est coché : calories (±10 %), protéines (≥ 90 %),
      séance faite (ou jour de repos / pas de programme), eau à l'objectif. */
   function checklist(o) {
@@ -183,7 +183,7 @@
     var items = [
       { id: 'kcal', ok: it.kcal },
       { id: 'protein', ok: it.protein },
-      { id: 'training', ok: tr === 'done' || tr === 'rest' || tr === 'none', state: tr },
+      { id: 'training', ok: tr === 'done' || tr === 'rest' || tr === 'free' || tr === 'none', state: tr }, /* free = rotation : séance quand on peut */
       { id: 'water', ok: (o.water || 0) >= (o.waterGoal || 8) }
     ];
     var n = items.filter(function (x) { return x.ok; }).length;

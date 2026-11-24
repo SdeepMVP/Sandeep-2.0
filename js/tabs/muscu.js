@@ -162,6 +162,9 @@
     d.sessions = d.sessions || [];
     d.activeId = d.activeId || null;
     d.schedule = d.schedule || {};
+    /* v0.47 : 'rotation' (par défaut : les jours du programme s'enchaînent dans l'ordre, quand on peut)
+       ou 'fixed' (jours fixes de la semaine, d.schedule). Le choix des jours fixes reste enregistré. */
+    d.trainMode = d.trainMode === 'fixed' ? 'fixed' : 'rotation';
     d.goals = d.goals || {};
     d.goals.lifts = Array.isArray(d.goals.lifts) ? d.goals.lifts : [];
     if (d.goals.perWeek === undefined) d.goals.perWeek = null;
@@ -233,6 +236,16 @@
     var c = (s.cycle || 1) > 1 ? (short ? ' C' + s.cycle : L(' · cycle ', ' · cycle ') + s.cycle) : '';
     if (s.deload) return (short ? L('Deload', 'Décharge') : L('Deload week', 'Semaine de décharge')) + c;
     return (short ? L('W', 'S') + s.week : L('Week ', 'Semaine ') + s.week) + c;
+  }
+
+  /* ---------- v0.47 : rotation ou jours fixes ---------- */
+  function fixedDays() { return data.trainMode === 'fixed'; }
+  /* Jour du programme prévu une date donnée : seulement en mode jours fixes. */
+  function scheduledDay(date) { return fixedDays() ? day(data.schedule[new Date(date).getDay()]) : null; }
+  /* Séance suivante de la rotation : le jour qui suit, dans l'ordre du programme, la dernière séance terminée. */
+  function nextInRotation() {
+    var id = ME ? ME.nextInRotation(data.days.map(function (d) { return d.id; }), data.sessions) : (data.days[0] && data.days[0].id);
+    return id ? day(id) : null;
   }
 
   /* Trouve un exercice (option) dans le programme. */
@@ -440,10 +453,10 @@
     var cyc = cycleInfo();
     if (pickWeek === null) pickWeek = cyc.lastWeek ? Math.min(WEEKS, cyc.lastWeek) : 1;
     /* Séance prévue aujourd'hui (jours d'entraînement) : présélectionnée, modifiable. */
-    var todayId = data.schedule[new Date().getDay()];
-    if (pickDay === null && todayId && day(todayId)) pickDay = todayId;
+    var sd = scheduledDay(new Date()), todayId = sd ? sd.id : null;
+    var next = nextInRotation(), nextId = !fixedDays() && next ? next.id : null;
+    if (pickDay === null && (todayId || nextId)) pickDay = todayId || nextId;
     body.appendChild(goalsCard());
-    if (Object.keys(data.schedule).length) body.appendChild(weekPlanCard());
 
     if (!done.length && !Object.keys(data.schedule).length) {
       body.appendChild(h('div', { class: 'card mu-firstrun' },
@@ -465,7 +478,8 @@
         'aria-pressed': pickDay === d.id ? 'true' : 'false',
         onclick: function () { pickDay = d.id; render(); }
       },
-        h('span', { class: 'mu-dayname' }, dayName(d), todayId === d.id ? h('span', { class: 'mu-todaytag' }, L('today', 'aujourd’hui')) : null),
+        h('span', { class: 'mu-dayname' }, dayName(d), todayId === d.id ? h('span', { class: 'mu-todaytag' }, L('today', 'aujourd’hui'))
+          : nextId === d.id ? h('span', { class: 'mu-todaytag' }, L('next', 'suivante')) : null),
         h('span', { class: 'mu-daymeta' }, L(d.slots.length + ' exercise' + (d.slots.length === 1 ? '' : 's'),
           d.slots.length + ' exercice' + (d.slots.length > 1 ? 's' : ''))),
         h('span', { class: 'mu-daymeta' }, lastOfDay
@@ -866,42 +880,6 @@
         h('button', { class: 'btn btn-ghost btn-block', onclick: pickTemplate }, L('Change program', 'Changer de programme'))));
   }
 
-  /* ---------- v0.40 : ma semaine (programme) : cette semaine et la suivante, jour par jour ---------- */
-  function weekPlanCard() {
-    var card = h('div', { class: 'card mu-weekplan' }, h('div', { class: 'card-title' }, L('📅 My week', '📅 Ma semaine')));
-    var mon = mondayOf(new Date()), todayK = dayKey(new Date()), today0 = new Date().setHours(0, 0, 0, 0);
-    var doneByDay = {};
-    finished().forEach(function (s) { (doneByDay[dayKey(s.startedAt)] = doneByDay[dayKey(s.startedAt)] || []).push(s); });
-    var wd = function (d) { var t = d.toLocaleDateString(S2.locale, { weekday: 'short' }).replace('.', ''); return t.charAt(0).toUpperCase() + t.slice(1); };
-    /* Cette semaine : une ligne par jour d'entraînement prévu ou fait (les jours de repos sans séance sont omis). */
-    card.appendChild(h('div', { class: 'mu-weeklabel' }, L('This week', 'Cette semaine')));
-    var list = h('div', { class: 'mu-weeklist' }), rows = 0;
-    for (var i = 0; i < 7; i++) {
-      var d = new Date(mon); d.setDate(d.getDate() + i);
-      var k = dayKey(d), plannedDay = day(data.schedule[d.getDay()]), did = doneByDay[k] || [];
-      if (!plannedDay && !did.length) continue;
-      var t0 = new Date(d).setHours(0, 0, 0, 0); /* comparaison par date (les clés de jour ne sont pas triables) */
-      var state = did.length ? 'done' : k === todayK ? 'today' : t0 < today0 ? 'missed' : 'planned';
-      var what = did.length ? sessionDay(did[0]) : dayName(plannedDay);
-      var tag = { done: L('✓ done', '✓ faite'), today: L('today', 'aujourd’hui'), missed: L('missed', 'pas faite'), planned: L('to come', 'à venir') }[state];
-      list.appendChild(h('div', { class: 'mu-wrow is-' + state }, h('span', { class: 'mu-wrowday' }, wd(d)), h('span', { class: 'mu-wrowwhat' }, what), h('span', { class: 'mu-wrowtag' }, tag)));
-      rows++;
-    }
-    if (!rows) list.appendChild(h('p', { class: 'hint' }, L('No training day this week.', 'Aucun jour d’entraînement cette semaine.')));
-    card.appendChild(list);
-    /* Semaine prochaine : résumé sur une ligne. */
-    var next = [];
-    for (var j = 7; j < 14; j++) {
-      var nd = new Date(mon); nd.setDate(nd.getDate() + j);
-      var pd = day(data.schedule[nd.getDay()]);
-      if (pd) next.push(wd(nd) + ' ' + dayName(pd));
-    }
-    card.appendChild(h('div', { class: 'mu-weeklabel' }, L('Next week', 'Semaine prochaine')));
-    card.appendChild(h('p', { class: 'sheet-text' }, next.length ? next.join(' · ') : L('Rest', 'Repos')));
-    card.appendChild(h('button', { class: 'btn btn-ghost btn-sm', onclick: function () { go('program'); } }, L('Change my training days ›', 'Changer mes jours d’entraînement ›')));
-    return card;
-  }
-
   /* ---------- v0.40 : bilan (volume par muscle sur la semaine, exercices qui stagnent) ---------- */
   function renderBilan(body) {
     if (!ME) return;
@@ -1273,7 +1251,7 @@
       h('button', { class: 'btn btn-secondary btn-block btn-lg', onclick: function () { editSlot(d, null); } }, L('+ Add an exercise', '+ Ajouter un exercice'))));
     body.appendChild(h('p', { class: 'hint' }, L('Target RPE by category: main 7.5–8 · secondary 8–8.5 · isolation 8.5–9. An exercise with several variants lets you pick one each workout.',
       'RPE cible par catégorie : principal 7,5–8 · secondaire 8–8,5 · isolation 8,5–9. Un exercice à plusieurs variantes te laisse en choisir une à chaque séance.')));
-    body.appendChild(h('h2', { class: 'section-title' }, L('My training days', 'Mes jours d’entraînement')));
+    body.appendChild(h('h2', { class: 'section-title' }, L('When I train', 'Quand je m’entraîne')));
     body.appendChild(scheduleCard());
     body.appendChild(h('h2', { class: 'section-title' }, L('Whole program', 'Programme entier')));
     body.appendChild(h('div', { class: 'stack' },
@@ -1497,6 +1475,16 @@
   }
   function scheduleCard() {
     var card = h('div', { class: 'card mu-schedule' });
+    card.appendChild(h('div', { class: 'segmented small' },
+      [['rotation', L('Rotation (when I can)', 'Rotation (quand je peux)')], ['fixed', L('Fixed days', 'Jours fixes')]].map(function (x) {
+        return h('button', { class: 'seg' + (data.trainMode === x[0] ? ' is-active' : ''), 'aria-pressed': data.trainMode === x[0] ? 'true' : 'false',
+          onclick: function () { data.trainMode = x[0]; pickDay = null; persist(); render(); } }, x[1]);
+      })));
+    if (!fixedDays()) {
+      card.appendChild(h('p', { class: 'hint' }, L('Your days follow each other in the program order, whenever you go: the app always suggests the next one (in Workout and in Today). No day is ever “missed”.',
+        'Tes jours s’enchaînent dans l’ordre du programme, quand tu y vas : l’app te propose toujours la séance suivante (dans Séance et dans Aujourd’hui). Aucun jour n’est jamais « manqué ».')));
+      return card;
+    }
     WEEKDAYS.forEach(function (wd) {
       var d = day(data.schedule[wd]);
       card.appendChild(h('button', { class: 'mu-schedrow', onclick: function () { pickScheduleDay(wd); } },
@@ -1680,11 +1668,13 @@
     /* Séance prévue ce jour-là (jours d'entraînement) et séances faites ce jour-là. */
     dayStatus: function (date, who) {
       return withPerson(who, function () {
-        var d = day(data.schedule[new Date(date).getDay()]);
+        var d = scheduledDay(date);
+        var nx = !fixedDays() ? nextInRotation() : null;
         var k = dayKey(date);
         var doneList = finished().filter(function (s) { return dayKey(s.startedAt) === k; }).map(function (s) { return { name: sessionDay(s), week: s.week, label: weekLabel(s).toLowerCase(), sets: Object.keys(s.entries).reduce(function (n, e) { return n + s.entries[e].sets.length; }, 0) }; });
         var act = active();
         return { planned: d ? { id: d.id, name: dayName(d), exercises: d.slots.length } : null, done: doneList,
+          next: nx ? { id: nx.id, name: dayName(nx), exercises: nx.slots.length } : null, rotation: !fixedDays(),
           inProgress: act && dayKey(act.startedAt) === k ? sessionDay(act) : null, hasProgram: data.days.length > 0 };
       });
     },
@@ -1693,7 +1683,7 @@
       return withPerson(who, function () {
         var a = new Date(from); a.setHours(0, 0, 0, 0); var b = new Date(to); b.setHours(23, 59, 59, 999);
         var planned = 0;
-        for (var d = new Date(a); d <= b; d.setDate(d.getDate() + 1)) if (day(data.schedule[d.getDay()])) planned++;
+        if (fixedDays()) for (var d = new Date(a); d <= b; d.setDate(d.getDate() + 1)) if (day(data.schedule[d.getDay()])) planned++;
         var done = finished().filter(function (s) { var t = new Date(s.startedAt); return t >= a && t <= b; }).length;
         return { planned: planned, done: done, perWeek: data.goals.perWeek, lifts: data.goals.lifts.map(function (lf) { return { name: lf.name, target: lf.target, best: bestWeight(lf.name) }; }) };
       });
